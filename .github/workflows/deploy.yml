@@ -1,4 +1,4 @@
-name: Despliegue Automatico
+name: Despliegue Automatico Ninja
 on:
   push:
     branches:
@@ -7,17 +7,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo
-        uses: actions/checkout@v3
-      
-      - name: Subir a cPanel via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .cpanel.yml
-            .github/**
+      - name: "1. Actualizar desde GitHub (Update from Remote)"
+        run: |
+          curl -k -H "Authorization: cpanel ${{ secrets.CPANEL_USER }}:${{ secrets.CPANEL_TOKEN }}" \
+          "https://tacnavuelveasonreir.com:2083/execute/VersionControl/update?repository_root=/home/tacnwddf/repositories/web-fuerza-tacna"
+
+      - name: "2. Desplegar en Subdominio (Deploy HEAD Commit)"
+        run: |
+          curl -k -H "Authorization: cpanel ${{ secrets.CPANEL_USER }}:${{ secrets.CPANEL_TOKEN }}" \
+          "https://tacnavuelveasonreir.com:2083/execute/VersionControl/deploy?repository_root=/home/tacnwddf/repositories/web-fuerza-tacna"
