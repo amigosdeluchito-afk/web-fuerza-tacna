@@ -1,0 +1,18 @@
+name: Despliegue Automatico Ninja
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "1. Actualizar desde GitHub (Update from Remote)"
+        run: |
+          curl -k -H "Authorization: cpanel ${{ secrets.CPANEL_USER }}:${{ secrets.CPANEL_TOKEN }}" \
+          "https://tacnavuelveasonreir.com:2083/execute/VersionControl/update?repository_root=/home/tacnwddf/repositories/web-fuerza-tacna"
+
+      - name: "2. Desplegar en Subdominio (Deploy HEAD Commit)"
+        run: |
+          curl -k -H "Authorization: cpanel ${{ secrets.CPANEL_USER }}:${{ secrets.CPANEL_TOKEN }}" \
+          "https://tacnavuelveasonreir.com:2083/execute/VersionControl/deploy?repository_root=/home/tacnwddf/repositories/web-fuerza-tacna"
