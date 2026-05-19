@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/tacnwddf/public_html/
+    - export DEPLOYPATH=/home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
     - /bin/cp -R * $DEPLOYPATH
