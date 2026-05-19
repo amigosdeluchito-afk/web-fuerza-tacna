@@ -9,4 +9,4 @@ jobs:
     steps:
       - name: "Llamar al túnel secreto (Plan Z)"
         run: |
-          curl -s -X POST -d "cpanel_user=${{ secrets.CPANEL_USER }}" -d "cpanel_token=${{ secrets.CPANEL_TOKEN }}" "https://fuerzatacna.tacnavuelveasonreir.com/actualizar.php"
+          curl -s --max-time 45 -X POST -d "cpanel_user=${{ secrets.CPANEL_USER }}" -d "cpanel_token=${{ secrets.CPANEL_TOKEN }}" "https://fuerzatacna.tacnavuelveasonreir.com/actualizar.php"
