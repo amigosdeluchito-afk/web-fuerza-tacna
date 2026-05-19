@@ -1374,6 +1374,9 @@ function initSafeMagneticScroll() {
             const sections = [
                 { id: 'hero-section', offset: 0, threshold: 0.25 }, // Área grande para atraparte al volver
                 { id: 'intro', align: 'center', threshold: 0.35 }, // 35% te atrapa desde muy lejos
+                { id: 'video-section', align: 'center', threshold: 0.35 },
+                { id: 'drone-section', align: 'center', threshold: 0.35 },
+                { id: 'votar-section', align: 'center', threshold: 0.35 },
                 // Secciones globales (Quiénes Somos, Candidatos, Contacto)
                 { id: 'quienes-somos-timeline', align: 'center', threshold: 0.35 },
                 { id: 'candidatos-section', align: 'center', threshold: 0.35 },
