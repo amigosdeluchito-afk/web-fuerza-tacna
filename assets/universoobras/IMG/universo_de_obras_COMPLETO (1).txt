@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Universo de Obras</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+html,body{
+margin:0;
+height:100%;
+color:#fff;
+font-family:Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* capa de fondo fija */
+.app-bg{
+position:fixed;
+inset:0;
+background: url("IMG/fondo pagina.png") center/cover no-repeat fixed;
+z-index:0;
+}
+
+/* contenedor del mapa */
+.map-wrap{
+position:fixed;
+inset:0;
+overflow:auto;
+-webkit-overflow-scrolling:touch;
+background:transparent;
+cursor:grab;
+z-index:1;
+}
+
+.map-wrap.dragging{
+cursor:grabbing;
+user-select:none;
+}
+
+/* mapa */
+.map-inner{
+position:relative;
+height:auto;
+transform-origin:0 0;
+will-change:transform;
+}
+
+#mapImg{
+display:block;
+width:100%;
+height:auto;
+user-select:none;
+-webkit-user-drag:none;
+opacity:1;
+transition: opacity 300ms ease; will-change: opacity;
+}
+
+/* chips */
+.chips{
+display:flex;
+gap:8px;
+padding:8px 12px;
+position:fixed;
+top:12px;
+left:12px;
+right:12px;
+z-index:10;
+}
+
+.chips::-webkit-scrollbar{ display:none; }
+
+.chips-group{
+display:flex;
+gap:8px;
+overflow-x:auto;
+padding:6px 8px;
+background:rgba(255,255,255,0.75);
+backdrop-filter:blur(6px);
+border-radius:16px;
+border:1px solid rgba(0,0,0,0.08);
+-webkit-overflow-scrolling:touch;
+}
+
+.chips-group::-webkit-scrollbar{ display:none; }
+
+.chip{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:8px 16px;
+margin:0;
+background:#fff;
+border:1px solid #ddd;
+border-radius:999px;
+font-size:14px;
+font-weight:600;
+color:#333;
+cursor:pointer;
+white-space:nowrap;
+transition:background .15s, border-color .15s, color .15s;
+}
+
+.chip:hover{
+background:#f5f5f5;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+.chip.is-active{
+background:#e8f3ff;
+border-color:#1a73e8;
+}
+.chip.is-active span{
+color:#1a73e8;
+font-weight:700;
+}
+
+
+.chip--label{
+font-size:13px;
+font-weight:700;
+color:#444;
+line-height:1.2;
+white-space:normal;
+max-width:72px;
+min-width:60px;
+text-align:center;
+word-break:break-word;
+background:transparent;
+pointer-events:none;
+}
+
+/* fade-in */
+.app-bg,
+.map-wrap{
+opacity:0;
+transition: opacity 800ms ease;
+}
+
+.app-bg.show{ opacity:1; }
+.map-wrap.show{
+opacity:1;
+transition-delay:800ms; 
+}
+
+#mapImg{
+display:block;
+width:100%;
+height:auto;
+user-select:none;
+-webkit-user-drag:none;
+opacity:1;
+transition: opacity 300ms ease; will-change: opacity;
+}
+
+@keyframes fadeIn {
+from{ opacity:0; }
+to { opacity:1; }
+}
+
+ </style>
+</head>
+<body>
+<div class="app-bg" aria-hidden="true"></div>
+
+  <div id="mapWrap" class="map-wrap">
+    <div id="mapInner" class="map-inner">
+      <img id="mapImg" src="IMG/mapa-base.png" alt="Mapa de obras">
+    </div>
+  </div>
+
+  <nav class="chips" id="chips">
+    <button class="chip is-active" data-map="base"><span>Inicio</span></button>
+    <div class="chips-group">
+      <div class="chip--label"><span>Elige un segmento</span></div>
+      <button class="chip" data-map="educacion"><span>Educación</span></button>
+      <button class="chip" data-map="salud"><span>Salud</span></button>
+      <button class="chip" data-map="transporte"><span>Transporte</span></button>
+      <button class="chip" data-map="agricultura"><span>Agricultura</span></button>
+      <button class="chip" data-map="social"><span>Social</span></button>
+    </div>
+  </nav>
+
+  <script>
+const mapImg   = document.getElementById('mapImg');
+  const mapWrap  = document.getElementById('mapWrap');
+  const mapInner = document.getElementById('mapInner');
+
+  let zoom = 1;
+  const ZMIN = 0.1, ZMAX = 3, ZSTEP = 0.12;
+  const MOBILE_INIT_FACTOR  = 0.2;
+  const DESKTOP_INIT_FACTOR = 0.90;
+
+  let lastMapKey = 'base';  // recordar último mapa usado
+
+
+  const MAPS = {
+    base: 'IMG/mapa-base.png',
+    educacion: 'IMG/mapa-educacion.png',
+    salud: 'IMG/mapa-salud.png',
+    transporte: 'IMG/mapa-transporte.png',
+    agricultura: 'IMG/mapa-agricultura.png',
+    social: 'IMG/mapa-social.png'
+  };
+  const COORDS = {
+    base:[900,500], educacion:[1200,800], salud:[800,600],
+    transporte:[1000,700], agricultura:[1300,900], social:[1100,750]
+  };
+
+  function setBaseMapSizeFromImage(){
+    if (mapImg.naturalWidth) mapInner.style.width = mapImg.naturalWidth + 'px';
+  }
+
+  function updateCentering(){
+    const baseW = mapInner.offsetWidth, baseH = mapInner.offsetHeight;
+    const scaledW = baseW * zoom,      scaledH = baseH * zoom;
+    const vw = mapWrap.clientWidth,    vh = mapWrap.clientHeight;
+
+    const padX = Math.max(0, (vw - scaledW)/2);
+    const padY = Math.max(0, (vh - scaledH)/2);
+
+    mapWrap.style.paddingLeft   = Math.floor(padX) + 'px';
+    mapWrap.style.paddingRight  = Math.floor(padX) + 'px';
+    mapWrap.style.paddingTop    = Math.floor(padY) + 'px';
+    mapWrap.style.paddingBottom = Math.floor(padY) + 'px';
+
+    if (scaledW <= vw && scaledH <= vh){
+      mapWrap.scrollLeft = 0;
+      mapWrap.scrollTop  = 0;
+    } else {
+      const maxX = Math.max(0, scaledW - vw);
+      const maxY = Math.max(0, scaledH - vh);
+      mapWrap.scrollLeft = Math.min(Math.max(mapWrap.scrollLeft, 0), maxX);
+      mapWrap.scrollTop  = Math.min(Math.max(mapWrap.scrollTop,  0), maxY);
+    }
+  }
+
+  function mapCabeEnViewport(){
+    const baseW = mapInner.offsetWidth, baseH = mapInner.offsetHeight;
+    const scaledW = baseW * zoom, scaledH = baseH * zoom;
+    return (scaledW <= mapWrap.clientWidth) || (scaledH <= mapWrap.clientHeight);
+  }
+
+  function centerOn(pxX, pxY){
+    const targetX = pxX - mapWrap.clientWidth / 2;
+    const targetY = pxY - mapWrap.clientHeight / 2;
+    mapWrap.scrollTo({ left: Math.max(targetX,0), top: Math.max(targetY,0), behavior:'smooth' });
+  }
+
+  function centerViewportOnWholeMap(){
+    mapWrap.scrollLeft = 0;
+    mapWrap.scrollTop  = 0;
+    updateCentering();
+  }
+
+  function isMobileView(){ return window.innerWidth <= 720; }
+
+function autoFitZoom(){
+  const vw = mapWrap.clientWidth, vh = mapWrap.clientHeight;
+  const iw = mapInner.offsetWidth, ih = mapInner.offsetHeight;
+  if (!iw || !ih) return zoom;
+  const scaleFit = Math.min(vw/iw, vh/ih);
+  const factor   = isMobileView() ? MOBILE_INIT_FACTOR : DESKTOP_INIT_FACTOR;
+  return Math.max(ZMIN, Math.min(ZMAX, scaleFit * factor));
+}
+
+isMobileView = () => window.innerWidth <= 720;
+
+  function setZoomKeepingPoint(nextZoom, vx=null, vy=null){
+    const rect = mapWrap.getBoundingClientRect();
+    if (vx == null) vx = rect.width / 2;
+    if (vy == null) vy = rect.height / 2;
+
+    const cs = getComputedStyle(mapWrap);
+    const padL = parseFloat(cs.paddingLeft)  || 0;
+    const padT = parseFloat(cs.paddingTop)   || 0;
+
+    const worldX = (mapWrap.scrollLeft + vx - padL) / zoom;
+    const worldY = (mapWrap.scrollTop  + vy - padT) / zoom;
+
+    const clamped = Math.max(ZMIN, Math.min(ZMAX, nextZoom));
+    if (clamped === zoom) return;
+    zoom = clamped;
+    mapInner.style.transform = "scale(" + zoom + ")";
+
+    updateCentering();
+
+    const cs2 = getComputedStyle(mapWrap);
+    const newPadL = parseFloat(cs2.paddingLeft) || 0;
+    const newPadT = parseFloat(cs2.paddingTop)  || 0;
+
+    const newScrollLeft = worldX * zoom + newPadL - vx;
+    const newScrollTop  = worldY * zoom + newPadT - vy;
+    mapWrap.scrollTo({ left:newScrollLeft, top:newScrollTop, behavior:"auto" });
+  }
+
+function loadMapAndCenter(key){
+const plainSrc = MAPS[key];
+const bust = plainSrc + (plainSrc.includes('?') ? '&' : '?') + 't=' + Date.now();
+
+// --- FADE-OUT corto: transición (200ms) ---
+mapImg.style.animation = 'none'; // cancelar animaciones previas
+mapImg.style.transition = 'opacity 200ms ease';
+requestAnimationFrame(()=>{ mapImg.style.opacity = 0; });
+
+// --- Registrar handlers ANTES del src (para caché) ---
+const onReady = () => {
+requestAnimationFrame(() => {
+setBaseMapSizeFromImage();
+setZoomKeepingPoint(autoFitZoom());
+centerViewportOnWholeMap();
+
+
+  if (key !== 'base' && !mapCabeEnViewport()){
+    const [cx, cy] = (COORDS[key] || COORDS.base);
+    centerOn(cx, cy);
+  }
+
+  // --- FADE-IN con ANIMACIÓN (más robusto que transition) ---
+  //  • base al regresar: más largo
+  //  • otros: rápido
+  const isReturningToBase = (key === 'base' && lastMapKey !== 'base');
+  const dur = isReturningToBase ? 1800 : 350; // ms, ajusta a gusto
+
+  mapImg.style.transition = 'none';     // que la entrada NO use transition
+  mapImg.style.opacity = 0;             // punto de partida de la animación
+  // Reiniciar animación (asegura que siempre se reproduzca)
+  mapImg.style.animation = 'none';
+  // Forzar reflow para reinicio seguro de la animación
+  void mapImg.offsetWidth;
+mapImg.style.animation = `fadeIn ${dur}ms linear forwards`;
+
+  lastMapKey = key;
+});
+
+
+};
+
+mapImg.addEventListener('load', onReady, { once:true });
+mapImg.addEventListener('error', () => {
+// si fallara la carga, no te quedes en negro
+mapImg.style.animation = 'none';
+mapImg.style.transition = 'opacity 0ms';
+mapImg.style.opacity = 1;
+lastMapKey = key;
+}, { once:true });
+
+// --- disparar la carga ---
+mapImg.src = bust;
+}
+
+
+  document.querySelectorAll('.chip[data-map]').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const key = chip.getAttribute('data-map');
+      document.querySelectorAll('.chip[data-map]').forEach(c=>c.classList.remove('is-active'));
+      chip.classList.add('is-active');
+      loadMapAndCenter(key);
+    });
+  });
+
+  mapWrap.addEventListener('wheel', (e)=>{
+    e.preventDefault();
+    const rect = mapWrap.getBoundingClientRect();
+    const vx = e.clientX - rect.left;
+    const vy = e.clientY - rect.top;
+    const dir = e.deltaY < 0 ? 1 : -1;
+    const next = zoom * (1 + dir * ZSTEP);
+    setZoomKeepingPoint(next, vx, vy);
+  }, { passive:false });
+
+  let isPanning=false, startX=0, startY=0, startSL=0, startST=0;
+  mapWrap.addEventListener('mousedown',(e)=>{
+    if (e.button!==0) return;
+    isPanning = true;
+    mapWrap.classList.add('dragging');
+    startX=e.clientX; startY=e.clientY;
+    startSL=mapWrap.scrollLeft; startST=mapWrap.scrollTop;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',(e)=>{
+    if(!isPanning) return;
+    mapWrap.scrollTo({ left:startSL-(e.clientX-startX), top:startST-(e.clientY-startY), behavior:'auto' });
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!isPanning) return;
+    isPanning=false; mapWrap.classList.remove('dragging');
+  });
+
+  window.addEventListener('resize', ()=>{
+    setBaseMapSizeFromImage();
+    setZoomKeepingPoint(autoFitZoom());
+    centerViewportOnWholeMap();
+  });
+  window.addEventListener('orientationchange', ()=>{
+    requestAnimationFrame(()=>{
+      setBaseMapSizeFromImage();
+      setZoomKeepingPoint(autoFitZoom());
+      centerViewportOnWholeMap();
+    });
+  });
+
+
+  function initialFit(){
+    setBaseMapSizeFromImage();
+    setZoomKeepingPoint(autoFitZoom());
+    centerViewportOnWholeMap();
+    mapImg.style.opacity = 1;
+  }
+
+  if (mapImg.complete) initialFit();
+  else mapImg.addEventListener('load', initialFit, { once:true });
+
+  window.addEventListener("load", function(){
+    var bg = document.querySelector(".app-bg");
+    if (bg) bg.classList.add("show");
+    if (mapWrap) mapWrap.classList.add("show");
+  });
+
+
+  </script>
+</body>
+</html>

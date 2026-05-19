@@ -1,0 +1,336 @@
+<?php
+// fotos_api.php – API para listar / eliminar / marcar principal / descargar ZIP
+require_once __DIR__ . '/config.php';
+require_login();
+
+header('Content-Type: application/json; charset=utf-8');
+
+// Usamos la ruta base de fotos definida en config.php
+global $FOTOS_BASE;
+
+/**
+ * Construye la ruta completa a la carpeta de una obra
+ */
+function get_obra_dir($segmento, $carpeta) {
+    global $FOTOS_BASE;
+    $segmento = trim($segmento);
+    $carpeta  = trim($carpeta);
+
+    if ($segmento === '' || $carpeta === '') {
+        return false;
+    }
+
+    $dir = $FOTOS_BASE . '/' . $segmento . '/' . $carpeta;
+    return $dir;
+}
+
+/**
+ * Lista las imágenes de una obra
+ */
+function handle_listar($segmento, $carpeta) {
+    $dir = get_obra_dir($segmento, $carpeta);
+    if (!$dir || !is_dir($dir)) {
+        echo json_encode([
+            'ok'        => true,
+            'fotos'     => [],
+            'total'     => 0,
+            'totalSize' => 0
+        ]);
+        return;
+    }
+
+    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
+    $files = glob($patron, GLOB_BRACE);
+
+    if (!$files) {
+        echo json_encode([
+            'ok'        => true,
+            'fotos'     => [],
+            'total'     => 0,
+            'totalSize' => 0
+        ]);
+        return;
+    }
+
+    // Orden natural (1.webp, 2.webp, etc.)
+    natsort($files);
+    $files = array_values($files);
+
+    $totalSize = 0;
+    $fotos = [];
+
+    foreach ($files as $idx => $path) {
+        $basename = basename($path);
+        $size_kb  = round(filesize($path) / 1024, 1);
+        $totalSize += $size_kb;
+
+        // Principal: el que tiene nombre que empieza con "1."
+        $es_principal = preg_match('/^1\./', $basename) === 1;
+
+        // URL pública (asumiendo que universoobras está en /universoobras)
+        $url = "/universoobras/IMG/fotos-obras/" .
+            rawurlencode($segmento) . "/" .
+            rawurlencode($carpeta) . "/" .
+            rawurlencode($basename);
+
+        $fotos[] = [
+            'url'          => $url,
+            'size_kb'      => $size_kb,
+            'es_principal' => $es_principal,
+        ];
+    }
+
+    echo json_encode([
+        'ok'        => true,
+        'fotos'     => $fotos,
+        'total'     => count($fotos),
+        'totalSize' => $totalSize
+    ]);
+}
+
+/**
+ * Eliminar una foto por número (1-based, según orden)
+ */
+function handle_eliminar($segmento, $carpeta, $numero) {
+    $dir = get_obra_dir($segmento, $carpeta);
+    if (!$dir || !is_dir($dir)) {
+        echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
+        return;
+    }
+
+    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
+    $files  = glob($patron, GLOB_BRACE);
+    if (!$files) {
+        echo json_encode(['ok' => false, 'error' => 'No hay fotos en la obra']);
+        return;
+    }
+
+    natsort($files);
+    $files = array_values($files);
+
+    $idx = $numero - 1;
+    if (!isset($files[$idx])) {
+        echo json_encode(['ok' => false, 'error' => 'Número de foto inválido']);
+        return;
+    }
+
+    $file = $files[$idx];
+    if (!unlink($file)) {
+        echo json_encode(['ok' => false, 'error' => 'No se pudo eliminar el archivo']);
+        return;
+    }
+
+    // Renumerar archivos restantes como 1,2,3,... manteniendo orden
+    $restantes = glob($patron, GLOB_BRACE);
+    natsort($restantes);
+    $restantes = array_values($restantes);
+
+    $tempMap = [];
+    // Primero renombramos a nombres temporales para evitar colisiones
+    foreach ($restantes as $p) {
+        $dirName  = dirname($p);
+        $baseName = basename($p);
+        $tmpName  = $dirName . '/tmp_' . uniqid() . '_' . $baseName;
+        if (rename($p, $tmpName)) {
+            $tempMap[] = $tmpName;
+        }
+    }
+
+    // Luego renombramos secuencialmente
+    $i = 1;
+    foreach ($tempMap as $tmpPath) {
+        $ext = pathinfo($tmpPath, PATHINFO_EXTENSION);
+        $newPath = $dir . '/' . $i . '.' . $ext;
+        rename($tmpPath, $newPath);
+        $i++;
+    }
+
+    echo json_encode(['ok' => true]);
+}
+
+function handle_eliminar_todas($segmento, $carpeta) {
+    $dir = get_obra_dir($segmento, $carpeta);
+    if (!$dir || !is_dir($dir)) {
+        echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
+        return;
+    }
+
+    $deleted = 0;
+
+    $items = scandir($dir);
+    foreach ($items as $name) {
+        if ($name === '.' || $name === '..') continue;
+
+        $path = $dir . '/' . $name;
+        if (!is_file($path)) continue;
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        // Borra imágenes normales + cualquier archivo que contenga ".thumb"
+        $isImage = in_array($ext, ['jpg','jpeg','png','webp','gif'], true);
+        $isThumb = (stripos($name, '.thumb') !== false);
+
+        if ($isImage || $isThumb) {
+            if (@unlink($path)) $deleted++;
+        }
+    }
+
+    echo json_encode(['ok' => true, 'deleted' => $deleted]);
+}
+
+
+/**
+ * Marcar como principal: reordena/renombra las fotos para que
+ * la elegida sea la 1.* y las demás sigan en orden.
+ */
+function handle_principal($segmento, $carpeta, $numero) {
+    $dir = get_obra_dir($segmento, $carpeta);
+    if (!$dir || !is_dir($dir)) {
+        echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
+        return;
+    }
+
+    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
+    $files  = glob($patron, GLOB_BRACE);
+    if (!$files) {
+        echo json_encode(['ok' => false, 'error' => 'No hay fotos']);
+        return;
+    }
+
+    natsort($files);
+    $files = array_values($files);
+
+    $idx = $numero - 1;
+    if (!isset($files[$idx])) {
+        echo json_encode(['ok' => false, 'error' => 'Número de foto inválido']);
+        return;
+    }
+
+    // Reordenamos: seleccionada primero, luego el resto
+    $selected = $files[$idx];
+    $ordered  = [$selected];
+
+    foreach ($files as $k => $p) {
+        if ($k === $idx) continue;
+        $ordered[] = $p;
+    }
+
+    // Renombrar en dos pasos para evitar colisiones
+    $tempMap = [];
+    foreach ($ordered as $p) {
+        $dirName  = dirname($p);
+        $baseName = basename($p);
+        $tmpName  = $dirName . '/tmp_' . uniqid() . '_' . $baseName;
+        if (rename($p, $tmpName)) {
+            $tempMap[] = $tmpName;
+        }
+    }
+
+    $i = 1;
+    foreach ($tempMap as $tmpPath) {
+        $ext = pathinfo($tmpPath, PATHINFO_EXTENSION);
+        $newPath = $dir . '/' . $i . '.' . $ext;
+        rename($tmpPath, $newPath);
+        $i++;
+    }
+
+    echo json_encode(['ok' => true]);
+}
+
+
+
+/**
+ * Descargar ZIP con todas las fotos
+ */
+function handle_download_zip($segmento, $carpeta) {
+    $dir = get_obra_dir($segmento, $carpeta);
+    if (!$dir || !is_dir($dir)) {
+        http_response_code(404);
+        echo "Carpeta no encontrada";
+        return;
+    }
+
+    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
+    $files  = glob($patron, GLOB_BRACE);
+    if (!$files) {
+        http_response_code(404);
+        echo "No hay fotos para descargar";
+        return;
+    }
+
+    if (!class_exists('ZipArchive')) {
+        http_response_code(500);
+        echo "ZipArchive no está disponible en este servidor";
+        return;
+    }
+
+    $zip = new ZipArchive();
+    $tmpZip = tempnam(sys_get_temp_dir(), 'obra_zip_');
+
+    if ($zip->open($tmpZip, ZipArchive::OVERWRITE) !== true) {
+        http_response_code(500);
+        echo "No se pudo crear el ZIP";
+        return;
+    }
+
+    natsort($files);
+    foreach ($files as $path) {
+        $zip->addFile($path, basename($path));
+    }
+
+    $zip->close();
+
+    $nombreZip = $segmento . '_' . $carpeta . '.zip';
+
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="' . $nombreZip . '"');
+    header('Content-Length: ' . filesize($tmpZip));
+
+    readfile($tmpZip);
+    unlink($tmpZip);
+    exit;
+}
+
+// =========================
+//   ENRUTADOR
+// =========================
+
+// Descarga ZIP por GET
+if (isset($_GET['download_zip'])) {
+    $segmento = $_GET['segmento'] ?? '';
+    $carpeta  = $_GET['carpeta'] ?? '';
+    handle_download_zip($segmento, $carpeta);
+    exit;
+}
+
+// Resto de acciones por POST
+$action   = $_POST['action']   ?? '';
+$segmento = $_POST['segmento'] ?? '';
+$carpeta  = $_POST['carpeta']  ?? '';
+
+
+
+switch ($action) {
+  case 'listar':
+    handle_listar($segmento, $carpeta);
+    break;
+
+  case 'eliminar':
+    $numero = isset($_POST['numero']) ? (int)$_POST['numero'] : 0;
+    handle_eliminar($segmento, $carpeta, $numero);
+    break;
+
+  case 'principal':
+    $numero = isset($_POST['numero']) ? (int)$_POST['numero'] : 0;
+    handle_principal($segmento, $carpeta, $numero);
+    break;
+
+  case 'eliminar_todas':
+    handle_eliminar_todas($segmento, $carpeta);
+    break;
+
+  default:
+    echo json_encode(['ok' => false, 'error' => 'Acción no soportada']);
+    break;
+}
+

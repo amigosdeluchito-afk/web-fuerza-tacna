@@ -1,0 +1,546 @@
+::-webkit-scrollbar{
+    width: 10px;
+}
+::-webkit-scrollbar-track{
+    background-color: rgba(64, 75, 203, 0);
+}
+::-webkit-scrollbar-thumb{
+    background-color: #241E1E;
+    border-radius: 15px;
+}
+html,
+body,
+main {
+    background-color: #FFC300 !important;
+    color: #fff;
+    overflow-x: hidden;
+}
+.responsive-button-container{
+    display: none;
+}
+.menu-container{
+    display: none;
+}
+.loading-screen {
+    z-index: 9999;
+    position: relative; 
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    background-color: #801039;
+    width: 100%;
+    height: 0;
+}
+.load-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 9999;
+    pointer-events: none;
+}
+#hero-section{
+    width: 100%;
+    height:100vh;
+    background-image: url('../img/img-hero.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+#hero-header{
+    z-index: 1;
+    position: absolute;
+    display: flex;
+    width: 100%;
+    padding: 60px 100px;
+}
+#hero-header .active{
+    font-family: 'silkabold';
+}
+#hero-header ul{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0px;
+}
+#hero-header ul li{
+    list-style: none;
+    margin: 0 25px; 
+}
+#hero-header ul li a{
+    font-family: 'silkamedium';
+    color: #241E1E;
+    transition: all 0.2s ease-in-out;
+}
+#hero-bottom{
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+.logo-container{
+    position: fixed;
+    width: 15%;
+}
+#logo-hero{
+    height: 80px;
+    margin-top: -20px;
+}
+.button-container{
+    right: 5%;
+    position: fixed;
+    width: 15%;
+    display: flex;
+    justify-content: flex-end;
+}
+.button-container img{
+    z-index:1;
+    width: 50px;
+}
+#hero-header .button-container a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.circular-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    animation: spin-text 12s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+.circular-text path {
+    fill: none;
+}
+.circular-text text {
+    font-family: "Arial Black", Arial, sans-serif;
+    font-size: 7.5px;
+    fill: #241E1E;
+    letter-spacing: 1.5px;
+}
+.button-container .magnetic {
+    z-index: 1;
+    position: relative;
+}
+@keyframes spin-text {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+#hero-header a{
+    text-decoration: none;
+}
+#hero-bottom{
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    padding: 30px 100px;
+}
+#hero-bottom ul{
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#hero-bottom ul li{
+    border-radius: 50px;
+    padding: 8px;
+    padding-top: 10px;
+    font-size: 18px;
+    width: 38px;
+    height: 38px;
+    list-style: none;
+}
+#hero-bottom ul a {
+    text-decoration: none;
+    color: #241E1E;
+    transition: all 0.3s ease-in-out;
+}
+#hero-bottom ul a li:hover{
+    background-color: #241E1E;
+    border-radius: 50px;
+    padding: 8px;
+    color: #fff;
+    padding-top: 10px;
+    transition: all 0.3s ease-in-out;
+}
+.city{
+    font-family: 'bernier';
+    color: #241E1E;
+}
+.city:before{
+    font-family:'icomoon';
+    content: "\e90d";
+    color: #241E1E;
+    margin-right: 5px;
+    font-size: 14px;
+}
+#intro{
+    height: 80vh;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.big-title{
+    font-family: 'bernier';
+    font-size: 10em;
+    line-height: 1em;
+    margin-bottom: 12%;
+}
+.center{
+    text-align: center;
+    margin-bottom: 5%;
+}
+.small-title{
+    font-family: 'bernier';
+    font-size: 0.3em;
+    color: #1F0709;
+    position: absolute;
+    margin-top: 3%;
+    transform: translate(-50%, -50%);
+}
+body .text-muted {
+    color: #fff !important;
+}
+#video-section h3, #drone-section h3, #design-section h3{
+    font-family: 'bernier';
+    font-size: 9em;
+    line-height: 0.9em;
+    color: #241E1E;
+}
+.white-text{
+    color: #fff !important;
+}
+.hyperlinks{
+    color: #fff;
+    font-weight: 600;
+}
+.hyperlinks:hover{
+    color: #fff;
+}
+.shadow{
+    box-shadow: 0px 0px 38px 6px rgba(38,6,6,0.44);
+    -webkit-box-shadow: 0px 0px 38px 6px rgba(38,6,6,0.44);
+    -moz-box-shadow: 0px 0px 38px 6px rgba(38,6,6,0.44);
+}
+#design-section{
+    margin-top: 5%;
+}
+#video-section p, #drone-section p, #design-section p{
+    font-family: 'silkaregular';
+    font-size: 14px;
+    margin-bottom: 40px;
+    line-height: 2em;
+    color: #241E1E;
+    margin-top: 35px;
+}
+.number{
+    font-family: 'bernier';
+    font-size: 3em;
+    top: 0;
+    line-height: 50%;
+    color: #fff;
+    margin-bottom: 10px;
+}
+.services-img{
+    position: relative;
+}
+.services-img img{
+    width: 130%;
+    margin-left: -20%;
+}
+#camera-img, #design-img{
+    left: 15%;
+}
+#video-section .text-column, #design-section .text-column{
+    padding-right: 25%;
+    margin-top: 10%;
+    padding-left: 7%;
+}
+.text-column svg{
+    margin-left: -30px;
+}
+#video-home-responsive{
+    display: none;
+    position: relative;
+    text-align: center;
+    padding: 0 5%;
+}
+#video-home{
+    position: relative;
+    text-align: center;
+    padding: 0 5%;
+}
+#video-home video{
+    width: 100%;
+}
+#drone-section{
+    margin-top: 5%;
+}
+.drone img{
+    margin-top: 19%;
+    width: 115%;
+}
+#left{
+    padding-top: 10%;
+    padding-left: 18%;
+    padding-right: 13%;
+}
+.design-home{
+    background-image: url('../img/design-main.jpg');
+    background-size: contain;
+    background-position: 50% 10%;
+    background-repeat: no-repeat;
+    margin-top: 7%;
+    width: 100%;
+    height: 100vh;
+}
+.design-home img{
+    width: 110%;
+    left: -8%;
+}
+#design-section img{
+    position: absolute;
+
+}
+.cards-section{
+    margin-top: 15%;
+    padding: 0 10%;
+}
+.cards-section .card{
+    background-color: rgba(64, 75, 203, 0);
+    padding: 5%;
+    border-style: none;
+}
+.cards-section .card img{
+    border-radius: 10px;
+}
+.shift-small{
+    
+}
+.shift-large{
+    margin-top: 15%
+}
+.contact-section h3{
+    font-family: 'bernier';
+    font-size: 6em;
+    margin-bottom: 25px;
+    margin-top: 20px;
+}
+body .references-section{
+    margin-top: 5%;
+    padding: 0 10%;
+    text-align: center;
+}
+body .contact-section{
+    text-align: center;
+    margin-top: 13%;
+    padding: 0 10%;
+}
+.references-container{
+    display: inline-block;
+    text-align: center;
+}
+.references-container img{
+    width: 15%;
+    margin: 40px;
+}
+#showreel-section .text-muted{
+    color: #fff;
+} 
+footer {
+    margin-top: 7%;
+    text-align: center;
+}
+footer ul{
+    margin-top: 50px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+footer ul li{
+    width: 85px;
+    list-style: none;
+    margin: 0 10px;
+}
+footer .hover{
+    font-weight: 300;
+    transition: all 0.2s ease-in-out;
+}
+footer .hover:hover{
+    font-weight: 400;
+    transition: all 0.2s ease-in-out;
+}
+footer ul li a{
+    font-family: 'silkamedium';
+    color: #fff;
+    text-decoration: none;
+}
+footer ul li a:hover{
+    text-decoration: none;
+    color: #fff;
+}
+#legal-notice{
+    margin: 50px 0;
+    font-size: 10px;
+    color: #241E1E;
+}
+#hero-video-section, #hero-design-section, #hero-drone-section {
+    width: 100%;
+    height:100vh;
+    background-repeat: no-repeat;
+    background-size: 60%;
+    background-position: 98% 43%;
+}
+#hero-video-section{
+    background-image: url('../img/hero-video.jpg');
+}
+#hero-design-section{
+    background-image: url('../img/design-hero.jpg');
+    background-size: 70%;
+    background-position: 110% 50%;
+}
+#hero-drone-section{
+    background-image: url('../img/drone.jpg');
+    background-size: 60%;
+    background-position: 100% 50%;
+}
+#hero-service-main{
+    position: absolute;
+    left: 15%;
+    width: 27%;
+    display: block;
+    top: 35%; 
+}
+#hero-service-main h1{
+    font-family: 'bernier';
+    font-size: 8em;
+    color: #241E1E;
+    line-height: 0.9em;
+}
+#hero-service-main h1:before{
+    content: "01";
+    font-family: 'bernier';
+    font-size: 56px;
+    position: absolute;
+    margin-top: -22%;
+    color: #fff;
+}
+#hero-service-main .photo-3:before{
+    content: "02";
+}
+#hero-service-main .design-2:before{
+    content: "03";
+}
+#hero-service-main p{
+    font-family: 'silkamedium';
+    line-height: 30px;
+    font-size: 14px;
+    color: #241E1E;  
+}
+#services{
+    margin-top: 5%;
+}
+#services .card{
+    background-color: initial;
+    border: initial;
+    padding: 50px;
+}
+#services h2{
+    font-family: 'bernier';
+    color: #241E1E;
+    font-size: 2.1em;
+    line-height: 37px;
+    margin-bottom: 25px;
+}
+#services p{
+    font-family: 'silkaregular';
+    color: #241E1E;
+    font-size: 14px;
+    line-height: 25px;
+}
+#services .card-img-top{
+    border-radius: 15px;
+}
+main .showreel-video{
+    padding: 0 15%;
+}
+main .showreel-design{
+    padding: 0 5%;
+}
+.showreel-design .cards-section{
+    column-count:2;
+}
+#studio-section{
+    padding: 0 15%;
+    margin-top: 15%;
+}
+#showreel-section{
+    margin-top: 10%;
+}
+#showreel-section h3{
+    text-align: center;
+    margin-bottom: 15%;
+}
+.video-player{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 15px;
+}
+.iframe-container{
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 56.25%;
+}
+#showreel-section .video-cards{
+    background: none;
+    margin-left: 5%;
+    margin-right: 5%;
+    border: none;
+}
+.card-deck video{
+    width: 100%;
+}
+#showreel-section .card-body{
+    padding: 20px 0;
+}
+#showreel-section .card-title{
+    font-family: 'bernier';
+    font-size: 2em;
+}
+#showreel-section .card-text{
+    color: #241E1E;
+    font-size: 14px;
+}
+#showreel-section .card-deck{
+    margin-top: 5%; 
+}
+#button-center{ 
+    margin-top: 5%;
+}
+.phone{
+    font-family: 'bernier';
+    font-size: 2em;
+    color: #241E1E;
+    margin: 0;
+}
+.menu-social-icons a:hover{
+    color: #FFC300;
+    text-decoration: none;
+}
+
+    

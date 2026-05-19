@@ -1,0 +1,118 @@
+@font-face {
+    font-family: 'BERNIER';
+    src: url('../fonts/bernier/BERNIERRegular-Regular.woff2') format('woff2'),
+        url('../fonts/bernier/BERNIERRegular-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'silkamedium';
+    src: url('../fonts/silka/silka-medium-webfont.eot');
+    src: url('../fonts/silka/silka-medium-webfontd41d.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/silka/silka-medium-webfont.woff2') format('woff2'),
+         url('../fonts/silka/silka-medium-webfont.woff') format('woff'),
+         url('../fonts/silka/silka-medium-webfont.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'silkabold';
+    src: url('../fonts/silka/silka-bold-webfont.eot');
+    src: url('../fonts/silka/silka-bold-webfontd41d.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/silka/silka-bold-webfont.woff2') format('woff2'),
+         url('../fonts/silka/silka-bold-webfont.woff') format('woff'),
+         url('../fonts/silka/silka-bold-webfont.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'silkaregular';
+    src: url('../fonts/silka/silka-regular-webfont.eot');
+    src: url('../fonts/silka/silka-regular-webfontd41d.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/silka/silka-regular-webfont.woff2') format('woff2'),
+         url('../fonts/silka/silka-regular-webfont.woff') format('woff'),
+         url('../fonts/silka/silka-regular-webfont.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+
+}
+@font-face {
+  font-family: 'icomoon';
+  src:  url('../fonts/icofont/icomoon26f5.eot?lwpijg');
+  src:  url('../fonts/icofont/icomoon26f5.eot?lwpijg#iefix') format('embedded-opentype'),
+    url('../fonts/icofont/icomoon26f5.ttf?lwpijg') format('truetype'),
+    url('../fonts/icofont/icomoon26f5.woff?lwpijg') format('woff'),
+    url('../fonts/icofont/icomoon26f5.svg?lwpijg#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-dribbble:before {
+  content: "\e900";
+}
+.icon-youtube:before {
+  content: "\e901";
+}
+.icon-instagram:before {
+  content: "\e902";
+}
+.icon-vimeo:before {
+  content: "\e903";
+}
+.icon-linkedin:before {
+  content: "\e904";
+}
+.icon-bottom-arrow:before {
+  content: "\e905";
+}
+.icon-left-arrow:before {
+  content: "\e906";
+}
+.icon-right-arrow:before {
+  content: "\e907";
+}
+.icon-top-arrow:before {
+  content: "\e908";
+}
+.icon-player .path1:before {
+  content: "\e909";
+  color: rgb(0, 0, 0);
+}
+.icon-player .path2:before {
+  content: "\e90a";
+  margin-left: -1em;
+  color: rgb(255, 255, 255);
+}
+.icon-contact:before {
+  content: "\e90b";
+}
+.icon-feather:before {
+  content: "\e90c";
+}
+.icon-world:before {
+  content: "\e90d";
+}
+
+@font-face {
+    font-family: 'Arial Black Web';
+    src: url('../fonts/ariblk.ttf') format('truetype'); /* Asegúrate de subir este archivo a tu carpeta fonts */
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}

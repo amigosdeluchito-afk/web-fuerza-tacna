@@ -1,0 +1,607 @@
+/* =========================================================
+   MAPA-OBRAS.CSS - ESTRUCTURA BASE (NÚCLEO)
+   ========================================================= */
+
+html,body{ margin:0; height:100% !important; width:100% !important; overflow:hidden !important; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; color:#111; background-color: #ffc300; }
+
+/* Fondo con fade */
+.app-bg{
+  position:fixed; inset:0;
+  background-color: #ffc300;
+  z-index:0; opacity:1;
+}
+
+/* Contenedor mapa con fade (oculto pero con tamaño) */
+#map{
+  position:fixed !important; inset:0 !important; z-index:1 !important; width:100% !important; height:100vh !important; background:transparent;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity 800ms ease;
+}
+
+/* --- NUEVO: Contenedor del Video Intro --- */
+#video-intro-container {
+  position: fixed;
+  inset: 0;
+  z-index: 10 !important; /* Lo subimos un poco más para asegurar prioridad */
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #000 !important;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1.5s ease-in-out;
+  pointer-events: none;
+}
+
+#video-intro-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.1); /* 10% más grande para tener margen de movimiento */
+  will-change: transform;
+}
+
+/* --- ESTILO GOOEY TEXT --- */
+#gooey-text-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 12;
+  filter: url(#threshold);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s ease; /* Fade-in del contenedor completo */
+}
+
+#gooey-text-container span {
+  position: absolute;
+  color: #ffc300;
+  font: 900 clamp(1.2rem, 3.5vw, 35pt) 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  padding: 0 10%;
+  user-select: none;
+}
+
+/* --- GRID DE TARJETAS KPI (ESTILO REACT PORT) --- */
+#intro-kpi-grid {
+    position: absolute;
+    top: 75%; /* Subimos el punto de partida para que no se vea tan pegado abajo */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centrado total para facilitar la subida */
+    display: flex;
+    gap: 12px; /* Espacio reducido entre tarjetas para una vista más compacta */
+    z-index: 15;
+    opacity: 0;
+    visibility: hidden;
+    /* Añadimos 'top' a la transición con un Bezier que le dé un efecto de "empuje" orgánico */
+    transition: opacity 1s ease, visibility 1s ease, top 1.8s cubic-bezier(0.19, 1, 0.22, 1);
+    width: max-content;
+    max-width: 95vw;
+    pointer-events: none; 
+}
+
+/* Cuando se activa la clase, el contenedor se vuelve interactivo */
+#intro-kpi-grid.is-visible { 
+    opacity: 1; 
+    visibility: visible;
+    pointer-events: auto; 
+}
+
+/* Nueva clase para elevar las tarjetas al centro de la pantalla */
+#intro-kpi-grid.is-centered {
+    top: 50%;
+}
+
+.kpi-card-wrap {
+    perspective: 1000px;
+    /* Animación de entrada: las tarjetas vendrán desde abajo */
+    opacity: 0;
+    transform: translateY(25px); /* Reducimos el salto inicial para que sea más sutil */
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease;
+    cursor: pointer;
+}
+
+/* Activación de la animación de entrada para cada tarjeta */
+#intro-kpi-grid.is-visible .kpi-card-wrap {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Efecto escalonado (Stagger): Cada tarjeta espera un poco más que la anterior */
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(1) { transition-delay: 0.1s; }
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(2) { transition-delay: 0.3s; }
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(3) { transition-delay: 0.5s; }
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(4) { transition-delay: 0.7s; }
+
+.kpi-card-wrap:hover {
+    transform: scale(1.05) rotate(-1deg); /* Rotación exacta del código original */
+}
+
+.kpi-card {
+    width: 340px; /* Tarjetas más anchas */
+    height: 265px; /* Reducido 10px de altura */
+    position: relative;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(20, 20, 20, 0.1), rgba(0, 0, 0, 0.3));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: border-color 0.5s, box-shadow 0.5s;
+}
+
+.kpi-card:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+}
+
+/* Efectos de fondo */
+.card-effects { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.eff-bg { position: absolute; inset: 0; background: linear-gradient(45deg, rgba(255,255,255,0.05), transparent); }
+.eff-bounce {
+    position: absolute; -bottom: 40px; -left: 40px; width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08), transparent);
+    filter: blur(30px); animation: bounce 4s infinite ease-in-out;
+}
+.eff-ping {
+    position: absolute; top: 20px; left: 20px; width: 40px; height: 40px;
+    border-radius: 50%; background: rgba(255,255,255,0.05); filter: blur(10px);
+    animation: ping 3s infinite cubic-bezier(0, 0, 0.2, 1);
+}
+.eff-shine {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    transform: skewX(-20deg) translateX(-150%);
+    transition: transform 1s ease;
+}
+.kpi-card:hover .eff-shine { transform: skewX(-20deg) translateX(200%); }
+
+/* Contenido */
+.card-content {
+    position: relative; z-index: 10;
+    padding: 15px 20px 10px; /* Reducimos el padding inferior para bajar los elementos */
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    justify-content: flex-start; /* Alineación desde arriba para consistencia total */
+    height: 100%;
+}
+
+.icon-sphere {
+    position: relative; width: 44px; height: 44px; margin-bottom: 8px; /* Espacio fijo para nivelar títulos */
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.5s ease;
+}
+.icon-inner {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.1));
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    transition: transform 0.7s ease;
+}
+.kpi-card:hover .icon-inner { border-color: #ffc300; }
+.icon-inner svg { width: 16px; height: 16px; color: #fff; }
+.icon-ping {
+    position: absolute; inset: 0; border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 50%; animation: ping 2s infinite;
+}
+
+/* Animación del icono al hacer hover (del código original) */
+.kpi-card-wrap:hover .icon-sphere {
+    transform: rotate(12deg) scale(1.1);
+}
+.kpi-card-wrap:hover .icon-inner {
+    transform: rotate(180deg);
+}
+
+.card-content h3 {
+    margin: 0 0 8px; font-size: 1.9rem; font-weight: 900; /* Aumentado para igualar el ancho de la primera línea */
+    background: linear-gradient(to right, #fff, #bbb, #fff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-transform: uppercase; line-height: 1.0; letter-spacing: 0px;
+    transition: transform 0.3s ease;
+}
+
+.card-content h3 span {
+    font-size: 3.2rem; /* El número ahora es aún más imponente */
+    line-height: 1;
+    display: inline-block;
+}
+
+.kpi-card-wrap:hover h3 {
+    transform: scale(1.05); /* Efecto zoom del título original */
+}
+
+.card-content p {
+    margin: 0; font-size: 1rem; color: #eee; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif !important; /* Tipografía delgada y moderna */
+    font-weight: 300; /* Peso ligero para el estilo aesthetic */
+    transition: color 0.3s ease;
+}
+.kpi-card:hover p { color: #fff; }
+
+.card-line {
+    width: 40px; height: 2px;
+    background: linear-gradient(to right, transparent, #fff, transparent);
+    margin-top: auto; /* Empuja la línea y puntos al final para alineación inferior */
+    margin-bottom: 12px; border-radius: 10px; opacity: 0.5;
+    animation: pulse 2s infinite; transition: all 0.5s ease;
+}
+.kpi-card:hover .card-line { 
+    width: 50%; /* Se ensancha como en el original */
+    height: 3px;
+    opacity: 1; 
+}
+
+.card-dots { display: flex; gap: 8px; opacity: 0.4; transition: opacity 0.3s; }
+.kpi-card:hover .card-dots { opacity: 1; }
+.card-dots span {
+    width: 6px; height: 6px; background: #fff; border-radius: 50%;
+    animation: bounce 1.5s infinite ease-in-out;
+}
+.card-dots span:nth-child(2) { animation-delay: 0.1s; }
+.card-dots span:nth-child(3) { animation-delay: 0.2s; }
+
+/* Esquinas decorativas que aparecen en hover */
+.card-corner-tl, .card-corner-br {
+    position: absolute;
+    width: 60px; height: 60px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 5;
+}
+.card-corner-tl {
+    top: 0; left: 0;
+    background: linear-gradient(to bottom right, rgba(255,255,255,0.1), transparent);
+    border-radius: 0 0 24px 0;
+}
+.card-corner-br {
+    bottom: 0; right: 0;
+    background: linear-gradient(to top left, rgba(255,255,255,0.1), transparent);
+    border-radius: 24px 0 0 0;
+}
+.kpi-card:hover .card-corner-tl,
+.kpi-card:hover .card-corner-br { opacity: 1; }
+
+/* Keyframes Animaciones */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes ping {
+    75%, 100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    #intro-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        top: 82%; /* Ajuste proporcional para tablets */
+    }
+    .kpi-card { width: 280px; height: 255px; }
+}
+
+@media (max-width: 600px) {
+    #intro-kpi-grid {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+        max-height: 40vh;
+        padding: 20px;
+    }
+    .kpi-card { width: 100%; height: auto; padding: 20px; }
+    .card-content { padding: 20px; }
+    .icon-sphere { margin-bottom: 15px; }
+    .card-line { margin: 15px 0; }
+}
+/* --- FIN KPI GRID --- */
+
+/* --- FOOTER INICIO --- */
+#home-footer {
+    position: absolute;
+    bottom: 15px; /* Bien pegado abajo */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 16;
+    color: rgba(255, 255, 255, 0.5); /* Color sutil para no distraer */
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 2s ease;
+    white-space: nowrap;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+#home-footer.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Chips */
+.chips{
+  position:fixed !important; top:20px !important; left:0 !important; right:0 !important; z-index:10000 !important;
+  display:flex; justify-content: center;
+  pointer-events: none; /* Deja pasar clics al mapa excepto en los botones */
+  /* Empiezan ocultos para que el video sea el protagonista */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1s ease, visibility 1s ease;
+}
+.chips-group{
+  display:flex; align-items: center; gap:6px; padding:6px 12px;
+  background-color: rgba(255, 195, 0, 0.5);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: 50px; border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  max-width: 95vw; pointer-events: auto;
+  overflow: visible !important;
+}
+
+/* --- ESTILO GLASS (Solo para Inicio) --- */
+.chips.is-glass .chips-group {
+  position: relative;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 2.2) !important;
+  isolation: isolate; /* Crea un nuevo contexto de apilamiento */
+}
+
+/* Capa 1: Vidrio Distorsionado (Background) */
+.chips.is-glass .chips-group::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: 50px;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  filter: url(#glass-distortion);
+  pointer-events: none;
+}
+
+/* Capa 2: Brillo y Sombras Internas (Fidelidad React) */
+.chips.is-glass .chips-group::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.25) !important;
+  /* Doble sombra interna para simular el grosor del cristal */
+  box-shadow: 
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5), 
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5) !important;
+  pointer-events: none;
+}
+
+ .chips.is-glass .chip { color: #801039 !important; }
+.chips.is-glass .chip.is-active { background: #fff !important; color: #801039 !important; }
+.chips.is-glass .divider-v { background: rgba(255, 255, 255, 0.3); }
+
+@media (max-width: 700px) {
+  .chips-group { overflow-x: auto !important; } /* En móvil mantenemos scroll si es necesario */
+}
+.chip{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:6px 14px; background: transparent;
+  border: none; border-radius: 999px; font-size: 11px; font-weight: 900; color: #801039; cursor: pointer;
+  font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  white-space: nowrap;
+}
+.chip:hover{ color: #fff; transform: translateY(-2px); }
+.chip.is-active{ background: #801039; color: #ffc300; }
+.chip.is-active span{ color: #ffc300; }
+.divider-v { width: 1px; height: 18px; background: rgba(128, 16, 57, 0.2); margin: 0 4px; flex-shrink: 0; }
+
+/* ===== Píldora de búsqueda (entre "Inicio" y el grupo de chips) ===== */
+.search-pill{
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50px; padding: 4px 12px;
+  width: 180px; transition: width 0.3s ease;
+}
+.search-pill:focus-within { width: 240px; background: rgba(255, 255, 255, 0.45); }
+.search-pill input{
+  border:0; outline:0; background:transparent;
+  font: 900 12px/1 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  color: #801039;
+  width:100%;
+}
+.search-pill input::placeholder { color: rgba(128, 16, 57, 0.6); }
+.search-pill svg{ width:20px; height:20px; color:#801039; pointer-events:none; }
+
+/* Lista de resultados */
+.search-list{
+  position:absolute; left:0; right:0; top:100%; margin-top:6px;
+  background: #801039; border: 1px solid #ffc300; border-radius: 15px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  list-style:none; padding:6px; max-height:52vh; overflow:auto;
+  z-index: 1000;
+}
+.search-list li{
+  padding:10px 12px; border-radius:10px; cursor:pointer;
+  font: 900 13px/1.25 'Arial Black Web', "Arial Black", Arial, sans-serif; color:#fff;
+  text-transform: uppercase;
+}
+.search-list li small{ display:block; color: #ffc300; opacity:.9; font-weight:bold; }
+.search-list li:hover{ background: rgba(255, 195, 0, 0.2); }
+
+  /* Estilos para la etiqueta de segmento en los resultados de búsqueda */
+  .search-list li span.seg-tag {
+    font-size: 9px;
+    background: rgba(255,255,255,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,195,0,0.3);
+    color: #ffc300;
+    font-family: 'Arial Black Web', "Arial Black", sans-serif;
+  }
+
+/* En móviles, que no rompa la barra de chips */
+@media (max-width:700px){
+  .chips{ flex-wrap:wrap; }
+  .search-pill{ max-width: 100%; flex: 1 1 auto; }
+}
+
+/* Crossfade de capas de imagen */
+.leaflet-image-layer{ transition:opacity 500ms ease; }
+
+/* HUD de zoom (opcional) */
+#zoomHud{
+  position:fixed; bottom:12px; left:12px; z-index:1000;
+  background:rgba(0,0,0,.6); color:#fff; padding:6px 10px; border-radius:8px;
+  font:600 12px/1.2 system-ui, Segoe UI, Roboto, Arial; pointer-events:none;
+}
+
+/* === Leyenda de estados === */
+#legend {
+  position: fixed;
+  left: calc(var(--sidebar-collapsed, 60px) + 12px);
+  bottom: 100px; /* justo encima de los botones + y - */
+  z-index: 2000; /* Lo subimos para que flote sobre el mapa y los paneles laterales */
+  background-color: rgba(128, 16, 57, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 195, 0, 0.3);
+  color: #ffc300;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font: 600 12px/1.4 system-ui, Segoe UI, Roboto, Arial;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+#legend .item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+#legend .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #fff; }
+#legend .label { opacity: .9; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none!important; transition:none!important }
+}
+
+
+
+/* ===== Solo móvil: subir zoom y bajar la leyenda ===== */
+@media (max-width: 600px) {
+  :root{
+    --zoom-btn: 38px;
+    --zoom-gap: 10px;
+    --zoom-offset: 50px;
+  }
+
+  .leaflet-bottom.leaflet-right{
+    padding-right: 8px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  .leaflet-bottom.leaflet-right .leaflet-control-zoom{
+    transform: scale(0.92);
+    transform-origin: bottom right;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    margin-bottom: var(--zoom-offset);
+  }
+  .leaflet-control-zoom a{
+    width: var(--zoom-btn);
+    height: var(--zoom-btn);
+    line-height: var(--zoom-btn);
+  }
+
+  #legend{
+    right: auto;
+    left: calc(var(--sidebar-collapsed, 60px) + 8px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    padding: 6px 8px;
+    border-radius: 10px;
+    font: 700 11px/1.3 system-ui, Segoe UI, Roboto, Arial;
+    background: rgba(0,0,0,.46);
+    box-shadow: 0 2px 8px rgba(0,0,0,.28);
+  }
+  #legend .item{ display:flex; align-items:center; gap:6px; margin-bottom:3px; }
+  #legend .item:last-child{ margin-bottom:0; }
+  #legend .dot{ width:10px; height:10px; }
+  #legend .label{ opacity:.95; }
+
+  #zoomHud{
+    left: 8px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--zoom-offset) + 6px);
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+}  /* ← este es el ÚNICO cierre del bloque móvil */
+
+
+
+
+.pill{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 9px; border-radius:999px; font-weight:800;
+  border:1px solid rgba(0,0,0,.06);
+}
+.pill svg{ width:14px; height:14px }
+
+.pill--entregado{ background:#e8f5e9; color:#1b5e20; }
+.pill--construccion{ background:#e8f0fe; color:#1a73e8; }
+.pill--paralizado{ background:#ffebee; color:#c62828; }
+.pill--suspendido{ background:#ffebee; color:#d32f2f; }
+.pill--estudios{ background:#eeeeee; color:#424242; }
+.pill--buenapro{      background:#fff3e0; color:#ef6c00; }  /* naranja suave */
+.pill--transferencia{ background:#f3e8ff; color:#6d28d9; }  /* morado suave */
+
+
+
+/* === Reset sólido de panes: overlay < controles < pines < tooltips < popups === */
+.leaflet-tile-pane     { z-index: 100 !important; }
+.leaflet-overlay-pane  { z-index: 200 !important; }  /* imageOverlay */
+.leaflet-shadow-pane   { z-index: 300 !important; }
+.leaflet-marker-pane   { z-index: 1200 !important; } /* PINS arriba */
+.leaflet-tooltip-pane  { z-index: 1300 !important; }
+.leaflet-popup-pane    { z-index: 1400 !important; }
+
+/* Controles por debajo de pines, por encima del overlay */
+.leaflet-control-container { z-index: 900 !important; }
+
+/* Rehabilita interacción en markers (tu CSS base los pone en none) */
+.leaflet-marker-icon { pointer-events: auto !important; }
+
+/* Por si algún reset global toca opacidad/filtros de los pines */
+.leaflet-marker-pane .leaflet-marker-icon { opacity: 1 !important; filter: none !important; }
+
+/* (Opcional) Asegura que la imagen de fondo no cree un stacking raro */
+.leaflet-image-layer { z-index: 0 !important; } /* relativo a su pane (overlay:200) */
+
+/* Solo móvil: ocultar el HUD de zoom */
+@media (max-width: 600px){
+  #zoomHud { display: none !important; }
+}
+
+
+/* Asegurar visibilidad y tamaño de los divIcon */
+.leaflet-marker-pane .leaflet-marker-icon.obra-pin { 
+  opacity: 1 !important; 
+  filter: none !important; 
+  display: block !important;
+}
+
+/* Eliminamos las reglas restrictivas que bloqueaban la apertura */
+#sheet:not(.is-open) {
+  pointer-events: none;
+}

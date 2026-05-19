@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- Mirrored from le-lab.io/drone-fpv by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:07 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head>
+        
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Le Lab est un studio de création basé à Bordeaux dédié à la production de contenus audiovisuels, de prises de vues aériennes, de drone FPV et de design.">
+        <title>FUERZA TACNA</title>
+        <link rel="icon" type="image/png" href="assets/img/favicon.png">
+        <link rel="stylesheet" href="assets/css/main.css?v=115">
+        <link rel="stylesheet" href="assets/css/button.css?v=115">
+        <link rel="stylesheet" href="assets/css/mobile-menu.css?v=115">
+        <link rel="stylesheet" href="assets/css/responsive.css?v=115">
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+        <link rel="stylesheet" type="text/css" href="assets/css/fonts.css?v=115">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
+
+        <script type="text/javascript" src="assets/js/smoothscroll.js"></script>
+        <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+        <script type="text/javascript" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+        <style>
+            .menu-links a, #hero-header ul li a {
+                font-family: "Arial Black", Arial, sans-serif !important;
+            }
+            /* --- Backgrounds & Fills --- */
+            .magnetic .wrap .span {
+                background-color: #25D366 !important;
+            }
+            .mouse-in,
+            #services h3::before,
+            #services .title-client::before,
+            #intro button:hover,
+            #video-section button:hover,
+            #drone-section button:hover,
+            #design-section button:hover,
+            .references-section button:hover,
+            #button-center:hover {
+                background-color: #ffc300 !important;
+            }
+
+            /* --- Text Colors --- */
+            .scroll-indication,
+            .small-title,
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center,
+            .menu-links a:hover,
+            .menu-links a.active,
+            .hyperlinks {
+                color: #ffc300 !important;
+            }
+
+            /* --- Border Colors --- */
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center {
+                border-color: #ffc300 !important;
+            }
+
+            /* --- Header Fijo Transparente --- */
+            #hero-header {
+                position: fixed;
+                top: 15px; /* Espacio desde el techo */
+                left: 2% !important;
+                width: 96% !important;
+                box-sizing: border-box !important;
+                z-index: 1000;
+                background: transparent; /* Contenedor principal sin fondo */
+            }
+            @media (min-width: 992px) {
+                #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; }
+                #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; }
+                #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; }
+            }
+
+            /* --- Píldora de Cristal (Solo el Menú Central) --- */
+            #hero-header ul {
+                background-color: rgba(255, 195, 0, 0.4); /* Color de fondo de la página (#FFC300) */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 50px; /* Forma de píldora redonda */
+                padding: 18px 24px; /* Más espacio arriba y abajo para darle 5px más de altura */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra muy reducida y sutil */
+                border: 1px solid rgba(255, 255, 255, 0.4); /* Borde blanco fino y sutil */
+                width: max-content !important; /* Hace que la caja solo ocupe el ancho estrictamente necesario */
+                margin: 0 auto; /* Centra la píldora en la pantalla */
+            }
+            #hero-header ul li {
+                margin: 0 15px !important; /* Reduce la separación entre los textos para hacerla más compacta */
+            }
+
+            /* --- Efecto Star Wars para "Súmate" --- */
+            #sumate-menu-item {
+                position: relative; /* Contexto para el posicionamiento de la imagen */
+                /* Ayuda a centrar verticalmente el texto de dos líneas */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Ajuste para que el texto de dos líneas no deforme la píldora */
+            #sumate-menu-item > a {
+                line-height: 1.05;
+                font-size: 13px; /* Tamaño más grande y equilibrado */
+                text-align: center;
+                /* --- NUEVO: Preparación para la animación de brillo --- */
+                position: relative;
+                z-index: 1; /* Asegura que el texto principal esté por encima del brillo */
+                transition: color 0.3s ease, transform 0.3s ease;
+            }
+
+            #sumate-menu-item .lucho-fuerza-peek {
+                position: absolute;
+                bottom: -30px; /* Lo bajamos drásticamente con píxeles para que se note el cambio */
+                left: 50%;
+                transform: translateX(-50%) translateY(-20px); /* Lo sube para que esté oculto inicialmente */
+                opacity: 0;
+                transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transición con rebote */
+                pointer-events: none; /* Para que no interfiera con el clic */
+            }
+
+            #sumate-menu-item .lucho-fuerza-peek img {
+                width: 100px; /* Tamaño del personaje (reducido) */
+                height: auto;
+                display: block;
+                filter: drop-shadow(0px 5px 15px rgba(0, 0, 0, 0.4));
+                /* Desvanecer la parte inferior de la imagen (más pronunciado) */
+                mask-image: linear-gradient(to bottom, black 40%, transparent 70%);
+                -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 70%);
+            }
+
+            /* --- NUEVO: Capa de brillo (pseudo-elemento) --- */
+            #sumate-menu-item > a::before {
+                content: 'SÚMATE\A A LA FUERZA'; /* \A crea un salto de línea */
+                white-space: pre; /* Permite que el salto de línea funcione */
+                color: #adfdff; /* Color base del brillo (cian claro) */
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: -1; /* Se posiciona detrás del texto principal */
+                opacity: 0;
+                filter: blur(1.5px);
+                transition: opacity 0.4s ease;
+            }
+
+            /* --- NUEVO: Animaciones de parpadeo y pulso --- */
+            @keyframes force-flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.95; } }
+            @keyframes force-glow-pulse {
+                0% { filter: blur(1.5px); text-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff, 0 0 35px #00d9ff; }
+                100% { filter: blur(2.5px); text-shadow: 0 0 15px #00d9ff, 0 0 30px #00d9ff, 0 0 50px #00d9ff; }
+            }
+
+            /* --- REEMPLAZO: El nuevo efecto al pasar el mouse --- */
+            #sumate-menu-item:hover > a {
+                color: #fff !important;
+                transform: translateY(-2px);
+                animation: force-flicker 0.15s infinite alternate; /* Aplicamos el parpadeo */
+            }
+
+            #sumate-menu-item:hover > a::before {
+                opacity: 1;
+                animation: force-glow-pulse 1s infinite alternate ease-in-out; /* Aplicamos el pulso al brillo */
+            }
+
+            #sumate-menu-item:hover .lucho-fuerza-peek {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0); /* Baja a su posición final para asomarse */
+            }
+        </style>
+
+    </head>
+
+    <body data-barba="wrapper" onload="init()">
+      <script>AOS.init();</script>
+      <div class="cursor-follower"></div>
+      <div class="load-container"><div class="loading-screen"></div></div>
+
+        <main data-barba="container" data-barba-namespace="home-section" class="animate-this">
+
+            
+                 
+<input type="checkbox" id="openmenu" class="hamburger-checkbox">
+<div class="hamburger-icon">
+  <label for="openmenu" id="hamburger-label">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>    
+</div>
+<div class="menu-pane"> 
+  <nav>
+    <ul class="menu-links">
+      <li><a href="index.html" class="">INICIO</a></li>
+      <li><a href="quienes-somos.html" class="active">QUIENES SOMOS</a></li> 
+      <li><a href="candidatos.html" class="">CANDIDATOS</a></li>
+      <li><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li>
+      <li><a href="sumate.html" class="">SUMATE</a></li>
+      <li><a href="contacto.html" class="">CONTACTO</a></li>                          
+    </ul>
+  </nav>
+</div>
+
+          
+            <div id="hero-drone-section" style="background-image: none !important; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; height: auto; padding: 12vh 0 3vh 0; overflow: hidden;">
+                <header id="hero-header">
+                    <div class="logo-container">
+                        <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+                    </div>
+                    
+                    
+<ul>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="index.html" class="">INICIO</a></li>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="quienes-somos.html" class="active">QUIENES SOMOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="800"><a href="candidatos.html" class="">CANDIDATOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="1000"><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li> 
+    <li data-aos="fade-down" data-aos-duration="1200" id="sumate-menu-item">
+        <a href="sumate.html" class="">SÚMATE<br>A LA FUERZA</a>
+        <div class="lucho-fuerza-peek">
+            <img src="assets/img/LUCHO%20FUERZA.png" alt="Lucho te invita a sumarte">
+        </div>
+    </li> 
+    <li data-aos="fade-down" data-aos-duration="1400"><a href="contacto.html" class="">CONTACTO</a></li>
+</ul>
+
+
+                    <div class="button-container">
+                        <a href="https://chat.whatsapp.com/InyGU3GIjEiHbO3Ms8lcoa" target="_blank">
+                            <svg class="circular-text" viewBox="0 0 100 100">
+                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                                <text>
+                                    <textPath href="#circlePath" startOffset="0%">
+                                        ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; 
+                                    </textPath>
+                                </text>
+                            </svg>
+                            <div class="magnetic">
+                                <div class="wrap">
+                                    <div class="span span-1 go"></div>
+                                    <div class="span span-2 go"></div>
+                                    <div class="span span-3 go"></div>
+                                    <div class="span span-4 go"></div>
+                                    <img src="assets/img/hand.png">
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </header>
+                
+                <!-- Nuevas Flechas Flotantes -->
+                <a href="#quienes-somos-timeline" class="mobile-arrows arr-left arr-dark" style="top: 92vh !important; bottom: auto !important;"><span></span><span></span><span></span></a>
+                <a href="#quienes-somos-timeline" class="mobile-arrows arr-center arr-dark" style="top: 92vh !important; bottom: auto !important;"><span></span><span></span><span></span></a>
+                <a href="#quienes-somos-timeline" class="mobile-arrows arr-right arr-dark" style="top: 92vh !important; bottom: auto !important;"><span></span><span></span><span></span></a>
+                
+                <style>
+                    @keyframes popInUpText {
+                        0% { opacity: 0; transform: translateY(150px) scale(0.7); filter: blur(12px); }
+                        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+                    }
+                    .anim-text-1 {
+                        opacity: 0;
+                        animation: popInUpText 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.2) 1.2s forwards;
+                    }
+                    .anim-text-2 {
+                        opacity: 0;
+                        animation: popInUpText 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.2) 1.6s forwards;
+                    }
+                    .anim-text-3 {
+                        opacity: 0;
+                        animation: popInUpText 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.2) 2s forwards;
+                    }
+                    .anim-text-4 {
+                        opacity: 0;
+                        animation: popInUpText 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.2) 2.4s forwards;
+                    }
+
+                    @property --gradient-angle {
+                        syntax: "<angle>";
+                        initial-value: 0deg;
+                        inherits: false;
+                    }
+
+                    @property --gradient-angle-offset {
+                        syntax: "<angle>";
+                        initial-value: 0deg;
+                        inherits: false;
+                    }
+
+                    @property --gradient-percent {
+                        syntax: "<percentage>";
+                        initial-value: 5%;
+                        inherits: false;
+                    }
+
+                    @property --gradient-shine {
+                        syntax: "<color>";
+                        initial-value: white;
+                        inherits: false;
+                    }
+
+                    .shiny-pillar {
+                        --shiny-cta-bg: #801039;
+                        --shiny-cta-bg-subtle: #6a0b2d;
+                        --shiny-cta-fg: #ffc300;
+                        --shiny-cta-highlight: #ffc300;
+                        --shiny-cta-highlight-subtle: #ffd659;
+                        --animation: gradient-angle linear infinite;
+                        --duration: 3s;
+                        --shadow-size: 2px;
+                        --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+
+                        isolation: isolate;
+                        position: relative;
+                        overflow: hidden;
+                        cursor: pointer;
+                        outline-offset: 4px;
+                        padding: 0.8rem 1.5rem;
+                        font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif;
+                        font-weight: 900;
+                        font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+                        text-transform: uppercase;
+                        line-height: 1.2;
+                        border: 2px solid transparent;
+                        border-radius: 8px;
+                        color: var(--shiny-cta-fg);
+                        background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+                          conic-gradient(
+                            from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+                            transparent,
+                            var(--shiny-cta-highlight) var(--gradient-percent),
+                            var(--gradient-shine) calc(var(--gradient-percent) * 2),
+                            var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
+                            transparent calc(var(--gradient-percent) * 4)
+                          ) border-box;
+                        box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle), 0 8px 20px rgba(0,0,0,0.2);
+                        transition: var(--transition);
+                        transition-property: --gradient-angle-offset, --gradient-percent, --gradient-shine;
+                        flex: 1 1 200px;
+                        max-width: 250px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+
+                    .shiny-pillar::before,
+                    .shiny-pillar::after,
+                    .shiny-pillar span::before {
+                        content: "";
+                        pointer-events: none;
+                        position: absolute;
+                        inset-inline-start: 50%;
+                        inset-block-start: 50%;
+                        translate: -50% -50%;
+                        z-index: -1;
+                    }
+
+                    .shiny-pillar:active {
+                        translate: 0 1px;
+                    }
+
+                    .shiny-pillar::before {
+                        --size: calc(100% - var(--shadow-size) * 3);
+                        --position: 2px;
+                        --space: calc(var(--position) * 2);
+                        width: var(--size);
+                        height: var(--size);
+                        background: radial-gradient(
+                          circle at var(--position) var(--position),
+                          white calc(var(--position) / 4),
+                          transparent 0
+                        ) padding-box;
+                        background-size: var(--space) var(--space);
+                        background-repeat: space;
+                        mask-image: conic-gradient(
+                          from calc(var(--gradient-angle) + 45deg),
+                          black,
+                          transparent 10% 90%,
+                          black
+                        );
+                        -webkit-mask-image: conic-gradient(
+                          from calc(var(--gradient-angle) + 45deg),
+                          black,
+                          transparent 10% 90%,
+                          black
+                        );
+                        border-radius: inherit;
+                        opacity: 0.2;
+                        z-index: -1;
+                    }
+
+                    .shiny-pillar::after {
+                        --animation: shimmer linear infinite;
+                        width: 100%;
+                        aspect-ratio: 1;
+                        background: linear-gradient(
+                          -50deg,
+                          transparent,
+                          var(--shiny-cta-highlight),
+                          transparent
+                        );
+                        mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+                        -webkit-mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+                        opacity: 0.6;
+                    }
+
+                    .shiny-pillar span {
+                        z-index: 1;
+                    }
+
+                    .shiny-pillar span::before {
+                        --size: calc(100% + 1rem);
+                        width: var(--size);
+                        height: var(--size);
+                        box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
+                        opacity: 0;
+                        transition: opacity var(--transition);
+                        animation: calc(var(--duration) * 1.5) breathe linear infinite;
+                    }
+
+                    .shiny-pillar,
+                    .shiny-pillar::before,
+                    .shiny-pillar::after {
+                        animation: var(--animation) var(--duration),
+                          var(--animation) calc(var(--duration) / 0.4) reverse paused;
+                        animation-composition: add;
+                    }
+
+                    .shiny-pillar:is(:hover, :focus-visible) {
+                        --gradient-percent: 20%;
+                        --gradient-angle-offset: 95deg;
+                        --gradient-shine: var(--shiny-cta-highlight-subtle);
+                    }
+
+                    .shiny-pillar:is(:hover, :focus-visible),
+                    .shiny-pillar:is(:hover, :focus-visible)::before,
+                    .shiny-pillar:is(:hover, :focus-visible)::after {
+                        animation-play-state: running;
+                    }
+
+                    .shiny-pillar:is(:hover, :focus-visible) span::before {
+                        opacity: 1;
+                    }
+
+                    @keyframes gradient-angle {
+                        to {
+                          --gradient-angle: 360deg;
+                        }
+                    }
+
+                    @keyframes shimmer {
+                        to {
+                          rotate: 360deg;
+                        }
+                    }
+
+                    @keyframes breathe {
+                        from, to {
+                          scale: 1;
+                        }
+                        50% {
+                          scale: 1.2;
+                        }
+                    }
+                </style>
+                <div style="width: 100%; text-align: center; padding: 0 2vw; z-index: 10; margin-top: 12vh;">
+                    <h3 class="anim-text-1" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-size: clamp(3rem, 6.5vw, 6rem); margin-bottom: -0.5rem; color: #801039;">SOMOS</h3>
+                    <h2 class="anim-text-2" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: clamp(2.8rem, 10vw, 11rem); line-height: 0.9; text-transform: uppercase; color: #801039; letter-spacing: -3px; margin: 0; width: 100%; white-space: nowrap;">FUERZA TACNA</h2>
+                    <div class="anim-text-3" style="margin-top: 3rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+                        <p style="font-family: Arial, sans-serif; font-size: clamp(1.2rem, 1.8vw, 1.8rem); font-weight: 600; color: #000; line-height: 1.6; margin: 0;">
+                            <span style="color: #801039; font-size: 2.5em; font-family: Georgia, serif; line-height: 0; position: relative; top: 12px; margin-right: 5px;">&ldquo;</span>Somos una fuerza que representa a la Tacna de todos los días: la de los mercados, los barrios, los jóvenes, los emprendedores, las familias y quienes trabajan por salir adelante.<span style="color: #801039; font-size: 2.5em; font-family: Georgia, serif; line-height: 0; position: relative; top: 12px; margin-left: 5px;">&rdquo;</span>
+                        </p>
+                    </div>
+                    <div class="anim-text-4" style="margin-top: 1.5rem; width: 100%;">
+                        <h4 style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; color: #801039; font-size: clamp(1.2rem, 2vw, 2rem); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem;">NUESTROS PILARES</h4>
+                        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5vw 2vw;">
+                            <div class="shiny-pillar"><span>Unidad</span></div>
+                            <div class="shiny-pillar"><span>Compromiso</span></div>
+                            <div class="shiny-pillar"><span>Trabajo</span></div>
+                            <div class="shiny-pillar"><span>Futuro</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- ========================================== -->
+                    <!-- INICIO DE LA LÍNEA DE TIEMPO (TIMELINE)    -->
+                    <!-- ========================================== -->
+                    <style>
+                        .timeline-section {
+                            position: relative;
+                            width: 100%;
+                            height: 420px; /* Reducido para ocultar la parte baja del círculo */
+                            background: transparent;
+                            overflow: hidden;
+                            margin-top: 1.5rem;
+                            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+                            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+                        }
+                        .timeline-center-glow {
+                            position: absolute;
+                            left: 50%;
+                            top: 100%;
+                            width: 500px;
+                            height: 500px;
+                            background: radial-gradient(circle, rgba(128,16,57,0.15) 0%, transparent 70%);
+                            transform: translate(-50%, -50%);
+                            pointer-events: none;
+                            z-index: 1;
+                        }
+                        .timeline-desc-container {
+                            position: absolute;
+                            top: 60%; /* Lo bajamos un poco para centrarlo en la nueva altura */
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            width: 90%;
+                            max-width: 700px;
+                            text-align: center;
+                            z-index: 15;
+                            padding: 1rem;
+                        }
+                        .timeline-year-badge {
+                            font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif;
+                            color: #801039;
+                            font-size: 2rem;
+                            margin-bottom: 0.1rem;
+                            line-height: 1;
+                            text-transform: uppercase;
+                            letter-spacing: 2px;
+                            display: block;
+                            opacity: 1;
+                            transition: opacity 0.4s ease, transform 0.4s ease;
+                        }
+                        .timeline-desc-text {
+                            font-family: Arial, sans-serif;
+                            font-size: clamp(1.05rem, 2vw, 1.25rem);
+                            color: #333333;
+                            line-height: 1.6;
+                            margin: 0;
+                            opacity: 1;
+                            transition: opacity 0.4s ease, transform 0.4s ease;
+                        }
+                        .timeline-ver-mas {
+                            display: inline-flex !important;
+                            flex: none;
+                            max-width: max-content;
+                            margin-top: 0.8rem;
+                            padding: 0.5rem 1.8rem;
+                            font-size: 0.8rem;
+                            text-decoration: none !important;
+                            border-radius: 50px;
+                            /* Incorporamos las transiciones de aparición en JS sin romper el efecto Shiny */
+                            transition: opacity 0.4s ease, transform 0.4s ease, var(--transition) !important;
+                            transition-property: opacity, transform, --gradient-angle-offset, --gradient-percent, --gradient-shine !important;
+                        }
+                        .timeline-wheel {
+                            position: absolute;
+                            left: 50%;
+                            top: 900px; /* Ajustado para 1600px */
+                            width: 1600px;
+                            height: 1600px;
+                            transform: translate(-50%, -50%);
+                            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+                        }
+                        .timeline-dashed-circle {
+                            position: absolute;
+                            inset: 0;
+                            border-radius: 50%;
+                            border: 4px dashed #801039;
+                            pointer-events: none;
+                        }
+                        .timeline-btn {
+                            position: absolute;
+                            left: 50%;
+                            top: 50%;
+                            background: transparent;
+                            border: none;
+                            cursor: pointer;
+                            outline: none;
+                            padding: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            pointer-events: auto;
+                            z-index: 20;
+                        }
+                        .timeline-wrapper {
+                            position: relative;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+                        }
+                        .timeline-year-text {
+                            position: absolute;
+                            bottom: 25px;
+                            font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif;
+                            font-size: clamp(1.8rem, 3.5vw, 3rem);
+                            color: #666666;
+                            transition: all 0.4s ease;
+                            pointer-events: none;
+                            white-space: nowrap;
+                        }
+                        .timeline-dot {
+                            --shiny-cta-bg: #801039;
+                            --shiny-cta-highlight: #ffc300;
+                            --shiny-cta-highlight-subtle: #ffd659;
+                            
+                            width: 22px;
+                            height: 22px;
+                            border-radius: 50%;
+                            border: 2px solid transparent;
+                            background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+                                conic-gradient(
+                                    from var(--gradient-angle),
+                                    transparent 0%,
+                                    var(--shiny-cta-highlight) 10%,
+                                    var(--shiny-cta-highlight-subtle) 20%,
+                                    var(--shiny-cta-highlight) 30%,
+                                    transparent 40%
+                                ) border-box;
+                            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                            animation: gradient-angle 3s linear infinite;
+                            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+                            pointer-events: none;
+                            position: relative;
+                        }
+                        .timeline-dot.active-dot {
+                            --shiny-cta-bg: #ffc300;
+                            --shiny-cta-highlight: #ffffff;
+                            --shiny-cta-highlight-subtle: #fff9e6;
+                            box-shadow: 0 0 25px rgba(255, 195, 0, 0.8), inset 0 0 5px rgba(255, 255, 255, 0.8);
+                        }
+                        .timeline-title-container {
+                            margin-top: clamp(4rem, 8vw, 8.5rem); /* Controla cuánto baja toda la sección */
+                            margin-bottom: clamp(3rem, 6vw, 5rem); /* Separa el título del arco */
+                            width: 100%;
+                            position: relative;
+                            z-index: 20;
+                            text-align: center;
+                        }
+                        .timeline-title {
+                            font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif;
+                            font-weight: 900;
+                            font-size: clamp(3.5rem, 7vw, 6.5rem);
+                            line-height: 0.9;
+                            text-transform: uppercase;
+                            color: #801039;
+                            letter-spacing: -2px;
+                            margin: 0;
+                        }
+                        
+                        /* --- ESTILOS DEL POPUP (MODAL) --- */
+                        .timeline-modal-overlay {
+                            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+                            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                            z-index: 999999; display: flex; align-items: center; justify-content: center;
+                            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+                        }
+                        .timeline-modal-overlay.active { opacity: 1; pointer-events: auto; }
+                        .timeline-modal-content {
+                            background: linear-gradient(135deg, #801039, #4a051f);
+                            border: 2px solid rgba(255, 195, 0, 0.6); border-radius: 20px;
+                            padding: 4rem 3rem; width: 95%; max-width: 1100px; min-height: 65vh; position: relative;
+                            transform: scale(0.9) translateY(20px); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                            box-shadow: 0 25px 50px rgba(0,0,0,0.5), inset 0 0 40px rgba(255,195,0,0.1);
+                            color: #fff;
+                            max-height: 90vh;
+                            overflow-y: auto;
+                            display: flex; flex-direction: column; justify-content: center; align-items: center;
+                        }
+                        .timeline-modal-layout { display: flex; width: 100%; gap: 3rem; align-items: center; justify-content: center; text-align: left; }
+                        .timeline-modal-left { flex: 1; display: flex; justify-content: center; align-items: center; }
+                        .timeline-modal-right { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+                        .timeline-modal-left img { width: 100%; max-height: 60vh; object-fit: cover; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 2px solid rgba(255, 195, 0, 0.3); }
+                        .timeline-modal-overlay.active .timeline-modal-content { transform: scale(1) translateY(0); }
+                        .timeline-modal-close {
+                            position: absolute; top: 15px; right: 20px; background: transparent; border: none;
+                            color: #ffc300; font-size: 1.8rem; cursor: pointer; transition: transform 0.3s ease; outline: none; z-index: 10;
+                        }
+                        .timeline-modal-close:hover { transform: scale(1.2) rotate(90deg); color: #fff; }
+                        .timeline-modal-year {
+                            font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-size: 4rem;
+                            color: #ffc300; margin: 0 0 1.5rem 0; text-transform: uppercase; letter-spacing: 2px;
+                            text-shadow: 0 4px 10px rgba(0,0,0,0.5); line-height: 1;
+                        }
+                        .timeline-modal-text {
+                            font-family: Arial, sans-serif; font-size: 1.3rem; line-height: 1.8; color: rgba(255, 255, 255, 0.95); max-width: 900px;
+                        }
+                        .timeline-modal-text p { margin-bottom: 1rem; }
+                        .timeline-modal-text strong { color: #ffc300; }
+                        /* Scrollbar elegante para el modal */
+                        .timeline-modal-content::-webkit-scrollbar { width: 8px; }
+                        .timeline-modal-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; margin: 15px 0; }
+                        .timeline-modal-content::-webkit-scrollbar-thumb { background: rgba(255,195,0,0.5); border-radius: 10px; }
+                        .timeline-modal-content::-webkit-scrollbar-thumb:hover { background: rgba(255,195,0,0.8); }
+                        @media (max-width: 768px) {
+                            .timeline-section { height: 380px; margin-top: 1rem; }
+                            .timeline-desc-container { top: 58%; width: 95%; padding: 1rem; }
+                            .timeline-year-badge { font-size: 1.8rem; }
+                            .timeline-wheel { width: 1000px; height: 1000px; top: 600px; }
+                            .timeline-modal-layout { flex-direction: column; gap: 1.5rem; text-align: center !important; }
+                            .timeline-modal-right { align-items: center !important; }
+                            .timeline-modal-left img { max-height: 40vh; }
+                        }
+                    </style>
+
+                    <!-- ENVOLTURA PARA EL IMÁN (Calcula el alto total exacto incluyendo los 10px) -->
+                    <div id="quienes-somos-timeline" style="width: 100%; position: relative; padding: 10px 0;">
+                        <div class="timeline-title-container" data-aos="fade-up" data-aos-duration="1200">
+                            <h2 class="timeline-title">Una historia con fuerza</h2>
+                        </div>
+
+                        <div class="timeline-section" data-aos="zoom-in-up" data-aos-duration="1500" data-aos-delay="200">
+                            <div class="timeline-center-glow"></div>
+                            <div class="timeline-desc-container">
+                                <span id="timeline-year-badge" class="timeline-year-badge"></span>
+                                <p id="timeline-desc" class="timeline-desc-text"></p>
+                                <a href="javascript:void(0);" id="timeline-ver-mas" class="timeline-ver-mas shiny-pillar"><span>Ver más</span></a>
+                            </div>
+                            <div id="timeline-wheel" class="timeline-wheel">
+                                <div class="timeline-dashed-circle"></div>
+                                <div id="timeline-items" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- POPUP (MODAL) DE MÁS INFORMACIÓN           -->
+                    <!-- ========================================== -->
+                    <div id="timeline-modal" class="timeline-modal-overlay">
+                        <div class="timeline-modal-content">
+                            <button id="timeline-modal-close" class="timeline-modal-close">✖</button>
+                            <div class="timeline-modal-layout">
+                                <div id="timeline-modal-left" class="timeline-modal-left"></div>
+                                <div class="timeline-modal-right">
+                                    <h3 id="timeline-modal-year" class="timeline-modal-year"></h3>
+                                    <div id="timeline-modal-text" class="timeline-modal-text"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ========================================== -->
+                    <!-- FIN DE LA LÍNEA DE TIEMPO                  -->
+                    <!-- ========================================== -->
+                </div>
+                
+                <!-- Flechas de la Segunda Sección (Línea de Tiempo -> Servicios) -->
+                <a href="#motor-norte-section" class="mobile-arrows arr-left arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
+                <a href="#motor-norte-section" class="mobile-arrows arr-center arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
+                <a href="#motor-norte-section" class="mobile-arrows arr-right arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
+            </div>
+
+            <style>
+                /* --- TOP OPTION: Cajas de Cristal con Luz Reactiva (Todo Visible) --- */
+                #motor-norte-section {
+                    position: relative;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh; /* Altura exacta para que el imán clave perfecto en el centro del monitor */
+                    background: transparent !important;
+                    z-index: 10;
+                }
+                
+                .mn-container {
+                    display: flex;
+                    gap: 4rem;
+                    width: 92%;
+                    max-width: 1200px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                    perspective: 1200px; /* Necesario para el efecto 3D Parallax */
+                }
+
+                .mn-glass-card {
+                    flex: 1 1 400px;
+                    max-width: 550px;
+                    background: linear-gradient(145deg, rgba(128, 16, 57, 0.65) 0%, rgba(74, 5, 31, 0.85) 100%); /* Cristal Granate */
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border: 1px solid rgba(255, 195, 0, 0.25); /* Borde dorado reforzado */
+                    border-radius: 30px;
+                    padding: 4.5rem 3.5rem;
+                    position: relative;
+                    overflow: hidden;
+                    transition: transform 0.15s ease-out, box-shadow 0.4s ease, border-color 0.4s ease;
+                    box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05), inset 0 0 20px rgba(255,195,0,0.05);
+                    text-align: left;
+                    transform-style: preserve-3d; /* Permite que el contenido interior flote en 3D */
+                }
+                
+                /* Spotlight que sigue al ratón */
+                .mn-glass-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 195, 0, 0.25), transparent 45%);
+                    opacity: 0;
+                    transition: opacity 0.5s ease;
+                    z-index: 1;
+                    pointer-events: none;
+                }
+
+                .mn-glass-card:hover {
+                    border-color: rgba(255, 195, 0, 0.7);
+                    box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1), inset 0 0 30px rgba(255,195,0,0.2);
+                }
+                .mn-glass-card:hover::before {
+                    opacity: 1;
+                }
+
+                /* Marcas de Agua 01 y 02 gigantes */
+                .mn-watermark {
+                    position: absolute;
+                    bottom: -30px;
+                    right: -15px;
+                    font-family: 'Arial Black Web', 'Arial Black', sans-serif;
+                    font-size: 16rem;
+                    line-height: 1;
+                    color: rgba(255, 255, 255, 0.03);
+                    z-index: 0;
+                    pointer-events: none;
+                    transition: color 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+                }
+                .mn-glass-card:hover .mn-watermark {
+                    color: rgba(255, 195, 0, 0.06);
+                    transform: scale(1.05) translate(-10px, -10px);
+                }
+
+                .mn-content {
+                    position: relative;
+                    z-index: 2;
+                    transform: translateZ(40px); /* Flota por encima del fondo al girar en 3D */
+                }
+
+                .mn-icon-wrapper {
+                    width: 75px;
+                    height: 75px;
+                    background: rgba(15, 15, 15, 0.4); /* Fondo oscuro para contrastar con el granate */
+                    border: 2px solid rgba(255, 195, 0, 0.6);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 2.5rem;
+                    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+                    box-shadow: 0 10px 20px rgba(128, 16, 57, 0.3);
+                }
+                .mn-glass-card:hover .mn-icon-wrapper {
+                    transform: scale(1.15) rotate(10deg);
+                    background: #ffc300;
+                    border-color: #fff;
+                    box-shadow: 0 15px 30px rgba(255, 195, 0, 0.4);
+                }
+                .mn-icon-wrapper svg {
+                    width: 38px;
+                    height: 38px;
+                    fill: #ffc300;
+                    transition: fill 0.5s ease;
+                }
+                .mn-glass-card:hover .mn-icon-wrapper svg {
+                    fill: #801039;
+                }
+
+                .mn-title {
+                    font-family: 'Arial Black Web', 'Arial Black', sans-serif;
+                    font-size: 2.5rem;
+                    color: #fff;
+                    text-transform: uppercase;
+                    margin: 0;
+                    line-height: 1.1;
+                    text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+                }
+                .mn-subtitle {
+                    font-family: Arial, sans-serif;
+                    font-size: 1.15rem;
+                    color: #ffc300;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    letter-spacing: 3px;
+                    display: block;
+                    margin-bottom: 1.5rem;
+                }
+                .mn-desc {
+                    font-family: Arial, sans-serif;
+                    font-size: 1.2rem;
+                    color: rgba(255, 255, 255, 0.85);
+                    line-height: 1.7;
+                    margin: 0;
+                }
+
+                @media (max-width: 992px) {
+                    #motor-norte-section { height: auto; min-height: 100vh; padding: 6rem 0; scroll-snap-align: start; }
+                    .mn-container { gap: 2.5rem; }
+                    .mn-glass-card { padding: 3.5rem 2.5rem; }
+                    .mn-watermark { font-size: 12rem; right: -10px; bottom: -20px; }
+                    .mn-title { font-size: 2.1rem; }
+                }
+            </style>
+
+            <div id="motor-norte-section" class="container-fluid" style="position: relative;">
+                <div class="mn-container">
+
+                    <!-- Caja 1: Misión -->
+                    <div class="mn-glass-card hover-glow" data-aos="fade-up" data-aos-duration="1200">
+                        <div class="mn-watermark">01</div>
+                        <div class="mn-content">
+                            <div class="mn-icon-wrapper">
+                                <!-- Engranaje -->
+                                <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                            </div>
+                            <h3 class="mn-title">El Motor</h3>
+                            <span class="mn-subtitle">Nuestra Misión</span>
+                            <p class="mn-desc">Trabajar incansablemente por el desarrollo integral de Tacna, impulsando obras reales, gestionando con transparencia y escuchando a cada ciudadano para construir una región con oportunidades para todos.</p>
+                        </div>
+                    </div>
+
+                    <!-- Caja 2: Visión -->
+                    <div class="mn-glass-card hover-glow" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="200">
+                        <div class="mn-watermark">02</div>
+                        <div class="mn-content">
+                            <div class="mn-icon-wrapper">
+                                <!-- Brújula -->
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2.5-4.5l8-3.5-3.5-8-8 3.5 3.5 8zM12 10.9c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z"/></svg>
+                            </div>
+                            <h3 class="mn-title">El Norte</h3>
+                            <span class="mn-subtitle">Nuestra Visión</span>
+                            <p class="mn-desc">Ser la fuerza política referente en el sur del Perú, reconocida por transformar la gestión pública en progreso tangible, garantizando un futuro próspero, moderno y seguro para las próximas generaciones.</p>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <script>
+                    // Script para el destello dinámico (Spotlight) y Tilt 3D
+                    (function initGlassGlow() {
+                        const attachGlowEffect = () => {
+                            const cards = document.querySelectorAll('.hover-glow');
+                            cards.forEach(card => {
+                                if(card.dataset.glowAttached) return;
+                                card.dataset.glowAttached = "true";
+                                
+                                card.addEventListener('mousemove', e => {
+                                    const rect = card.getBoundingClientRect();
+                                    const x = e.clientX - rect.left;
+                                    const y = e.clientY - rect.top;
+                                    card.style.setProperty('--mouse-x', `${x}px`);
+                                    card.style.setProperty('--mouse-y', `${y}px`);
+                                    
+                                    // Efecto de inclinación 3D (Tilt)
+                                    if (window.innerWidth > 992) {
+                                        const centerX = rect.width / 2;
+                                        const centerY = rect.height / 2;
+                                        const rotateX = ((y - centerY) / centerY) * -10; 
+                                        const rotateY = ((x - centerX) / centerX) * 10;
+                                        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                                    }
+                                });
+                                
+                                card.addEventListener('mouseleave', () => {
+                                    if (window.innerWidth > 992) {
+                                        card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                                    }
+                                });
+                            });
+                        };
+                        attachGlowEffect();
+                        setInterval(attachGlowEffect, 1500); // Para reenganchar en caso de usar Barba.js
+                    })();
+                </script>
+
+                <!-- Script de Imán Inteligente JS (Compatible con smoothscroll.js) -->
+                <script>
+                    (function initMagnet() {
+                        let hasSnapped = false; // Candado para dejar salir al usuario
+                        
+                        window.addEventListener('scroll', () => {
+                            if (window.innerWidth <= 992) return; // Desactivado en móvil
+                            
+                            const section = document.getElementById('motor-norte-section');
+                            if (!section) return;
+                            
+                            const rect = section.getBoundingClientRect();
+                            const vh = window.innerHeight;
+                            
+                            // 1. REARMAR: Resetear el imán si la sección se aleja del centro (más del 50%)
+                            if (rect.top > vh * 0.5 || rect.top < -vh * 0.5) {
+                                hasSnapped = false;
+                                return;
+                            }
+                            
+                            // 2. ATRAPAR: Si entra al 35% del centro y no ha sido atrapada en este pase
+                            if (!hasSnapped && rect.top > -vh * 0.35 && rect.top < vh * 0.35) {
+                                hasSnapped = true; // Cierra el candado para dejar que el usuario salga libremente después
+                                
+                                const targetScroll = window.scrollY + rect.top;
+                                
+                                // Usar el smoothscroll interno para no pelear con él y deslizar suavemente
+                                if (window.scroller && typeof window.scroller.setPostion === 'function') {
+                                    window.scroller.setPostion(targetScroll);
+                                } else {
+                                    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+                                }
+                            }
+                        }, { passive: true });
+                    })();
+                </script>
+            </div>
+            
+            <footer>
+                <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+                <div id="legal-notice">©2024 Fuerza Tacna - Todos los derechos reservados</div>
+            </footer>
+        </main>
+
+        <!-- ========================================== -->
+        <!-- REPRODUCTOR DE MÚSICA WOW (Flotante)       -->
+        <!-- ========================================== -->
+        
+        <!-- Notificación Inteligente si se bloquea el audio -->
+        <div id="audio-toast">
+            <img src="assets/img/LUCHO%20MUSICA.svg" alt="Activar música" class="lucho-toast-img">
+            <span>SOBRINO,<br>ESCUCHA<br>NUESTRA MÚSICA</span>
+        </div>
+
+        <div id="premium-music-player" class="music-paused">
+            <audio id="bg-audio"></audio>
+            
+            <!-- Botón circular (Estado colapsado) -->
+            <div class="player-toggle-btn" id="player-toggle-btn">
+                <div class="play-icon"></div>
+                <div class="equalizer">
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                </div>
+            </div>
+            
+            <!-- Controles completos (Estado expandido) -->
+            <div class="player-content">
+                <div class="track-info-container">
+                    <svg class="music-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                    <div class="player-info">
+                        <div class="scrolling-text">
+                            <span id="track-name-display">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls-container">
+                    <div class="main-controls">
+                        <button id="prev-btn" class="ctrl-btn" title="Anterior"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                        <button id="main-play-btn" class="ctrl-btn play-btn" title="Play/Pausa"><svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
+                        <button id="next-btn" class="ctrl-btn" title="Siguiente"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+                    </div>
+                    <div class="volume-container" title="Volumen">
+                        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.35">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            /* Estilos del Reproductor Premium V2 */
+            #premium-music-player {
+                position: fixed;
+                bottom: 0.8rem;
+                left: 0.8rem;
+                z-index: 9000;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                background: rgba(15, 15, 15, 0.7);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 195, 0, 0.2);
+                border-radius: 40px;
+                padding: 4px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+                width: 40px; /* Más Pequeño y esquinado */
+                height: 40px;
+                overflow: hidden;
+                transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            }
+            
+            #premium-music-player:hover,
+            #premium-music-player.force-expand {
+                width: 210px;
+                height: 72px;
+                border-radius: 18px;
+                background: rgba(128, 16, 57, 0.95);
+                border-color: rgba(255, 195, 0, 0.6);
+                box-shadow: 0 15px 35px rgba(128,16,57,0.4), 0 0 20px rgba(255,195,0,0.2);
+                padding: 8px 12px;
+            }
+        
+            .player-toggle-btn {
+                position: absolute;
+                top: 4px;
+                left: 4px;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #ffc300, #d4a000);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                z-index: 2;
+                transition: all 0.3s ease;
+            }
+        
+            #premium-music-player:hover .player-toggle-btn,
+            #premium-music-player.force-expand .player-toggle-btn {
+                opacity: 0;
+                pointer-events: none;
+                transform: scale(0.5);
+            }
+        
+            .play-icon {
+                width: 0; height: 0;
+                border-style: solid;
+                border-width: 5px 0 5px 8px;
+                border-color: transparent transparent transparent #801039;
+                margin-left: 2px;
+                transition: opacity 0.3s ease;
+            }
+            .equalizer {
+                display: none; align-items: flex-end; justify-content: center; gap: 2px; height: 12px;
+            }
+            .eq-bar {
+                width: 2px; background: #801039; border-radius: 2px; animation: eq-bounce 0.8s infinite alternate ease-in-out;
+            }
+            .eq-bar:nth-child(1) { height: 100%; animation-delay: 0.1s; }
+            .eq-bar:nth-child(2) { height: 60%; animation-delay: 0.3s; }
+            .eq-bar:nth-child(3) { height: 80%; animation-delay: 0.0s; }
+            .eq-bar:nth-child(4) { height: 40%; animation-delay: 0.2s; }
+            @keyframes eq-bounce { 0% { height: 20%; } 100% { height: 100%; } }
+        
+            .music-playing .play-icon { display: none; }
+            .music-playing .equalizer { display: flex; }
+        
+            .player-content {
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                justify-content: space-between;
+            }
+            #premium-music-player:hover .player-content,
+            #premium-music-player.force-expand .player-content {
+                opacity: 1;
+                pointer-events: auto;
+                transition-delay: 0.1s;
+            }
+        
+            .track-info-container {
+                display: flex; align-items: center; overflow: hidden; margin-bottom: 4px; margin-top: 2px;
+            }
+            .music-icon { width: 16px; height: 16px; fill: #ffc300; margin-right: 8px; flex-shrink: 0; }
+            .player-info {
+                flex-grow: 1; overflow: hidden;
+                mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+            }
+            .scrolling-text {
+                display: inline-block;
+                white-space: nowrap;
+                color: #fff;
+                font-family: Arial, sans-serif;
+                font-size: 0.75rem;
+                font-weight: bold;
+            }
+            .music-playing .scrolling-text {
+                animation: scrollText 12s linear infinite;
+            }
+            @keyframes scrollText { 0% { transform: translateX(10%); } 100% { transform: translateX(-50%); } }
+        
+            .controls-container { display: flex; align-items: center; justify-content: space-between; }
+            .main-controls { display: flex; align-items: center; gap: 12px; }
+            .ctrl-btn { background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; outline: none; }
+            .ctrl-btn svg { width: 18px; height: 18px; fill: #fff; transition: fill 0.2s ease, transform 0.2s; }
+            .ctrl-btn:hover svg { fill: #ffc300; transform: scale(1.15); }
+            .ctrl-btn.play-btn svg { width: 24px; height: 24px; fill: #ffc300; }
+            .ctrl-btn.play-btn:hover svg { fill: #fff; }
+        
+            /* Estilos de la Notificación Toast */
+            #audio-toast {
+                position: fixed;
+                bottom: 1.5rem; /* Un poco más arriba, pero aún detrás */
+                left: 0.2rem; /* Más a la izquierda */
+                background: transparent;
+                z-index: 8999; /* El reproductor tiene 9000, así que esto lo pone detrás */
+                display: flex;
+                flex-direction: row; /* Imagen y texto al costado */
+                align-items: center; /* Centrado vertical para 3 líneas */
+                gap: 8px;
+                transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(10px);
+            }
+            #audio-toast.show-toast {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            #audio-toast .lucho-toast-img {
+                width: 70px; /* Tamaño del dibujo */
+                height: auto;
+                animation: toast-lucho-bounce 1.5s infinite ease-in-out;
+                filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
+                /* Desvanecimiento en la parte inferior */
+                mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+            }
+            @keyframes toast-lucho-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+            #audio-toast span {
+                color: #000;
+                font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive; /* Letra a mano */
+                font-size: 0.65rem; /* Texto aún más pequeño */
+                font-weight: bold;
+                text-shadow: 1px 1px 0 rgba(255,255,255,0.9), -1px -1px 0 rgba(255,255,255,0.9), 1px -1px 0 rgba(255,255,255,0.9), -1px 1px 0 rgba(255,255,255,0.9);
+                line-height: 1.2;
+                margin-bottom: 0;
+                text-align: center;
+            }
+
+            .volume-container { display: flex; align-items: center; gap: 6px; width: 60px; }
+            .volume-container svg { width: 15px; height: 15px; fill: #fff; flex-shrink: 0; }
+            .volume-slider { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; outline: none; cursor: pointer; }
+            .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ffc300; cursor: pointer; transition: transform 0.2s; }
+            .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        
+            @media (max-width: 768px) {
+                #premium-music-player { bottom: 1rem; left: 1rem; }
+                #premium-music-player:hover, #premium-music-player.force-expand { width: 210px; }
+                .volume-container { width: 60px; }
+            }
+        </style>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if(window.musicPlayerInit) return;
+                window.musicPlayerInit = true;
+
+                // Aquí puedes agregar más canciones duplicando la línea y cambiando el título/ruta
+                const playlist = [
+                    { title: "Balada para un gordo - Juan y Juan", src: "assets/MUSICA/BALADA%20PARA%20UN%20GORDO%20JUAN%20Y%20JUAN%201970.mp3" },
+                    { title: "El Tacneño - Himno", src: "assets/MUSICA/BALADA%20PARA%20UN%20GORDO%20JUAN%20Y%20JUAN%201970.mp3" } // <- Ejemplo (Puedes cambiar la ruta a otra canción)
+                ];
+                let currentTrack = 0;
+
+                const playerWidget = document.getElementById('premium-music-player');
+                const bgAudio = document.getElementById('bg-audio');
+                const toggleBtn = document.getElementById('player-toggle-btn');
+                const mainPlayBtn = document.getElementById('main-play-btn');
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+                const volSlider = document.getElementById('volume-slider');
+                const trackDisplay = document.getElementById('track-name-display');
+                const iconPlay = document.getElementById('icon-play');
+                const iconPause = document.getElementById('icon-pause');
+                const audioToast = document.getElementById('audio-toast');
+                
+                const togglePlay = () => {
+                    if (bgAudio.paused) {
+                        bgAudio.play();
+                        playerWidget.classList.remove('music-paused');
+                        playerWidget.classList.add('music-playing');
+                        iconPlay.style.display = 'none';
+                        iconPause.style.display = 'block';
+                    } else {
+                        bgAudio.pause();
+                        playerWidget.classList.remove('music-playing');
+                        playerWidget.classList.add('music-paused');
+                        iconPlay.style.display = 'block';
+                        iconPause.style.display = 'none';
+                    }
+                };
+
+                const attemptAutoplay = () => {
+                    const playPromise = bgAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            playerWidget.classList.remove('music-paused');
+                            playerWidget.classList.add('music-playing');
+                            iconPlay.style.display = 'none';
+                            iconPause.style.display = 'block';
+                        }).catch(err => {
+                            // Mostrar notificación visual al usuario para pedir su acción
+                            if (audioToast) {
+                                audioToast.classList.add('show-toast');
+                            }
+                        });
+                    }
+                };
+
+                if(playerWidget && bgAudio) {
+                    const loadTrack = (index, forcePlay = false) => {
+                        bgAudio.src = playlist[index].src;
+                        trackDisplay.innerHTML = `${playlist[index].title} &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; ${playlist[index].title}`;
+                        if(playerWidget.classList.contains('music-playing') || forcePlay) attemptAutoplay();
+                    };
+
+                    bgAudio.volume = volSlider.value;
+                    loadTrack(currentTrack, false); // False evita el autoplay al inicio
+
+                    // Evitar que el panel se cierre al arrastrar el volumen
+                    volSlider.addEventListener('mousedown', () => playerWidget.classList.add('force-expand'));
+                    volSlider.addEventListener('touchstart', () => playerWidget.classList.add('force-expand'), {passive: true});
+                    document.addEventListener('mouseup', () => playerWidget.classList.remove('force-expand'));
+                    document.addEventListener('touchend', () => playerWidget.classList.remove('force-expand'), {passive: true});
+
+                    volSlider.addEventListener('input', (e) => bgAudio.volume = e.target.value);
+
+                    toggleBtn.addEventListener('click', togglePlay);
+                    mainPlayBtn.addEventListener('click', togglePlay);
+
+                    nextBtn.addEventListener('click', () => {
+                        currentTrack = (currentTrack + 1) % playlist.length;
+                        loadTrack(currentTrack);
+                        if(bgAudio.paused) togglePlay();
+                    });
+
+                    prevBtn.addEventListener('click', () => {
+                        currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
+                        loadTrack(currentTrack);
+                        if(bgAudio.paused) togglePlay();
+                    });
+
+                    bgAudio.addEventListener('ended', () => {
+                        currentTrack = (currentTrack + 1) % playlist.length;
+                        loadTrack(currentTrack);
+                        bgAudio.play();
+                    });
+                }
+            });
+        </script>
+
+        <!-- Audio para el efecto de sable de luz -->
+        <audio id="saber-sound" src="assets/img/SONIDO%20SABLE.mp3" preload="auto"></audio>
+
+        <script>
+            (function() {
+                function attachSaberSoundEvents() {
+                    const sumateMenuItem = document.getElementById('sumate-menu-item');
+                    const saberSound = document.getElementById('saber-sound');
+
+                    if (sumateMenuItem && saberSound) {
+                        if (sumateMenuItem.dataset.soundAttached) return;
+
+                        sumateMenuItem.addEventListener('mouseenter', () => {
+                            saberSound.volume = 0.8;
+                            saberSound.currentTime = 0;
+                            saberSound.play().catch(error => {});
+                        });
+
+                        sumateMenuItem.addEventListener('mouseleave', () => {
+                            saberSound.pause();
+                            saberSound.currentTime = 0;
+                        });
+
+                        sumateMenuItem.dataset.soundAttached = 'true';
+                    }
+                }
+
+                function setupAudioUnlock() {
+                    if (window.isFuerzaTacnaAudioUnlocked) return;
+                    const saberSound = document.getElementById('saber-sound');
+                    if (saberSound) {
+                        const unlocker = () => {
+                            saberSound.play().catch(() => {});
+                            saberSound.pause();
+                        };
+                        ['click', 'touchstart', 'keydown'].forEach(evt => {
+                            document.addEventListener(evt, unlocker, { once: true });
+                        });
+                        window.isFuerzaTacnaAudioUnlocked = true;
+                    }
+                }
+
+                function initializePage() {
+                    setupAudioUnlock();
+                    attachSaberSoundEvents();
+                    if (typeof AOS !== 'undefined') AOS.init();
+                }
+
+                document.addEventListener('DOMContentLoaded', initializePage);
+                
+                // Parche para Barba.js: Asegura que el evento de sonido se aplique tras navegar
+                setInterval(attachSaberSoundEvents, 500);
+            })();
+        </script>
+        <!-- ========================================== -->
+
+    </body>
+    
+    <script type="text/javascript" src="assets/js/button.js"></script>
+    <script type="text/javascript" src="assets/js/cursor.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="assets/js/main.js?v=115"></script>
+
+<!-- Mirrored from le-lab.io/drone-fpv by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:07 GMT -->
+</html>

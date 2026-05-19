@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- Mirrored from le-lab.io/studio.php by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:06 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head>
+        
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Le Lab est un studio de création basé à Bordeaux dédié à la production de contenus audiovisuels, de prises de vues aériennes, de drone FPV et de design.">
+        <title>FUERZA TACNA</title>
+        <link rel="icon" type="image/png" href="assets/img/favicon.png">
+        <link rel="stylesheet" href="assets/css/main.css">
+        <link rel="stylesheet" href="assets/css/button.css">
+        <link rel="stylesheet" href="assets/css/mobile-menu.css">
+        <link rel="stylesheet" href="assets/css/responsive.css">
+        <link rel="stylesheet" type="text/css" href="../unpkg.com/aos%402.3.1/dist/aos.css">
+        <link rel="stylesheet" type="text/css" href="assets/css/fonts.css">
+        <link rel="stylesheet" href="../stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
+
+        <script type="text/javascript" src="assets/js/smoothscroll.js"></script>
+        <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+        <script type="text/javascript" src="form.html"></script>
+        <script type="text/javascript" src="../unpkg.com/aos%402.3.1/dist/aos.js"></script>
+
+        <style>
+            .menu-links a, #hero-header ul li a {
+                font-family: "Arial Black", Arial, sans-serif !important;
+            }
+            /* --- Backgrounds & Fills --- */
+            .magnetic .wrap .span {
+                background-color: #25D366 !important;
+            }
+            .mouse-in,
+            #services h3::before,
+            #services .title-client::before,
+            #intro button:hover,
+            #video-section button:hover,
+            #drone-section button:hover,
+            #design-section button:hover,
+            .references-section button:hover,
+            #button-center:hover {
+                background-color: #ffc300 !important;
+            }
+
+            /* --- Text Colors --- */
+            .scroll-indication,
+            .small-title,
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center,
+            .menu-links a:hover,
+            .menu-links a.active,
+            .hyperlinks {
+                color: #ffc300 !important;
+            }
+
+            /* --- Border Colors --- */
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center {
+                border-color: #ffc300 !important;
+            }
+
+            /* --- Header Fijo Transparente --- */
+            #hero-header {
+                position: fixed;
+                top: 15px; /* Espacio desde el techo */
+                left: 2% !important;
+                width: 96% !important;
+                box-sizing: border-box !important;
+                z-index: 1000;
+                background: transparent; /* Contenedor principal sin fondo */
+            }
+            @media (min-width: 992px) {
+                #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; }
+                #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; }
+                #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; }
+            }
+
+            /* --- Píldora de Cristal (Solo el Menú Central) --- */
+            #hero-header ul {
+                background-color: rgba(255, 195, 0, 0.4); /* Color de fondo de la página (#FFC300) */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 50px; /* Forma de píldora redonda */
+                padding: 15px 24px; /* 5px más de espacio arriba y abajo */
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+        </style>
+
+    </head>
+
+    <body data-barba="wrapper" onload="init()">
+        <div class="cursor-follower"></div>
+        <div class="load-container"><div class="loading-screen"></div></div>
+            
+        <main data-barba="container" data-barba-namespace="home-section" class="animate-this">
+            
+                  
+<input type="checkbox" id="openmenu" class="hamburger-checkbox">
+<div class="hamburger-icon">
+  <label for="openmenu" id="hamburger-label">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>    
+</div>
+<div class="menu-pane"> 
+  <nav>
+    <ul class="menu-links">
+      <li><a href="index.html" class="">INICIO</a></li>
+      <li><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li> 
+      <li><a href="candidatos.html" class="">CANDIDATOS</a></li>
+      <li><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li>
+      <li><a href="sumate.html" class="active">SÚMATE A LA FUERZA</a></li>
+      <li><a href="contacto.html" class="">CONTACTO</a></li>                          
+    </ul>
+    <ul class="menu-social-icons">
+        <a href="https://www.linkedin.com/company/le-lab-studio"><li class="icon-linkedin social-icons"></li></a>
+        <a href="https://www.instagram.com/le.lab.studio"><li class="icon-instagram social-icons"></li></a>
+        <a href="https://dribbble.com/thomascuvelier"><li class="icon-dribbble social-icons"></li></a>
+        <a href="https://vimeo.com/lelabstudio"><li class="icon-vimeo social-icons"></li></a>  
+        <a href="https://www.youtube.com/channel/UCkJbccSzw0pSNr47r4yXIOA"><li class="icon-youtube social-icons"></li></a> 
+    </ul>
+    <div class="city">Bordeaux, FR</div>
+  </nav>
+</div>
+
+            
+            <div>
+                <header id="hero-header">
+
+                    <div class="logo-container">
+                        <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+                    </div>
+                    
+                    
+<ul>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="index.html" class="">INICIO</a></li>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="800"><a href="candidatos.html" class="">CANDIDATOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="1000"><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li> 
+    <li data-aos="fade-down" data-aos-duration="1200" id="sumate-menu-item">
+        <a href="sumate.html" class="active">SÚMATE<br>A LA FUERZA</a>
+        <div class="lucho-fuerza-peek">
+            <img src="assets/img/LUCHO%20FUERZA.png" alt="Lucho te invita a sumarte">
+        </div>
+    </li> 
+    <li data-aos="fade-down" data-aos-duration="1400"><a href="contacto.html" class="">CONTACTO</a></li>
+</ul>
+
+
+                    <div class="button-container">
+                        <a href="https://chat.whatsapp.com/InyGU3GIjEiHbO3Ms8lcoa" target="_blank">
+                            <svg class="circular-text" viewBox="0 0 100 100">
+                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                                <text>
+                                    <textPath href="#circlePath" startOffset="0%">
+                                        ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; 
+                                    </textPath>
+                                </text>
+                            </svg>
+                            <div class="magnetic">
+                                <div class="wrap">
+                                    <div class="span span-1 go"></div>
+                                    <div class="span span-2 go"></div>
+                                    <div class="span span-3 go"></div>
+                                    <div class="span span-4 go"></div>
+                                    <img src="assets/img/hand.png">
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </header>
+                <div id="hero-bottom">
+                    <div class="city">Bordeaux, FR</div>
+                    <ul>
+                        <a href="https://www.linkedin.com/company/le-lab-studio"><li class="icon-linkedin social-icons"></li></a>
+                        <a href="https://www.instagram.com/le.lab.studio"><li class="icon-instagram social-icons"></li></a>
+                        <a href="https://dribbble.com/thomascuvelier"><li class="icon-dribbble social-icons"></li></a>
+                        <a href="https://vimeo.com/lelabstudio"><li class="icon-vimeo social-icons"></li></a>
+                        <a href="https://www.youtube.com/channel/UCkJbccSzw0pSNr47r4yXIOA"><li class="icon-youtube social-icons"></li></a> 
+                    
+                    </ul>
+                </div>
+            </div>
+            <div id="studio-section" class="container-fluid ">
+
+            <h1 class="big-title center">Studio</h1>
+
+
+           <div id="services" class="container">
+
+                <div class="card-deck">
+                    <div class="card" data-aos="fade-up" data-aos-duration="2000">
+                        <h2 class="title-client">Le Lab, <br>c'est quoi ?</h2>
+                        <p class="title-text">Après une carrière en tant que <strong>Directeur Artistique</strong>, <strong>Thomas Cuvelier</strong> décide de créer sa propre entreprise en 2019 avec comme coeur d’activité le <strong>design et la création audiovisuelle (vidéo)</strong>.
+                        </br></br>
+                        Cette idée d'allier design à la vidéo a donné naissance au nom <strong>"Le Lab"</strong>. À la manière d'un laboratoire, on mélange deux univers pour en créer un nouveau.
+                        </br></br>
+                        Les opportunités se sont succédées et <strong>depuis 2020</strong>, Le Lab s'est doté d'une nouvelle compétence : <strong>la maîtrise des airs</strong>. Suite à une formation et l'obtention d'un <strong>certificat officiel délivré par la DGAC</strong>, Le Lab a obtenu le titre de <strong>télépilote agréé</strong> et peut réaliser tout type de plans aériens en toute légalité et sécurité.
+                        </br></br>
+                        Aujourd'hui, Le Lab c'est un interlocuteur, <strong>une personne de confiance</strong> qui réalise vos missions à Bordeaux comme ailleurs avec du <strong>matériel professionnel, du savoir-faire, des compétences fortes</strong> et bien entendu de la bienveillance.</p>
+                    </div>
+                    <div class="card" data-aos="fade-up" data-aos-duration="1200">
+                        <img class="card-img-top shadow" src="assets/img/thomas-video.jpg">                       
+                    </div> 
+                </div>
+
+                <div class="card-deck">
+                    <div class="card" data-aos="fade-up" data-aos-duration="2000">
+                        <img class="card-img-top shadow" src="assets/img/thomas-fpv.jpg">                      
+                    </div>
+                    <div class="card" data-aos="fade-up" data-aos-duration="1000">
+                        <h2 class="title-client">FPV drone <br>- First Person View</h2>
+                        <p class="title-text"><strong>Vous vous demandez ce qu'est le FPV ?</strong> 
+                        </br></br>
+                        C'est simple, imaginez un drone qui est capable de suivre une moto, une voiture, un bateau et même un planeur lancé à <strong>pleine vitesse </strong>. Imaginez un drone qui peut se faufiler dans une maison, des bureaux ou des chantiers. Les possibilités sont <strong>infinies</strong>.
+                        </br></br>
+                        <strong>Le FPV (First Person View)</strong> offre une approche visuelle complétement <strong>révolutionnaire</strong>. Pour mieux comprendre, le drone traditionnel s'utilise pour réaliser des plans cinématographiques. Le FPV, lui, réalise des plans <strong>dynamiques en immersion totale</strong>.
+                        </br></br>
+                        Dans le cadre d'un film, les deux types de drones apportent leurs spécificités, ils sont <strong>complémentaires</strong>. Mais <strong>attention</strong>, le FPV n'est pas une pratique que l'on peut improviser. Cela demande beaucoup de <strong>travail, de technique et de précision</strong>. 
+                        </br></br>
+                        Mais heuresuement, <strong>Le Lab maîtrise les deux pratiques</strong> 🚀.</p>
+                    </div>     
+                </div>
+
+                <div class="card-deck">
+                    <div class="card" data-aos="fade-up" data-aos-duration="2000">
+                        <h2 class="title-client">Le studio, <br>Bordeaux centre</h2>
+                        <p class="title-text"><strong>À partir de septembre 2023</strong>, Le Lab évolue et occupera ses propres bureaux situés à <strong>Bordeaux, dans le quartier Darwin</strong>, à deux pas du pont Chaban Delmas. Il sera idéalement situé et pourra accueillir <strong>un espace de travail commun, un atelier drone et un studio vidéo/photo</strong> de 30 m².
+                        </br></br>
+                        Le Lab, c'est également <strong>le partage</strong>. Dès son ouverture, <strong>5 bureaux en coworking</strong> seront proposés à des autoentrepreneurs travaillant dans le secteur de la <strong>communication, de la technologie ou de l'audiovisuel</strong>. L'intérêt est de pouvoir échanger nos compétences, s'aider mutuellement et évoluer ensemble tout en gardant chacun son activité.
+                        </br></br>
+                       Si cela vous intéresse, n'hésitez pas à contacter <strong><a class="hyperlinks" href="mailto:thomas@le-lab.io">Le Lab</a>.</strong></p>      
+                    </div>
+                    <div class="card" data-aos="fade-up" data-aos-duration="1000">
+                        <img class="card-img-top shadow" src="assets/img/map.jpg">                        
+                    </div>
+                    
+                </div>
+           
+            </div>
+            
+
+            
+           
+             <footer>
+    <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+    <div id="legal-notice">©2023 Le Lab - Thomas Cuvelier - Tous droits réservés</div>
+</footer>        </main>
+
+  <div id="awwwards" style="position: fixed; z-index: 999; transform: translateY(-50%); top: 50%; right: 0"><a href="https://www.awwwards.com/sites/le-lab" target="_blank"><svg width="53.08" height="171.358"><path class="js-color-bg" fill="black" d="M0 0h53.08v171.358H0z"></path><g class="js-color-text" fill="white"><path d="M20.047 153.665v-1.9h3.888v-4.093h-3.888v-1.9h10.231v1.9h-4.59v4.093h4.59v1.9zM29.898 142.236c-.331.565-.784.997-1.359 1.294s-1.222.446-1.944.446c-.721 0-1.369-.149-1.943-.446a3.316 3.316 0 0 1-1.36-1.294c-.331-.564-.497-1.232-.497-2.002s.166-1.438.497-2.002a3.316 3.316 0 0 1 1.36-1.294c.574-.297 1.223-.445 1.943-.445.723 0 1.369.148 1.944.445a3.307 3.307 0 0 1 1.359 1.294c.331.564.497 1.232.497 2.002s-.166 1.438-.497 2.002m-1.703-3.347c-.435-.33-.967-.496-1.601-.496-.633 0-1.166.166-1.601.496-.433.332-.649.78-.649 1.346 0 .564.217 1.013.649 1.345.435.331.968.497 1.601.497.634 0 1.166-.166 1.601-.497.435-.332.649-.78.649-1.345.001-.566-.214-1.014-.649-1.346M22.911 134.852v-1.813h1.186a3.335 3.335 0 0 1-.951-1.009 2.423 2.423 0 0 1-.352-1.271c0-.682.19-1.229.57-1.645.381-.413.932-.621 1.652-.621h5.262v1.812h-4.721c-.419 0-.727.096-.921.285-.195.19-.292.447-.292.769 0 .302.115.58.35.833.234.254.577.458 1.03.613.454.156.993.234 1.616.234h2.938v1.813h-7.367zM29.898 125.136a3.314 3.314 0 0 1-1.359 1.294c-.575.297-1.222.445-1.944.445-.721 0-1.369-.148-1.943-.445a3.322 3.322 0 0 1-1.36-1.294c-.331-.565-.497-1.232-.497-2.002 0-.771.166-1.438.497-2.003a3.313 3.313 0 0 1 1.36-1.293c.574-.297 1.223-.446 1.943-.446.723 0 1.369.149 1.944.446s1.028.728 1.359 1.293.497 1.232.497 2.003c.001.769-.166 1.436-.497 2.002m-1.703-3.347c-.435-.331-.967-.497-1.601-.497-.633 0-1.166.166-1.601.497-.433.331-.649.778-.649 1.345 0 .564.217 1.013.649 1.344.435.332.968.498 1.601.498.634 0 1.166-.166 1.601-.498.435-.331.649-.779.649-1.344.001-.567-.214-1.014-.649-1.345M22.911 117.75v-1.812h1.199c-.419-.265-.742-.586-.972-.966s-.345-.784-.345-1.213c0-.272.05-.569.146-.892l1.682.336a1.429 1.429 0 0 0-.205.76c0 .576.261 1.048.783 1.418.521.37 1.342.557 2.461.557h2.617v1.812h-7.366zM29.812 111.252c-.391.511-.857.851-1.403 1.016l-.776-1.446c.381-.138.68-.329.893-.577.215-.249.321-.544.321-.885a1.2 1.2 0 0 0-.168-.658c-.112-.175-.294-.263-.548-.263-.225 0-.406.105-.548.313-.142.21-.291.534-.446.973-.019.068-.058.17-.117.307-.224.565-.506 1.004-.848 1.315-.34.313-.779.467-1.314.467-.381 0-.727-.102-1.039-.306a2.185 2.185 0 0 1-.744-.84 2.554 2.554 0 0 1-.279-1.207c0-.497.105-.949.314-1.359.211-.408.506-.725.886-.949l.993 1.082c-.43.292-.644.686-.644 1.184a.84.84 0 0 0 .154.504.471.471 0 0 0 .401.212c.176 0 .338-.103.49-.307.15-.205.334-.604.547-1.199.205-.564.474-1.001.805-1.308.332-.308.756-.46 1.271-.46.721 0 1.299.229 1.732.687s.65 1.057.65 1.797c.001.759-.194 1.396-.583 1.907M35.481 17.006l-4.782 14.969h-3.266l-2.584-9.682-2.584 9.682h-3.268l-4.782-14.969h3.713l2.673 10.276 2.525-10.276h3.445l2.524 10.276 2.674-10.276zM37.978 27.163c1.426 0 2.496 1.068 2.496 2.495 0 1.425-1.07 2.495-2.496 2.495-1.425 0-2.494-1.07-2.494-2.495-.001-1.427 1.069-2.495 2.494-2.495"></path></g></svg></a></div>
+    </body>
+    
+    <script type="text/javascript" src="assets/js/button.js"></script>
+    <script type="text/javascript" src="assets/js/cursor.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="assets/js/main.js"></script>
+
+<!-- Mirrored from le-lab.io/studio.php by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:07 GMT -->
+</html>

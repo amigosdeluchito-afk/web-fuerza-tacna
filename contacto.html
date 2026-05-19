@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contacto - FUERZA TACNA</title>
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <link rel="stylesheet" href="assets/css/main.css?v=110">
+    <link rel="stylesheet" href="assets/css/button.css?v=110">
+    <link rel="stylesheet" href="assets/css/mobile-menu.css?v=110">
+    <link rel="stylesheet" href="assets/css/responsive.css?v=110">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/fonts.css?v=110">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+    <script type="text/javascript" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+</head>
+
+<body data-barba="wrapper">
+
+    <div class="cursor-follower"></div>
+    <div class="load-container"><div class="loading-screen"></div></div>
+
+    <main data-barba="container" data-barba-namespace="contacto-section" class="animate-this">
+        <style>
+            /* --- ESTILOS GLOBALES DE CABECERA Y PATRÓN (Consistencia estricta) --- */
+            .menu-links a, #hero-header ul li a {
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                font-weight: 900 !important;
+            }
+            #hero-header {
+                position: fixed;
+                top: 15px;
+                left: 2% !important;
+                width: 96% !important;
+                box-sizing: border-box !important;
+                z-index: 1000;
+                background: transparent;
+            }
+            @media (min-width: 992px) {
+                #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; }
+                #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; }
+                #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; }
+            }
+            #hero-header ul {
+                background-color: rgba(255, 195, 0, 0.4);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 50px;
+                padding: 18px 24px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.4);
+                width: max-content !important;
+                margin: 0 auto;
+            }
+            #hero-header ul li {
+                margin: 0 15px !important;
+            }
+            .menu-links a:hover, .menu-links a.active {
+                color: #ffc300 !important;
+            }
+            main { position: relative; z-index: 0; }
+            main::before {
+                content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background-image: url('assets/img/pattern.svg'); background-repeat: no-repeat;
+                background-size: cover; background-position: center; pointer-events: none; z-index: -1;
+            }
+            
+            /* --- Efecto Star Wars para "Súmate" --- */
+            #sumate-menu-item {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #sumate-menu-item > a {
+                line-height: 1.05;
+                font-size: 13px;
+                text-align: center;
+                position: relative;
+                z-index: 1;
+                transition: color 0.3s ease, transform 0.3s ease;
+            }
+            #sumate-menu-item .lucho-fuerza-peek {
+                position: absolute;
+                bottom: -30px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+                transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                pointer-events: none;
+            }
+            #sumate-menu-item .lucho-fuerza-peek img {
+                width: 100px; height: auto; display: block;
+                filter: drop-shadow(0px 5px 15px rgba(0, 0, 0, 0.4));
+                mask-image: linear-gradient(to bottom, black 40%, transparent 70%);
+                -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 70%);
+            }
+            #sumate-menu-item > a::before {
+                content: 'SÚMATE\\A A LA FUERZA';
+                white-space: pre;
+                color: #adfdff;
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: -1;
+                opacity: 0; filter: blur(1.5px); transition: opacity 0.4s ease;
+            }
+            @keyframes force-flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.95; } }
+            @keyframes force-glow-pulse { 0% { filter: blur(1.5px); text-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff, 0 0 35px #00d9ff; } 100% { filter: blur(2.5px); text-shadow: 0 0 15px #00d9ff, 0 0 30px #00d9ff, 0 0 50px #00d9ff; } }
+            #sumate-menu-item:hover > a { color: #fff !important; transform: translateY(-2px); animation: force-flicker 0.15s infinite alternate; }
+            #sumate-menu-item:hover > a::before { opacity: 1; animation: force-glow-pulse 1s infinite alternate ease-in-out; }
+            #sumate-menu-item:hover .lucho-fuerza-peek { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+            /* --- ESTILOS ESPECÍFICOS DE LA PÁGINA DE CONTACTO (CÓMIC) --- */
+            #contacto-escenario {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100svh; /* Se adapta mejor a las barras de navegación de celular */
+                width: 100%;
+                padding-top: 100px; /* Compensa el menú de manera segura */
+                padding-bottom: 2rem;
+                box-sizing: border-box;
+                position: relative;
+                z-index: 10;
+                overflow: hidden; /* Mantiene la animación encapsulada sin romper la cabecera */
+            }
+
+            /* Contenedor central que se moverá */
+            .comic-layout {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem; /* Junta la imagen de Luchito mucho más al globo de diálogo */
+                width: 100%;
+                max-width: 1400px; /* Expandido para pantallas grandes */
+                margin: 0 auto;
+            }
+
+            /* Escenario de Luchito */
+            #contacto-escenario .lucho-stage {
+                position: relative;
+                width: clamp(300px, 35vw, 550px); /* Lucho notablemente más grande */
+                height: clamp(450px, 60vh, 650px);
+                flex-shrink: 0;
+            }
+            #contacto-escenario .lucho-stage img {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                object-position: bottom center;
+                filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+            }
+            #contacto-escenario #lucho-pose-2 {
+                opacity: 0;
+                visibility: hidden;
+            }
+
+            /* Escenario del Globo de Diálogo */
+            #contacto-escenario .dialog-stage {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                max-width: clamp(400px, 45vw, 600px); /* Globo de diálogo expandido */
+                position: relative;
+                z-index: 20;
+            }
+
+            .glass-bubble {
+                background: linear-gradient(135deg, rgba(140, 20, 60, 0.85) 0%, rgba(50, 5, 20, 0.95) 100%);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 195, 0, 0.5);
+                border-top: 2px solid #ffc300; /* Borde superior intenso de oro puro */
+                border-radius: 24px 24px 24px 0; /* Cola del globo hacia Luchito */
+                padding: 2.5rem;
+                /* Sombra volumétrica intensa + Resplandor dorado exterior */
+                box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 40px rgba(255,195,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.15), inset 0 15px 30px rgba(255,195,0,0.25);
+                margin-bottom: 2rem;
+                position: relative;
+                transform-origin: bottom left;
+                animation: floatBubble 4s ease-in-out infinite; /* Levitación suave */
+            }
+            @keyframes floatBubble {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-12px); }
+            }
+            
+            /* Reflejo cristalino superior (Efecto Glass Premium) */
+            .glass-bubble::after {
+                content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                border-radius: inherit; background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 40%);
+                pointer-events: none; z-index: 1;
+            }
+            
+            /* Cola del globo de diálogo */
+            .glass-bubble::before {
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: -18px;
+                width: 35px;
+                height: 35px;
+                background: rgba(50, 5, 20, 0.95);
+                border-bottom: 1px solid rgba(255, 195, 0, 0.4);
+                border-left: 1px solid rgba(255, 195, 0, 0.4);
+                clip-path: polygon(0 100%, 100% 100%, 100% 0);
+                border-bottom-left-radius: 6px;
+            }
+
+            .dialog-text {
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+                font-size: clamp(1.4rem, 2.2vw, 1.8rem); /* Texto responsivo ligeramente más grande */
+                color: #ffffff;
+                line-height: 1.45;
+                margin: 0;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                text-shadow: 0 5px 15px rgba(0,0,0,0.6);
+                position: relative;
+                z-index: 2; /* Asegura que quede por encima del reflejo de cristal */
+            }
+            .dialog-text .highlight {
+                background: linear-gradient(to right, #ffc300, #ffffff, #ffc300); /* Degradado metálico animado */
+                background-size: 200% auto;
+                animation: goldenShine 3s linear infinite;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 0 25px rgba(255, 195, 0, 0.8); /* Resplandor muy intenso */
+                font-weight: 900;
+            }
+            @keyframes goldenShine {
+                to { background-position: 200% center; }
+            }
+
+            /* Botón Shiny (Reutilizado de index) */
+            .shiny-pillar {
+                --shiny-cta-bg: #801039;
+                --shiny-cta-bg-subtle: #6a0b2d;
+                --shiny-cta-fg: #ffc300;
+                --shiny-cta-highlight: #ffc300;
+                --shiny-cta-highlight-subtle: #ffd659;
+                --animation: gradient-angle linear infinite;
+                --duration: 3s;
+                --shadow-size: 2px;
+                --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+                isolation: isolate; position: relative; overflow: hidden; cursor: pointer; outline-offset: 4px; padding: 1rem 3rem;
+                font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 1.35rem; text-transform: uppercase;
+                line-height: 1.2; border: 2px solid transparent; border-radius: 50px; color: var(--shiny-cta-fg) !important;
+                letter-spacing: 2px;
+                text-shadow: 0 4px 10px rgba(0,0,0,0.6); /* Sombra para que resalte la letra */
+                background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box, conic-gradient(from calc(var(--gradient-angle) - var(--gradient-angle-offset)), transparent, var(--shiny-cta-highlight) var(--gradient-percent), var(--shiny-cta-highlight-subtle) calc(var(--gradient-percent) * 2), var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3), transparent calc(var(--gradient-percent) * 4)) border-box;
+                box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle), 0 15px 30px rgba(0,0,0,0.5); transition: var(--transition);
+                display: inline-flex; justify-content: center; align-items: center; width: auto; max-width: 100%; align-self: center; text-align: center; border: none;
+            }
+            .shiny-pillar span { z-index: 1; transition: transform 0.3s ease; display: inline-block; }
+            .shiny-pillar:hover span { transform: translateX(5px); }
+            @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+            @keyframes gradient-angle { to { --gradient-angle: 360deg; } }
+            .shiny-pillar { animation: gradient-angle 3s linear infinite; }
+
+            /* --- TARJETAS DE CONTACTO (Aparecen al final) --- */
+            #contact-cards-container {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                position: absolute;
+                right: 28%; /* Pega las tarjetas casi al lado de Luchito en PC */
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 30;
+                width: clamp(300px, 25vw, 380px);
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+
+            .glass-contact-card {
+                background: linear-gradient(135deg, rgba(140, 20, 60, 0.9) 0%, rgba(50, 5, 20, 0.95) 100%);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 195, 0, 0.5);
+                border-radius: 15px;
+                padding: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 1.2rem;
+                text-decoration: none;
+                color: #fff;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+                transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+                cursor: pointer;
+            }
+            .glass-contact-card:hover {
+                background: linear-gradient(135deg, rgba(160, 20, 65, 0.95) 0%, rgba(70, 5, 25, 1) 100%);
+                border-color: #ffc300;
+                transform: translateX(-10px) translateY(-5px);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255, 195, 0, 0.3);
+                text-decoration: none;
+                color: #fff;
+            }
+            
+            /* Variante WhatsApp Destacado */
+            .card-whatsapp { border-color: rgba(37, 211, 102, 0.6); }
+            .card-whatsapp:hover { border-color: #25D366; box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(37, 211, 102, 0.4); }
+            
+            .card-icon {
+                width: 55px; height: 55px; border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 24px; flex-shrink: 0;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .card-whatsapp .card-icon { background: #25D366; color: #fff; border: none; }
+            .card-icon svg { width: 28px; height: 28px; fill: currentColor; }
+
+            .card-info { display: flex; flex-direction: column; }
+            .card-info h4 { margin: 0 0 0.3rem 0; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.1rem; text-transform: uppercase; color: #ffc300; }
+            .card-whatsapp .card-info h4 { color: #fff; }
+            .card-info p { margin: 0; font-size: 1rem; font-family: system-ui, sans-serif; font-weight: 600; opacity: 0.9; }
+
+            .social-icons-row { display: flex; gap: 10px; margin-top: 5px; }
+            .social-mini-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; transition: all 0.3s; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+            .social-mini-btn:hover { background: #ffc300; color: #801039; transform: scale(1.15); border-color: #ffc300; }
+            .social-mini-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+            /* --- RESPONSIVE MOBILE --- */
+            @media (max-width: 991px) {
+                .comic-layout { flex-direction: column; text-align: center; gap: 1rem; }
+                #contacto-escenario .lucho-stage { width: 320px; height: 420px; } /* Lucho más grande en celulares */
+                .dialog-stage { align-items: center; margin-left: 0; padding: 0 15px; }
+                .glass-bubble { border-radius: 20px; padding: 1.5rem; text-align: center; transform-origin: center top; margin-bottom: 1.5rem; }
+                .glass-bubble::before { left: 50%; bottom: 100%; top: -20px; transform: translateX(-50%); border-bottom: none; border-left: 1px solid rgba(255, 195, 0, 0.4); border-top: 2px solid rgba(255, 195, 0, 0.8); clip-path: polygon(0 0, 100% 0, 50% 100%); background: rgba(128, 16, 57, 0.9); }
+                .dialog-text { font-size: 1.35rem; } /* Texto móvil mejorado */
+                .shiny-pillar { font-size: 1.15rem; padding: 0.8rem 2.5rem; }
+                
+                #contact-cards-container { position: relative; right: auto; top: auto; transform: none; width: 100%; max-width: 400px; margin: -110px auto 0 auto; padding: 0 15px; padding-bottom: 40px; } /* Margen negativo extremo para acercarlo en celular */
+            }
+        </style>
+        <input type="checkbox" id="openmenu" class="hamburger-checkbox">
+        <div class="hamburger-icon">
+          <label for="openmenu" id="hamburger-label">
+            <span></span><span></span><span></span>
+          </label>    
+        </div>
+        <div class="menu-pane"> 
+          <nav>
+            <ul class="menu-links">
+              <li><a href="index.html" class="">INICIO</a></li>
+              <li><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li> 
+              <li><a href="candidatos.html" class="">CANDIDATOS</a></li>
+              <li><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li>
+              <li><a href="sumate.html" class="">SÚMATE A LA FUERZA</a></li>
+              <li><a href="contacto.html" class="active">CONTACTO</a></li>                          
+            </ul>
+          </nav>
+        </div>
+
+        <header id="hero-header">
+            <div class="logo-container">
+                <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg" alt="Fuerza Tacna"></a>
+            </div>
+            <ul>
+                <li data-aos="fade-down" data-aos-duration="600"><a href="index.html" class="">INICIO</a></li>
+                <li data-aos="fade-down" data-aos-duration="600"><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li>
+                <li data-aos="fade-down" data-aos-duration="800"><a href="candidatos.html" class="">CANDIDATOS</a></li>
+                <li data-aos="fade-down" data-aos-duration="1000"><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li> 
+                <li data-aos="fade-down" data-aos-duration="1200" id="sumate-menu-item">
+                    <a href="sumate.html" class="">SÚMATE<br>A LA FUERZA</a>
+                    <div class="lucho-fuerza-peek">
+                        <img src="assets/img/LUCHO%20FUERZA.png" alt="Lucho te invita a sumarte">
+                    </div>
+                </li> 
+                <li data-aos="fade-down" data-aos-duration="1400"><a href="contacto.html" class="active">CONTACTO</a></li>
+            </ul>
+            <div class="button-container">
+                <a href="https://chat.whatsapp.com/InyGU3GIjEiHbO3Ms8lcoa" target="_blank">
+                    <svg class="circular-text" viewBox="0 0 100 100">
+                        <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                        <text><textPath href="#circlePath" startOffset="0%">ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp;</textPath></text>
+                    </svg>
+                    <div class="magnetic">
+                        <div class="wrap">
+                            <div class="span span-1 go"></div>
+                            <div class="span span-2 go"></div>
+                            <div class="span span-3 go"></div>
+                            <div class="span span-4 go"></div>
+                            <img src="assets/img/hand.png">
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </header>
+        
+        <section id="contacto-escenario">
+            <div class="comic-layout" id="comic-layout" style="opacity: 0;">
+                
+                <!-- LUCHITO STAGE -->
+                <div class="lucho-stage">
+                    <img id="lucho-pose-1" src="assets/img/LUCHO HOLA.png" alt="Lucho Saludando">
+                    <img id="lucho-pose-2" src="assets/img/LUCHO HOLA 2.png" alt="Lucho Animado">
+                </div>
+
+                <!-- GLOBOS DE DIÁLOGO Y BOTÓN -->
+                <div class="dialog-stage" id="dialog-stage">
+                    <div class="glass-bubble" id="main-bubble">
+                        <p class="dialog-text" id="comic-text">
+                            ¡Hola, sobrino! Qué gusto verte por aquí. En la <span class="highlight">Fuerza Ganadora</span> estamos conectados contigo 24/7.
+                        </p>
+                    </div>
+                    
+                    <button id="comic-btn" class="shiny-pillar">
+                        <span id="comic-btn-text">SIGUIENTE ➔</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- TARJETAS DE CONTACTO (OCULTAS INICIALMENTE) -->
+            <div id="contact-cards-container">
+                
+                <!-- WhatsApp -->
+                <a href="https://wa.me/51999888777" target="_blank" class="glass-contact-card card-whatsapp">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51h-.57c-.199 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>Línea Directa</h4>
+                        <p>999 888 777</p>
+                    </div>
+                </a>
+
+                <!-- Redes Sociales -->
+                <div class="glass-contact-card" style="cursor: default;">
+                    <div class="card-info" style="width: 100%;">
+                        <h4>Redes Oficiales</h4>
+                        <p style="font-size: 0.85rem; margin-bottom: 8px;">Síguenos para más propuestas</p>
+                        <div class="social-icons-row">
+                            <a href="#" target="_blank" class="social-mini-btn" title="Facebook"><svg viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/></svg></a>
+                            <a href="#" target="_blank" class="social-mini-btn" title="Instagram"><svg viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"/></svg></a>
+                            <a href="#" target="_blank" class="social-mini-btn" title="TikTok"><svg viewBox="0 0 24 24"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.12-3.44-3.17-3.64-5.46-.24-2.61 1.25-5.32 3.65-6.32 1.22-.5 2.58-.6 3.86-.46.04.05.09.09.13.14.02 1.34-.02 2.68.04 4.02-1.25-.19-2.58-.1-3.68.64-1.23.86-1.78 2.45-1.31 3.88.52 1.55 2.15 2.59 3.8 2.42 1.84-.21 3.28-1.87 3.3-3.73.04-6.42.02-12.84.02-19.26h4.15z"/></svg></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Local Central -->
+                <a href="#" class="glass-contact-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                    </div>
+                    <div class="card-info">
+                        <h4>Local Central</h4>
+                        <p>Av. San Martín #123</p>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script type="text/javascript" src="assets/js/button.js"></script>
+    <script type="text/javascript" src="assets/js/cursor.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
+    <script src="assets/js/main.js?v=134"></script>
+
+    <!-- Audio para el efecto de sable de luz -->
+    <audio id="saber-sound" src="assets/img/SONIDO%20SABLE.mp3" preload="auto"></audio>
+
+    <script>
+        (function() {
+            function attachSaberSoundEvents() {
+                const sumateMenuItem = document.getElementById('sumate-menu-item');
+                const saberSound = document.getElementById('saber-sound');
+                if (sumateMenuItem && saberSound) {
+                    if (sumateMenuItem.dataset.soundAttached) return;
+                    sumateMenuItem.addEventListener('mouseenter', () => {
+                        saberSound.volume = 0.8;
+                        saberSound.currentTime = 0;
+                        saberSound.play().catch(error => {});
+                    });
+                    sumateMenuItem.addEventListener('mouseleave', () => {
+                        saberSound.pause();
+                        saberSound.currentTime = 0;
+                    });
+                    sumateMenuItem.dataset.soundAttached = 'true';
+                }
+            }
+            function setupAudioUnlock() {
+                if (window.isFuerzaTacnaAudioUnlocked) return;
+                const saberSound = document.getElementById('saber-sound');
+                if (saberSound) {
+                    const unlocker = () => { saberSound.play().catch(() => {}); saberSound.pause(); };
+                    ['click', 'touchstart', 'keydown'].forEach(evt => document.addEventListener(evt, unlocker, { once: true }));
+                    window.isFuerzaTacnaAudioUnlocked = true;
+                }
+            }
+            document.addEventListener('DOMContentLoaded', () => { setupAudioUnlock(); attachSaberSoundEvents(); });
+            setInterval(attachSaberSoundEvents, 500);
+        })();
+    </script>
+</body>
+</html>

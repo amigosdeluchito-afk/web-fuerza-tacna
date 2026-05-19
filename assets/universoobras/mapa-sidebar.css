@@ -1,0 +1,341 @@
+/* =========================================================
+   SISTEMA DE FILTROS, SIDEBAR (RAIL) Y RESULTADOS
+   ========================================================= */
+
+:root {
+  --sidebar-w: 240px;
+  --sidebar-collapsed: 60px; /* Ancho de la franja delgada pegada al borde */
+}
+
+@media (max-width: 700px) {
+  :root { --sidebar-w: calc(100vw - var(--sidebar-collapsed)); }
+}
+
+/* Contenedor Principal (Wrapper invisible) */
+#filtersDock.fp {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 0; /* El contenedor base no debe tener ancho para no bloquear clics al mapa */
+  overflow: visible !important; /* Permitimos que sus hijos se salgan de su ancho 0 */
+  z-index: 9000 !important; /* Por encima de todo */
+  display: flex !important; /* Forzamos la visualización como flex */
+  background-color: transparent !important; /* Quitar el color temporal */
+  margin: 0;
+  padding: 0;
+  pointer-events: none; /* El wrapper es invisible al clic, solo sus hijos reaccionan */
+  /* El dock de filtros también nace oculto */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1s ease, visibility 1s ease;
+}
+
+/* LA FRANJA DELGADA (Rail - Siempre visible) */
+.fp-rail {
+  position: absolute !important; /* Aseguramos que flote y no empuje nada */
+  top: 0;
+  left: 0;
+  width: var(--sidebar-collapsed);
+  height: 100vh;
+  background: #ffffff !important;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1); /* Sombra más sutil */
+  z-index: 10 !important; /* Aseguramos que esté por encima del mapa */
+  pointer-events: auto; /* Reactiva clics aquí */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Botón Inicio (Cabecera de la franja) */
+.fp-home-btn {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: var(--sidebar-collapsed);
+  background: #801039;
+  color: #ffc300;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.fp-home-btn:hover { background: #9a1546; }
+.fp-home-btn svg { width: 26px; height: 26px; }
+
+/* Botón Filtros (Icono en la franja) */
+.fp-pill {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: var(--sidebar-collapsed);
+  background: transparent;
+  border: none !important;
+  border-bottom: 1px solid #eaeaea;
+  color: #801039;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  padding: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.fp-rail .fp-pill + .fp-pill {
+  border-top: 1px solid #eaeaea; /* Separador entre botones del rail */
+  border-bottom: none;
+}
+.fp-pill:hover { background: #fdf5f7; }
+.fp-pill svg { width: 28px; height: 28px; transition: transform 0.3s ease; }
+#filtersDock.fp:not(.is-collapsed) .fp-pill { background: #fdf5f7; }
+#filtersDock.fp:not(.is-collapsed) .fp-pill svg { transform: rotate(90deg); }
+.fp-pill span { display: none !important; } /* Ocultamos el texto, solo icono */
+
+/* EL CAJÓN DESPLEGABLE (Drawer - Sale desde atrás de la franja) */
+.fp-drawer {
+  position: absolute;
+  top: 0;
+  left: var(--sidebar-collapsed); /* Empieza justo a la derecha de la franja */
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: #ffffff;
+  z-index: 1; /* Pasa por debajo de la franja (.fp-rail) */
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0 16px 0 0;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translateX(-110%); /* Oculto por defecto para que no tape el mapa al cargar */
+  box-sizing: border-box;
+}
+
+/* Mostrar el cajón cuando NO está colapsado (es decir, cuando está abierto) */
+#filtersDock.fp:not(.is-collapsed) .fp-drawer {
+  transform: translateX(0);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+}
+
+/* Cabecera del Cajón */
+.fp-drawer-header {
+  padding: 18px 20px;
+  font: 900 15px/1 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  color: #801039;
+  text-transform: uppercase;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fdf5f7;
+  flex-shrink: 0;
+}
+
+/* Cuerpo del panel de filtros */
+#fpPanel {
+  height: auto !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.fp-panel {
+  flex: 1;
+  width: var(--sidebar-w);
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+#filtersDock .fp-head { display: none !important; }
+
+/* Estilo de las opciones */
+#filtersDock .fp-body { padding: 0; }
+#filtersDock .f-field {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 20px;
+  position: relative;
+  display: block;
+  margin: 0;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+#filtersDock .f-field:hover {
+  background-color: #fdf5f7;
+}
+#filtersDock .f-field:first-child {
+  border-top: 1px solid #f0f0f0;
+}
+#filtersDock .f-field > label {
+  font: 800 13px/1.2 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  color: #333 !important;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  text-transform: uppercase;
+}
+#filtersDock .f-chip {
+  position: absolute; right: 12px; top: 10px;
+  background: transparent; border: none; width: 24px; height: 24px;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  box-shadow: none;
+}
+#filtersDock .f-chip__icon {
+  display: grid;
+  place-items: center;
+}
+#filtersDock .f-chip__icon svg {
+  width: 24px; height: 24px;
+  color: #801039;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+#filtersDock .f-chip__icon.is-rotated svg { transform: rotate(180deg); }
+#filtersDock .f-chip > span:not(.f-chip__icon) { display: none !important; }
+
+/* Menús de Checkboxes */
+#filtersDock .f-menu {
+  height: 0; overflow: hidden; transition: height 0.25s ease; margin-top: 10px;
+  border: none; padding: 0; box-shadow: none; position: static; width: 100%;
+}
+#filtersDock .f-menu.is-open { height: auto; padding-bottom: 8px; }
+#filtersDock .f-menu label {
+  display: flex; align-items: center; gap: 10px;
+  font: 700 12.5px/1.2 system-ui, sans-serif;
+  color: #444 !important; padding: 6px 10px; border-radius: 8px;
+  cursor: pointer; transition: background 0.15s, color 0.15s; margin: 2px 0;
+  background: transparent;
+}
+#filtersDock .f-menu label:hover {
+  background: #fdf5f7 !important; color: #801039 !important;
+}
+#filtersDock .f-menu label input { margin: 0; accent-color: #801039; }
+
+/* Botones de acción Apilados */
+#filtersDock .f-actions {
+  padding: 24px; display: flex; gap: 12px; flex-direction: column; margin: 0; border: none;
+}
+.btn-apply, .btn-clear {
+  width: 100%; padding: 14px; border-radius: 999px;
+  font: 900 13px 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  text-transform: uppercase; cursor: pointer; text-align: center; transition: all 0.2s;
+}
+.btn-apply { background: #801039; color: #ffc300; border: none; box-shadow: 0 4px 15px rgba(128, 16, 57, 0.3); }
+.btn-apply:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+.btn-clear { background: #fff; color: #801039; border: 2px solid #801039; }
+.btn-apply:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(128, 16, 57, 0.4); }
+.btn-clear:hover { background: #fdf5f7; }
+
+/* Estilos para el panel de historial */
+.fp-history-panel {
+  padding: 0;
+}
+
+/* Dock de Resultados (Sale desde el Sidebar) */
+#resultsDock {
+  position: fixed;
+  top: 0;
+  left: calc(var(--sidebar-collapsed) + var(--sidebar-w)) !important;
+  height: 100vh;
+  max-height: 100vh;
+  width: 320px;
+  z-index: 1400; /* Pasa por debajo del cajón de filtros (.fp-drawer) */
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+  border-radius: 0 16px 16px 0;
+  border: none; border-right: 1px solid #eaeaea;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
+  display: flex; flex-direction: column;
+}
+#resultsDock.is-hidden {
+  transform: translateX(-100%); /* Al esconderse viaja 320px a la izquierda, ocultándose tras el drawer */
+  opacity: 0;
+  pointer-events: none;
+}
+#resultsDock .rd-head {
+  padding: 26px 20px 24px;
+  border-bottom: 1px solid #eaeaea;
+  display: flex; justify-content: space-between; align-items: center;
+  font: 800 15px/1 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  color: #801039; text-transform: uppercase;
+}
+#resultsDock .rd-count { font-weight: 900; color: #ffc300; background: #801039; padding: 4px 10px; border-radius: 999px; font-size: 12px; }
+
+#resultsDock .rd-list {
+  flex: 1; overflow-y: auto; padding: 12px; margin: 0; border: none; box-shadow: none; background: transparent; max-height: none; list-style: none;
+}
+#resultsDock .rd-list li {
+  padding: 12px 14px; border-radius: 12px; cursor: pointer; display: grid; gap: 6px; border: 1px solid transparent; transition: all 0.2s;
+}
+#resultsDock .rd-list li:hover { background: #fdf5f7; border-color: rgba(128, 16, 57, 0.1); transform: translateY(-1px); }
+#resultsDock .title { font: 800 13px/1.25 system-ui; color: #111; }
+#resultsDock .meta { font: 700 12px/1.2 system-ui; color: #555; }
+#resultsDock .pill { font: 800 10px/1 system-ui; padding: 3px 8px; border-radius: 999px; display: inline-block; border: 1px solid rgba(0,0,0,0.06); }
+
+@media (max-width: 700px) {
+  #resultsDock { left: 0 !important; width: 100vw; z-index: 1600; }
+}
+
+/* === Apartado: Volver a la Web (Dentro del Sidebar) === */
+.fp-home-btn {
+  display: grid;
+  place-items: center;
+  width: var(--sidebar-collapsed);
+  height: var(--sidebar-collapsed);
+  background: #801039;
+  color: #ffc300;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  pointer-events: auto; /* Reactiva los clics */
+}
+.fp-home-btn:hover {
+  background: #9a1546;
+}
+.fp-home-btn svg { width: 26px; height: 26px; }
+
+/* === Animación de Resalte (Hover) para Listas === */
+.results { list-style: none; padding: 0; margin: 0; }
+.results li {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.results li:hover {
+  background: #fdf5f7;
+  padding-left: 26px; /* Desplazamiento elegante a la derecha */
+}
+
+/* Barra lateral de acento al pasar el mouse */
+.results li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0;
+  background: #801039;
+  transition: width 0.2s ease;
+}
+.results li:hover::before { width: 4px; }
+
+.results li .title {
+  font: 800 13px/1.3 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+  color: #111 !important;
+  margin-bottom: 4px;
+}
+.results li .meta {
+  font: 600 12px system-ui, sans-serif !important;
+  color: #666 !important;
+  margin-bottom: 8px;
+}
+.results li .footer, .rd-list .footer { display: flex; gap: 6px; align-items: center; }
+.pill--tag {
+  background: #f0f0f0 !important;
+  color: #333 !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  text-transform: uppercase !important;
+}

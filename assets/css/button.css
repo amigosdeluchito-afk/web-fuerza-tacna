@@ -1,0 +1,263 @@
+.magnetic {
+    margin: -100px;
+    padding: 100px;
+    display: inline-block;
+    border-radius: 50%;
+    /*border: 1px solid #000; */
+}
+#magnet-button {
+    display: inline-block;
+}
+.my-button {
+    background-color: #FFF;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    cursor: pointer;
+}
+.my-button:hover {
+    color: #FFF;
+    background-color: #000;
+    transition: 0.5s background-color, 0.5s box-shadow;
+    box-shadow: 0px 2px 25px rgba(0,0,0,0.5);
+}
+.wrap, .wrap-2 {
+    margin: 0 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 35%;
+}
+.wrap:hover p, .wrap-2:hover p {
+    opacity: 1;
+}
+.wrap .span, .wrap-2 .span {
+    cursor: pointer;
+    border: 1.5px solid #241E1E;
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    opacity: .6;
+    border-radius: 100%;
+    transition: all;
+}
+.icon-feather{
+    color: #fff;
+    font-size: 22px;
+    height: auto;
+    z-index: 1;
+}
+.wrap .span {
+    cursor: pointer;
+    border: 1.5px solid #241E1E;
+    position: absolute;
+    background: #241E1E;
+    opacity: .6;
+    border-radius: 100%;
+    transition: all;
+}
+.wrap .span-1 {
+    transition: all 1200ms;
+}
+.wrap .span-1.go {
+    border-radius: 40% 42% 45% 55%;
+    animation: gogo 5200ms infinite linear;
+}
+.wrap .span-2 {
+    transition: all 1200ms;
+}
+.wrap .span-2.go {
+    border-radius: 55% 41% 65% 43%;
+    animation: gogo-2 5500ms infinite linear;
+}
+.wrap .span-3 {
+    transition: all 1200ms;
+}
+.wrap .span-3.go {
+    border-radius: 52% 72% 45% 61%;
+    animation: gogo 3400ms infinite linear;
+}
+.wrap .span-4 {
+    transition: all 1200ms;
+}
+.wrap .span-4.go {
+    border-radius: 58% 56% 72% 58%;
+    animation: gogo-2 6000ms infinite linear;
+}
+.wrap-2 .span-1 {
+    transition: all 1200ms;
+}
+.wrap-2 .span-1.go {
+    border-radius: 40% 42% 45% 55%;
+    animation: gogo 5200ms infinite linear;
+}
+.wrap-2 .span-2 {
+    transition: all 1200ms;
+}
+.wrap-2 .span-2.go {
+    border-radius: 55% 41% 65% 43%;
+    animation: gogo-2 5500ms infinite linear;
+}
+.wrap-2 .span-3 {
+    transition: all 1200ms;
+}
+.wrap-2 .span-3.go {
+    border-radius: 52% 72% 45% 61%;
+    animation: gogo 3400ms infinite linear;
+}
+.wrap-2 .span-4 {
+    transition: all 1200ms;
+}
+.wrap-2 .span-4.go {
+    border-radius: 58% 56% 72% 58%;
+    animation: gogo-2 6000ms infinite linear;
+}
+.go {
+    transition: all 1200ms;
+}
+@keyframes gogo {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes gogo-2 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-720deg);
+  }
+}
+/*button classic */
+body button:focus {
+    outline: none;
+}
+body button {
+    border: none;
+    transition: all .2s ease-in-out;
+    -webkit-appearance: none;
+    letter-spacing: -0.5px;
+    display: inline-block;
+    border-radius: 100px;
+    font-family: 'silkamedium';
+    font-size: 14px;
+    color: #fff;
+    position: relative;
+    padding: 20px 60px;
+    background: #241E1E;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+
+}
+body button:hover { transform: scale(1.04); }
+body button{ transform: scale(1); }
+button:before {
+  animation: pulse 2s ease infinite ;
+  border-radius: 100px;
+  position: absolute;
+  background: #241E1E;
+  content: "";
+  z-index: -1;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  top: 0;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { opacity: 0.2; }
+  100% { transform: scale(1.2, 1.4); opacity: 0; }
+}
+#mouse-scroll {
+  display: inline-block;
+  position: absolute;
+  margin: auto;
+  left: 50%;
+  bottom: 5%;
+  -webkit-transform: translateX(-50%);
+  border-radius: 70px;
+}
+#mouse-scroll span{
+  display: block;
+  width: 5px; 
+  height: 5px;
+  -ms-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+       transform: rotate(45deg);
+       transform: rotate(45deg);
+  border-right: 2px solid #fff; 
+  border-bottom: 2px solid #fff;
+  margin: 0 0 3px 5px;
+}
+#mouse-scroll .mouse {
+  background-color: #241E1E;
+  height: 40px;
+  width: 25px;
+  border-radius: 20px;
+  -webkit-transform: none;
+  -ms-transform: none;
+  transform: none;
+  top: 170px;
+  margin-left: 5px;
+}
+#mouse-scroll .mouse-in {
+  top: 8px;
+  height: 8px;
+  width: 3px;
+  border-radius: 10px;
+  display: block; 
+  margin: 5px auto;
+  background: #FFEDC3;
+  position: relative;
+}
+#mouse-scroll .mouse-in {
+ -webkit-animation: animated-mouse 1.2s ease infinite;
+  moz-animation: mouse-animated 1.2s ease infinite;
+}
+.scroll-indication{
+  font-family: 'bernier';
+  color: #241E1E;
+  margin-top: 10px;
+}
+@-webkit-keyframes animated-mouse {
+  0% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+     opacity: 0;
+    -webkit-transform: translateY(6px);
+    -ms-transform: translateY(6px);
+    transform: translateY(6px);
+  }
+}
+@-webkit-keyframes mouse-scroll {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+  100% {
+    opacity: 1;
+  } 
+}
+@keyframes mouse-scroll {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}

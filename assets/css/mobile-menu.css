@@ -1,0 +1,120 @@
+.menu-container{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+}
+.hamburger-icon {
+  position: fixed;
+  top: 5vh;
+  right: 12vw;
+  padding-bottom: 2vh;
+  z-index: 1002;
+}
+.hamburger-icon span {
+  border-radius: 21px;
+    height: 4px;
+    width: 30px;
+    background-color: #801039;
+  display: block;
+  margin: 5px 0px 5px 0px;
+  transition: 0.7s ease-in-out;
+  transform: none;
+  z-index: 1002;
+}
+input.hamburger-checkbox {
+  position: fixed;
+  z-index: 1003;
+  top: 5vh;
+  right: 12vw;
+  width: 10vw;
+  opacity: 0;
+  height: 6vh;
+}
+#openmenu:checked ~ .menu-pane {
+  right: -5vw;
+  transform: translateX(-5vw);
+}
+#openmenu:checked ~ .hamburger-icon span:nth-of-type(1) {
+  transform: translate(0%, 220%) rotate(-45deg);
+  background-color: white;
+}
+#openmenu:checked ~ .hamburger-icon span:nth-of-type(3) {
+  transform: translate(0%, -215%) rotate(45deg);
+  background-color: white;
+}
+#openmenu:checked ~ .hamburger-icon span:nth-of-type(2) {
+  opacity: 0;
+}
+div.menu-pane {
+  background-color: #251f1f;
+  position: fixed;
+  transform: translateX(-105vw);
+  transform-origin: (0, 0);
+  width: 100vw;
+  height: 100%;
+  transition: 0.6s ease-in-out;
+  z-index: 1001;
+}
+.menu-pane nav {
+  width: 100%;
+  height: 100%;
+}
+.menu-links li, a, span {
+      transition: 0.5s ease-in-out;
+}
+.menu-pane ul {
+  margin-top: 21%;
+  padding: 10%;
+  display: inline-block;
+  list-style: none;
+  width: 100%;
+  text-align: center;
+}
+.menu-pane .menu-social-icons{
+  position: absolute;
+  bottom: 7%;
+  display: flex;
+  justify-content: center;
+  font-size: 10px;
+}
+.menu-pane li {
+  font-family: 'bernier';
+  padding-top: 15px;
+  padding-bottom: 0px;
+  margin-left: 10px;
+  font-size: 2em;
+}
+.menu-pane .city{
+  position: absolute;
+  bottom: 7%;
+  width: 100%;
+  color: #FDC239;
+  text-align: center;
+}
+.menu-social-icons a{
+  color: #fff;
+}
+.menu-social-icons li{
+  margin: 0 10px;
+}
+.menu-links li a {
+  color: white;
+  text-decoration: none;
+}
+.menu-links li:hover a {
+  color: #FDC239;
+}
+.menu-links li:first-child:hover #QC-info {
+opacity: 1;
+}
+.menu-links li:first-child:hover #DC-info {
+opacity: 1;
+}
+#DC-info {
+  background-color: #FFAB91;
+    border: 2px solid;
+  border-color: #FFAB91;
+display: block;
+  opacity: 0;
+}

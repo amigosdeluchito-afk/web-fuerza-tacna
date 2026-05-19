@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- Mirrored from le-lab.io/video by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:07 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head>
+        
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Le Lab est un studio de création basé à Bordeaux dédié à la production de contenus audiovisuels, de prises de vues aériennes, de drone FPV et de design.">
+        <title>FUERZA TACNA</title>
+        <link rel="icon" type="image/png" href="assets/img/favicon.png">
+        <link rel="stylesheet" href="assets/css/main.css?v=108">
+        <link rel="stylesheet" href="assets/css/button.css?v=108">
+        <link rel="stylesheet" href="assets/css/mobile-menu.css?v=108">
+        <link rel="stylesheet" href="assets/css/responsive.css?v=108">
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+        <link rel="stylesheet" type="text/css" href="assets/css/fonts.css?v=108">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
+
+        <script type="text/javascript" src="assets/js/smoothscroll.js"></script>
+        <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+        <script type="text/javascript" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+
+    </head>
+
+    <body data-barba="wrapper" onload="init()">
+
+      <script>AOS.init();</script>
+
+    <div class="cursor-follower"></div>
+
+        <div class="load-container">
+            <div class="loading-screen"></div>
+        </div>
+
+        <main data-barba="container" data-barba-namespace="home-section" class="animate-this">
+
+        <style>
+            .menu-links a, #hero-header ul li a {
+                font-family: "Arial Black", Arial, sans-serif !important;
+            }
+            /* --- Backgrounds & Fills --- */
+            .magnetic .wrap .span {
+                background-color: #25D366 !important;
+            }
+            .mouse-in,
+            #services h3::before,
+            #services .title-client::before,
+            #intro button:hover,
+            #video-section button:hover,
+            #drone-section button:hover,
+            #design-section button:hover,
+            .references-section button:hover,
+            #button-center:hover {
+                background-color: #ffc300 !important;
+            }
+
+            /* --- Text Colors --- */
+            .scroll-indication,
+            .small-title,
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center,
+            .menu-links a:hover,
+            .menu-links a.active,
+            .hyperlinks {
+                color: #ffc300 !important;
+            }
+
+            /* --- Border Colors --- */
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center {
+                border-color: #ffc300 !important;
+            }
+
+            /* --- Header Fijo Transparente --- */
+            #hero-header {
+                position: fixed;
+                top: 15px; /* Espacio desde el techo */
+                left: 2% !important;
+                width: 96% !important;
+                box-sizing: border-box !important;
+                z-index: 1000;
+                background: transparent; /* Contenedor principal sin fondo */
+            }
+            @media (min-width: 992px) {
+                #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; }
+                #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; }
+                #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; }
+            }
+
+            /* --- Píldora de Cristal (Solo el Menú Central) --- */
+            #hero-header ul {
+                background-color: rgba(255, 195, 0, 0.4); /* Color de fondo de la página (#FFC300) */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 50px; /* Forma de píldora redonda */
+                padding: 18px 24px; /* Más espacio arriba y abajo para darle 5px más de altura */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra muy reducida y sutil */
+                border: 1px solid rgba(255, 255, 255, 0.4); /* Borde blanco fino y sutil */
+                width: max-content !important; /* Hace que la caja solo ocupe el ancho estrictamente necesario */
+                margin: 0 auto; /* Centra la píldora en la pantalla */
+            }
+            #hero-header ul li {
+                margin: 0 15px !important; /* Reduce la separación entre los textos para hacerla más compacta */
+            }
+
+            /* --- Override Background --- */
+            #hero-video-section {
+                position: relative;
+                width: 100%;
+                min-height: 100vh;
+                background-image: none !important;
+                background-color: transparent !important;
+            }
+            /* Ocultar cualquier capa oscura (filtro) del tema original */
+            #hero-video-section::before,
+            #hero-video-section::after {
+                display: none !important;
+            }
+            
+            /* --- Candidatos Section Styles --- */
+            #candidatos-section {
+                background-color: transparent;
+                position: absolute;
+                top: 52%;
+                left: 0;
+                width: 100%;
+                transform: translateY(-50%);
+                overflow: hidden;
+                color: #fff;
+                z-index: 10;
+            }
+            
+            .marquee-container {
+                overflow: hidden;
+                width: 100%;
+                position: relative;
+                display: flex;
+                cursor: grab;
+            }
+            .marquee-container:active {
+                cursor: grabbing;
+            }
+            .marquee-container * {
+                user-select: none;
+                -webkit-user-drag: none;
+            }
+            .marquee-content {
+                display: flex;
+                gap: 1.5rem;
+                width: max-content;
+                padding: 1rem 0;
+                will-change: transform;
+            }
+
+            .candidate-card {
+                width: 400px;
+                height: 550px;
+                position: relative;
+                border-radius: 1.5rem;
+                overflow: hidden;
+                flex-shrink: 0;
+                background: transparent;
+                box-shadow: none; /* Se eliminó la sombra oscura que estaba detrás */
+                cursor: pointer;
+                transform-style: preserve-3d;
+            }
+            .candidate-card img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                position: absolute;
+                top: 0;
+                left: 0;
+                transition: opacity 0.4s ease;
+                transform: translateZ(-5px) scale(1.02); /* Zoom minimizado para evitar recortes */
+            }
+            .candidate-card .img-hover {
+                opacity: 0;
+            }
+            .candidate-card:hover .img-hover {
+                opacity: 1;
+            }
+            .candidate-card:hover .img-default {
+                opacity: 0;
+            }
+            .candidate-info {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                background: rgba(20, 20, 20, 0.85);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                padding: 1.5rem 1rem;
+                text-align: center;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                transform: translateZ(40px); /* Hace que la info resalte hacia adelante en 3D */
+            }
+            .candidate-info h3 {
+                margin: 0 0 0.4rem 0;
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: #fff;
+                font-family: "Arial Black", Arial, sans-serif;
+            }
+            .candidate-info p {
+                margin: 0;
+                font-size: 0.95rem;
+                color: #ffc300;
+                font-weight: 500;
+            }
+
+            .testimonial {
+                max-width: 800px;
+                margin: 6rem auto 0 auto;
+                text-align: center;
+                padding: 0 1.5rem;
+                position: relative;
+                z-index: 10;
+            }
+            .testimonial p.quote {
+                font-size: 1.35rem;
+                font-weight: 400;
+                color: #fff;
+                line-height: 1.8;
+                margin-bottom: 2rem;
+            }
+            .testimonial-profile {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.8rem;
+            }
+            .testimonial-img {
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                overflow: hidden;
+                border: 2px solid #ffc300;
+            }
+            .testimonial-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .testimonial-profile h4 {
+                margin: 0;
+                font-size: 1.2rem;
+                color: #fff;
+                font-weight: bold;
+                font-family: "Arial Black", Arial, sans-serif;
+            }
+            .testimonial-profile p {
+                margin: 0;
+                font-size: 0.95rem;
+                color: #aaa;
+            }
+
+            /* --- Stacking Context para Main --- */
+            main {
+                position: relative;
+                z-index: 0;
+            }
+
+            /* --- Patrón de Fondo SVG --- */
+            main::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-image: url('assets/img/pattern.svg'); /* Cambia el nombre si tu archivo se llama distinto */
+                background-repeat: no-repeat; /* Evita que se duplique y genere cortes */
+                background-size: cover; /* Escala la imagen para cubrir toda la pantalla */
+                background-position: center; /* Mantiene la parte central del patrón siempre visible */
+                pointer-events: none; /* Crucial: evita que el patrón bloquee los clics en la página */
+                z-index: -1; /* Lo mantiene firmemente en el fondo, debajo de los textos y fotos */
+            }
+        </style>
+
+                  
+<input type="checkbox" id="openmenu" class="hamburger-checkbox">
+<div class="hamburger-icon">
+  <label for="openmenu" id="hamburger-label">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>    
+</div>
+<div class="menu-pane"> 
+  <nav>
+    <ul class="menu-links">
+      <li><a href="index.html" class="">INICIO</a></li>
+      <li><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li> 
+      <li><a href="candidatos.html" class="active">CANDIDATOS</a></li>
+      <li><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li>
+      <li><a href="sumate.html" class="">SÚMATE A LA FUERZA</a></li>
+      <li><a href="contacto.html" class="">CONTACTO</a></li>                          
+    </ul>
+  </nav>
+</div>
+
+        
+            <div id="hero-video-section">
+                <header id="hero-header">
+                    <div class="logo-container">
+                        <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+                    </div>
+                    
+                    
+<ul>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="index.html" class="">INICIO</a></li>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="800"><a href="candidatos.html" class="active">CANDIDATOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="1000"><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li> 
+    <li data-aos="fade-down" data-aos-duration="1200" id="sumate-menu-item">
+        <a href="sumate.html" class="">SÚMATE<br>A LA FUERZA</a>
+        <div class="lucho-fuerza-peek">
+            <img src="assets/img/LUCHO%20FUERZA.png" alt="Lucho te invita a sumarte">
+        </div>
+    </li> 
+    <li data-aos="fade-down" data-aos-duration="1400"><a href="contacto.html" class="">CONTACTO</a></li>
+</ul>
+
+
+                    <div class="button-container">
+                        <a href="https://chat.whatsapp.com/InyGU3GIjEiHbO3Ms8lcoa" target="_blank">
+                            <svg class="circular-text" viewBox="0 0 100 100">
+                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                                <text>
+                                    <textPath href="#circlePath" startOffset="0%">
+                                        ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; 
+                                    </textPath>
+                                </text>
+                            </svg>
+                            <div class="magnetic">
+                                <div class="wrap">
+                                    <div class="span span-1 go"></div>
+                                    <div class="span span-2 go"></div>
+                                    <div class="span span-3 go"></div>
+                                    <div class="span span-4 go"></div>
+                                    <img src="assets/img/hand.png">
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </header>
+
+                <a href="#" id="mouse-none">
+                    <div id="mouse-scroll">
+                      <div class="mouse">
+                        <div class="mouse-in"></div>
+                      </div>
+                      <div class="scroll-indication">Scroll</div>
+                    </div>
+                </a>
+
+                <section id="candidatos-section">
+                    <div class="marquee-container">
+                        <div class="marquee-content">
+                            <!-- Group 1 -->
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-1.png" alt="Patrick Stewart" class="img-default">
+                                <img src="assets/img/candidato-1-hover.png" alt="Patrick Stewart" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Patrick Stewart</h3>
+                                    <p>Candidato a Alcalde</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-2.png" alt="Alena Rosser" class="img-default">
+                                <img src="assets/img/candidato-2-hover.png" alt="Alena Rosser" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Alena Rosser</h3>
+                                    <p>Regidora</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-3.png" alt="Fletch Skinner" class="img-default">
+                                <img src="assets/img/candidato-3-hover.png" alt="Fletch Skinner" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Fletch Skinner</h3>
+                                    <p>Regidor</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-4.png" alt="Marc Spector" class="img-default">
+                                <img src="assets/img/candidato-4-hover.png" alt="Marc Spector" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Marc Spector</h3>
+                                    <p>Regidor</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-5.png" alt="Natalia Skinner" class="img-default">
+                                <img src="assets/img/candidato-5-hover.png" alt="Natalia Skinner" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Natalia Skinner</h3>
+                                    <p>Regidora</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Group 2 (Duplicated for seamless scrolling) -->
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-1.png" alt="Patrick Stewart" class="img-default">
+                                <img src="assets/img/candidato-1-hover.png" alt="Patrick Stewart" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Patrick Stewart</h3>
+                                    <p>Candidato a Alcalde</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-2.png" alt="Alena Rosser" class="img-default">
+                                <img src="assets/img/candidato-2-hover.png" alt="Alena Rosser" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Alena Rosser</h3>
+                                    <p>Regidora</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-3.png" alt="Fletch Skinner" class="img-default">
+                                <img src="assets/img/candidato-3-hover.png" alt="Fletch Skinner" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Fletch Skinner</h3>
+                                    <p>Regidor</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-4.png" alt="Marc Spector" class="img-default">
+                                <img src="assets/img/candidato-4-hover.png" alt="Marc Spector" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Marc Spector</h3>
+                                    <p>Regidor</p>
+                                </div>
+                            </div>
+                            <div class="candidate-card">
+                                <img src="assets/img/candidato-5.png" alt="Natalia Skinner" class="img-default">
+                                <img src="assets/img/candidato-5-hover.png" alt="Natalia Skinner" class="img-hover">
+                                <div class="candidate-info">
+                                    <h3>Natalia Skinner</h3>
+                                    <p>Regidora</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+             <footer>
+    <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+    <div id="legal-notice">©2023 Le Lab - Thomas Cuvelier - Tous droits réservés</div>
+</footer>
+        </main>
+    </body>
+
+    <!-- Audio para el efecto de sable de luz -->
+    <audio id="saber-sound" src="assets/img/SONIDO%20SABLE.mp3" preload="auto"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sumateMenuItem = document.getElementById('sumate-menu-item');
+            const saberSound = document.getElementById('saber-sound');
+
+            const unlockSaberSound = () => {
+                if (saberSound) {
+                    saberSound.play().catch(()=>{});
+                    saberSound.pause();
+                }
+            };
+            ['click', 'touchstart', 'keydown'].forEach(evt => document.addEventListener(evt, unlockSaberSound, { once: true }));
+
+            if (sumateMenuItem && saberSound) {
+                sumateMenuItem.addEventListener('mouseenter', () => {
+                    saberSound.volume = 0.8;
+                    saberSound.currentTime = 0;
+                    saberSound.play().catch(error => {});
+                });
+                sumateMenuItem.addEventListener('mouseleave', () => {
+                    saberSound.pause();
+                    saberSound.currentTime = 0;
+                });
+            }
+        });
+    </script>
+
+    <script type="text/javascript" src="assets/js/button.js"></script>
+    <script type="text/javascript" src="assets/js/cursor.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="assets/js/main.js?v=108"></script>
+
+<!-- Mirrored from le-lab.io/video by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:07 GMT -->
+</html>

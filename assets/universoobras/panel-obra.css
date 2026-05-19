@@ -1,0 +1,269 @@
+/* ===========================
+   PANEL DE OBRA — CSS COMPLETO
+   =========================== */
+
+/* ---------- Backdrop (oscurecido y tap-para-cerrar) ---------- */
+#sheetBackdrop{
+  position: fixed; inset: 0;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 9000;
+}
+#sheetBackdrop.is-open{
+  background: rgba(0,0,0,.45);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- Panel (desktop: lateral derecho) ---------- */
+#sheet{
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: min(92vw, 350px);
+  background: #fff; color:#111;
+  box-shadow: -12px 0 30px rgba(0,0,0,.28);
+  z-index: 9001;
+  transform: translateX(100%);        /* oculto a la derecha */
+  transition: transform .24s ease;
+  display: flex; flex-direction: column;
+  overflow: visible !important;         /* deja salir la oreja */
+  contain: none !important;             /* evita recortes raros */
+}
+#sheet.is-open{ transform: translateX(0) !important; }
+#sheet.no-trans{ transition: none !important; } /* para reEnterSheet() */
+
+/* ---------- Móvil: convierte a bottom-sheet ---------- */
+@media (max-width:700px){
+  #sheet{
+    left:0; right:0; top:auto; bottom:0;
+    width:100vw; height:55vh;
+    border-top-left-radius:16px; border-top-right-radius:16px;
+    transform: translateY(100%);   /* oculto abajo */
+    box-shadow: 0 -12px 30px rgba(0,0,0,.28);
+  }
+  #sheet.is-open{ transform: translateY(0) !important; } /* visible */
+}
+
+
+/* ---------- Oreja/handle (solo desktop, hija del #sheet) ---------- */
+#sheet .sheet-handle{
+  position: absolute;
+  left: -26px; top: 50%;
+  transform: translate(-6px,-50%);
+  width: 32px; height: 72px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 12px 0 0 12px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.25);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 5;
+}
+#sheet .sheet-handle .chev{
+  width: 0; height: 0;
+  border-right: 7px solid #555;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+#sheet:not(.is-open) .sheet-handle{ display: none !important; }
+@media (max-width:700px){
+  #sheet .sheet-handle{ display: none !important; }
+}
+
+/* ---------- Hero / portada ---------- */
+.sheet-hero{ 
+  position: relative; 
+  background:#fff; 
+  display: flex; 
+  flex-direction: column; 
+}
+.sheet-hero::after { display: none; } /* Eliminamos el degradado */
+
+.sheet-cover{
+  display:block; width:100%; height: 160px; object-fit:cover;
+  position: relative;
+  z-index: 1; /* La imagen queda en la capa base */
+  opacity:0; filter: blur(2px);
+  transition: opacity .25s ease, filter .25s ease;
+}
+.sheet-cover.is-loaded{ opacity:1; filter: blur(0); }
+
+/* Título y Pill ahora fluyen debajo de la imagen */
+.sheet-hero-content {
+  padding: 18px 16px 10px;
+  color: #111;
+}
+
+.sheet-status-tag {
+  margin-bottom: 6px;
+}
+
+.sheet-hero-content .sheet-title { 
+  color: #111 !important; 
+  text-shadow: none;
+  font-family: "Arial Black", Arial, sans-serif !important;
+  font-size: 20px;
+  line-height: 1.1;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.sheet-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: 600 13px system-ui;
+  color: #666;
+}
+.sheet-subtitle svg { width: 14px; height: 14px; color: #801039; }
+
+.sheet-close { 
+  position:absolute; top:12px; right:12px;
+  width:32px; height:32px; border-radius:50%; border:0;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display:grid; place-items:center; cursor:pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+.sheet-close:hover {
+  background: #fdf5f7;
+  transform: scale(1.1);
+}
+.sheet-close svg{ width:14px; height:14px; color:#801039; }
+
+
+/* ---------- Body & Secciones ---------- */
+.sheet-body{ padding:14px 14px 16px; overflow:auto; }
+
+/* Barra superior fija (invisible hasta que se activa) */
+#sheetTopBar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 12px 45px 12px 16px; /* Espacio para la X */
+  background: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  display: block;
+}
+
+#sheetTopBar.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+#sheetTopBar .sheet-title {
+  font: 800 14px/1.2 "Arial Black", Arial, sans-serif !important;
+  margin: 0; color: #111;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.sheet-title-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.sheet-title{ font:800 18px/1.2 system-ui, Segoe UI, Roboto, Arial; margin:0; color:#111; }
+
+/* Tarjeta de Monto / Inversión */
+.sheet-metric {
+  margin: 5px 0 25px;
+  padding: 16px 20px;
+  background: #fdf5f7;
+  border-radius: 14px;
+  border-left: 5px solid #801039;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(128, 16, 57, 0.05);
+}
+.metric-label { 
+  font: 800 11px/1 system-ui; 
+  color: #801039; 
+  text-transform: uppercase; 
+  letter-spacing: 0.8px;
+  opacity: 0.8;
+}
+.metric-value { 
+  font: 900 28px/1 "Arial Black", Arial, sans-serif !important; 
+  color: #801039; 
+  margin: 0;
+}
+
+/* Título de Sección con Línea Separadora */
+.sheet-section-title {
+  font: 800 12px/1 system-ui;
+  color: #801039;
+  text-transform: uppercase;
+  margin: 35px 0 15px; 
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sheet-section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(128, 16, 57, 0.15);
+}
+
+/* Descripción */
+.sheet-desc{ font:500 14px/1.5 system-ui; color:#333; }
+.sheet-desc.is-clamped{
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.sheet-desc-more{
+  margin-top:6px; border:0; background:transparent;
+  color:#1a73e8; font:700 12px system-ui; cursor:pointer;
+}
+
+/* ---------- Acciones ---------- */
+.sheet-actions{ margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+.sheet-actions .btn{
+  background:#f6f8ff; color:#1a73e8; border:1px solid #dbe5ff;
+  border-radius:999px; padding:8px 12px; font:800 12px system-ui; cursor:pointer;
+}
+.sheet-actions .btn--video {
+  background: #801039;
+  color: #fff;
+  border-color: #801039;
+}
+
+/* ---------- Indicadores Clave (KPIs) ---------- */
+.sheet-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px;
+  background: #fdf5f7; /* Fondo guinda muy sutil */
+  border-radius: 12px;
+  border: 1px solid rgba(128, 16, 57, 0.08);
+}
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.kpi-card.full { grid-column: span 2; }
+.kpi-label { 
+  font: 800 9px/1 system-ui; 
+  color: #801039; 
+  text-transform: uppercase; 
+  opacity: 0.7; 
+  letter-spacing: 0.4px; 
+}
+.kpi-value { font: 800 13px/1.2 system-ui; color: #111; }
+
+.progress-track {
+  width: 100%; height: 7px; background: rgba(0,0,0,0.06); border-radius: 10px; margin-top: 6px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: #d32f2f; border-radius: 10px; transition: width 1s ease;
+}
+.progress-fill.is-half { background: #f9a825; }
+.progress-fill.is-complete { background: #2e7d32; }

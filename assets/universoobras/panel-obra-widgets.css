@@ -1,0 +1,114 @@
+/* =========================================================
+   WIDGETS INTERACTIVOS DEL PANEL (Carrusel, Slider, Lightbox)
+   ========================================================= */
+
+/* ---------- Carrusel con flechas ---------- */
+.sheet-carousel-mask{ position:relative; }
+.sheet-carousel{
+  margin: 15px 0 5px !important;
+  display: flex !important;
+  flex-flow: row nowrap !important; /* Impide que las fotos bajen */
+  align-items: center !important;
+  gap: 10px !important;
+  overflow-x: auto !important; 
+  overflow-y: hidden !important;
+  height: 105px !important;
+  scroll-snap-type:x mandatory;
+  padding: 4px 10px 12px !important;
+  width: 100%;
+  box-sizing: border-box !important;
+  -webkit-overflow-scrolling: touch;
+}
+.sheet-carousel::-webkit-scrollbar{ height:6px; }
+.sheet-carousel .media{
+  position: relative;
+  flex: 0 0 145px !important; /* Ancho fijo inamovible */
+  width: 145px !important;
+  height: 88px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+  border-radius: 12px; 
+  overflow: hidden;
+  background:#eee; scroll-snap-align:center; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.sheet-carousel .media img{ width:100%; height:100%; object-fit:cover; display:block !important; opacity: 1 !important; transition: transform .18s ease; }
+.sheet-carousel-nav button{
+  pointer-events: auto; position: absolute; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 38px; border-radius: 999px; border: 0; background: rgba(255,255,255,.95);
+  box-shadow: 0 4px 14px rgba(0,0,0,.22); display: grid; place-items: center; cursor: pointer;
+}
+.sheet-carousel-nav .prev{ left:0; transform: translate(-10px, -50%); }
+.sheet-carousel-nav .next{ right: 8px; transform: translate(-6px, -50%); }
+.sheet-carousel-nav button svg{ width: 18px; height: 18px; color:#222; }
+
+/* ---------- Comparador Antes y Después ---------- */
+.comparison-slider {
+  position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden;
+  margin-top: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); user-select: none;
+}
+.comp-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.comp-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.comp-after { z-index: 2; width: 50%; overflow: hidden; border-right: 2px solid #fff; }
+.comp-after img { width: 100%; max-width: none; }
+.comp-label {
+  position: absolute; bottom: 10px; padding: 4px 10px; background: rgba(0,0,0,0.6);
+  color: #fff; font: 800 10px system-ui; border-radius: 4px; z-index: 5; text-transform: uppercase;
+}
+.comp-before .comp-label { right: 10px; }
+.comp-after .comp-label { left: 10px; }
+.comp-range { position: absolute; inset: 0; z-index: 10; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; }
+
+/* ---------- Skeletons ---------- */
+.skel{ position:relative; overflow:hidden; background:#eee; border-radius:10px; }
+.skel::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+  animation: sk 1s infinite;
+}
+@keyframes sk{ from{transform:translateX(-100%)} to{transform:translateX(100%)} }
+
+/* ---------- Visor de Fotos (Lightbox) ---------- */
+#pvBackdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.85); opacity:0; pointer-events:none; 
+  transition:opacity .2s ease; z-index: 11000;
+}
+#pvBackdrop.is-open{ opacity:1; pointer-events:auto; }
+#pv{ 
+  position:fixed; inset:0; display:flex; align-items:center; justify-content:center; 
+  pointer-events:none; z-index: 11001;
+  /* Estado oculto por defecto */
+  opacity: 0; 
+  visibility: hidden; 
+  transition: opacity .2s ease, visibility .2s ease;
+}
+
+/* Permitimos que los clics pasen a través del contenedor #pv para que lleguen al backdrop, 
+   pero activamos los clics específicamente para la caja de la imagen y los botones */
+#pv.is-open{ pointer-events:none; opacity: 1; visibility: visible; } 
+#pv.is-open .box, #pv.is-open .pv-btn { pointer-events: auto; }
+
+#pv .box{
+  position:relative; background:#000; border-radius:14px; overflow:hidden;
+  /* Tamaño fijo para consistencia visual */
+  width: min(92vw, 1100px);
+  height: min(86vh, 860px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:0 18px 60px rgba(0,0,0,.45);
+}
+#pv img{ display:block; width: 100%; height: 100%; object-fit:contain; }
+.pv-btn{
+  position:absolute; display:grid; place-items:center; width:42px; height:42px;
+  border:0; border-radius:999px; background:rgba(255,255,255,.98); cursor:pointer; z-index: 10;
+}
+.pv-close{ top:10px; right:10px; }
+.pv-prev{ left:12px; top:50%; transform:translateY(-50%); }
+.pv-next{ right:12px; top:50%; transform:translateY(-50%); }
+.pv-counter{
+  position:absolute; left:0; right:0; bottom:0; padding:8px 12px;
+  text-align:center; color:#fff; font:700 12px system-ui;
+  background:linear-gradient(180deg, transparent, rgba(0,0,0,.45));
+}

@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- Mirrored from le-lab.io/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:47:36 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head>
+        
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Le Lab est un studio de création basé à Bordeaux dédié à la production de contenus audiovisuels, de prises de vues aériennes, de drone FPV et de design.">
+        <title>FUERZA TACNA</title>
+        <link rel="icon" type="image/png" href="assets/img/favicon.png">
+        <link rel="stylesheet" href="assets/css/main.css?v=110">
+        <link rel="stylesheet" href="assets/css/button.css?v=110">
+        <link rel="stylesheet" href="assets/css/mobile-menu.css?v=110">
+        <link rel="stylesheet" href="assets/css/responsive.css?v=110">
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+        <link rel="stylesheet" type="text/css" href="assets/css/fonts.css?v=110">
+        
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
+
+        <script type="text/javascript" src="assets/js/smoothscroll.js"></script>
+        <!-- Usar solo GSAP 3 para evitar conflictos y congelamientos -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+        <script type="text/javascript" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+        <style>
+            .menu-links a, #hero-header ul li a {
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                font-weight: 900 !important;
+            }
+            /* --- Backgrounds & Fills --- */
+            .magnetic .wrap .span {
+                background-color: #25D366 !important;
+            }
+            .mouse-in,
+            #services h3::before,
+            #services .title-client::before,
+            #intro button:hover,
+            #video-section button:hover,
+            #drone-section button:hover,
+            #design-section button:hover,
+            .references-section button:hover,
+            #button-center:hover {
+                background-color: #ffc300 !important;
+            }
+
+            /* --- Text Colors --- */
+            .scroll-indication,
+            .small-title,
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center,
+            .menu-links a:hover,
+            .menu-links a.active,
+            .hyperlinks {
+                color: #ffc300 !important;
+            }
+
+            /* --- Border Colors --- */
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center {
+                border-color: #ffc300 !important;
+            }
+
+            /* --- Header Fijo Transparente --- */
+            #hero-header {
+                position: fixed;
+                top: 15px; /* Espacio desde el techo */
+                left: 5%;
+                width: 90%;
+                z-index: 1000;
+                background: transparent; /* Contenedor principal sin fondo */
+            }
+
+            /* --- Píldora de Cristal (Solo el Menú Central) --- */
+            #hero-header ul {
+                background-color: rgba(255, 195, 0, 0.4); /* Color de fondo de la página (#FFC300) */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 50px; /* Forma de píldora redonda */
+                padding: 18px 24px; /* Más espacio arriba y abajo para darle 5px más de altura */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra muy reducida y sutil */
+                border: 1px solid rgba(255, 255, 255, 0.4); /* Borde blanco fino y sutil */
+                width: max-content !important; /* Hace que la caja solo ocupe el ancho estrictamente necesario */
+                margin: 0 auto; /* Centra la píldora en la pantalla */
+            }
+            #hero-header ul li {
+                margin: 0 15px !important; /* Reduce la separación entre los textos para hacerla más compacta */
+            }
+
+            /* --- Stacking Context para Main --- */
+            main {
+                position: relative;
+                z-index: 0;
+            }
+
+            /* --- Patrón de Fondo SVG --- */
+            main::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-image: url('assets/img/pattern.svg'); /* Cambia el nombre si tu archivo se llama distinto */
+                background-repeat: no-repeat; /* Evita que se duplique y genere cortes */
+                background-size: cover; /* Escala la imagen para cubrir toda la pantalla */
+                background-position: center; /* Mantiene la parte central del patrón siempre visible */
+                pointer-events: none; /* Crucial: evita que el patrón bloquee los clics en la página */
+                z-index: -1; /* Lo mantiene firmemente en el fondo, debajo de los textos y fotos */
+            }
+
+            /* --- Loader Inicial --- */
+            .initial-loader {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 9999;
+                z-index: 99999999;
+                z-index: 99999999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #ffc300; /* Fondo amarillo inicial */
+            }
+            
+            .initial-loader h1 {
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                font-size: 5rem;
+                line-height: 1.1;
+                margin: 0;
+                text-align: center;
+                color: #801039; /* Texto granate inicial */
+                font-weight: 900;
+                letter-spacing: 2px;
+            }
+
+            .initial-loader .water-layer {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 0%; /* Inicia en 0% para ir subiendo */
+                background-color: #801039; /* Fondo granate del agua */
+                overflow: hidden;
+            }
+
+            .initial-loader .water-content {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .initial-loader .water-content h1 {
+                color: #ffc300; /* Texto amarillo cuando pasa el agua */
+            }
+            
+            /* --- Ola Liquida Fluida y Limpia --- */
+            .initial-loader .wave {
+                position: absolute;
+                bottom: 0%;
+                margin-bottom: -2vw; 
+                left: -10vw; 
+                width: 120vw;
+                height: clamp(60px, 10vw, 130px); /* Altura equilibrada */
+                z-index: 2;
+                pointer-events: none;
+            }
+
+            .initial-loader .wave::before {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 240vw; 
+                height: 100%;
+                /* SVG con curvas más profundas para una ola sólida */
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 150" preserveAspectRatio="none"><path d="M0,50 Q125,10 250,50 T500,50 T750,50 T1000,50 L1000,150 L0,150 Z" fill="%23801039"/></svg>');
+                background-size: 120vw 100%;
+                background-repeat: repeat-x;
+                transform-origin: bottom center;
+                animation: waveAnimFluid 2.5s linear infinite;
+            }
+
+            /* Traslación y un suave subir/bajar para darle volumen a la única ola */
+            @keyframes waveAnimFluid {
+                0% { transform: translateX(0) translateY(0); }
+                50% { transform: translateX(-60vw) translateY(8px); }
+                100% { transform: translateX(-120vw) translateY(0); }
+            }
+
+            /* --- Imagen de Luchito --- */
+            .luchito-img {
+                width: 100%;
+                max-width: 380px; /* Tamaño máximo para PC */
+                height: auto;
+                margin: 2rem auto 0 auto; /* Centrado automático */
+                display: block;
+                position: relative;
+                z-index: 1;
+            }
+
+            /* --- Cajas de Valores --- */
+            .values-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: center;
+                margin-top: -30px; /* Superposición base para PC */
+                position: relative;
+                z-index: 2; /* Para que quede por encima de la imagen */
+            }
+            .value-box {
+                background-color: #801039;
+                color: #ffc300;
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+                font-weight: 900;
+                font-size: 1.15rem;
+                text-transform: uppercase;
+                padding: 0.7rem 2rem;
+                border-radius: 8px;
+                border: 2px solid #ffc300;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+                letter-spacing: 2px;
+                width: 100%;
+                max-width: 280px;
+                text-align: center;
+            }
+
+            /* --- Asegurar que las flechas no se escapen y tengan espacio en todas las secciones --- */
+            #hero-section, #intro, #video-section, #drone-section, #design-section { position: relative !important; }
+
+            /* --- Flechas Flotantes Animadas (Global: PC y Móvil) --- */
+            #mouse-scroll { display: none !important; } /* Ocultamos el mouse clásico viejo */
+            
+            .mobile-arrows {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                position: absolute;
+                bottom: 11vh; /* Subido un pelín más arriba */
+                z-index: 9999;
+                text-decoration: none;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .mobile-arrows.arr-left { left: 20%; transform: translateX(-50%); }
+            .mobile-arrows.arr-center { left: 50%; transform: translateX(-50%); }
+            .mobile-arrows.arr-right { left: 80%; transform: translateX(-50%); }
+            .mobile-arrows span {
+                display: block;
+                width: 14px;  /* Reducido para un diseño más sutil */
+                height: 14px;
+                border-bottom: 3px solid #ffffff; /* Borde más fino */
+                border-right: 3px solid #ffffff;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* Sombra más suave para acompañar la transparencia */
+                margin: -4px auto; /* Margen ajustado al nuevo tamaño */
+                animation: arrow-float 2s infinite;
+            }
+            .mobile-arrows span:nth-child(2) { animation-delay: -0.2s; }
+            .mobile-arrows span:nth-child(3) { animation-delay: -0.4s; }
+
+            /* Control de visualización del título (Desktop vs Mobile) */
+            .title-mobile { display: none !important; }
+            .title-desktop { 
+                display: block; 
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                font-weight: 900;
+                font-size: clamp(3rem, 5vw, 5.5rem); /* Se adapta según la pantalla de PC */
+                line-height: 1.05;
+                color: #801039 !important;
+                text-align: left; /* Previene el centrado heredado */
+                margin-bottom: 1.5rem;
+                letter-spacing: -2px;
+                white-space: nowrap; /* Fuerza a que sean exactamente 3 líneas y nada se caiga */
+            }
+
+            /* --- Layout Desktop para la Sección 2 (#intro) --- */
+            .candidatos-intro-split {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap !important; /* Fuerza a que no se caigan a la siguiente línea */
+                align-items: center;
+                justify-content: space-between; /* Empuja el texto a la izquierda y el carrusel a la derecha */
+                width: 95%; /* Toma casi toda la pantalla horizontalmente */
+                max-width: 1600px; /* Límite muy ancho para monitores grandes */
+                margin: 0 auto;
+                padding: 0;
+                gap: 15%; /* Aumentamos el hueco invisible en el centro drásticamente */
+            }
+            .candidatos-intro-text {
+                width: 35%; /* Anclamos su caja firmemente hacia la izquierda */
+                flex-shrink: 0;
+                text-align: left;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            .intro-btn-container {
+                margin-top: 2rem;
+                width: 100%;
+                display: flex;
+                justify-content: flex-start;
+            }
+            .circular-testimonial-container {
+                width: 40%; /* Anclamos el carrusel firmemente hacia la derecha */
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            /* --- Ocultar flechas móviles en PC --- */
+            @media (min-width: 769px) {
+                /* Oculta a Luchito y los botones rojos en la versión normal (PC) */
+                .luchito-img, .values-container {
+                    display: none !important;
+                }
+
+            /* Bajar el contenido de la Sección 2 en PC para compensar el espacio del menú superior */
+            .candidatos-intro-split {
+                margin-top: 6vh !important;
+            }
+
+            /* --- Ajuste milimétrico para Secciones 3, 4 y 5 en PC --- */
+            #video-section, #drone-section, #design-section {
+                min-height: 100vh !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #video-section .row, #drone-section .row, #design-section .row {
+                margin-top: 8vh; /* Compensa el menú superior */
+                width: 100%;
+            }
+
+            /* --- Pegar el texto de la Sección 3 al video en PC --- */
+            #video-section .col-md-6:first-child {
+                padding-right: 1vw !important; /* Deja un pequeño respiro a la derecha del video */
+            }
+            #video-section .text-column {
+                padding-left: 1vw !important; /* Deja un pequeño respiro a la izquierda del texto */
+                margin-left: 0 !important; /* Quitamos el margen negativo para evitar que se monte encima */
+            }
+            }
+
+            @media (max-width: 768px) {
+                .initial-loader h1 { font-size: 3.5rem; }
+                
+                /* --- Unificación del Imán: Apagamos el CSS nativo para que actúe el JS y sea idéntico a las flechas --- */
+                html { scroll-snap-type: none !important; scroll-behavior: smooth; }
+                #hero-section, #intro, #video-section, #drone-section, #design-section, .references-section {
+                    scroll-snap-align: none !important;
+                }
+
+                /* --- Responsive Mobile: Título apilado al mismo ancho --- */
+                .title-desktop { display: none !important; }
+                .title-mobile { 
+                    display: flex !important; 
+                    flex-direction: column; 
+                    width: 100%; 
+                    text-align: center; 
+                    margin-bottom: 1.5rem; 
+                    font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                    color: #801039 !important;
+                    font-weight: 900;
+                }
+                .title-mobile span { display: block; line-height: 0.98; white-space: nowrap; }
+                .title-mobile .t-line1 { font-size: 19.5vw !important; letter-spacing: 0; }
+                .title-mobile .t-line2 { font-size: 13vw !important; letter-spacing: 0; }
+                .title-mobile .t-line3 { font-size: 12.5vw !important; letter-spacing: 0; }
+
+                .luchito-img {
+                    max-width: 65vw !important; /* Escala perfecta para el ancho del celular */
+                    max-height: 38vh !important; /* Límite de altura para encajar en 100vh */
+                    object-fit: contain;
+                    margin-top: 0.5rem !important; /* Espacio ideal bajo el texto en móvil */
+                    order: 2; /* Fuerza a que la imagen se coloque debajo del texto */
+                }
+
+                .values-container {
+                    order: 3; /* Fuerza a que se coloquen debajo de la foto */
+                    margin-top: -35vw !important; /* Bajado 5 puntos más */
+                    margin-bottom: 2rem;
+                    gap: 2.5vw;
+                    z-index: 10;
+                }
+                .intro-btn-container {
+                    order: 4; /* Fuerza a que se coloque debajo de los valores */
+                    justify-content: center;
+                    margin-top: 0;
+                    margin-bottom: 2.5rem;
+                }
+                .value-box {
+                    font-size: 4.5vw; /* Escala tipográfica fluida */
+                    padding: 2.5vw 0;
+                    width: 65vw;
+                }
+
+                /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
+                #intro, #video-section, #drone-section, #design-section {
+                    height: 100vh !important; /* Fuerza 1 pantalla exacta */
+                    min-height: 100vh !important;
+                    padding: 10vh 0 15vh 0 !important; /* Quitamos colchón arriba para que suban */
+                    margin-top: 0 !important; /* SIN MARGEN NEGATIVO para que el imán centre perfecto */
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: center !important;
+                    align-items: center !important; /* TRUCO: Fuerza a que todo el contenido flote en el medio exacto */
+                    box-sizing: border-box;
+                }
+                #intro {
+                    padding-top: 8vh !important; /* Reducimos el peso superior para subirlo notoriamente en celulares */
+                    padding-bottom: 14vh !important; /* Le damos más espacio al suelo */
+                }
+                #video-section .row, #drone-section .row, #design-section .row {
+                    width: 100%;
+                    margin: 0;
+                }
+                .candidatos-intro-split {
+                    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%;
+                }
+                .candidatos-intro-text {
+                    width: 100%;
+                    text-align: center;
+                }
+                .circular-testimonial-container {
+                    display: none !important; /* Oculta el carrusel completamente en celulares */
+                }
+            }
+            
+            /* Keyframes para la animación de las flechas (Fuera del Media Query para que funcione en PC) */
+            @keyframes arrow-float {
+                0% { opacity: 0; transform: translateY(-10px) rotate(45deg); } /* Desplazamiento más corto y delicado */
+                50% { opacity: 0.5; transform: translateY(0) rotate(45deg); } /* Opacidad a la mitad para hacerlas más transparentes */
+                100% { opacity: 0; transform: translateY(10px) rotate(45deg); }
+            }
+
+            /* --- Ocultar nivel profundo del carrusel --- */
+            .ocultar-tarjeta-atras {
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+
+            /* --- Animaciones y estilos del botón Ver Más (Shiny Pillar) --- */
+            @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+            @property --gradient-angle-offset { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+            @property --gradient-percent { syntax: "<percentage>"; initial-value: 5%; inherits: false; }
+            @property --gradient-shine { syntax: "<color>"; initial-value: white; inherits: false; }
+
+            .shiny-pillar {
+                --shiny-cta-bg: #801039;
+                --shiny-cta-bg-subtle: #6a0b2d;
+                --shiny-cta-fg: #ffc300;
+                --shiny-cta-highlight: #ffc300;
+                --shiny-cta-highlight-subtle: #ffd659;
+                --animation: gradient-angle linear infinite;
+                --duration: 3s;
+                --shadow-size: 2px;
+                --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+
+                isolation: isolate;
+                position: relative;
+                overflow: hidden;
+                cursor: pointer;
+                outline-offset: 4px;
+                padding: 0.8rem 1.5rem;
+                font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif;
+                font-weight: 900;
+                font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+                text-transform: uppercase;
+                line-height: 1.2;
+                border: 2px solid transparent;
+                border-radius: 8px;
+                color: var(--shiny-cta-fg) !important;
+                background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+                  conic-gradient(
+                    from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+                    transparent,
+                    var(--shiny-cta-highlight) var(--gradient-percent),
+                    var(--gradient-shine) calc(var(--gradient-percent) * 2),
+                    var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
+                    transparent calc(var(--gradient-percent) * 4)
+                  ) border-box;
+                box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle), 0 8px 20px rgba(0,0,0,0.2);
+                transition: var(--transition);
+                transition-property: --gradient-angle-offset, --gradient-percent, --gradient-shine;
+                max-width: 250px;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .shiny-pillar::before,
+            .shiny-pillar::after,
+            .shiny-pillar span::before {
+                content: ""; pointer-events: none; position: absolute; inset-inline-start: 50%; inset-block-start: 50%; translate: -50% -50%; z-index: -1;
+            }
+            .shiny-pillar:active { translate: 0 1px; }
+            .shiny-pillar::before {
+                --size: calc(100% - var(--shadow-size) * 3);
+                --position: 2px;
+                --space: calc(var(--position) * 2);
+                width: var(--size);
+                height: var(--size);
+                background: radial-gradient( circle at var(--position) var(--position), white calc(var(--position) / 4), transparent 0 ) padding-box;
+                background-size: var(--space) var(--space);
+                background-repeat: space;
+                mask-image: conic-gradient( from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black );
+                -webkit-mask-image: conic-gradient( from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black );
+                border-radius: inherit;
+                opacity: 0.2;
+                z-index: -1;
+            }
+            .shiny-pillar::after {
+                --animation: shimmer linear infinite;
+                width: 100%;
+                aspect-ratio: 1;
+                background: linear-gradient( -50deg, transparent, var(--shiny-cta-highlight), transparent );
+                mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+                -webkit-mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+                opacity: 0.6;
+            }
+            .shiny-pillar span { z-index: 1; }
+            .shiny-pillar span::before {
+                --size: calc(100% + 1rem);
+                width: var(--size);
+                height: var(--size);
+                box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
+                opacity: 0;
+                transition: opacity var(--transition);
+                animation: calc(var(--duration) * 1.5) breathe linear infinite;
+            }
+            .shiny-pillar,
+            .shiny-pillar::before,
+            .shiny-pillar::after {
+                animation: var(--animation) var(--duration), var(--animation) calc(var(--duration) / 0.4) reverse paused;
+                animation-composition: add;
+            }
+            .shiny-pillar:is(:hover, :focus-visible) {
+                --gradient-percent: 20%;
+                --gradient-angle-offset: 95deg;
+                --gradient-shine: var(--shiny-cta-highlight-subtle);
+            }
+            .shiny-pillar:is(:hover, :focus-visible),
+            .shiny-pillar:is(:hover, :focus-visible)::before,
+            .shiny-pillar:is(:hover, :focus-visible)::after {
+                animation-play-state: running;
+            }
+            .shiny-pillar:is(:hover, :focus-visible) span::before { opacity: 1; }
+            @keyframes gradient-angle { to { --gradient-angle: 360deg; } }
+            @keyframes shimmer { to { rotate: 360deg; } }
+            @keyframes breathe { from, to { scale: 1; } 50% { scale: 1.2; } }
+
+            /* --- Estilos Mapa Interactivo Tacna --- */
+            #mapa-tacna-container svg {
+                width: 100%;
+                height: auto;
+                overflow: visible;
+                filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
+            }
+            #mapa-tacna-container svg path, #mapa-tacna-container svg polygon, #mapa-tacna-container svg g {
+                fill: #801039; /* Color base granate institucional */
+                stroke: url(#map-shiny-border); /* Borde animado brillante */
+                stroke-width: 2.5px;
+                stroke-linejoin: round;
+                transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27); /* Transición con rebote elástico */
+                cursor: pointer;
+                transform-origin: center;
+            }
+            #mapa-tacna-container svg path:hover, #mapa-tacna-container svg polygon:hover, #mapa-tacna-container svg g:hover {
+                fill: #ffc300; /* Amarillo al pasar el mouse */
+                stroke: #ffffff; /* Borde blanco para efecto 3D */
+                stroke-width: 3.5px;
+                transform: translateY(-12px) scale(1.03); /* Se levanta más hacia el usuario */
+                filter: drop-shadow(0 20px 25px rgba(0,0,0,0.5)); /* Sombra proyectada más intensa oscura */
+            }
+            /* Animación flotante continua para que el mapa se vea vivo */
+            #mapa-tacna-container {
+                animation: map-float 6s ease-in-out infinite;
+            }
+            @keyframes map-float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-12px); }
+                100% { transform: translateY(0px); }
+            }
+            
+            /* --- Tooltip del Mapa Interactivo --- */
+            #map-tooltip {
+                position: fixed;
+                background: rgba(20, 20, 20, 0.85); /* Estilo oscuro y limpio aesthetic */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 195, 0, 0.4); /* Borde sutil dorado */
+                color: #fff;
+                padding: 0.8rem 1.4rem; /* Más pequeño y elegante */
+                border-radius: 8px;
+                pointer-events: none;
+                opacity: 0;
+                visibility: hidden;
+                z-index: 999999;
+                transform: translate(-50%, -100%) scale(0.9);
+                transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+                text-align: center;
+            }
+            #map-tooltip.visible {
+                opacity: 1;
+                visibility: visible;
+                transform: translate(-50%, -130%) scale(1);
+            }
+            #map-tooltip h4 { margin: 0 0 0.3rem 0; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; color: #ffc300; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1; }
+            #map-tooltip p { margin: 0; font-size: 0.75rem; font-weight: 600; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+        </style>
+
+        <style>
+            /* --- Efecto Star Wars para "Súmate" --- */
+            #sumate-menu-item {
+                position: relative; /* Contexto para el posicionamiento de la imagen */
+                /* Ayuda a centrar verticalmente el texto de dos líneas */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Ajuste para que el texto de dos líneas no deforme la píldora */
+            #sumate-menu-item > a {
+                line-height: 1.05;
+                font-size: 13px; /* Tamaño más grande y equilibrado */
+                text-align: center;
+                /* --- NUEVO: Preparación para la animación de brillo --- */
+                position: relative;
+                z-index: 1; /* Asegura que el texto principal esté por encima del brillo */
+                transition: color 0.3s ease, transform 0.3s ease;
+            }
+
+            #sumate-menu-item .lucho-fuerza-peek {
+                position: absolute;
+                bottom: -30px; /* Lo bajamos drásticamente con píxeles para que se note el cambio */
+                left: 50%;
+                transform: translateX(-50%) translateY(-20px); /* Lo sube para que esté oculto inicialmente */
+                opacity: 0;
+                transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transición con rebote */
+                pointer-events: none; /* Para que no interfiera con el clic */
+            }
+
+            #sumate-menu-item .lucho-fuerza-peek img {
+                width: 100px; /* Tamaño del personaje (reducido) */
+                height: auto;
+                display: block;
+                filter: drop-shadow(0px 5px 15px rgba(0, 0, 0, 0.4));
+                /* Desvanecer la parte inferior de la imagen (más pronunciado) */
+                mask-image: linear-gradient(to bottom, black 40%, transparent 70%);
+                -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 70%);
+            }
+
+            /* --- NUEVO: Capa de brillo (pseudo-elemento) --- */
+            #sumate-menu-item > a::before {
+                content: 'SÚMATE\A A LA FUERZA'; /* \A crea un salto de línea */
+                white-space: pre; /* Permite que el salto de línea funcione */
+                color: #adfdff; /* Color base del brillo (cian claro) */
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: -1; /* Se posiciona detrás del texto principal */
+                opacity: 0;
+                filter: blur(1.5px);
+                transition: opacity 0.4s ease;
+            }
+
+            /* --- NUEVO: Animaciones de parpadeo y pulso --- */
+            @keyframes force-flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.95; } }
+            @keyframes force-glow-pulse {
+                0% { filter: blur(1.5px); text-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff, 0 0 35px #00d9ff; }
+                100% { filter: blur(2.5px); text-shadow: 0 0 15px #00d9ff, 0 0 30px #00d9ff, 0 0 50px #00d9ff; }
+            }
+
+            /* --- REEMPLAZO: El nuevo efecto al pasar el mouse --- */
+            #sumate-menu-item:hover > a {
+                color: #fff !important;
+                transform: translateY(-2px);
+                animation: force-flicker 0.15s infinite alternate; /* Aplicamos el parpadeo */
+            }
+
+            #sumate-menu-item:hover > a::before {
+                opacity: 1;
+                animation: force-glow-pulse 1s infinite alternate ease-in-out; /* Aplicamos el pulso al brillo */
+            }
+
+            #sumate-menu-item:hover .lucho-fuerza-peek {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0); /* Baja a su posición final para asomarse */
+            }
+        </style>
+
+    </head>
+
+    <body data-barba="wrapper" onload="init()">
+        
+        <!-- Loader que solo se ve al recargar -->
+        <div class="initial-loader">
+            <h1>FUERZA<br>TACNA</h1>
+            <div class="water-layer">
+                <div class="water-content">
+                    <h1>FUERZA<br>TACNA</h1>
+                </div>
+            </div>
+            <div class="wave"></div>
+        </div>
+
+        <script>
+            // Se ejecuta de inmediato para evitar el doble parpadeo
+            let isReload = false;
+            if (window.performance) {
+                if (performance.getEntriesByType && performance.getEntriesByType("navigation").length > 0) isReload = performance.getEntriesByType("navigation")[0].type === "reload";
+                else if (performance.navigation && performance.navigation.type === 1) isReload = true;
+            }
+            if (isReload) sessionStorage.removeItem('fuerzaTacnaLoaderPlayed');
+
+            if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) document.querySelector('.initial-loader').style.display = 'none';
+        </script>
+
+        <script>AOS.init();</script>
+        <div class="cursor-follower"></div>
+        <div class="load-container"><div class="loading-screen"></div></div>
+        <main data-barba="container" data-barba-namespace="home-section" class="animate-this">
+
+        <style>
+            .menu-links a, #hero-header ul li a {
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                font-weight: 900 !important;
+            }
+            /* --- Backgrounds & Fills --- */
+            .magnetic .wrap .span {
+                background-color: #25D366 !important;
+            }
+            .mouse-in,
+            #services h3::before,
+            #services .title-client::before,
+            #intro button:hover,
+            #video-section button:hover,
+            #drone-section button:hover,
+            #votar-section button:hover,
+            .references-section button:hover,
+            #button-center:hover {
+                background-color: #ffc300 !important;
+            }
+
+            /* --- Text Colors --- */
+            .scroll-indication,
+            .small-title,
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #votar-section button,
+            .references-section button,
+            #button-center,
+            .menu-links a:hover,
+            .menu-links a.active,
+            .hyperlinks {
+                color: #ffc300 !important;
+            }
+
+            /* --- Border Colors --- */
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #votar-section button,
+            .references-section button,
+            #button-center {
+                border-color: #ffc300 !important;
+            }
+
+            /* --- Header Fijo Transparente --- */
+            #hero-header {
+                position: fixed;
+                top: 15px; /* Espacio desde el techo */
+                left: 2% !important;
+                width: 96% !important;
+                box-sizing: border-box !important;
+                z-index: 1000;
+                background: transparent; /* Contenedor principal sin fondo */
+            }
+            @media (min-width: 992px) {
+                #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; }
+                #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; }
+                #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; }
+            }
+
+            /* --- Píldora de Cristal (Solo el Menú Central) --- */
+            #hero-header ul {
+                background-color: rgba(255, 195, 0, 0.4); /* Color de fondo de la página (#FFC300) */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 50px; /* Forma de píldora redonda */
+                padding: 18px 24px; /* Más espacio arriba y abajo para darle 5px más de altura */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra muy reducida y sutil */
+                border: 1px solid rgba(255, 255, 255, 0.4); /* Borde blanco fino y sutil */
+                width: max-content !important; /* Hace que la caja solo ocupe el ancho estrictamente necesario */
+                margin: 0 auto; /* Centra la píldora en la pantalla */
+            }
+            #hero-header ul li {
+                margin: 0 15px !important; /* Reduce la separación entre los textos para hacerla más compacta */
+            }
+
+            /* --- Stacking Context para Main --- */
+            main {
+                position: relative;
+                z-index: 0;
+            }
+
+            /* --- Patrón de Fondo SVG --- */
+            main::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-image: url('assets/img/pattern.svg'); /* Cambia el nombre si tu archivo se llama distinto */
+                background-repeat: no-repeat; /* Evita que se duplique y genere cortes */
+                background-size: cover; /* Escala la imagen para cubrir toda la pantalla */
+                background-position: center; /* Mantiene la parte central del patrón siempre visible */
+                pointer-events: none; /* Crucial: evita que el patrón bloquee los clics en la página */
+                z-index: -1; /* Lo mantiene firmemente en el fondo, debajo de los textos y fotos */
+            }
+
+            /* --- Loader Inicial --- */
+            .initial-loader {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #ffc300; /* Fondo amarillo inicial */
+            }
+            
+            .initial-loader h1 {
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                font-size: 5rem;
+                line-height: 1.1;
+                margin: 0;
+                text-align: center;
+                color: #801039; /* Texto granate inicial */
+                font-weight: 900;
+                letter-spacing: 2px;
+            }
+
+            .initial-loader .water-layer {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 0%; /* Inicia en 0% para ir subiendo */
+                background-color: #801039; /* Fondo granate del agua */
+                overflow: hidden;
+            }
+
+            .initial-loader .water-content {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .initial-loader .water-content h1 {
+                color: #ffc300; /* Texto amarillo cuando pasa el agua */
+            }
+            
+            /* --- Ola Liquida Fluida y Limpia --- */
+            .initial-loader .wave {
+                position: absolute;
+                bottom: 0%;
+                margin-bottom: -2vw; 
+                left: -10vw; 
+                width: 120vw;
+                height: clamp(60px, 10vw, 130px); /* Altura equilibrada */
+                z-index: 2;
+                pointer-events: none;
+            }
+
+            .initial-loader .wave::before {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 240vw; 
+                height: 100%;
+                /* SVG con curvas más profundas para una ola sólida */
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 150" preserveAspectRatio="none"><path d="M0,50 Q125,10 250,50 T500,50 T750,50 T1000,50 L1000,150 L0,150 Z" fill="%23801039"/></svg>');
+                background-size: 120vw 100%;
+                background-repeat: repeat-x;
+                transform-origin: bottom center;
+                animation: waveAnimFluid 2.5s linear infinite;
+            }
+
+            /* Traslación y un suave subir/bajar para darle volumen a la única ola */
+            @keyframes waveAnimFluid {
+                0% { transform: translateX(0) translateY(0); }
+                50% { transform: translateX(-60vw) translateY(8px); }
+                100% { transform: translateX(-120vw) translateY(0); }
+            }
+
+            /* --- Imagen de Luchito --- */
+            .luchito-img {
+                width: 100%;
+                max-width: 380px; /* Tamaño máximo para PC */
+                height: auto;
+                margin: 2rem auto 0 auto; /* Centrado automático */
+                display: block;
+                position: relative;
+                z-index: 1;
+            }
+
+            /* --- Cajas de Valores --- */
+            .values-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: center;
+                margin-top: -30px; /* Superposición base para PC */
+                position: relative;
+                z-index: 2; /* Para que quede por encima de la imagen */
+            }
+            .value-box {
+                background-color: #801039;
+                color: #ffc300;
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+                font-weight: 900;
+                font-size: 1.15rem;
+                text-transform: uppercase;
+                padding: 0.7rem 2rem;
+                border-radius: 8px;
+                border: 2px solid #ffc300;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+                letter-spacing: 2px;
+                width: 100%;
+                max-width: 280px;
+                text-align: center;
+            }
+
+            /* --- Asegurar que las flechas no se escapen y tengan espacio en todas las secciones --- */
+            #hero-section, #intro, #video-section, #drone-section, #votar-section { position: relative !important; }
+
+            /* --- Flechas Flotantes Animadas (Global: PC y Móvil) --- */
+            #mouse-scroll { display: none !important; } /* Ocultamos el mouse clásico viejo */
+            
+            .mobile-arrows {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                position: absolute;
+                bottom: 11vh; /* Subido un pelín más arriba */
+                z-index: 9999;
+                text-decoration: none;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .mobile-arrows.arr-left { left: 20%; transform: translateX(-50%); }
+            .mobile-arrows.arr-center { left: 50%; transform: translateX(-50%); }
+            .mobile-arrows.arr-right { left: 80%; transform: translateX(-50%); }
+            .mobile-arrows span {
+                display: block;
+                width: 14px;  /* Reducido para un diseño más sutil */
+                height: 14px;
+                border-bottom: 3px solid #ffffff; /* Borde más fino */
+                border-right: 3px solid #ffffff;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* Sombra más suave para acompañar la transparencia */
+                margin: -4px auto; /* Margen ajustado al nuevo tamaño */
+                animation: arrow-float 2s infinite;
+            }
+            .mobile-arrows span:nth-child(2) { animation-delay: -0.2s; }
+            .mobile-arrows span:nth-child(3) { animation-delay: -0.4s; }
+
+            /* Bajar específicamente las flechas de la Sección 2 */
+            #intro .mobile-arrows {
+                top: 90% !important; bottom: auto !important;
+            }
+            
+            /* Bajar específicamente las flechas de la Sección 3 */
+            #video-section .mobile-arrows {
+                top: 93% !important; bottom: auto !important;
+            }
+            /* Bajar específicamente las flechas de la Sección 4 */
+            #drone-section .mobile-arrows {
+                top: 96.5% !important; bottom: auto !important;
+            }
+            /* Bajar específicamente las flechas de la última sección (Votar) */
+            #votar-section .mobile-arrows {
+                top: 96.5% !important; bottom: auto !important;
+            }
+
+            /* Control de visualización del título (Desktop vs Mobile) */
+            .title-mobile { display: none !important; }
+            .title-desktop { display: block; }
+
+            /* --- Layout Desktop para la Sección 2 (#intro) --- */
+            .candidatos-intro-split {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap !important; /* Fuerza a que no se caigan a la siguiente línea */
+                align-items: center;
+            justify-content: space-between; /* Obliga a los elementos a separarse a los extremos */
+            width: 95%; /* Permite que ocupen casi toda la pantalla horizontalmente */
+            max-width: 1600px; /* Aumenta drásticamente el límite para monitores grandes */
+                margin: 0 auto;
+            gap: 15%; /* Hueco invisible inmenso en el medio */
+            }
+            .candidatos-intro-text {
+            width: 35%; /* Anclamos firmemente la caja hacia la izquierda */
+                flex-shrink: 0;
+            text-align: left;
+            }
+            .circular-testimonial-container {
+            width: 40%; /* Anclamos firmemente el carrusel hacia la derecha */
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            /* --- Ocultar flechas móviles en PC --- */
+            @media (min-width: 769px) {
+                /* Oculta a Luchito y los botones rojos en la versión normal (PC) */
+                .luchito-img, .values-container {
+                    display: none !important;
+                }
+
+            /* --- Reducir separación excesiva entre Sección 2 y 3 en PC --- */
+            #intro {
+                min-height: 75vh !important; /* Quitamos altura sobrante */
+                padding-top: 20vh !important; /* Separación extra respecto a la Sección 1 */
+            }
+            #video-section {
+                margin-top: -2vh !important; /* Un ajuste muy leve y seguro */
+            }
+            #drone-section {
+                margin-top: 0vh !important; /* Devolvemos el espacio al mapa */
+            }
+            #votar-section {
+                margin-top: 0vh !important; /* Devolvemos el espacio */
+            }
+
+            /* Bajar el contenido de la Sección 2 en PC para compensar el espacio del menú superior */
+            .candidatos-intro-split {
+                margin-top: 6vh !important;
+            }
+            
+            /* Subir el bloque de texto de la Sección 2 un poco más respecto al carrusel */
+            .candidatos-intro-text {
+                transform: translateY(-4vh); /* Subido notoriamente respecto al carrusel */
+            }
+
+            /* --- Ajuste milimétrico para Secciones 3, 4 y 5 en PC --- */
+            #video-section, #drone-section, #votar-section {
+                min-height: 85vh !important; /* Ajuste para eliminar espacios muertos entre bloques */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #video-section .row, #drone-section .row, #votar-section .row {
+                margin-top: 8vh; /* Compensa el menú superior */
+                width: 100%;
+            }
+
+            /* --- Pegar el texto de la Sección 3 al video en PC --- */
+            #video-section .col-md-6:first-child {
+                padding-right: 1vw !important; /* Deja un pequeño respiro a la derecha del video */
+            }
+            #video-section .text-column {
+                padding-left: 1vw !important; /* Deja un pequeño respiro a la izquierda del texto */
+                margin-left: 0 !important; /* Quitamos el margen negativo para evitar que se monte encima */
+            }
+            }
+
+            @media (max-width: 768px) {
+                .initial-loader h1 { font-size: 3.5rem; }
+                
+                /* --- Unificación del Imán: Apagamos el CSS nativo para que actúe el JS y sea idéntico a las flechas --- */
+                html { scroll-snap-type: none !important; scroll-behavior: smooth; }
+                #hero-section, #intro, #video-section, #drone-section, #votar-section, .references-section {
+                    scroll-snap-align: none !important;
+                }
+
+                /* --- Responsive Mobile: Título apilado al mismo ancho --- */
+                .title-desktop { display: none !important; }
+                .title-mobile { display: flex !important; flex-direction: column; width: 100%; text-align: center; margin-bottom: 1.5rem; }
+                .title-mobile span { display: block; line-height: 0.98; white-space: nowrap; }
+                .title-mobile .t-line1 { font-size: 19.5vw !important; letter-spacing: 0; }
+                .title-mobile .t-line2 { font-size: 13vw !important; letter-spacing: 0; }
+                .title-mobile .t-line3 { font-size: 12.5vw !important; letter-spacing: 0; }
+
+                .luchito-img {
+                    max-width: 65vw !important; /* Escala perfecta para el ancho del celular */
+                    max-height: 38vh !important; /* Límite de altura para encajar en 100vh */
+                    object-fit: contain;
+                    margin-top: 0.5rem !important; /* Espacio ideal bajo el texto en móvil */
+                    order: 2; /* Fuerza a que la imagen se coloque debajo del texto */
+                }
+
+                .values-container {
+                    order: 3; /* Fuerza a que se coloquen debajo de la foto */
+                    margin-top: -35vw !important; /* Bajado 5 puntos más */
+                    margin-bottom: 2rem;
+                    gap: 2.5vw;
+                    z-index: 10;
+                }
+                .value-box {
+                    font-size: 4.5vw; /* Escala tipográfica fluida */
+                    padding: 2.5vw 0;
+                    width: 65vw;
+                }
+
+                /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
+                #intro, #video-section, #drone-section, #votar-section {
+                    height: 100vh !important; /* Fuerza 1 pantalla exacta */
+                    min-height: 100vh !important;
+                    padding: 10vh 0 15vh 0 !important; /* Quitamos colchón arriba para que suban */
+                    margin-top: 0 !important; /* SIN MARGEN NEGATIVO para que el imán centre perfecto */
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: center !important;
+                    align-items: center !important; /* TRUCO: Fuerza a que todo el contenido flote en el medio exacto */
+                    box-sizing: border-box;
+                }
+                #intro {
+                    height: auto !important;
+                    min-height: 85vh !important;
+                    padding-top: 26vh !important; /* Aumentamos el peso superior para separarlo un poco de la Sección 1 */
+                    padding-bottom: 5vh !important; /* Le quitamos el colchón de espacio vacío abajo */
+                }
+                #video-section {
+                    margin-top: 0vh !important;
+                }
+            #drone-section {
+                    margin-top: 0vh !important; /* Devolvemos el espacio al mapa en celulares */
+            }
+            #votar-section {
+                    margin-top: 0vh !important; 
+            }
+                #video-section .row, #drone-section .row, #votar-section .row {
+                    width: 100%;
+                    margin: 0;
+                }
+                .candidatos-intro-split {
+                    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%;
+                }
+                .candidatos-intro-text {
+                    width: 100%;
+                    text-align: center;
+                }
+                .circular-testimonial-container {
+                    display: none !important; /* Oculta el carrusel completamente en celulares */
+                }
+            }
+            
+            /* Keyframes para la animación de las flechas (Fuera del Media Query para que funcione en PC) */
+            @keyframes arrow-float {
+                0% { opacity: 0; transform: translateY(-10px) rotate(45deg); } /* Desplazamiento más corto y delicado */
+                50% { opacity: 0.5; transform: translateY(0) rotate(45deg); } /* Opacidad a la mitad para hacerlas más transparentes */
+                100% { opacity: 0; transform: translateY(10px) rotate(45deg); }
+            }
+
+            /* --- Ocultar nivel profundo del carrusel --- */
+            .ocultar-tarjeta-atras {
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+
+            /* --- Animaciones y estilos del botón Ver Más (Shiny Pillar) --- */
+            @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+            @property --gradient-angle-offset { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+            @property --gradient-percent { syntax: "<percentage>"; initial-value: 5%; inherits: false; }
+            @property --gradient-shine { syntax: "<color>"; initial-value: white; inherits: false; }
+
+            .shiny-pillar {
+                --shiny-cta-bg: #801039;
+                --shiny-cta-bg-subtle: #6a0b2d;
+                --shiny-cta-fg: #ffc300;
+                --shiny-cta-highlight: #ffc300;
+                --shiny-cta-highlight-subtle: #ffd659;
+                --animation: gradient-angle linear infinite;
+                --duration: 3s;
+                --shadow-size: 2px;
+                --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+
+                isolation: isolate;
+                position: relative;
+                overflow: hidden;
+                cursor: pointer;
+                outline-offset: 4px;
+                padding: 0.8rem 1.5rem;
+                font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif;
+                font-weight: 900;
+                font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+                text-transform: uppercase;
+                line-height: 1.2;
+                border: 2px solid transparent;
+                border-radius: 8px;
+                color: var(--shiny-cta-fg) !important;
+                background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+                  conic-gradient(
+                    from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+                    transparent,
+                    var(--shiny-cta-highlight) var(--gradient-percent),
+                    var(--gradient-shine) calc(var(--gradient-percent) * 2),
+                    var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
+                    transparent calc(var(--gradient-percent) * 4)
+                  ) border-box;
+                box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle), 0 8px 20px rgba(0,0,0,0.2);
+                transition: var(--transition);
+                transition-property: --gradient-angle-offset, --gradient-percent, --gradient-shine;
+                max-width: 250px;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .shiny-pillar::before,
+            .shiny-pillar::after,
+            .shiny-pillar span::before {
+                content: ""; pointer-events: none; position: absolute; inset-inline-start: 50%; inset-block-start: 50%; translate: -50% -50%; z-index: -1;
+            }
+            .shiny-pillar:active { translate: 0 1px; }
+            .shiny-pillar::before {
+                --size: calc(100% - var(--shadow-size) * 3);
+                --position: 2px;
+                --space: calc(var(--position) * 2);
+                width: var(--size);
+                height: var(--size);
+                background: radial-gradient( circle at var(--position) var(--position), white calc(var(--position) / 4), transparent 0 ) padding-box;
+                background-size: var(--space) var(--space);
+                background-repeat: space;
+                mask-image: conic-gradient( from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black );
+                -webkit-mask-image: conic-gradient( from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black );
+                border-radius: inherit;
+                opacity: 0.2;
+                z-index: -1;
+            }
+            .shiny-pillar::after {
+                --animation: shimmer linear infinite;
+                width: 100%;
+                aspect-ratio: 1;
+                background: linear-gradient( -50deg, transparent, var(--shiny-cta-highlight), transparent );
+                mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+                -webkit-mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+                opacity: 0.6;
+            }
+            .shiny-pillar span { z-index: 1; }
+            .shiny-pillar span::before {
+                --size: calc(100% + 1rem);
+                width: var(--size);
+                height: var(--size);
+                box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
+                opacity: 0;
+                transition: opacity var(--transition);
+                animation: calc(var(--duration) * 1.5) breathe linear infinite;
+            }
+            .shiny-pillar,
+            .shiny-pillar::before,
+            .shiny-pillar::after {
+                animation: var(--animation) var(--duration), var(--animation) calc(var(--duration) / 0.4) reverse paused;
+                animation-composition: add;
+            }
+            .shiny-pillar:is(:hover, :focus-visible) {
+                --gradient-percent: 20%;
+                --gradient-angle-offset: 95deg;
+                --gradient-shine: var(--shiny-cta-highlight-subtle);
+            }
+            .shiny-pillar:is(:hover, :focus-visible),
+            .shiny-pillar:is(:hover, :focus-visible)::before,
+            .shiny-pillar:is(:hover, :focus-visible)::after {
+                animation-play-state: running;
+            }
+            .shiny-pillar:is(:hover, :focus-visible) span::before { opacity: 1; }
+            @keyframes gradient-angle { to { --gradient-angle: 360deg; } }
+            @keyframes shimmer { to { rotate: 360deg; } }
+            @keyframes breathe { from, to { scale: 1; } 50% { scale: 1.2; } }
+        </style>
+
+                
+<input type="checkbox" id="openmenu" class="hamburger-checkbox">
+<div class="hamburger-icon">
+  <label for="openmenu" id="hamburger-label">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>    
+</div>
+<div class="menu-pane"> 
+  <nav>
+    <ul class="menu-links">
+      <li><a href="index.html" class="active">INICIO</a></li>
+      <li><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li> 
+      <li><a href="candidatos.html" class="">CANDIDATOS</a></li>
+      <li><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li>
+      <li><a href="sumate.html" class="">SÚMATE A LA FUERZA</a></li>
+      <li><a href="contacto.html" class="">CONTACTO</a></li>                          
+    </ul>
+  </nav>
+</div>
+
+            
+            <div id="hero-section">
+                <header id="hero-header">
+                    <div class="logo-container">
+                        <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+                    </div>
+                    
+                    
+<ul>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="index.html" class="active">INICIO</a></li>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="quienes-somos.html" class="">QUIENES SOMOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="800"><a href="candidatos.html" class="">CANDIDATOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="1000"><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li> 
+    <li data-aos="fade-down" data-aos-duration="1200" id="sumate-menu-item">
+        <a href="sumate.html" class="">SÚMATE<br>A LA FUERZA</a>
+        <div class="lucho-fuerza-peek">
+            <img src="assets/img/LUCHO%20FUERZA.png" alt="Lucho te invita a sumarte">
+        </div>
+    </li> 
+    <li data-aos="fade-down" data-aos-duration="1400"><a href="contacto.html" class="">CONTACTO</a></li>
+</ul>
+
+
+                    <div class="button-container">
+                        <a href="https://chat.whatsapp.com/InyGU3GIjEiHbO3Ms8lcoa" target="_blank">
+                            <svg class="circular-text" viewBox="0 0 100 100">
+                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                                <text>
+                                    <textPath href="#circlePath" startOffset="0%">
+                                        ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; 
+                                    </textPath>
+                                </text>
+                            </svg>
+                            <div class="magnetic">
+                                <div class="wrap">
+                                    <div class="span span-1 go"></div>
+                                    <div class="span span-2 go"></div>
+                                    <div class="span span-3 go"></div>
+                                    <div class="span span-4 go"></div>
+                                    <img src="assets/img/hand.png">
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </header>
+
+                <!-- EL BOTÓN REGRESA A SU LUGAR, FUERA DEL HEADER PARA QUE NO SE VAYA ARRIBA -->
+                <div id="hero-main-content" style="opacity: 0; visibility: hidden;">
+                    <a href="candidatos.html" class="glass-button-wrap">
+                        <div class="glass-button">
+                            <span class="glass-button-text">VER CANDIDATOS</span>
+                        </div>
+                        <div class="glass-button-shadow"></div>
+                    </a>
+                </div>
+                <a href="#">
+                    <div id="mouse-scroll">
+                      <div class="mouse">
+                        <div class="mouse-in"></div>
+                      </div>
+                      <div class="scroll-indication">Scroll</div>
+                    </div>
+                </a>
+                <!-- Nuevas Flechas Flotantes para Celular (Izquierda) -->
+                <a href="#intro" class="mobile-arrows arr-left">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <!-- Nuevas Flechas Flotantes para Celular (Centro) -->
+                <a href="#intro" class="mobile-arrows arr-center">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <!-- Nuevas Flechas Flotantes para Celular (Derecha) -->
+                <a href="#intro" class="mobile-arrows arr-right">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+            </div>
+            <div id="intro" data-aos="fade-right" data-aos-duration="1000" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10;">
+                <div class="candidatos-intro-split">
+                    <!-- Texto Izquierdo y Controles -->
+                    <div class="candidatos-intro-text">
+                        <h2 class="title-desktop">SOMOS<br>LA FUERZA<br>GANADORA</h2>
+                        <h2 class="title-mobile">
+                            <span class="t-line1">SOMOS</span>
+                            <span class="t-line2">LA FUERZA</span>
+                            <span class="t-line3">GANADORA</span>
+                        </h2>
+                        <!-- Imagen de Luchito -->
+                        <img src="assets/img/LUCHITO.png" alt="Luchito" class="luchito-img" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="200" data-aos-anchor="#intro">
+                        
+                        <!-- Cajas de Valores -->
+                        <div class="values-container">
+                            <div class="value-box" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400" data-aos-anchor="#intro">UNIDAD</div>
+                            <div class="value-box" data-aos="fade-up" data-aos-duration="800" data-aos-delay="550" data-aos-anchor="#intro">COMPROMISO</div>
+                            <div class="value-box" data-aos="fade-up" data-aos-duration="800" data-aos-delay="700" data-aos-anchor="#intro">TRABAJO</div>
+                        </div>
+
+                        <!-- Botón Ver Más -->
+                        <div class="intro-btn-container" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="850" data-aos-anchor="#intro">
+                            <a href="candidatos.html" class="shiny-pillar" style="text-decoration: none;"><span>Ver más</span></a>
+                        </div>
+                    </div>
+                    <!-- Carrusel Derecho -->
+                    <div class="circular-testimonial-container">
+                        <!-- Images 3D -->
+                        <div class="circular-image-container">
+                            <img src="assets/img/candidato-1.png" alt="Patrick Stewart" class="testimonial-image">
+                            <img src="assets/img/candidato-2.png" alt="Alena Rosser" class="testimonial-image">
+                            <img src="assets/img/candidato-3.png" alt="Fletch Skinner" class="testimonial-image">
+                            <img src="assets/img/candidato-4.png" alt="Marc Spector" class="testimonial-image">
+                            <img src="assets/img/candidato-5.png" alt="Natalia Skinner" class="testimonial-image">
+                                
+                                <!-- Texto superpuesto -->
+                                <div class="circular-testimonial-content">
+                                    <h3 class="circular-name" id="carousel-name"></h3>
+                                    <p class="circular-designation" id="carousel-designation"></p>
+                                    <p class="circular-quote" id="carousel-quote"></p>
+                                </div>
+                        </div>
+                        <!-- Botones de flechas debajo de las tarjetas -->
+                        <div class="circular-arrow-buttons">
+                                <div class="circular-arrow-button" id="carousel-prev" aria-label="Anterior" role="button">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+                                </div>
+                                <div class="circular-arrow-button" id="carousel-next" aria-label="Siguiente" role="button">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Nuevas Flechas Flotantes (Sección 2 -> 3) -->
+                <a href="#video-section" class="mobile-arrows arr-left">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <a href="#video-section" class="mobile-arrows arr-center">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <a href="#video-section" class="mobile-arrows arr-right">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+            </div>
+            <div class="container-fluid" id="video-section">
+                <div class="row align-items-center">
+                    <div class="col-md-6" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                        <div class="services-img" id="camera-img" style="position: relative !important; left: 0 !important; right: 0 !important; display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; margin: 0 auto; padding: 0 !important; transform: none !important;">
+                            <div class="iframe-container" style="width: 100%; max-width: 90vw; margin: 0 auto; aspect-ratio: 16/9; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.4);">
+                                <iframe class="video-player" src="https://player.vimeo.com/video/508019424?h=9dcc987e89" style="width: 100%; height: 100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-column">
+                        <!-- TRUCO MAESTRO: Usar display:table garantiza que el ancho inferior copie matemáticamente al superior -->
+                        <div style="display: table; white-space: nowrap; margin: -10vh 0 0 0;">
+                            <div style="display: table-row;">
+                                <h2 data-aos="fade-up" data-aos-duration="1200" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; text-transform: uppercase; line-height: 0.98; margin-bottom: 0; color: #801039; text-align: left; font-size: clamp(3.5rem, 7.5vw, 7rem); letter-spacing: -3px;">
+                                    <span style="display: block;">LA FUERZA</span>
+                                    <span style="display: block;">ESTÁ EN</span>
+                                    <span style="display: block;">LA GENTE</span>
+                                </h2>
+                            </div>
+                            <div style="display: table-caption; caption-side: bottom; white-space: normal;">
+                                <p data-aos="fade-up" data-aos-duration="1500" style="text-align: justify; line-height: 1.35; margin-top: 0.8rem; margin-bottom: 1.5rem;">Trabajamos hombro a hombro con cada ciudadano. En <strong>Fuerza Tacna</strong> creemos que el verdadero motor del cambio y el desarrollo son las personas. Juntos construiremos el futuro que merecemos.</p>
+                                <div style="display: flex; justify-content: center; width: 100%;" data-aos="fade-up" data-aos-duration="1800">
+                                    <a href="quienes-somos.html" class="shiny-pillar" style="text-decoration: none;"><span>Ver más</span></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Nuevas Flechas Flotantes (Sección 3 -> 4) -->
+                <a href="#drone-section" class="mobile-arrows arr-left">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <a href="#drone-section" class="mobile-arrows arr-center">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <a href="#drone-section" class="mobile-arrows arr-right">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+            </div>
+            <!-- GUARDAMOS EL VIDEO AQUÍ APAGADO POR SI LO NECESITAS EN EL FUTURO
+            <div id="video-home" data-aos="zoom-out-up">
+                <div class="iframe-container">
+                    <iframe class="video-player" src="https://player.vimeo.com/video/508019424?h=9dcc987e89" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                     
+                </div>
+            </div>
+            <div id="video-home-responsive" data-aos="zoom-out-up">
+                <div class="iframe-container iframe-video-home">
+                    <iframe class="video-player" src="https://player.vimeo.com/video/508019424?h=9dcc987e89" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                     
+                </div>
+            </div>
+            -->
+            <div class="container-fluid" id="drone-section">
+                <div class="row justify-content-center text-center">
+                <div class="col-md-6 text-column" style="display: flex; flex-direction: column; justify-content: center; text-align: left; padding: 0 7vw 0 5vw;">
+                    <h2 data-aos="fade-right" data-aos-duration="1500" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: clamp(4rem, 7.5vw, 8.5rem); line-height: 1.05; text-transform: uppercase; color: #801039; letter-spacing: -3px; margin-bottom: 2rem; width: 100%;">
+                        <span style="display: block;">OBRAS</span>
+                        <span style="display: block;">QUE HACEN</span>
+                        <span style="display: block;">HISTORIA</span>
+                    </h2>
+                    <div data-aos="fade-right" data-aos-duration="1800">
+                        <a href="assets/universoobras/mapa-obras.html" class="shiny-pillar" style="text-decoration: none;"><span>Ver más</span></a>
+                    </div>
+                </div>
+                <div class="col-md-6" style="display: flex; justify-content: center; align-items: center; padding: 2rem;">
+                    <div id="mapa-tacna-container" data-aos="fade-left" data-aos-duration="1500" style="width: 100%; max-width: 650px; position: relative; right: 4vw;">
+                        
+                        <!-- El mapa SVG real será inyectado aquí automáticamente por JavaScript -->
+                        
+                    </div>
+                    </div>
+                </div>
+                <!-- Nuevas Flechas Flotantes (Sección 4 -> 5) -->
+                <a href="#votar-section" class="mobile-arrows arr-left">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <a href="#votar-section" class="mobile-arrows arr-center">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+                <a href="#votar-section" class="mobile-arrows arr-right">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </a>
+            </div>
+            
+            <div class="container-fluid" id="votar-section" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; overflow: hidden; padding: 5vh 5vw;">
+                <h2 data-aos="fade-up" data-aos-duration="1200" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: clamp(3rem, 7vw, 8rem); line-height: 1.05; text-transform: uppercase; color: #801039; letter-spacing: -2px; margin-bottom: 3.5rem;">
+                    <span style="display: block;">PORQUE LO BUENO</span>
+                    <span style="display: block;">VUELVE CON FUERZA</span>
+                </h2>
+                
+                <img src="assets/img/PARA%20VOTAR.svg" alt="Para Votar" data-aos="zoom-in-up" data-aos-duration="1500" style="width: 100%; max-width: 1400px; height: auto; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));">
+                
+            </div>
+            
+             <footer>
+    <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+    <div id="legal-notice">&copy; 2024 Fuerza Tacna - Todos los derechos reservados.</div>
+</footer>
+           
+        </main>
+
+        <!-- ========================================== -->
+        <!-- REPRODUCTOR DE MÚSICA WOW (Flotante)       -->
+        <!-- ========================================== -->
+        <div id="premium-music-player" class="music-paused">
+            <audio id="bg-audio"></audio>
+            
+            <!-- Botón circular (Estado colapsado) -->
+            <div class="player-toggle-btn" id="player-toggle-btn">
+                <div class="play-icon"></div>
+                <div class="equalizer">
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                    <span class="eq-bar"></span>
+                </div>
+            </div>
+            
+            <!-- Controles completos (Estado expandido) -->
+            <div class="player-content">
+                <div class="track-info-container">
+                    <svg class="music-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                    <div class="player-info">
+                        <div class="scrolling-text">
+                            <span id="track-name-display">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls-container">
+                    <div class="main-controls">
+                        <button id="prev-btn" class="ctrl-btn" title="Anterior"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                        <button id="main-play-btn" class="ctrl-btn play-btn" title="Play/Pausa"><svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
+                        <button id="next-btn" class="ctrl-btn" title="Siguiente"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+                    </div>
+                    <div class="volume-container" title="Volumen">
+                        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.35">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notificación Inteligente si se bloquea el audio -->
+        <div id="audio-toast">
+            <img src="assets/img/LUCHO%20MUSICA.svg" alt="Activar música" class="lucho-toast-img">
+            <span>SOBRINO,<br>ESCUCHA<br>NUESTRA<br>MÚSICA</span>
+        </div>
+        
+        <style>
+            /* Estilos del Reproductor Premium V2 */
+            #premium-music-player {
+                position: fixed;
+                bottom: 0.8rem;
+                left: 0.8rem;
+                z-index: 9000;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                background: rgba(15, 15, 15, 0.7);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 195, 0, 0.2);
+                border-radius: 40px;
+                padding: 4px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+                width: 40px; /* Más Pequeño y esquinado */
+                height: 40px;
+                overflow: hidden;
+                transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            }
+            
+            #premium-music-player:hover,
+            #premium-music-player.force-expand {
+                width: 210px;
+                height: 72px;
+                border-radius: 18px;
+                background: rgba(128, 16, 57, 0.95);
+                border-color: rgba(255, 195, 0, 0.6);
+                box-shadow: 0 15px 35px rgba(128,16,57,0.4), 0 0 20px rgba(255,195,0,0.2);
+                padding: 8px 12px;
+            }
+        
+            .player-toggle-btn {
+                position: absolute;
+                top: 4px;
+                left: 4px;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #ffc300, #d4a000);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                z-index: 2;
+                transition: all 0.3s ease;
+            }
+        
+            #premium-music-player:hover .player-toggle-btn,
+            #premium-music-player.force-expand .player-toggle-btn {
+                opacity: 0;
+                pointer-events: none;
+                transform: scale(0.5);
+            }
+        
+            .play-icon {
+                width: 0; height: 0;
+                border-style: solid;
+                border-width: 5px 0 5px 8px;
+                border-color: transparent transparent transparent #801039;
+                margin-left: 2px;
+                transition: opacity 0.3s ease;
+            }
+            .equalizer {
+                display: none; align-items: flex-end; justify-content: center; gap: 2px; height: 12px;
+            }
+            .eq-bar {
+                width: 2px; background: #801039; border-radius: 2px; animation: eq-bounce 0.8s infinite alternate ease-in-out;
+            }
+            .eq-bar:nth-child(1) { height: 100%; animation-delay: 0.1s; }
+            .eq-bar:nth-child(2) { height: 60%; animation-delay: 0.3s; }
+            .eq-bar:nth-child(3) { height: 80%; animation-delay: 0.0s; }
+            .eq-bar:nth-child(4) { height: 40%; animation-delay: 0.2s; }
+            @keyframes eq-bounce { 0% { height: 20%; } 100% { height: 100%; } }
+        
+            .music-playing .play-icon { display: none; }
+            .music-playing .equalizer { display: flex; }
+        
+            .player-content {
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                justify-content: space-between;
+            }
+            #premium-music-player:hover .player-content,
+            #premium-music-player.force-expand .player-content {
+                opacity: 1;
+                pointer-events: auto;
+                transition-delay: 0.1s;
+            }
+        
+            .track-info-container {
+                display: flex; align-items: center; overflow: hidden; margin-bottom: 4px; margin-top: 2px;
+            }
+            .music-icon { width: 16px; height: 16px; fill: #ffc300; margin-right: 8px; flex-shrink: 0; }
+            .player-info {
+                flex-grow: 1; overflow: hidden;
+                mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+            }
+            .scrolling-text {
+                display: inline-block;
+                white-space: nowrap;
+                color: #fff;
+                font-family: Arial, sans-serif;
+                font-size: 0.75rem;
+                font-weight: bold;
+            }
+            .music-playing .scrolling-text {
+                animation: scrollText 12s linear infinite;
+            }
+            @keyframes scrollText { 0% { transform: translateX(10%); } 100% { transform: translateX(-50%); } }
+        
+            .controls-container { display: flex; align-items: center; justify-content: space-between; }
+            .main-controls { display: flex; align-items: center; gap: 12px; }
+            .ctrl-btn { background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; outline: none; }
+            .ctrl-btn svg { width: 18px; height: 18px; fill: #fff; transition: fill 0.2s ease, transform 0.2s; }
+            .ctrl-btn:hover svg { fill: #ffc300; transform: scale(1.15); }
+            .ctrl-btn.play-btn svg { width: 24px; height: 24px; fill: #ffc300; }
+            .ctrl-btn.play-btn:hover svg { fill: #fff; }
+        
+            /* Estilos de la Notificación Toast */
+            #audio-toast {
+                position: fixed;
+                bottom: 1.5rem; /* Un poco más arriba, pero aún detrás */
+                left: 0.2rem; /* Más a la izquierda */
+                background: transparent;
+                z-index: 8999; /* El reproductor tiene 9000, así que esto lo pone detrás */
+                display: flex;
+                flex-direction: row; /* Imagen y texto al costado */
+                align-items: center; /* Centrado vertical para 3 líneas */
+                gap: 8px;
+                transition: bottom 0.5s ease; /* Solo animamos la esquiva hacia arriba */
+                opacity: 1; /* Siempre visible por defecto */
+                pointer-events: none;
+            }
+            /* Elevación de la notificación al abrir el reproductor */
+            #premium-music-player:hover ~ #audio-toast,
+            #premium-music-player.force-expand ~ #audio-toast {
+                bottom: 6rem;
+            }
+            #audio-toast .lucho-toast-img {
+                width: 70px; /* Tamaño del dibujo */
+                height: auto;
+                animation: toast-lucho-bounce 1.5s infinite ease-in-out;
+                filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
+                /* Desvanecimiento en la parte inferior */
+                mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+            }
+            @keyframes toast-lucho-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+            #audio-toast span {
+                color: #000;
+                font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive; /* Letra a mano */
+                font-size: 0.6rem; /* Aún más pequeño para 4 líneas */
+                font-weight: bold;
+                text-shadow: 1px 1px 0 rgba(255,255,255,0.9), -1px -1px 0 rgba(255,255,255,0.9), 1px -1px 0 rgba(255,255,255,0.9), -1px 1px 0 rgba(255,255,255,0.9);
+                line-height: 1.2;
+                margin-bottom: 26px; /* Texto colocado aún más arriba */
+                text-align: center;
+            }
+
+            .volume-container { display: flex; align-items: center; gap: 6px; width: 60px; }
+            .volume-container svg { width: 15px; height: 15px; fill: #fff; flex-shrink: 0; }
+            .volume-slider { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; outline: none; cursor: pointer; }
+            .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ffc300; cursor: pointer; transition: transform 0.2s; }
+            .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        
+            @media (max-width: 768px) {
+                #premium-music-player { bottom: 1rem; left: 1rem; }
+                #premium-music-player:hover, #premium-music-player.force-expand { width: 210px; }
+                .volume-container { width: 60px; }
+            }
+        </style>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if(window.musicPlayerInit) return;
+                window.musicPlayerInit = true;
+
+                // Aquí puedes agregar más canciones duplicando la línea y cambiando el título/ruta
+                const playlist = [
+                    { title: "Balada para un gordo - Juan y Juan", src: "assets/MUSICA/BALADA%20PARA%20UN%20GORDO%20JUAN%20Y%20JUAN%201970.mp3" },
+                    { title: "El Tacneño - Himno", src: "assets/MUSICA/BALADA%20PARA%20UN%20GORDO%20JUAN%20Y%20JUAN%201970.mp3" } // <- Ejemplo (Puedes cambiar la ruta a otra canción)
+                ];
+                let currentTrack = 0;
+
+                const playerWidget = document.getElementById('premium-music-player');
+                const bgAudio = document.getElementById('bg-audio');
+                const toggleBtn = document.getElementById('player-toggle-btn');
+                const mainPlayBtn = document.getElementById('main-play-btn');
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+                const volSlider = document.getElementById('volume-slider');
+                const trackDisplay = document.getElementById('track-name-display');
+                const iconPlay = document.getElementById('icon-play');
+                const iconPause = document.getElementById('icon-pause');
+                const audioToast = document.getElementById('audio-toast');
+                
+                const togglePlay = () => {
+                    if (bgAudio.paused) {
+                        bgAudio.play();
+                        playerWidget.classList.remove('music-paused');
+                        playerWidget.classList.add('music-playing');
+                        iconPlay.style.display = 'none';
+                        iconPause.style.display = 'block';
+                    } else {
+                        bgAudio.pause();
+                        playerWidget.classList.remove('music-playing');
+                        playerWidget.classList.add('music-paused');
+                        iconPlay.style.display = 'block';
+                        iconPause.style.display = 'none';
+                    }
+                };
+
+                const attemptAutoplay = () => {
+                    const playPromise = bgAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            playerWidget.classList.remove('music-paused');
+                            playerWidget.classList.add('music-playing');
+                            iconPlay.style.display = 'none';
+                            iconPause.style.display = 'block';
+                        }).catch(err => {
+                            // Autoplay bloqueado por el navegador. El usuario debe darle a play manualmente.
+                            console.log("Autoplay bloqueado, esperando interacción del usuario.");
+                        });
+                    }
+                };
+
+                if(playerWidget && bgAudio) {
+                    const loadTrack = (index, forcePlay = false) => {
+                        bgAudio.src = playlist[index].src;
+                        trackDisplay.innerHTML = `${playlist[index].title} &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; ${playlist[index].title}`;
+                        if(playerWidget.classList.contains('music-playing') || forcePlay) attemptAutoplay();
+                    };
+
+                    bgAudio.volume = volSlider.value;
+                    loadTrack(currentTrack, false); // False evita el autoplay al inicio
+
+                    // Evitar que el panel se cierre al arrastrar el volumen
+                    volSlider.addEventListener('mousedown', () => playerWidget.classList.add('force-expand'));
+                    volSlider.addEventListener('touchstart', () => playerWidget.classList.add('force-expand'), {passive: true});
+                    document.addEventListener('mouseup', () => playerWidget.classList.remove('force-expand'));
+                    document.addEventListener('touchend', () => playerWidget.classList.remove('force-expand'), {passive: true});
+
+                    volSlider.addEventListener('input', (e) => bgAudio.volume = e.target.value);
+
+                    toggleBtn.addEventListener('click', togglePlay);
+                    mainPlayBtn.addEventListener('click', togglePlay);
+
+                    nextBtn.addEventListener('click', () => {
+                        currentTrack = (currentTrack + 1) % playlist.length;
+                        loadTrack(currentTrack);
+                        if(bgAudio.paused) togglePlay();
+                    });
+
+                    prevBtn.addEventListener('click', () => {
+                        currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
+                        loadTrack(currentTrack);
+                        if(bgAudio.paused) togglePlay();
+                    });
+
+                    bgAudio.addEventListener('ended', () => {
+                        if (playlist.length === 1) {
+                            // Si solo hay una canción, hace bucle perfecto y sin pausas
+                            bgAudio.currentTime = 0;
+                            attemptAutoplay();
+                        } else {
+                            // Si hay varias, pasa a la siguiente de la lista (y vuelve al inicio al terminar)
+                            currentTrack = (currentTrack + 1) % playlist.length;
+                            loadTrack(currentTrack, true);
+                        }
+                    });
+                }
+            });
+        </script>
+        <!-- ========================================== -->
+
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+
+        <!-- Parche global para el carrusel (Persiste entre navegaciones Barba.js) -->
+        <script>
+            (function() {
+                let observer = null;
+                let currentImages = null;
+
+                const checkAndApplyPatch = () => {
+                    const images = document.querySelectorAll('.circular-image-container .testimonial-image');
+                    
+                    // Si no hay imágenes (estamos en otra página), limpiar observer
+                    if (images.length === 0) {
+                        if (observer) {
+                            observer.disconnect();
+                            observer = null;
+                            currentImages = null;
+                        }
+                        return;
+                    }
+
+                    // Si hay imágenes y son las mismas de antes, no hacer nada extra
+                    if (currentImages && currentImages.length === images.length && currentImages[0] === images[0]) {
+                        return;
+                    }
+
+                    // Si hay imágenes nuevas (ej. regresó a Inicio con Barba.js), aplicar parche
+                    if (observer) observer.disconnect();
+                    currentImages = images;
+
+                    const updateVisibility = () => {
+                        if (observer) observer.disconnect();
+                        
+                        const inlineValues = Array.from(images).map(img => {
+                            const z = parseInt(img.style.zIndex);
+                            const op = parseFloat(img.style.opacity);
+                            let scale = 1;
+                            if (img.style.transform && img.style.transform.includes('scale')) {
+                                const match = img.style.transform.match(/scale\(([^)]+)\)/);
+                                if (match) scale = parseFloat(match[1]);
+                            }
+                            return { img, z, op, scale };
+                        });
+
+                        let zValues = new Set(), opValues = new Set(), scaleValues = new Set();
+                        inlineValues.forEach(val => {
+                            if (!isNaN(val.z)) zValues.add(val.z);
+                            if (!isNaN(val.op)) opValues.add(val.op);
+                            if (!isNaN(val.scale)) scaleValues.add(val.scale);
+                        });
+
+                        inlineValues.forEach(val => {
+                            let isBack = false;
+                            if (zValues.size > 1) { if (val.z === Math.min(...Array.from(zValues))) isBack = true; }
+                            else if (opValues.size > 1) { if (val.op === Math.min(...Array.from(opValues))) isBack = true; }
+                            else if (scaleValues.size > 1) { if (val.scale === Math.min(...Array.from(scaleValues))) isBack = true; }
+
+                            if (isBack && images.length > 3) val.img.classList.add('ocultar-tarjeta-atras');
+                            else val.img.classList.remove('ocultar-tarjeta-atras');
+                        });
+                        
+                        images.forEach(img => observer.observe(img, { attributes: true, attributeFilter: ['style'] }));
+                    };
+                    
+                    observer = new MutationObserver(updateVisibility);
+                    updateVisibility();
+                };
+
+                // Comprobar cada medio segundo permite atrapar el momento exacto en que Barba.js inyecta el nuevo HTML
+                setInterval(checkAndApplyPatch, 500);
+            })();
+        </script>
+
+        <!-- Audio para el efecto de sable de luz -->
+        <audio id="saber-sound" src="assets/img/SONIDO%20SABLE.mp3" preload="auto"></audio>
+
+        <script>
+            (function() {
+                function attachSaberSoundEvents() {
+                    const sumateMenuItem = document.getElementById('sumate-menu-item');
+                    const saberSound = document.getElementById('saber-sound');
+
+                    if (sumateMenuItem && saberSound) {
+                        if (sumateMenuItem.dataset.soundAttached) return;
+
+                        sumateMenuItem.addEventListener('mouseenter', () => {
+                            saberSound.volume = 0.8;
+                            saberSound.currentTime = 0;
+                            saberSound.play().catch(error => {});
+                        });
+
+                        sumateMenuItem.addEventListener('mouseleave', () => {
+                            saberSound.pause();
+                            saberSound.currentTime = 0;
+                        });
+
+                        sumateMenuItem.dataset.soundAttached = 'true';
+                    }
+                }
+
+                function setupAudioUnlock() {
+                    if (window.isFuerzaTacnaAudioUnlocked) return;
+                    const saberSound = document.getElementById('saber-sound');
+                    if (saberSound) {
+                        const unlocker = () => {
+                            saberSound.play().catch(() => {});
+                            saberSound.pause();
+                        };
+                        ['click', 'touchstart', 'keydown'].forEach(evt => {
+                            document.addEventListener(evt, unlocker, { once: true });
+                        });
+                        window.isFuerzaTacnaAudioUnlocked = true;
+                    }
+                }
+
+                function initializePage() {
+                    setupAudioUnlock();
+                    attachSaberSoundEvents();
+                    if (typeof AOS !== 'undefined') AOS.init();
+                }
+
+                document.addEventListener('DOMContentLoaded', initializePage);
+                
+                // Parche para Barba.js: Asegura que el evento de sonido se aplique tras navegar
+                setInterval(attachSaberSoundEvents, 500);
+            })();
+        </script>
+    </body>
+    
+    <script type="text/javascript" src="assets/js/button.js"></script>
+    <script type="text/javascript" src="assets/js/cursor.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.4/gsap.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
+    <script src="assets/js/main.js?v=135"></script>
+
+<!-- Mirrored from le-lab.io/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:47:53 GMT -->
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+    
+<!-- Mirrored from le-lab.io/drone-fpv.php by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:02 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head>
+        
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Le Lab est un studio de création basé à Bordeaux dédié à la production de contenus audiovisuels, de prises de vues aériennes, de drone FPV et de design.">
+        <title>FUERZA TACNA</title>
+        <link rel="icon" type="image/png" href="assets/img/favicon.png">
+        <link rel="stylesheet" href="assets/css/main.css">
+        <link rel="stylesheet" href="assets/css/button.css">
+        <link rel="stylesheet" href="assets/css/mobile-menu.css">
+        <link rel="stylesheet" href="assets/css/responsive.css">
+        <link rel="stylesheet" type="text/css" href="../unpkg.com/aos%402.3.1/dist/aos.css">
+        <link rel="stylesheet" type="text/css" href="assets/css/fonts.css">
+        <link rel="stylesheet" href="../stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
+
+        <script type="text/javascript" src="assets/js/smoothscroll.js"></script>
+        <script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+        <script type="text/javascript" src="form.html"></script>
+        <script type="text/javascript" src="../unpkg.com/aos%402.3.1/dist/aos.js"></script>
+
+        <style>
+            .menu-links a, #hero-header ul li a {
+                font-family: "Arial Black", Arial, sans-serif !important;
+            }
+            /* --- Backgrounds & Fills --- */
+            .magnetic .wrap .span {
+                background-color: #25D366 !important;
+            }
+            .mouse-in,
+            #services h3::before,
+            #services .title-client::before,
+            #intro button:hover,
+            #video-section button:hover,
+            #drone-section button:hover,
+            #design-section button:hover,
+            .references-section button:hover,
+            #button-center:hover {
+                background-color: #ffc300 !important;
+            }
+
+            /* --- Text Colors --- */
+            .scroll-indication,
+            .small-title,
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center,
+            .menu-links a:hover,
+            .menu-links a.active,
+            .hyperlinks {
+                color: #ffc300 !important;
+            }
+
+            /* --- Border Colors --- */
+            #intro button,
+            #video-section button,
+            #drone-section button,
+            #design-section button,
+            .references-section button,
+            #button-center {
+                border-color: #ffc300 !important;
+            }
+
+            /* --- Header Fijo Transparente --- */
+            #hero-header {
+                position: fixed;
+                top: 15px; /* Espacio desde el techo */
+                left: 2% !important;
+                width: 96% !important;
+                box-sizing: border-box !important;
+                z-index: 1000;
+                background: transparent; /* Contenedor principal sin fondo */
+            }
+            @media (min-width: 992px) {
+                #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; }
+                #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; }
+                #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; }
+                #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; }
+            }
+
+            /* --- Píldora de Cristal (Solo el Menú Central) --- */
+            #hero-header ul {
+                background-color: rgba(255, 195, 0, 0.4); /* Color de fondo de la página (#FFC300) */
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 50px; /* Forma de píldora redonda */
+                padding: 18px 24px; /* Más espacio arriba y abajo para darle 5px más de altura */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra muy reducida y sutil */
+                border: 1px solid rgba(255, 255, 255, 0.4); /* Borde blanco fino y sutil */
+                width: max-content !important; /* Hace que la caja solo ocupe el ancho estrictamente necesario */
+                margin: 0 auto; /* Centra la píldora en la pantalla */
+            }
+            #hero-header ul li {
+                margin: 0 15px !important; /* Reduce la separación entre los textos para hacerla más compacta */
+            }
+        </style>
+
+    </head>
+
+    <body data-barba="wrapper" onload="init()">
+      <script>AOS.init();</script>
+      <div class="cursor-follower"></div>
+      <div class="load-container"><div class="loading-screen"></div></div>
+
+        <main data-barba="container" data-barba-namespace="home-section" class="animate-this">
+
+            
+                 
+<input type="checkbox" id="openmenu" class="hamburger-checkbox">
+<div class="hamburger-icon">
+  <label for="openmenu" id="hamburger-label">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>    
+</div>
+<div class="menu-pane"> 
+  <nav>
+    <ul class="menu-links">
+      <li><a href="index.html" class="">INICIO</a></li>
+      <li><a href="drone-fpv-2.html" class="active">QUIENES SOMOS</a></li> 
+      <li><a href="video-2.html" class="">CANDIDATOS</a></li>
+      <li><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li>
+      <li><a href="studio-2.html" class="">SUMATE</a></li>
+      <li><a href="contact-2.html" class="">CONTACTO</a></li>                          
+    </ul>
+    <ul class="menu-social-icons">
+        <a href="https://www.linkedin.com/company/le-lab-studio"><li class="icon-linkedin social-icons"></li></a>
+        <a href="https://www.instagram.com/le.lab.studio"><li class="icon-instagram social-icons"></li></a>
+        <a href="https://dribbble.com/thomascuvelier"><li class="icon-dribbble social-icons"></li></a>
+        <a href="https://vimeo.com/lelabstudio"><li class="icon-vimeo social-icons"></li></a>  
+        <a href="https://www.youtube.com/channel/UCkJbccSzw0pSNr47r4yXIOA"><li class="icon-youtube social-icons"></li></a> 
+    </ul>
+    <div class="city">Bordeaux, FR</div>
+  </nav>
+</div>
+
+          
+            <div id="hero-drone-section">
+                <header id="hero-header">
+                    <div class="logo-container">
+                        <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+                    </div>
+                    
+                    
+<ul>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="index.html" class="">INICIO</a></li>
+    <li data-aos="fade-down" data-aos-duration="600"><a href="drone-fpv-2.html" class="active">QUIENES SOMOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="800"><a href="video-2.html" class="">CANDIDATOS</a></li>
+    <li data-aos="fade-down" data-aos-duration="1000"><a href="assets/universoobras/mapa-obras.html" class="">OBRAS</a></li> 
+    <li data-aos="fade-down" data-aos-duration="1200"><a href="studio-2.html" class="">SUMATE</a></li> 
+    <li data-aos="fade-down" data-aos-duration="1400"><a href="contact-2.html" class="">CONTACTO</a></li>
+</ul>
+
+
+                    <div class="button-container">
+                        <a href="https://chat.whatsapp.com/InyGU3GIjEiHbO3Ms8lcoa" target="_blank">
+                            <svg class="circular-text" viewBox="0 0 100 100">
+                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                                <text>
+                                    <textPath href="#circlePath" startOffset="0%">
+                                        ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; ÚNETE A NUESTRA COMUNIDAD &nbsp;&nbsp;•&nbsp;&nbsp; 
+                                    </textPath>
+                                </text>
+                            </svg>
+                            <div class="magnetic">
+                                <div class="wrap">
+                                    <div class="span span-1 go"></div>
+                                    <div class="span span-2 go"></div>
+                                    <div class="span span-3 go"></div>
+                                    <div class="span span-4 go"></div>
+                                    <img src="assets/img/hand.png">
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </header>
+                <a href="#" id="mouse-none">
+                    <div id="mouse-scroll">
+                      <div class="mouse">
+                        <div class="mouse-in"></div>
+                      </div>
+                      <div class="scroll-indication">Scroll</div>
+                    </div>
+                </a>
+                <div id="hero-service-main">
+                    <h1 class="photo-3" data-aos="fade-up" data-aos-duration="1000">Fpv & Drone</h1>
+                    <p data-aos="fade-up" data-aos-duration="1500">Certifié télépilote, <strong>Le Lab</strong> vous propose un service complet de prise de vue aériennes tant cinématique qu'en immersion.</p>
+                </div>
+                <div id="hero-bottom">
+                    <div class="city">Bordeaux, FR</div>
+                    <ul>
+                        <a href="https://www.linkedin.com/company/le-lab-studio"><li class="icon-linkedin social-icons"></li></a>
+                        <a href="https://www.instagram.com/le.lab.studio"><li class="icon-instagram social-icons"></li></a>
+                        <a href="https://dribbble.com/thomascuvelier"><li class="icon-dribbble social-icons"></li></a>
+                        <a href="https://vimeo.com/lelabstudio"><li class="icon-vimeo social-icons"></li></a>
+                        <a href="https://www.youtube.com/channel/UCkJbccSzw0pSNr47r4yXIOA"><li class="icon-youtube social-icons"></li></a> 
+                    </ul>
+                </div>
+            </div>
+            <div id="services" class="container">
+                <div class="card-deck">
+                    <div class="card">
+                        <h2 class="title-client">Immobilier</h2>
+                        <p class="title-text">Présenter un bien immobilier de manière innovante à vos clients. L'immersion permet de se projeter plus facilement en recréant une balade à travers chaque pièce et lieu, tant en intérieur qu'en extérieur.</p>
+                    </div>
+                    <div class="card">
+                        <img class="card-img-top shadow" src="assets/img/photo-service-3.jpg">                        
+                    </div>
+                    <div class="card">
+                        <h2 class="title-client">Présentation aérienne</h2>
+                        <p class="title-text"><strong>Le Lab</strong> se charge de réaliser des plans de présentation cinématiques en 4k que vous pouvez réutiliser dans tous vos médias.</p>
+                    </div>
+                </div>
+                <div class="card-deck">
+                    <div class="card">
+                        <img class="card-img-top shadow" src="assets/img/photo-service-1.jpg">                        
+                    </div>
+                    <div class="card">
+                        <h2 class="title-client">L'immersion</h2>
+                        <p class="title-text">L'expérience en immersion est unique. Elle permet un rapprochement, une liberté totale et aucune limite en terme de mise en scène, en intérieur comme en extérieur.</p>
+                    </div>
+                    <div class="card">
+                        <img class="card-img-top shadow" src="assets/img/photo-service-2.jpg">                        
+                    </div>
+                </div>
+                
+             </div>
+             <div id="showreel-section" class="container-fluid showreel-photo">
+                <div class="card video-cards">
+                   <h3 class="big-title">Showreel</h3>
+                  <div class="card-deck margin-up">
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/990535618?" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Showreel Rush Hunters</h5>
+                        <p class="card-text paragraphe">FPV - Le Lab & MojoTV pour Rush Hunters"</p>
+                        <p class="card-text"><small class="text-muted">FPV / Showreel / Montage</small></p>
+                      </div>
+                    </div>
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/1018467469?h=afb6fc5559" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Beychevelle</h5>
+                        <p class="card-text paragraphe">Séquence en FPV</p>
+                        <p class="card-text"><small class="text-muted">FPV / Intérieur / Captation / Montage</small></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-deck margin-up">
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/792942778?h=3ee2a53a8e" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Climb Up</h5>
+                        <p class="card-text paragraphe">FPV en immersion et en intérieur"</p>
+                        <p class="card-text"><small class="text-muted">FPV / Intérieur / Montage</small></p>
+                      </div>
+                    </div>
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/781786091?h=ebce79f1d2" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Boat Chasing FPV</h5>
+                        <p class="card-text paragraphe">Vidéo chasing d'un bateau en FPV</p>
+                        <p class="card-text"><small class="text-muted">FPV / Chasing / Captation / Montage</small></p>
+                      </div>
+                    </div>
+                  </div>     
+
+                  <div class="card-deck">
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/781789430?h=b1bc99dace" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">FPV / Takeda</h5>
+                        <p class="card-text paragraphe">Présentation aérienne du site de Takeda"</p>
+                        <p class="card-text"><small class="text-muted">FPV / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/781792054?h=3415ad3c18" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Notaires du Jeu de Paume</h5>
+                        <p class="card-text paragraphe">Immersion dans les bureaux du cabinet Notaires du Jeu de Paume</p>
+                        <p class="card-text"><small class="text-muted">FPV / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-deck">
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/693269770?h=60f1f86f52" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Motocross FPV</h5>
+                        <p class="card-text paragraphe">Vidéo promotionelle pour le Moto club de l'entre de mers Baigneaux"</p>
+                        <p class="card-text"><small class="text-muted">FPV / Chasing / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/781788183?h=03f4d62092" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Domaine Segondignac</h5>
+                        <p class="card-text paragraphe">Présentation du domaine en FPV et drone durant un mariage</p>
+                        <p class="card-text"><small class="text-muted">FPV / Drone / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-deck">
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/590635128?h=6436c61ca2" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">FPV / Clos Fourtet</h5>
+                        <p class="card-text paragraphe">Présentation aérienne du Clos Fourtet - Saint-Emilion"</p>
+                        <p class="card-text"><small class="text-muted">FPV / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/639853131?h=c2a57e1650" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">FPV / Château Tire Pé </h5>
+                        <p class="card-text paragraphe">Présentation aérienne du domaine Château Tire Pé</p>
+                        <p class="card-text"><small class="text-muted">FPV / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                  </div>
+
+                   <div class="card-deck">
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/589887850?h=4e6632ca7e" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">FPV Grèce</h5>
+                        <p class="card-text paragraphe">Film île Grecque</p>
+                        <p class="card-text"><small class="text-muted">FPV / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                    <div class="card video-cards">
+                      <div class="iframe-container">
+                        <iframe class="video-player" src="https://player.vimeo.com/video/560995874?h=ecef60ddaa" width="640" height="360" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title">Domaine Segondignac</h5>
+                        <p class="card-text paragraphe">Présentation du domaine Segondignac</p>
+                        <p class="card-text"><small class="text-muted">FPV / Télépilote / Montage</small></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <div class="container-fluid references-section">
+    <div class="row">
+        <div class="col-lg-12 references-container">
+            <img src="assets/logos/clos-fourtet.png">
+            <img src="assets/logos/tire-Pe.png">
+            <img src="assets/logos/grt-gaz.png">
+            <img src="assets/logos/keops.png">
+            <img src="assets/logos/frida-logo.svg">
+            <img src="assets/logos/yeast-logo.svg">
+            <img src="assets/logos/ferrari.svg">
+            <img src="assets/logos/pilotme-logo.svg">
+            <img src="assets/logos/recycle-logo.svg">
+            <img src="assets/logos/bacasable-logo.svg">
+            <img src="assets/logos/logo-vertigo.svg">
+            <img src="assets/logos/takeda-logo.svg">
+            <img src="assets/logos/bdr-logo.svg">
+            <img src="assets/logos/domaine-segondignac.svg">
+            <img src="assets/logos/le-lab.svg">
+            <img src="assets/logos/michael-dardant.svg">
+            <img src="assets/logos/sud-ouest.svg">
+            <img src="assets/logos/yabawt.svg">
+            <img src="assets/logos/chocolat-marilou.svg">                        
+            <img src="assets/logos/alain-joaillier.svg">
+        </div>
+    </div>
+    <a href="contact-2.html"><button id="button-center">Contact</button></a>
+</div>
+
+
+
+
+
+
+
+             <footer>
+    <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
+    <div id="legal-notice">©2023 Le Lab - Thomas Cuvelier - Tous droits réservés</div>
+</footer>            
+        </main>
+
+<div id="awwwards" style="position: fixed; z-index: 999; transform: translateY(-50%); top: 50%; right: 0"><a href="https://www.awwwards.com/sites/le-lab" target="_blank"><svg width="53.08" height="171.358"><path class="js-color-bg" fill="black" d="M0 0h53.08v171.358H0z"></path><g class="js-color-text" fill="white"><path d="M20.047 153.665v-1.9h3.888v-4.093h-3.888v-1.9h10.231v1.9h-4.59v4.093h4.59v1.9zM29.898 142.236c-.331.565-.784.997-1.359 1.294s-1.222.446-1.944.446c-.721 0-1.369-.149-1.943-.446a3.316 3.316 0 0 1-1.36-1.294c-.331-.564-.497-1.232-.497-2.002s.166-1.438.497-2.002a3.316 3.316 0 0 1 1.36-1.294c.574-.297 1.223-.445 1.943-.445.723 0 1.369.148 1.944.445a3.307 3.307 0 0 1 1.359 1.294c.331.564.497 1.232.497 2.002s-.166 1.438-.497 2.002m-1.703-3.347c-.435-.33-.967-.496-1.601-.496-.633 0-1.166.166-1.601.496-.433.332-.649.78-.649 1.346 0 .564.217 1.013.649 1.345.435.331.968.497 1.601.497.634 0 1.166-.166 1.601-.497.435-.332.649-.78.649-1.345.001-.566-.214-1.014-.649-1.346M22.911 134.852v-1.813h1.186a3.335 3.335 0 0 1-.951-1.009 2.423 2.423 0 0 1-.352-1.271c0-.682.19-1.229.57-1.645.381-.413.932-.621 1.652-.621h5.262v1.812h-4.721c-.419 0-.727.096-.921.285-.195.19-.292.447-.292.769 0 .302.115.58.35.833.234.254.577.458 1.03.613.454.156.993.234 1.616.234h2.938v1.813h-7.367zM29.898 125.136a3.314 3.314 0 0 1-1.359 1.294c-.575.297-1.222.445-1.944.445-.721 0-1.369-.148-1.943-.445a3.322 3.322 0 0 1-1.36-1.294c-.331-.565-.497-1.232-.497-2.002 0-.771.166-1.438.497-2.003a3.313 3.313 0 0 1 1.36-1.293c.574-.297 1.223-.446 1.943-.446.723 0 1.369.149 1.944.446s1.028.728 1.359 1.293.497 1.232.497 2.003c.001.769-.166 1.436-.497 2.002m-1.703-3.347c-.435-.331-.967-.497-1.601-.497-.633 0-1.166.166-1.601.497-.433.331-.649.778-.649 1.345 0 .564.217 1.013.649 1.344.435.332.968.498 1.601.498.634 0 1.166-.166 1.601-.498.435-.331.649-.779.649-1.344.001-.567-.214-1.014-.649-1.345M22.911 117.75v-1.812h1.199c-.419-.265-.742-.586-.972-.966s-.345-.784-.345-1.213c0-.272.05-.569.146-.892l1.682.336a1.429 1.429 0 0 0-.205.76c0 .576.261 1.048.783 1.418.521.37 1.342.557 2.461.557h2.617v1.812h-7.366zM29.812 111.252c-.391.511-.857.851-1.403 1.016l-.776-1.446c.381-.138.68-.329.893-.577.215-.249.321-.544.321-.885a1.2 1.2 0 0 0-.168-.658c-.112-.175-.294-.263-.548-.263-.225 0-.406.105-.548.313-.142.21-.291.534-.446.973-.019.068-.058.17-.117.307-.224.565-.506 1.004-.848 1.315-.34.313-.779.467-1.314.467-.381 0-.727-.102-1.039-.306a2.185 2.185 0 0 1-.744-.84 2.554 2.554 0 0 1-.279-1.207c0-.497.105-.949.314-1.359.211-.408.506-.725.886-.949l.993 1.082c-.43.292-.644.686-.644 1.184a.84.84 0 0 0 .154.504.471.471 0 0 0 .401.212c.176 0 .338-.103.49-.307.15-.205.334-.604.547-1.199.205-.564.474-1.001.805-1.308.332-.308.756-.46 1.271-.46.721 0 1.299.229 1.732.687s.65 1.057.65 1.797c.001.759-.194 1.396-.583 1.907M35.481 17.006l-4.782 14.969h-3.266l-2.584-9.682-2.584 9.682h-3.268l-4.782-14.969h3.713l2.673 10.276 2.525-10.276h3.445l2.524 10.276 2.674-10.276zM37.978 27.163c1.426 0 2.496 1.068 2.496 2.495 0 1.425-1.07 2.495-2.496 2.495-1.425 0-2.494-1.07-2.494-2.495-.001-1.427 1.069-2.495 2.494-2.495"></path></g></svg></a></div>
+    </body>
+    
+    <script type="text/javascript" src="assets/js/button.js"></script>
+    <script type="text/javascript" src="assets/js/cursor.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="assets/js/main.js"></script>
+
+<!-- Mirrored from le-lab.io/drone-fpv.php by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:48:02 GMT -->
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>FUERZA TACNA</title>
+<link rel="icon" type="image/png" href="../img/favicon.png?v=update1">
+<link rel="apple-touch-icon" href="../img/favicon.png?v=update1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<script>
+// --- NUEVO: Corrección de rutas para URLs amigables (/obras) ---
+(function(){
+    const path = window.location.pathname;
+    if (path.endsWith('/obras') || path.endsWith('/obras/')) {
+        const base = document.createElement('base');
+        base.href = path.endsWith('/') ? '../assets/universoobras/' : 'assets/universoobras/';
+        document.head.appendChild(base);
+    }
+})();
+</script>
+
+<script>window.BUILD_ID='2025-10-24T16:00Z';</script>
+<script>
+(function(){
+  const KEY='APP_BUILD_ID', next=window.BUILD_ID||'', cur=localStorage.getItem(KEY);
+  if(next && cur && cur!==next){
+    localStorage.setItem(KEY,next);
+    const u=new URL(location.href); u.searchParams.set('v',next); location.replace(u.toString());
+  }else if(next && !cur){ localStorage.setItem(KEY,next); }
+})();
+</script>
+
+<!-- Estilos de Leaflet (librería de mapas) -->
+<link rel="stylesheet" href="vendor/leaflet.css">
+<!-- Estilos del Panel de Obra (ficha lateral) -->
+<link rel="stylesheet" href="panel-obra.css">
+<link rel="stylesheet" href="panel-obra-widgets.css">
+<!-- Estilos de la Interfaz del Mapa (sidebar, overlays, chips, leyenda) -->
+<link rel="stylesheet" href="mapa-sidebar.css">
+<link rel="stylesheet" href="mapa-overlays.css">
+<link rel="stylesheet" href="mapa-obras.css?v=22">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="panel-obra-modules.js" defer></script>
+<script src="panel-obra.js" defer></script> <!-- Inclusión correcta de panel-obra.js -->
+<script src="mapa-utils.js" defer></script>
+<script src="mapa-buscador.js" defer></script>
+<script src="../js/mapa-obras.js?v=25" defer></script>
+<script src="mapa-filtros.js?v=10" defer></script>
+
+
+</head>
+<body>
+
+<div class="app-bg" aria-hidden="true"></div>
+
+<div id="video-intro-container">
+    <video autoplay muted loop playsinline id="introVideo">
+        <source src="IMG/VIDEO%20TACNA.mp4" type="video/mp4">
+        Tu navegador no soporta videos.
+    </video>
+    
+    <!-- Nuevo: Contenedor para el texto Gooey -->
+    <div id="gooey-text-container">
+        <span id="gooey-text-1"></span>
+        <span id="gooey-text-2"></span>
+    </div>
+
+    <!-- KPIs de Impacto (Estilo High-End Dark Glass) -->
+    <div id="intro-kpi-grid">
+        <!-- Card 1: Obras -->
+        <div class="kpi-card-wrap">
+            <div class="kpi-card">
+                <div class="card-effects">
+                    <div class="eff-bg"></div>
+                    <div class="eff-bounce"></div>
+                    <div class="eff-ping"></div>
+                    <div class="eff-shine"></div>
+                </div>
+                <div class="card-content">
+                    <div class="icon-sphere">
+                        <div class="icon-ping"></div>
+                        <div class="icon-inner">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                        </div>
+                    </div>
+                    <h3><span>+ 80</span><br>OBRAS<br>EJECUTADAS</h3>
+                    <p>Infraestructura moderna para la región</p>
+                    <div class="card-line"></div>
+                    <div class="card-dots"><span></span><span></span><span></span></div>
+                    <!-- Esquinas del código original -->
+                    <div class="card-corner-tl"></div>
+                    <div class="card-corner-br"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Inversión -->
+        <div class="kpi-card-wrap">
+            <div class="kpi-card">
+                <div class="card-effects">
+                    <div class="eff-bg"></div>
+                    <div class="eff-bounce"></div>
+                    <div class="eff-ping"></div>
+                    <div class="eff-shine"></div>
+                </div>
+                <div class="card-content">
+                    <div class="icon-sphere">
+                        <div class="icon-ping"></div>
+                        <div class="icon-inner">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                        </div>
+                    </div>
+                    <h3><span>S/ 200M</span><br>INVERSIÓN<br>REGIONAL</h3>
+                    <p>Crecimiento económico y desarrollo</p>
+                    <div class="card-line"></div>
+                    <div class="card-dots"><span></span><span></span><span></span></div>
+                    <div class="card-corner-tl"></div>
+                    <div class="card-corner-br"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Empleos -->
+        <div class="kpi-card-wrap">
+            <div class="kpi-card">
+                <div class="card-effects">
+                    <div class="eff-bg"></div>
+                    <div class="eff-bounce"></div>
+                    <div class="eff-ping"></div>
+                    <div class="eff-shine"></div>
+                </div>
+                <div class="card-content">
+                    <div class="icon-sphere">
+                        <div class="icon-ping"></div>
+                        <div class="icon-inner">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                        </div>
+                    </div>
+                    <h3><span>+ 2,000</span><br>EMPLEOS<br>GENERADOS</h3>
+                    <p>Generando oportunidades de trabajo</p>
+                    <div class="card-line"></div>
+                    <div class="card-dots"><span></span><span></span><span></span></div>
+                    <div class="card-corner-tl"></div>
+                    <div class="card-corner-br"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Familias -->
+        <div class="kpi-card-wrap">
+            <div class="kpi-card">
+                <div class="card-effects">
+                    <div class="eff-bg"></div>
+                    <div class="eff-bounce"></div>
+                    <div class="eff-ping"></div>
+                    <div class="eff-shine"></div>
+                </div>
+                <div class="card-content">
+                    <div class="icon-sphere">
+                        <div class="icon-ping"></div>
+                        <div class="icon-inner">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </div>
+                    </div>
+                    <h3><span>130 MIL</span><br>FAMILIAS<br>BENEFICIADAS</h3>
+                    <p>Bienestar para todo Tacna</p>
+                    <div class="card-line"></div>
+                    <div class="card-dots"><span></span><span></span><span></span></div>
+                    <div class="card-corner-tl"></div>
+                    <div class="card-corner-br"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer de Inicio -->
+    <div id="home-footer">
+        MOVIMIENTO INDEPENDIENTE REGIONAL FUERZA TACNA
+    </div>
+</div>
+
+<nav class="chips" id="chips">
+  <div class="chips-group">
+    <button class="chip is-active" data-map="base"><span>Inicio</span></button>
+    <div class="divider-v"></div>
+    <div id="obraSearch" class="search-pill">
+      <input id="obraSearchInput" type="search" placeholder="Buscar obra…" autocomplete="off">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.5 21.5 20l-6-6Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"/></svg>
+      <ul id="obraSearchList" class="search-list" hidden></ul>
+    </div>
+    <div class="divider-v"></div>
+    <button class="chip" data-map="educacion"><span>Educación</span></button>
+    <button class="chip" data-map="vias"><span>Vías</span></button>
+    <button class="chip" data-map="agua"><span>Agua</span></button>
+    <button class="chip" data-map="transporte"><span>Transporte</span></button>
+    <button class="chip" data-map="agricultura"><span>Agricultura</span></button>
+    <button class="chip" data-map="social"><span>Social</span></button>
+  </div>
+</nav>
+
+<!-- Panel de Filtros (Dock Izquierdo) -->
+<div id="filtersDock" class="fp fp--list is-collapsed" aria-expanded="false">
+  <!-- LA FRANJA DELGADA (Rail - Siempre visible) -->
+  <div class="fp-rail">
+    <a href="../../index.html" onclick="event.preventDefault(); let r = window.location.href.split('?')[0].split('#')[0]; if(r.includes('/assets/')) r = r.substring(0, r.indexOf('/assets/')); else r = r.replace(/\/obras\/?$/, ''); window.location.href = r + '/index.html';" class="fp-home-btn" title="Volver a la Web">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    </a>
+    <button id="fpPill" class="fp-pill" title="Abrir Filtros">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"></path></svg>
+    </button>
+    <button id="fpHistoryBtn" class="fp-pill" title="Ver Historial">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.95-2.05l-1.42 1.42C8.27 19.94 10.51 20.7 13 20.7c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v7h4v-2h-2V8h-2z"/></svg>
+    </button>
+  </div>
+  
+  <!-- EL CAJÓN DESPLEGABLE (Sale desde atrás de la franja) -->
+  <div class="fp-drawer">
+    <div class="fp-drawer-header" id="fpDrawerHeader">Filtrar Obras</div>
+    <div class="fp-drawer-content-wrapper">
+      <div id="fpPanel" class="fp-panel" hidden>
+    <div class="fp-head">
+      <span class="fp-title">Filtros</span>
+      <span id="fMeta" class="fp-meta">—</span>
+    </div>
+    <div class="fp-body fp--list">
+      <div class="f-field">
+        <label>Categoría</label>
+        <button id="fSegBtn" class="f-chip f-chip--disclosure">
+          <span id="fSegBtnLabel">—</span>
+          <span class="f-chip__icon">＋</span>
+        </button>
+        <div id="fSegMenu" class="f-menu" hidden></div>
+      </div>
+      <div class="f-field">
+        <label>Provincia</label>
+        <button id="fProvBtn" class="f-chip f-chip--disclosure">
+          <span id="fProvBtnLabel">—</span>
+          <span class="f-chip__icon">＋</span>
+        </button>
+        <div id="fProvMenu" class="f-menu" hidden></div>
+      </div>
+      <div class="f-field">
+        <label>Distrito</label>
+        <button id="fDistBtn" class="f-chip f-chip--disclosure">
+          <span id="fDistBtnLabel">—</span>
+          <span class="f-chip__icon">＋</span>
+        </button>
+        <div id="fDistMenu" class="f-menu" hidden>
+          <label style="padding-bottom: 6px; border-bottom: 1px solid #eee; background: #fafafa; border-radius: 8px 8px 0 0;"><input id="fDistAll" type="checkbox"> Seleccionar todo</label>
+          <div id="fDistList" style="max-height: 240px; overflow-y: auto; padding-top: 4px;"></div>
+        </div>
+      </div>
+      <div class="f-field">
+        <label>Estado</label>
+        <button id="fEstadoBtn" class="f-chip f-chip--disclosure">
+          <span id="fEstadoBtnLabel">—</span>
+          <span class="f-chip__icon">＋</span>
+        </button>
+        <div id="fEstadoMenu" class="f-menu" hidden></div>
+      </div>
+      <div class="f-actions">
+        <button id="fApply" class="btn-apply" disabled>Aplicar Filtros</button>
+        <button id="fClear" class="btn-clear">Limpiar</button>
+      </div>
+    </div>
+    <ul id="resultsList" class="results" hidden></ul>
+      </div>
+      <div id="fpHistoryPanel" class="fp-history-panel" hidden>
+        <div style="padding: 12px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: flex-end; background: #fdf5f7;">
+          <button id="fClearHistory" style="background:none; border:none; color:#801039; font: 900 10px 'Arial Black', Arial; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;">× Borrar Historial</button>
+        </div>
+        <ul id="fpHistoryList" class="results"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dock de Resultados (Derecha) -->
+<div id="resultsDock" class="is-hidden" hidden>
+    <div class="rd-head">
+        <span>Resultados</span>
+        <span id="rdCount" class="rd-count"></span>
+    </div>
+    <ul id="resultsDockList" class="rd-list"></ul>
+</div>
+
+
+<div id="map"></div>
+<div id="zoomHud">—</div>
+<div id="legend" style="display:none">
+  <div class="item"><div class="dot" style="background:#2e7d32"></div><div class="label">Entregado</div></div>
+  <div class="item"><div class="dot" style="background:#1a73e8"></div><div class="label">En Construcción</div></div>
+  <div class="item"><div class="dot" style="background:#c62828"></div><div class="label">Paralizado</div></div>
+  <div class="item"><div class="dot" style="background:#ef6c00"></div><div class="label">Buena Pro</div></div>
+  <div class="item"><div class="dot" style="background:#6d28d9"></div><div class="label">Transferencia</div></div>
+  <div class="item"><div class="dot" style="background:#616161"></div><div class="label">En Estudios</div></div>
+</div>
+<script>
+  window.addEventListener('load', () => {
+    // 1. Mostrar fondo
+    document.querySelector('.app-bg')?.classList.add('show');
+    
+    // Mostrar el footer desde el inicio
+    document.getElementById('home-footer')?.classList.add('is-visible');
+
+    // 2. Encender el Motor del Mapa (¡Esto era lo que faltaba para que se vea el mapa!)
+    if (typeof window.initLeafletMap === 'function') {
+      window.initLeafletMap(document);
+      
+      // --- NUEVO: Leer segmento de la URL y activarlo ---
+      const urlParams = new URLSearchParams(window.location.search);
+      const segment = urlParams.get('s');
+      if (segment && segment !== 'base') {
+          const chip = document.querySelector(`.chip[data-map="${segment}"]`);
+          if (chip) setTimeout(() => chip.click(), 500);
+      }
+    }
+
+    // 3. Iniciar filtros (función dentro de mapa-filtros.js)
+    if (typeof initFilters === 'function') {
+      initFilters();
+    }
+
+    // --- NUEVO: Mostrar tarjetas exactamente 1 segundo después de que termine la intro de texto ---
+    window.addEventListener('gooeyTextFinished', () => {
+        console.log("Evento recibido: Iniciando conteo de 1s para las tarjetas.");
+        setTimeout(() => {
+            const kpiGrid = document.getElementById('intro-kpi-grid');
+            
+            if (kpiGrid) {
+                kpiGrid.classList.add('is-visible');
+                
+                // Esperamos a que terminen de aparecer (stagger) para iniciar la subida al centro
+                setTimeout(() => {
+                    kpiGrid.classList.add('is-centered');
+                }, 1500);
+            }
+        }, 1000); 
+    });
+  });
+  
+  // 4. Precarga de datos para el buscador global (Ahora se ejecuta en el evento 'load')
+  window.addEventListener('load', () => {
+    window.SHEET_CACHE = window.SHEET_CACHE || {}; // Paso 1: Aseguramos que la caché exista antes de intentar leerla
+    Object.keys(window.SHEETS).forEach(key => {
+      if (window.SHEETS[key] && !window.SHEET_CACHE[key]) {
+        window.fetchSheetGVizJSON(window.SHEET_ID, { sheetName: window.SHEETS[key] }).then(json => {
+          window.SHEET_CACHE[key] = window.gvizToObjects(json);
+        });
+      }
+    });
+  });
+</script>
+
+<!-- Filtro SVG para el efecto Gooey (Texto viscoso) -->
+<svg style="display: none;">
+  <defs>
+    <filter id="threshold">
+      <feColorMatrix
+        in="SourceGraphic"
+        type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 255 -140" />
+    </filter>
+  </defs>
+</svg>
+
+<!-- Filtro SVG de Vidrio Líquido (Fidelidad React) -->
+<svg style="display: none;">
+  <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+    <!-- Generación del ruido para la distorsión orgánica -->
+    <feTurbulence type="fractalNoise" baseFrequency="0.001 0.005" numOctaves="1" seed="17" result="turbulence"/>
+    
+    <!-- Mapeo de colores para la refracción -->
+    <feComponentTransfer in="turbulence" result="mapped">
+      <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5"/>
+      <feFuncG type="gamma" amplitude="0" exponent="1" offset="0"/>
+      <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5"/>
+    </feComponentTransfer>
+    
+    <!-- Suavizado del mapa para evitar pixelado en los bordes -->
+    <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap"/>
+    
+    <!-- Iluminación especular (el brillo del vidrio) -->
+    <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lightingColor="white" result="specLight">
+      <fePointLight x="-200" y="-200" z="300"/>
+    </feSpecularLighting>
+    
+    <!-- Combinación de la luz con la imagen -->
+    <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage"/>
+    
+    <!-- Desplazamiento final. 
+         Nota: Bajamos de 200 a 60 para evitar bordes pixelados en navegadores desktop, 
+         manteniendo el efecto líquido. -->
+    <feDisplacementMap in="SourceGraphic" in2="softMap" scale="60" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+</body>
+</html>
