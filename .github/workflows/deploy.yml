@@ -7,12 +7,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: "1. Actualizar desde GitHub (Update from Remote)"
+      - name: "Llamar al túnel secreto (Plan Z)"
         run: |
-          curl -k --connect-timeout 10 --max-time 30 --retry 3 -H "Authorization: cpanel ${{ secrets.CPANEL_USER }}:${{ secrets.CPANEL_TOKEN }}" \
-          "https://tacnavuelveasonreir.com:2083/execute/VersionControl/update?repository_root=/home/tacnwddf/repositories/web-fuerza-tacna"
-
-      - name: "2. Desplegar en Subdominio (Deploy HEAD Commit)"
-        run: |
-          curl -k --connect-timeout 10 --max-time 30 --retry 3 -H "Authorization: cpanel ${{ secrets.CPANEL_USER }}:${{ secrets.CPANEL_TOKEN }}" \
-          "https://tacnavuelveasonreir.com:2083/execute/VersionControl/deploy?repository_root=/home/tacnwddf/repositories/web-fuerza-tacna"
+          curl -s -X POST -d "cpanel_user=${{ secrets.CPANEL_USER }}" -d "cpanel_token=${{ secrets.CPANEL_TOKEN }}" "https://fuerzatacna.tacnavuelveasonreir.com/actualizar.php"
