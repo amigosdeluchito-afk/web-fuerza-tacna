@@ -9,33 +9,12 @@ if (empty($api_user) || empty($api_token)) {
     die("Acceso denegado.");
 }
 
-$repo_path = urlencode("/home/tacnwddf/repositories/web-fuerza-tacna");
-$headers = ["Authorization: cpanel $api_user:$api_token"];
+// PLAN OMEGA: Comando nativo interno del servidor
+$repo_local = "/home/tacnwddf/repositories/web-fuerza-tacna";
+$out1 = shell_exec("/usr/bin/uapi VersionControl update repository_root=" . escapeshellarg($repo_local) . " 2>&1");
+$out2 = shell_exec("/usr/bin/uapi VersionControl deploy repository_root=" . escapeshellarg($repo_local) . " 2>&1");
 
-// Usar 127.0.0.1 para que el servidor se llame a sí mismo internamente y burle su propio firewall
-$cpanel_url = "https://127.0.0.1:2083";
-
-// 1. Ejecutar Update from Remote
-$ch1 = curl_init("$cpanel_url/execute/VersionControl/update?repository_root=$repo_path");
-curl_setopt($ch1, CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch1, CURLOPT_SSL_VERIFYHOST, false);
-curl_setopt($ch1, CURLOPT_CONNECTTIMEOUT, 10);
-curl_setopt($ch1, CURLOPT_TIMEOUT, 30);
-curl_exec($ch1);
-curl_close($ch1);
-
-// 2. Ejecutar Deploy HEAD Commit
-$ch2 = curl_init("$cpanel_url/execute/VersionControl/deploy?repository_root=$repo_path");
-curl_setopt($ch2, CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch2, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch2, CURLOPT_SSL_VERIFYHOST, false);
-curl_setopt($ch2, CURLOPT_CONNECTTIMEOUT, 10);
-curl_setopt($ch2, CURLOPT_TIMEOUT, 30);
-curl_exec($ch2);
-curl_close($ch2);
+echo "Update:\n$out1\nDeploy:\n$out2";
 
 echo "¡Despliegue automático exitoso!";
 ?>
