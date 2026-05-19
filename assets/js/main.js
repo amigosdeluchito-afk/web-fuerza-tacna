@@ -898,7 +898,7 @@ window.showCandidateDetail = function(selectedName) {
         // Usamos onclick inline para agilizar la interacción
         sidebarHTML += `
             <div class="mini-card ${isActive}" onclick="window.showCandidateDetail('${c.name}')">
-                <img src="${c.imgSrc}" alt="${c.name}">
+                <img src="${c.imgSrc}" alt="${c.name}" loading="lazy" decoding="async">
             </div>`;
     });
     sidebarHTML += `</div>`;
@@ -911,7 +911,7 @@ window.showCandidateDetail = function(selectedName) {
                     <div class="photo-glow"></div>
                     <div class="photo-badge">${selectedCandidate.role}</div>
                     <div class="candidato-photo">
-                        <img src="${selectedCandidate.imgSrc}" alt="${selectedCandidate.name}">
+                        <img src="${selectedCandidate.imgSrc}" alt="${selectedCandidate.name}" loading="lazy" decoding="async">
                     </div>
                 </div>
                 <div class="candidate-top-info">
@@ -947,13 +947,13 @@ window.showCandidateDetail = function(selectedName) {
                                 <div class="timeline-carousel-wrapper">
                                     <div class="timeline-carousel-content">
                                         <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-1.jpg" alt="Actividad 2018-1" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
+                                            <img src="assets/img/photo-service-1.jpg" alt="Actividad 2018-1" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
                                         </div>
                                         <div class="timeline-carousel-item">
-                                            <img src="assets/img/design-service-1.jpg" alt="Actividad 2018-2" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
+                                            <img src="assets/img/design-service-1.jpg" alt="Actividad 2018-2" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
                                         </div>
                                         <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-2.jpg" alt="Actividad 2018-3" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
+                                            <img src="assets/img/photo-service-2.jpg" alt="Actividad 2018-3" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
                                         </div>
                                     </div>
                                     <div class="timeline-carousel-nav prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg></div>
@@ -970,10 +970,10 @@ window.showCandidateDetail = function(selectedName) {
                                 <div class="timeline-carousel-wrapper">
                                     <div class="timeline-carousel-content">
                                         <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-2.jpg" alt="Actividad 2021-1" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])">
+                                            <img src="assets/img/photo-service-2.jpg" alt="Actividad 2021-1" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])">
                                         </div>
                                         <div class="timeline-carousel-item">
-                                            <img src="assets/img/design-service-3.jpg" alt="Actividad 2021-2" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])">
+                                            <img src="assets/img/design-service-3.jpg" alt="Actividad 2021-2" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])">
                                         </div>
                                     </div>
                                     <div class="timeline-carousel-nav prev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg></div>
@@ -990,7 +990,7 @@ window.showCandidateDetail = function(selectedName) {
                                 <div class="timeline-carousel-wrapper">
                                     <div class="timeline-carousel-content">
                                         <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-3.jpg" alt="Actividad 2024-1" onclick="window.openCandidateGallery(['assets/img/photo-service-3.jpg'])">
+                                            <img src="assets/img/photo-service-3.jpg" alt="Actividad 2024-1" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-3.jpg'])">
                                         </div>
                                     </div>
                                     <div class="timeline-carousel-nav prev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg></div>
@@ -1058,7 +1058,7 @@ window.showCandidateDetail = function(selectedName) {
                 <div class="stagger-el">
                     <div class="next-candidate-module" onclick="window.showCandidateDetail('${nextCandidate.name}')">
                         <div class="next-candidate-info">
-                            <img src="${nextCandidate.imgSrc}" alt="${nextCandidate.name}" class="next-candidate-avatar">
+                            <img src="${nextCandidate.imgSrc}" alt="${nextCandidate.name}" class="next-candidate-avatar" loading="lazy" decoding="async">
                             <div class="next-candidate-text">
                                 <h5>Siguiente Perfil</h5>
                                 <h3>${nextCandidate.name}</h3>
@@ -1771,11 +1771,11 @@ function initCircularTimeline(container) {
     wheel.dataset.initialized = 'true';
 
     const baseEvents = [
-        { year: "2018", description: "Iniciamos nuestro camino con la firme convicción de construir una Tacna más fuerte, uniendo a líderes vecinales.", details: "<p>En este año, comenzamos reuniéndonos con representantes de diferentes distritos para escuchar de primera mano las necesidades más urgentes. <strong>Fuerza Tacna</strong> nace como una respuesta directa a la falta de liderazgo y a la necesidad de construir un proyecto político con base ciudadana y visión a largo plazo.</p><img src='assets/img/historia-2018.jpg'>" },
-        { year: "2019", description: "Consolidamos nuestras bases vecinales en diferentes distritos de la región, escuchando al pueblo.", details: "<p>Se abrieron los primeros locales partidarios y se formaron comités en cada junta vecinal. Este año estuvo marcado por un fuerte trabajo de campo, recorriendo asentamientos humanos y asociaciones de vivienda para empadronar a nuevos militantes y recoger las verdaderas prioridades de la población.</p><img src='assets/img/historia-2019.jpg'>" },
-        { year: "2020", description: "Lanzamiento de nuestros programas de apoyo solidario durante tiempos de crisis, apoyando a las familias.", details: "<p>Frente a los desafíos de la pandemia, adaptamos nuestro enfoque hacia la asistencia social directa. Implementamos campañas de donación de alimentos, asesoría médica gratuita y creación de ollas comunes solidarias, demostrando que nuestra fuerza está en la solidaridad y el trabajo en equipo.</p><img src='assets/img/historia-2020.jpg'>" },
-        { year: "2021", description: "Expansión de nuestro equipo técnico para diseñar soluciones urbanas sostenibles y modernas.", details: "<p>Convocamos a profesionales tacneños de primer nivel (ingenieros, arquitectos, economistas) para conformar las mesas técnicas. Juntos comenzamos a estructurar proyectos viables en transporte, seguridad ciudadana y servicios básicos, asegurando que cada propuesta tenga un sustento técnico sólido.</p><img src='assets/img/historia-2021.jpg'>" },
-        { year: "2022", description: "Participación histórica en elecciones locales, ganando representación y consolidando la confianza ciudadana.", details: "<p>Marcamos un hito en nuestra historia política al lograr una importante votación que nos permitió obtener representación en diferentes niveles de gobierno local. Esto demostró el respaldo popular y nos impulsó a seguir trabajando con mayor compromiso y fiscalización.</p><img src='assets/img/historia-2022.jpg'>" },
+        { year: "2018", description: "Iniciamos nuestro camino con la firme convicción de construir una Tacna más fuerte, uniendo a líderes vecinales.", details: "<p>En este año, comenzamos reuniéndonos con representantes de diferentes distritos para escuchar de primera mano las necesidades más urgentes. <strong>Fuerza Tacna</strong> nace como una respuesta directa a la falta de liderazgo y a la necesidad de construir un proyecto político con base ciudadana y visión a largo plazo.</p><img src='assets/img/historia-2018.jpg' loading='lazy'>" },
+        { year: "2019", description: "Consolidamos nuestras bases vecinales en diferentes distritos de la región, escuchando al pueblo.", details: "<p>Se abrieron los primeros locales partidarios y se formaron comités en cada junta vecinal. Este año estuvo marcado por un fuerte trabajo de campo, recorriendo asentamientos humanos y asociaciones de vivienda para empadronar a nuevos militantes y recoger las verdaderas prioridades de la población.</p><img src='assets/img/historia-2019.jpg' loading='lazy'>" },
+        { year: "2020", description: "Lanzamiento de nuestros programas de apoyo solidario durante tiempos de crisis, apoyando a las familias.", details: "<p>Frente a los desafíos de la pandemia, adaptamos nuestro enfoque hacia la asistencia social directa. Implementamos campañas de donación de alimentos, asesoría médica gratuita y creación de ollas comunes solidarias, demostrando que nuestra fuerza está en la solidaridad y el trabajo en equipo.</p><img src='assets/img/historia-2020.jpg' loading='lazy'>" },
+        { year: "2021", description: "Expansión de nuestro equipo técnico para diseñar soluciones urbanas sostenibles y modernas.", details: "<p>Convocamos a profesionales tacneños de primer nivel (ingenieros, arquitectos, economistas) para conformar las mesas técnicas. Juntos comenzamos a estructurar proyectos viables en transporte, seguridad ciudadana y servicios básicos, asegurando que cada propuesta tenga un sustento técnico sólido.</p><img src='assets/img/historia-2021.jpg' loading='lazy'>" },
+        { year: "2022", description: "Participación histórica en elecciones locales, ganando representación y consolidando la confianza ciudadana.", details: "<p>Marcamos un hito en nuestra historia política al lograr una importante votación que nos permitió obtener representación en diferentes niveles de gobierno local. Esto demostró el respaldo popular y nos impulsó a seguir trabajando con mayor compromiso y fiscalización.</p><img src='assets/img/historia-2022.jpg' loading='lazy'>" },
         { year: "2023", description: "Mesas de trabajo ciudadanas y foros para la creación integral de nuestro plan de gobierno.", details: "<p>Realizamos asambleas públicas participativas donde la ciudadanía tuvo voz y voto en la construcción de nuestro plan de gobierno. Integramos propuestas de jóvenes, emprendedores y asociaciones civiles para asegurar un plan de desarrollo verdaderamente inclusivo.</p>" },
         { year: "2024", description: "Presentación oficial de nuestra campaña por la Alcaldía, con propuestas concretas, transparentes y viables.", details: "<p>Iniciamos nuestra campaña central enfocada en la innovación y la transparencia. Recorrimos calles y plazas presentando nuestra visión de una Tacna ordenada, con megaproyectos de infraestructura, modernización del comercio y tolerancia cero a la corrupción.</p>" },
         { year: "2025", description: "Implementación de foros de inversión y alianzas estratégicas para el financiamiento de megaproyectos.", details: "<p>Nos proyectamos a gestionar asociaciones público-privadas para viabilizar obras de envergadura. Planeamos atraer inversión nacional e internacional para modernizar nuestro sistema de transporte y crear verdaderos parques ecológicos zonales.</p>" },
