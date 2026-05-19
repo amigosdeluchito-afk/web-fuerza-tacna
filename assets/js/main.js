@@ -1372,15 +1372,15 @@ function initSafeMagneticScroll() {
 
         snapTimeout = setTimeout(() => {
             const sections = [
-                { id: 'hero-section', offset: 0, threshold: 0.25 }, // Área grande para atraparte al volver
-                { id: 'intro', align: 'center', threshold: 0.35 }, // 35% te atrapa desde muy lejos
-                { id: 'video-section', align: 'center', threshold: 0.35 },
-                { id: 'drone-section', align: 'center', threshold: 0.35 },
-                { id: 'votar-section', align: 'center', threshold: 0.35 },
+                    { id: 'hero-section', offset: 0, threshold: 0.40 }, // Área aumentada
+                    { id: 'intro', align: 'center', threshold: 0.50 }, // Aumentado al 50% de atracción
+                    { id: 'video-section', align: 'center', threshold: 0.50 },
+                    { id: 'drone-section', align: 'center', threshold: 0.50 },
+                    { id: 'votar-section', align: 'center', threshold: 0.50 },
                 // Secciones globales (Quiénes Somos, Candidatos, Contacto)
-                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.35 },
-                { id: 'candidatos-section', align: 'center', threshold: 0.35 },
-                { id: 'contacto-escenario', align: 'center', threshold: 0.35 }
+                    { id: 'quienes-somos-timeline', align: 'center', threshold: 0.40 },
+                    { id: 'candidatos-section', align: 'center', threshold: 0.40 },
+                    { id: 'contacto-escenario', align: 'center', threshold: 0.40 }
             ];
 
             const currentY = window.scrollY;
@@ -1389,7 +1389,7 @@ function initSafeMagneticScroll() {
             let closestTarget = null;
             let closestId = null;
             let minDistance = Infinity;
-            let activeThreshold = 0.35; 
+                let activeThreshold = 0.50; 
 
             sections.forEach(secData => {
                 const el = document.getElementById(secData.id);
@@ -1414,7 +1414,7 @@ function initSafeMagneticScroll() {
                     minDistance = distance;
                     closestTarget = targetY;
                     closestId = secData.id;
-                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.35;
+                        activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.50;
                 }
             });
 
@@ -1457,13 +1457,11 @@ function initSafeMagneticScroll() {
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
-        }, 300); // PACIENCIA DEL IMÁN: 300ms. Espera a que termines de hacer tus swipes antes de actuar
+            }, 150); // PACIENCIA DEL IMÁN: 150ms para que se active más rápido apenas termine la inercia
     };
 
-    // Escuchar la rueda del ratón y el touch de móviles
-    window.addEventListener('wheel', handleInteraction, { passive: true });
-    window.addEventListener('touchstart', handleInteraction, { passive: true });
-    window.addEventListener('touchmove', handleInteraction, { passive: true });
+        // Cambiado al evento 'scroll' global para detectar y dominar el movimiento por inercia en móviles y trackpads
+        window.addEventListener('scroll', handleInteraction, { passive: true });
 }
 
 function initVideoScrollFix(container) {
