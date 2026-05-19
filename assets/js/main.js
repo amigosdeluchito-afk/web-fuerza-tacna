@@ -1349,19 +1349,25 @@ function initSafeMagneticScroll() {
     isMagneticScrollInitialized = true;
     
     let snapTimeout;
+    let isAutoScrolling = false;
 
-    const handleInteraction = () => {
-        // Se ejecuta en todos los dispositivos para asegurar que el imán y las flechas usen la misma matemática exacta
-        clearTimeout(snapTimeout);
-        
-        // Si el usuario vuelve a hacer scroll, cancelamos el imán para no pelear con él y devolverle el control
+    // Detectar interacciones reales del usuario para cancelar el imán si se arrepiente
+    const handleUserInteraction = () => {
         if (window.currentScrollAnim) {
             cancelAnimationFrame(window.currentScrollAnim);
             window.currentScrollAnim = null;
+            isAutoScrolling = false;
             if (window.scroller && typeof window.scroller.setPostion === 'function') {
                 window.scroller.setPostion(window.scrollY);
             }
         }
+    };
+
+    const handleScroll = () => {
+        // Si el scroll es provocado por nuestro propio imán, no hacemos nada
+        if (isAutoScrolling) return;
+
+        clearTimeout(snapTimeout);
 
         // Pausar el imán temporalmente si la vista de detalle de un candidato o algún modal están abiertos
         const detailWrapper = document.getElementById('detalle-candidato-wrapper');
@@ -1372,15 +1378,15 @@ function initSafeMagneticScroll() {
 
         snapTimeout = setTimeout(() => {
             const sections = [
-                    { id: 'hero-section', offset: 0, threshold: 0.40 }, // Área aumentada
-                    { id: 'intro', align: 'center', threshold: 0.50 }, // Aumentado al 50% de atracción
-                    { id: 'video-section', align: 'center', threshold: 0.50 },
-                    { id: 'drone-section', align: 'center', threshold: 0.50 },
-                    { id: 'votar-section', align: 'center', threshold: 0.50 },
+                { id: 'hero-section', offset: 0, threshold: 0.50 }, 
+                { id: 'intro', align: 'center', threshold: 0.60 }, 
+                { id: 'video-section', align: 'center', threshold: 0.60 },
+                { id: 'drone-section', align: 'center', threshold: 0.60 },
+                { id: 'votar-section', align: 'center', threshold: 0.60 },
                 // Secciones globales (Quiénes Somos, Candidatos, Contacto)
-                    { id: 'quienes-somos-timeline', align: 'center', threshold: 0.40 },
-                    { id: 'candidatos-section', align: 'center', threshold: 0.40 },
-                    { id: 'contacto-escenario', align: 'center', threshold: 0.40 }
+                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.50 },
+                { id: 'candidatos-section', align: 'center', threshold: 0.50 },
+                { id: 'contacto-escenario', align: 'center', threshold: 0.50 }
             ];
 
             const currentY = window.scrollY;
@@ -1389,7 +1395,7 @@ function initSafeMagneticScroll() {
             let closestTarget = null;
             let closestId = null;
             let minDistance = Infinity;
-                let activeThreshold = 0.50; 
+            let activeThreshold = 0.60; 
 
             sections.forEach(secData => {
                 const el = document.getElementById(secData.id);
@@ -1414,7 +1420,7 @@ function initSafeMagneticScroll() {
                     minDistance = distance;
                     closestTarget = targetY;
                     closestId = secData.id;
-                        activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.50;
+                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.60;
                 }
             });
 
@@ -1422,13 +1428,11 @@ function initSafeMagneticScroll() {
 
             if (closestTarget !== null) {
                 if (closestId === window.lastSnappedId) {
-                    // Si seguimos cerca de la misma sección que ya nos atrapó, 
-                    // te dejamos escapar MÚY fácil. (Si te mueves más de 60px, eres libre)
-                    if (minDistance > 5 && minDistance < 60) {
+                    // Si seguimos en la misma sección, el rango para volver a centrarte es pequeño
+                    if (minDistance > 5 && minDistance < 80) {
                         shouldSnap = true;
                     }
                 } else {
-                    // Si te acercas a una sección NUEVA, usamos el radar gigante (35%) para atraparte a la perfección
                     if (minDistance < viewportHeight * activeThreshold) {
                         shouldSnap = true;
                         window.lastSnappedId = closestId; // Guardamos registro de quién te atrapó
@@ -1437,31 +1441,35 @@ function initSafeMagneticScroll() {
             }
 
             if (shouldSnap) {
-                // Animación matemática Extrema (Quintic Ease Out)
+                isAutoScrolling = true;
                 const startY = window.scrollY;
                 const distance = closestTarget - startY;
                 let startTime = null;
-                const duration = 1000; // Aumentado a 1 segundo para que deslice como seda
+                const duration = 900; // Fricción elegante
                 
                 function customAnim(currentTime) {
                     if (!startTime) startTime = currentTime;
                     const progress = Math.min((currentTime - startTime) / duration, 1);
-                    const ease = 1 - Math.pow(1 - progress, 5); // Curva Quintic para un freno levitando
+                    const ease = 1 - Math.pow(1 - progress, 5); 
                     window.scrollTo(0, startY + distance * ease);
                     if (progress < 1) {
                         window.currentScrollAnim = requestAnimationFrame(customAnim);
                     } else {
                         window.currentScrollAnim = null;
                         if (window.scroller && typeof window.scroller.setPostion === 'function') window.scroller.setPostion(closestTarget);
+                        // Liberar el auto-scroll despues de un margen de seguridad
+                        setTimeout(() => { isAutoScrolling = false; }, 50);
                     }
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
-            }, 150); // PACIENCIA DEL IMÁN: 150ms para que se active más rápido apenas termine la inercia
+        }, 150); // PACIENCIA DEL IMÁN: 150ms para que se active más rápido apenas termine la inercia
     };
 
-        // Cambiado al evento 'scroll' global para detectar y dominar el movimiento por inercia en móviles y trackpads
-        window.addEventListener('scroll', handleInteraction, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('wheel', handleUserInteraction, { passive: true });
+    window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+    window.addEventListener('touchmove', handleUserInteraction, { passive: true });
 }
 
 function initVideoScrollFix(container) {
