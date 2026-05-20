@@ -23,6 +23,7 @@ function injectGlobalAssets() {
             @media (min-width: 992px) { #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; } #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; } #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; } #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; } }
             #hero-header ul { background-color: rgba(255, 195, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 50px; padding: 18px 24px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.4); width: max-content !important; margin: 0 auto; }
             #hero-header ul li { margin: 0 15px !important; }
+            #hero-section, #hero-drone-section, #hero-video-section, #hero-contact, #hero-design-section { min-height: 100vh !important; width: 100%; box-sizing: border-box; }
             body.hide-header #hero-header, body.hide-header .mobile-arrows {
                 opacity: 0 !important;
                 visibility: hidden !important;
@@ -1378,12 +1379,20 @@ function initSafeMagneticScroll() {
 
         snapTimeout = setTimeout(() => {
             const sections = [
-                { id: 'hero-section', offset: 0, threshold: 0.50 }, 
+                // Top de las páginas (Snap a 0)
+                { id: 'hero-section', offset: 0, threshold: 0.40 }, 
+                { id: 'hero-drone-section', offset: 0, threshold: 0.40 }, 
+                { id: 'hero-video-section', offset: 0, threshold: 0.40 }, 
+                { id: 'hero-contact', offset: 0, threshold: 0.40 }, 
+                { id: 'hero-design-section', offset: 0, threshold: 0.40 }, 
+                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.40 }, 
+
+                // Secciones de contenido (Centradas)
                 { id: 'intro', align: 'center', threshold: 0.60 }, 
                 { id: 'video-section', align: 'center', threshold: 0.60 },
                 { id: 'drone-section', align: 'center', threshold: 0.60 },
                 { id: 'votar-section', align: 'center', threshold: 0.60 },
-                // Secciones globales (Quiénes Somos, Candidatos, Contacto)
+                { id: 'motor-norte-section', align: 'center', threshold: 0.60 },
                 { id: 'quienes-somos-timeline', align: 'center', threshold: 0.50 },
                 { id: 'candidatos-section', align: 'center', threshold: 0.50 },
                 { id: 'contacto-escenario', align: 'center', threshold: 0.50 }
