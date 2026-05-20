@@ -1378,21 +1378,21 @@ function initSafeMagneticScroll() {
         snapTimeout = setTimeout(() => {
             const sections = [
                 // Top de las páginas (Snap a 0)
-                { id: 'hero-section', offset: 0, threshold: 0.40 },
-                { id: 'hero-drone-section', offset: 0, threshold: 0.40 },
-                { id: 'hero-video-section', offset: 0, threshold: 0.40 },
-                { id: 'hero-design-section', offset: 0, threshold: 0.40 },
-                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.40 },
-                { id: 'contacto-escenario', offset: 0, threshold: 0.40 }, 
+                { id: 'hero-section', offset: 0, threshold: 0.60 },
+                { id: 'hero-drone-section', offset: 0, threshold: 0.60 },
+                { id: 'hero-video-section', offset: 0, threshold: 0.60 },
+                { id: 'hero-design-section', offset: 0, threshold: 0.60 },
+                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.60 },
+                { id: 'contacto-escenario', offset: 0, threshold: 0.60 }, 
 
                 // Secciones de contenido (Centradas)
-                { id: 'intro', align: 'center', threshold: 0.40 }, 
-                { id: 'video-section', align: 'center', threshold: 0.40 },
-                { id: 'drone-section', align: 'center', threshold: 0.40 },
-                { id: 'votar-section', align: 'center', threshold: 0.40 },
-                { id: 'motor-norte-section', align: 'center', threshold: 0.40 },
-                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.40 },
-                { id: 'candidatos-section', align: 'center', threshold: 0.40 }
+                { id: 'intro', align: 'center', threshold: 0.60 }, 
+                { id: 'video-section', align: 'center', threshold: 0.60 },
+                { id: 'drone-section', align: 'center', threshold: 0.60 },
+                { id: 'votar-section', align: 'center', threshold: 0.60 },
+                { id: 'motor-norte-section', align: 'center', threshold: 0.60 },
+                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.60 },
+                { id: 'candidatos-section', align: 'center', threshold: 0.60 }
             ];
 
             const currentY = window.scrollY;
@@ -1401,7 +1401,7 @@ function initSafeMagneticScroll() {
             let closestTarget = null;
             let closestId = null;
             let minDistance = Infinity;
-            let activeThreshold = 0.40; 
+            let activeThreshold = 0.60; 
 
             sections.forEach(secData => {
                 const el = document.getElementById(secData.id);
@@ -1426,7 +1426,7 @@ function initSafeMagneticScroll() {
                     minDistance = distance;
                     closestTarget = targetY;
                     closestId = secData.id;
-                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.40;
+                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.60;
                 }
             });
 
@@ -1468,7 +1468,7 @@ function initSafeMagneticScroll() {
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
-        }, 250); // PACIENCIA DEL IMÁN: 250ms es el tiempo ideal para darte libertad y luego centrarte.
+        }, 150); // PACIENCIA DEL IMÁN: Reducido a 150ms para una respuesta más rápida.
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
