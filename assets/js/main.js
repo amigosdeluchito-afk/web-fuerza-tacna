@@ -1380,21 +1380,21 @@ function initSafeMagneticScroll() {
         snapTimeout = setTimeout(() => {
             const sections = [
                 // Top de las páginas (Snap a 0)
-                { id: 'hero-section', offset: 0, threshold: 0.40 },
-                { id: 'hero-drone-section', offset: 0, threshold: 0.40 },
-                { id: 'hero-video-section', offset: 0, threshold: 0.40 },
-                { id: 'hero-design-section', offset: 0, threshold: 0.40 },
-                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.40 },
-                { id: 'contacto-escenario', offset: 0, threshold: 0.40 }, // Corregido: Es un snap superior
+                { id: 'hero-section', offset: 0, threshold: 0.20 },
+                { id: 'hero-drone-section', offset: 0, threshold: 0.20 },
+                { id: 'hero-video-section', offset: 0, threshold: 0.20 },
+                { id: 'hero-design-section', offset: 0, threshold: 0.20 },
+                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.20 },
+                { id: 'contacto-escenario', offset: 0, threshold: 0.20 }, 
 
                 // Secciones de contenido (Centradas)
-                { id: 'intro', align: 'center', threshold: 0.45 }, 
-                { id: 'video-section', align: 'center', threshold: 0.45 },
-                { id: 'drone-section', align: 'center', threshold: 0.45 },
-                { id: 'votar-section', align: 'center', threshold: 0.45 },
-                { id: 'motor-norte-section', align: 'center', threshold: 0.45 },
-                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.45 },
-                { id: 'candidatos-section', align: 'center', threshold: 0.45 }
+                { id: 'intro', align: 'center', threshold: 0.25 }, 
+                { id: 'video-section', align: 'center', threshold: 0.25 },
+                { id: 'drone-section', align: 'center', threshold: 0.25 },
+                { id: 'votar-section', align: 'center', threshold: 0.25 },
+                { id: 'motor-norte-section', align: 'center', threshold: 0.25 },
+                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.25 },
+                { id: 'candidatos-section', align: 'center', threshold: 0.25 }
             ];
 
             const currentY = window.scrollY;
@@ -1403,7 +1403,7 @@ function initSafeMagneticScroll() {
             let closestTarget = null;
             let closestId = null;
             let minDistance = Infinity;
-            let activeThreshold = 0.45; 
+            let activeThreshold = 0.25; 
 
             sections.forEach(secData => {
                 const el = document.getElementById(secData.id);
@@ -1428,7 +1428,7 @@ function initSafeMagneticScroll() {
                     minDistance = distance;
                     closestTarget = targetY;
                     closestId = secData.id;
-                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.45;
+                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.25;
                 }
             });
 
@@ -1471,7 +1471,7 @@ function initSafeMagneticScroll() {
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
-        }, 250); // PACIENCIA DEL IMÁN: Aumentado a 250ms para que sea menos agresivo y no atrape el scroll tan rápido.
+        }, 400); // PACIENCIA DEL IMÁN: Aumentado a 400ms para que sea mucho menos agresivo
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
