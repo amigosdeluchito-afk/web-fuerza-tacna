@@ -4,3 +4,5 @@ deployment:
     - export DEPLOYPATH=/home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
     - /bin/cp -R * $DEPLOYPATH
     - /bin/cp .htaccess $DEPLOYPATH
+    - find $DEPLOYPATH -type d -exec chmod 755 {} \;
+    - find $DEPLOYPATH -type f -exec chmod 644 {} \;
