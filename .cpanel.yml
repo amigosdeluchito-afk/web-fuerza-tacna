@@ -1,4 +1,6 @@
 ---
 deployment:
   tasks:
-    - /bin/rsync -a --exclude='.git' ./ /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
+    - export DEPLOYPATH=/home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
+    - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp .htaccess $DEPLOYPATH
