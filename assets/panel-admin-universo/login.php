@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass = $_POST['password'] ?? '';
 
     if (check_login($user, $pass)) {
+        session_regenerate_id(true);
         $_SESSION['user'] = $user;
         header('Location: index.php');
         exit;

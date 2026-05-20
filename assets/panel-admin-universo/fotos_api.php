@@ -60,6 +60,11 @@ function handle_listar($segmento, $carpeta) {
     $fotos = [];
 
     foreach ($files as $idx => $path) {
+        // Excluir el archivo de miniatura
+        if (strpos($path, '.thumb.') !== false) {
+            continue;
+        }
+
         $basename = basename($path);
         $size_kb  = round(filesize($path) / 1024, 1);
         $totalSize += $size_kb;
@@ -105,6 +110,9 @@ function handle_eliminar($segmento, $carpeta, $numero) {
         return;
     }
 
+    // Excluir miniatura del procesamiento
+    $files = array_filter($files, fn($f) => strpos($f, '.thumb.') === false);
+
     natsort($files);
     $files = array_values($files);
 
@@ -122,6 +130,7 @@ function handle_eliminar($segmento, $carpeta, $numero) {
 
     // Renumerar archivos restantes como 1,2,3,... manteniendo orden
     $restantes = glob($patron, GLOB_BRACE);
+    $restantes = array_filter($restantes, fn($f) => strpos($f, '.thumb.') === false);
     natsort($restantes);
     $restantes = array_values($restantes);
 
@@ -144,6 +153,9 @@ function handle_eliminar($segmento, $carpeta, $numero) {
         rename($tmpPath, $newPath);
         $i++;
     }
+
+    // Eliminar la miniatura para evitar que quede desactualizada
+    @unlink($dir . '/1.thumb.webp');
 
     echo json_encode(['ok' => true]);
 }
@@ -197,6 +209,9 @@ function handle_principal($segmento, $carpeta, $numero) {
         return;
     }
 
+    // Excluir miniatura del procesamiento
+    $files = array_filter($files, fn($f) => strpos($f, '.thumb.') === false);
+
     natsort($files);
     $files = array_values($files);
 
@@ -234,6 +249,9 @@ function handle_principal($segmento, $carpeta, $numero) {
         $i++;
     }
 
+    // Eliminar la miniatura para evitar que quede desactualizada
+    @unlink($dir . '/1.thumb.webp');
+
     echo json_encode(['ok' => true]);
 }
 
@@ -257,6 +275,9 @@ function handle_download_zip($segmento, $carpeta) {
         echo "No hay fotos para descargar";
         return;
     }
+
+    // Excluir miniatura del ZIP
+    $files = array_filter($files, fn($f) => strpos($f, '.thumb.') === false);
 
     if (!class_exists('ZipArchive')) {
         http_response_code(500);
@@ -333,4 +354,3 @@ switch ($action) {
     echo json_encode(['ok' => false, 'error' => 'Acción no soportada']);
     break;
 }
-

@@ -81,6 +81,11 @@ try {
     if ($segmento === '' || $carpeta === '') {
         json_fail('Faltan datos: segmento/carpeta');
     }
+    
+    // Prevenir Path Traversal
+    if (strpos($segmento, '..') !== false || strpos($carpeta, '..') !== false) {
+        json_fail('Nombres de segmento o carpeta no válidos');
+    }
 
 $filesKey = null;
 if (isset($_FILES['fotos'])) $filesKey = 'fotos';
