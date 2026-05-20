@@ -1,4 +1,5 @@
 ---
 deployment:
   tasks:
-    - /bin/cp -a . /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
+    - /bin/cp -R * /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
+    - /bin/cp .htaccess /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
