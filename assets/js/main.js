@@ -1598,7 +1598,7 @@ function initMapaTacna(container) {
                                 <stop offset="100%" stop-color="rgba(255, 195, 0, 0.2)" />
                                 <animateTransform attributeName="gradientTransform" type="rotate" from="0 0.5 0.5" to="360 0.5 0.5" dur="3s" repeatCount="indefinite" />
                             </linearGradient>
-                        `;
+                        `);
                     }
                     
                     // --- NUEVO: Generar Puntos de Pulsación Aleatorios ---
