@@ -129,14 +129,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="username" value="<?= htmlspecialchars($u) ?>">
                 <button type="submit" class="btn btn-danger">Eliminar</button>
               </form>
-            <?php else: ?>
-              —
             <?php endif; ?>
+            <button type="button" class="btn btn-primary" style="background:#4f46e5; margin-left: 4px;" onclick="editarUsuario('<?= htmlspecialchars($u) ?>', '<?= htmlspecialchars($info['role'] ?? 'editor') ?>')">Cambiar Clave</button>
           </td>
         </tr>
       <?php endforeach; ?>
     </tbody>
   </table>
 </main>
+
+<script>
+function editarUsuario(username, role) {
+    // Llena el formulario automáticamente con los datos del usuario
+    document.querySelector('input[name="username"]').value = username;
+    document.querySelector('select[name="role"]').value = role;
+    document.querySelector('input[name="password"]').focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Sube la pantalla suavemente
+}
+</script>
 </body>
 </html>
