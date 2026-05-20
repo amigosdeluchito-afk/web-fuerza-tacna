@@ -18,9 +18,13 @@ function SmoothScroll(target, speed, smooth) {
               ? document.documentElement 
               : target // safari is the new IE
   
-	target.addEventListener('wheel', scrolled, { passive: false });
-	target.addEventListener('mousewheel', scrolled, { passive: false });
-	target.addEventListener('DOMMouseScroll', scrolled, { passive: false });
+	var wheelOpt = { passive: false };
+	if ('onwheel' in document.createElement('div')) {
+		target.addEventListener('wheel', scrolled, wheelOpt);
+	} else {
+		target.addEventListener('mousewheel', scrolled, wheelOpt);
+		target.addEventListener('DOMMouseScroll', scrolled, wheelOpt);
+	}
 
 	this.setPostion = function(newPosY) {
 		pos = newPosY;
@@ -50,7 +54,9 @@ function SmoothScroll(target, speed, smooth) {
 
 	function normalizeWheelDelta(e){
 		if (e.type === 'wheel') {
-			return e.deltaMode === 1 ? -e.deltaY / 3 : -e.deltaY / 100;
+			var delta = -e.deltaY;
+			if (e.deltaMode === 0) return delta / 120; // Píxeles
+			return e.deltaMode === 1 ? delta / 3 : delta; // Líneas o páginas
 		}
 		if(e.detail){
 			if(e.wheelDelta)
