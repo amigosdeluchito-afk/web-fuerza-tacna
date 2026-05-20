@@ -1388,13 +1388,13 @@ function initSafeMagneticScroll() {
                 { id: 'contacto-escenario', offset: 0, threshold: 0.40 }, // Corregido: Es un snap superior
 
                 // Secciones de contenido (Centradas)
-                { id: 'intro', align: 'center', threshold: 0.60 }, 
-                { id: 'video-section', align: 'center', threshold: 0.60 },
-                { id: 'drone-section', align: 'center', threshold: 0.60 },
-                { id: 'votar-section', align: 'center', threshold: 0.60 },
-                { id: 'motor-norte-section', align: 'center', threshold: 0.60 },
-                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.50 },
-                { id: 'candidatos-section', align: 'center', threshold: 0.50 }
+                { id: 'intro', align: 'center', threshold: 0.45 }, 
+                { id: 'video-section', align: 'center', threshold: 0.45 },
+                { id: 'drone-section', align: 'center', threshold: 0.45 },
+                { id: 'votar-section', align: 'center', threshold: 0.45 },
+                { id: 'motor-norte-section', align: 'center', threshold: 0.45 },
+                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.45 },
+                { id: 'candidatos-section', align: 'center', threshold: 0.45 }
             ];
 
             const currentY = window.scrollY;
@@ -1403,7 +1403,7 @@ function initSafeMagneticScroll() {
             let closestTarget = null;
             let closestId = null;
             let minDistance = Infinity;
-            let activeThreshold = 0.60; 
+            let activeThreshold = 0.45; 
 
             sections.forEach(secData => {
                 const el = document.getElementById(secData.id);
@@ -1428,7 +1428,7 @@ function initSafeMagneticScroll() {
                     minDistance = distance;
                     closestTarget = targetY;
                     closestId = secData.id;
-                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.60;
+                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.45;
                 }
             });
 
@@ -1471,7 +1471,7 @@ function initSafeMagneticScroll() {
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
-        }, 150); // PACIENCIA DEL IMÁN: 150ms para que se active más rápido apenas termine la inercia
+        }, 250); // PACIENCIA DEL IMÁN: Aumentado a 250ms para que sea menos agresivo y no atrape el scroll tan rápido.
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
