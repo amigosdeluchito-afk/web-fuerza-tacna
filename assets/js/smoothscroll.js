@@ -23,9 +23,10 @@ function SmoothScroll(target, speed, smooth) {
 
 	this.setPostion = function(newPosY) {
 		pos = newPosY;
+		// Si no se está moviendo, inicia el bucle de animación para ir a la nueva posición.
+		if (!moving) update();
 	};
 	function scrolled(e) {
-		if (window.smoothScrollPaused) return;
 		e.preventDefault(); // disable default scrolling
 
 		var delta = normalizeWheelDelta(e)
@@ -47,11 +48,6 @@ function SmoothScroll(target, speed, smooth) {
 	}
 
 	function update() {
-		if (window.smoothScrollPaused) {
-			moving = false;
-			return;
-		}
-
 		moving = true
     
 		var delta = (pos - target.scrollTop) / smooth
