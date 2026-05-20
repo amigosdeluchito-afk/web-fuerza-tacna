@@ -25,6 +25,7 @@ function SmoothScroll(target, speed, smooth) {
 		pos = newPosY;
 	};
 	function scrolled(e) {
+		if (window.smoothScrollPaused) return;
 		e.preventDefault(); // disable default scrolling
 
 		var delta = normalizeWheelDelta(e)
@@ -46,6 +47,11 @@ function SmoothScroll(target, speed, smooth) {
 	}
 
 	function update() {
+		if (window.smoothScrollPaused) {
+			moving = false;
+			return;
+		}
+
 		moving = true
     
 		var delta = (pos - target.scrollTop) / smooth

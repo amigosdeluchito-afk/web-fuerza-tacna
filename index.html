@@ -22,6 +22,7 @@
         
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> 
 
+        <script type="text/javascript" src="assets/js/smoothscroll.js"></script>
         <!-- Usar solo GSAP 3 para evitar conflictos y congelamientos -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
         <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
@@ -709,7 +710,7 @@
 
     </head>
 
-    <body data-barba="wrapper">
+    <body data-barba="wrapper" onload="init()">
         
         <!-- Loader que solo se ve al recargar -->
         <div class="initial-loader">
@@ -1045,7 +1046,7 @@
             }
 
             /* --- Unificación del Imán: Apagamos el CSS nativo globalmente para que actúe el JS magnético --- */
-            html { scroll-snap-type: none !important; scroll-behavior: smooth !important; }
+            html { scroll-snap-type: none !important; scroll-behavior: auto !important; }
             #hero-section, #intro, #video-section, #drone-section, #votar-section, .references-section {
                 scroll-snap-align: none !important;
             }

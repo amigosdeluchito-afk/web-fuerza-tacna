@@ -1358,8 +1358,7 @@ function initSafeMagneticScroll() {
             cancelAnimationFrame(window.currentScrollAnim);
             window.currentScrollAnim = null;
             isAutoScrolling = false;
-            // Al cancelar, restauramos el comportamiento de scroll a lo que dicte el CSS
-            document.documentElement.style.scrollBehavior = '';
+            if (window.scroller) window.smoothScrollPaused = false;
         }
     };
 
@@ -1379,21 +1378,21 @@ function initSafeMagneticScroll() {
         snapTimeout = setTimeout(() => {
             const sections = [
                 // Top de las páginas (Snap a 0)
-                { id: 'hero-section', offset: 0, threshold: 0.60 },
-                { id: 'hero-drone-section', offset: 0, threshold: 0.60 },
-                { id: 'hero-video-section', offset: 0, threshold: 0.60 },
-                { id: 'hero-design-section', offset: 0, threshold: 0.60 },
-                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.60 },
-                { id: 'contacto-escenario', offset: 0, threshold: 0.60 }, 
+                { id: 'hero-section', offset: 0, threshold: 0.40 },
+                { id: 'hero-drone-section', offset: 0, threshold: 0.40 },
+                { id: 'hero-video-section', offset: 0, threshold: 0.40 },
+                { id: 'hero-design-section', offset: 0, threshold: 0.40 },
+                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.40 },
+                { id: 'contacto-escenario', offset: 0, threshold: 0.40 }, 
 
                 // Secciones de contenido (Centradas)
-                { id: 'intro', align: 'center', threshold: 0.60 }, 
-                { id: 'video-section', align: 'center', threshold: 0.60 },
-                { id: 'drone-section', align: 'center', threshold: 0.60 },
-                { id: 'votar-section', align: 'center', threshold: 0.60 },
-                { id: 'motor-norte-section', align: 'center', threshold: 0.60 },
-                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.60 },
-                { id: 'candidatos-section', align: 'center', threshold: 0.60 }
+                { id: 'intro', align: 'center', threshold: 0.40 }, 
+                { id: 'video-section', align: 'center', threshold: 0.40 },
+                { id: 'drone-section', align: 'center', threshold: 0.40 },
+                { id: 'votar-section', align: 'center', threshold: 0.40 },
+                { id: 'motor-norte-section', align: 'center', threshold: 0.40 },
+                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.40 },
+                { id: 'candidatos-section', align: 'center', threshold: 0.40 }
             ];
 
             const currentY = window.scrollY;
@@ -1402,7 +1401,7 @@ function initSafeMagneticScroll() {
             let closestTarget = null;
             let closestId = null;
             let minDistance = Infinity;
-            let activeThreshold = 0.60; 
+            let activeThreshold = 0.40; 
 
             sections.forEach(secData => {
                 const el = document.getElementById(secData.id);
@@ -1427,7 +1426,7 @@ function initSafeMagneticScroll() {
                     minDistance = distance;
                     closestTarget = targetY;
                     closestId = secData.id;
-                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.60;
+                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.40;
                 }
             });
 
@@ -1444,11 +1443,9 @@ function initSafeMagneticScroll() {
             }
 
             if (shouldSnap) {
+                if (window.scroller) window.smoothScrollPaused = true;
                 isAutoScrolling = true;
                 
-                // Desactivamos temporalmente el scroll suave nativo para que nuestra animación JS tome el control total.
-                document.documentElement.style.scrollBehavior = 'auto';
-
                 const startY = window.scrollY;
                 const distance = closestTarget - startY;
                 let startTime = null;
@@ -1464,8 +1461,8 @@ function initSafeMagneticScroll() {
                         window.currentScrollAnim = requestAnimationFrame(customAnim);
                     } else {
                         window.currentScrollAnim = null;
-                        // Al terminar, devolvemos el control al CSS.
-                        document.documentElement.style.scrollBehavior = '';
+                        if (window.scroller) window.smoothScrollPaused = false;
+                        if (window.scroller && typeof window.scroller.setPostion === 'function') window.scroller.setPostion(closestTarget);
                         setTimeout(() => { isAutoScrolling = false; }, 50); // Liberar el auto-scroll despues de un margen de seguridad
                     }
                 }
