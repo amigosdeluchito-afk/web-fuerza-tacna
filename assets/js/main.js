@@ -1358,9 +1358,8 @@ function initSafeMagneticScroll() {
             cancelAnimationFrame(window.currentScrollAnim);
             window.currentScrollAnim = null;
             isAutoScrolling = false;
-            if (window.scroller && typeof window.scroller.setPostion === 'function') {
-                window.scroller.setPostion(window.scrollY);
-            }
+            // Al cancelar, restauramos el comportamiento de scroll a lo que dicte el CSS
+            document.documentElement.style.scrollBehavior = '';
         }
     };
 
@@ -1446,23 +1445,28 @@ function initSafeMagneticScroll() {
 
             if (shouldSnap) {
                 isAutoScrolling = true;
+                
+                // Desactivamos temporalmente el scroll suave nativo para que nuestra animación JS tome el control total.
+                document.documentElement.style.scrollBehavior = 'auto';
+
                 const startY = window.scrollY;
                 const distance = closestTarget - startY;
                 let startTime = null;
-                const duration = 700; // Fricción más rápida para que el imán se sienta ágil
+                const duration = 700;
                 
                 function customAnim(currentTime) {
                     if (!startTime) startTime = currentTime;
                     const progress = Math.min((currentTime - startTime) / duration, 1);
                     const ease = 1 - Math.pow(1 - progress, 5); 
-                    window.scrollTo({ top: startY + distance * ease, behavior: 'auto' });
+                    // Usamos el scrollTo nativo sin 'behavior' porque ya lo controlamos en el <html>
+                    window.scrollTo(0, startY + distance * ease);
                     if (progress < 1) {
                         window.currentScrollAnim = requestAnimationFrame(customAnim);
                     } else {
                         window.currentScrollAnim = null;
-                        if (window.scroller && typeof window.scroller.setPostion === 'function') window.scroller.setPostion(closestTarget);
-                        // Liberar el auto-scroll despues de un margen de seguridad
-                        setTimeout(() => { isAutoScrolling = false; }, 50);
+                        // Al terminar, devolvemos el control al CSS.
+                        document.documentElement.style.scrollBehavior = '';
+                        setTimeout(() => { isAutoScrolling = false; }, 50); // Liberar el auto-scroll despues de un margen de seguridad
                     }
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
