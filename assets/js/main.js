@@ -1459,7 +1459,7 @@ function initSafeMagneticScroll() {
                     if (!startTime) startTime = currentTime;
                     const progress = Math.min((currentTime - startTime) / duration, 1);
                     const ease = 1 - Math.pow(1 - progress, 5); 
-                    window.scrollTo(0, startY + distance * ease);
+                    window.scrollTo({ top: startY + distance * ease, behavior: 'auto' });
                     if (progress < 1) {
                         window.currentScrollAnim = requestAnimationFrame(customAnim);
                     } else {
