@@ -1362,6 +1362,12 @@ function initSafeMagneticScroll() {
         }
 
         snapTimeout = setTimeout(() => {
+            // Prevenir que el imán actúe si el usuario todavía está desplazándose con la inercia de smoothscroll
+            if (window.scroller && typeof window.scroller.isMoving === 'function' && window.scroller.isMoving()) {
+                handleScroll(); // Reprogramamos el chequeo para cuando termine
+                return;
+            }
+
             const sections = [
                 // Top de las páginas (Snap a 0)
                 { id: 'hero-section', offset: 0, threshold: 0.60 },
@@ -1472,7 +1478,11 @@ function initSmoothArrows(container) {
             if (targetEl) {
                 // Alineamos estrictamente al techo de la sección 
                 const targetY = targetEl.offsetTop;
-                window.scrollTo({ top: targetY, behavior: 'smooth' });
+                if (window.scroller && typeof window.scroller.setPostion === 'function') {
+                    window.scroller.setPostion(targetY);
+                } else {
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
+                }
             }
         });
     });
