@@ -16,11 +16,15 @@ if (session_status() === PHP_SESSION_NONE) {
 $PROJECT_ROOT = realpath(__DIR__ . '/../universoobras');  // ajusta si tu carpeta pública se llama distinto
 
 if ($PROJECT_ROOT === false) {
-    die("No se pudo resolver PROJECT_ROOT. Revisa la ruta en config.php");
+    // PLAN B: Si no está dentro de 'assets', buscar en la carpeta principal
+    $PROJECT_ROOT = realpath(__DIR__ . '/../../universoobras');
+    if ($PROJECT_ROOT === false) {
+        die("<h1 style='color:red; font-family:sans-serif;'>Error de carpetas</h1><p style='font-family:sans-serif;'>El panel de administración no logra encontrar la carpeta <b>universoobras</b> en tu servidor. Revisa que sí la hayas subido a Internet.</p>");
+    }
 }
 
 // Carpeta donde deben guardarse las fotos de las obras
-$FOTOS_BASE = realpath(__DIR__ . '/../universoobras/IMG/fotos-obras');
+$FOTOS_BASE = $PROJECT_ROOT . '/IMG/fotos-obras';
 
 
 // Tamaños máximos (en píxeles) para redimensionar (si los usas)
