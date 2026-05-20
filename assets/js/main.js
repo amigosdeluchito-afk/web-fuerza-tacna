@@ -1350,8 +1350,24 @@ function initSafeMagneticScroll() {
     isMagneticScrollInitialized = true;
     
     let snapTimeout;
+    let isAutoScrolling = false;
+
+    // Detectar interacciones reales del usuario para cancelar el imán si se arrepiente
+    const handleUserInteraction = () => {
+        if (window.currentScrollAnim) {
+            cancelAnimationFrame(window.currentScrollAnim);
+            window.currentScrollAnim = null;
+            isAutoScrolling = false;
+            if (window.scroller && typeof window.scroller.setPostion === 'function') {
+                window.scroller.setPostion(window.scrollY);
+            }
+        }
+    };
 
     const handleScroll = () => {
+        // Si el scroll es provocado por nuestro propio imán, no hacemos nada
+        if (isAutoScrolling) return;
+
         clearTimeout(snapTimeout);
 
         // Pausar el imán temporalmente si la vista de detalle de un candidato o algún modal están abiertos
@@ -1435,19 +1451,40 @@ function initSafeMagneticScroll() {
             }
 
             if (shouldSnap) {
-                // Simplificación: Dejamos que smoothscroll.js maneje la animación del imán.
-                // Esto evita conflictos y asegura que la sensación sea consistente.
-                if (window.scroller && typeof window.scroller.setPostion === 'function') {
-                    window.scroller.setPostion(closestTarget);
-                } else {
-                    // Fallback si smoothscroll.js no está presente.
-                    window.scrollTo({ top: closestTarget, behavior: 'smooth' });
+                isAutoScrolling = true;
+                
+                const startY = window.scrollY;
+                const distance = closestTarget - startY;
+                let startTime = null;
+                const duration = 650; // Animación ágil, ni muy lenta ni seca
+                
+                function customAnim(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    const progress = Math.min((currentTime - startTime) / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 4); // easeOutQuart para efecto magnético perfecto
+                    
+                    window.scrollTo(0, startY + distance * ease);
+                    
+                    if (progress < 1) {
+                        window.currentScrollAnim = requestAnimationFrame(customAnim);
+                    } else {
+                        window.currentScrollAnim = null;
+                        if (window.scroller && typeof window.scroller.setPostion === 'function') {
+                            window.scroller.setPostion(closestTarget);
+                        }
+                        // Pequeño delay para no interferir
+                        setTimeout(() => { isAutoScrolling = false; }, 50);
+                    }
                 }
+                window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
         }, 150); // PACIENCIA DEL IMÁN: Reducido a 150ms para una respuesta más rápida.
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('wheel', handleUserInteraction, { passive: true });
+    window.addEventListener('touchstart', handleUserInteraction, { passive: true });
+    window.addEventListener('touchmove', handleUserInteraction, { passive: true });
 }
 
 function initVideoScrollFix(container) {
