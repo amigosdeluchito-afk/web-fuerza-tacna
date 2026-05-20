@@ -72,8 +72,8 @@ function handle_listar($segmento, $carpeta) {
         // Principal: el que tiene nombre que empieza con "1."
         $es_principal = preg_match('/^1\./', $basename) === 1;
 
-        // URL pública (asumiendo que universoobras está en /universoobras)
-        $url = "/universoobras/IMG/fotos-obras/" .
+        // URL pública (ajustada a la estructura de fuerza_tacna/assets)
+        $url = "/fuerza_tacna/assets/universoobras/IMG/fotos-obras/" .
             rawurlencode($segmento) . "/" .
             rawurlencode($carpeta) . "/" .
             rawurlencode($basename);
