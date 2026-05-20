@@ -1,5 +1,4 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
-    - /bin/rsync -av --delete --exclude='.git*' --exclude='.cpanel.yml' --exclude='actualizar.php' ./ "$DEPLOYPATH"
+    - /bin/cp -R * /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
