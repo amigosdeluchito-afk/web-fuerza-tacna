@@ -1762,20 +1762,30 @@ function inits(container) {
     // Refresco forzado de AOS milisegundos después para detectar nuevo HTML de Barba
     setTimeout(() => AOS.refreshHard(), 100);
     setTimeout(() => AOS.refreshHard(), 500); // Segundo refresco de seguridad
-    initCandidatos(container);
-    initCircularCarousel(container);
-    initTimelineCarousels(container);
-    initMapaTacna(container);
+        
+        // Inicializaciones Ligeras
     initSafeMagneticScroll();
-    initVideoScrollFix(container);
     initSmoothArrows(container);
-    initCircularTimeline(container);
-    // Paso 2: Despertar el mapa de Leaflet cuando entramos a la página del mapa
-    if (typeof initLeafletMap === 'function') initLeafletMap(container);
-    // Paso 1: Despertar la lógica de los filtros que ahora vive en mapa-filtros.js
-    if (typeof initFilters === 'function') initFilters();
-    // Inicializador del cómic interactivo de la página de contacto
-    if (typeof initContactoComic === 'function') initContactoComic(container);
+        
+        // TRUCO UX: Retrasamos 250ms las inicializaciones pesadas (Mapas, Leaflet, Carruseles, etc.)
+        // Esto hace que el navegador use todo su procesador EXACTAMENTE cuando el telón de Barba.js
+        // está cubriendo toda la pantalla de un color sólido, escondiendo cualquier caída de FPS.
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                initCandidatos(container);
+                initCircularCarousel(container);
+                initTimelineCarousels(container);
+                initMapaTacna(container);
+                initVideoScrollFix(container);
+                initCircularTimeline(container);
+                // Paso 2: Despertar el mapa de Leaflet cuando entramos a la página del mapa
+                if (typeof initLeafletMap === 'function') initLeafletMap(container);
+                // Paso 1: Despertar la lógica de los filtros que ahora vive en mapa-filtros.js
+                if (typeof initFilters === 'function') initFilters();
+                // Inicializador del cómic interactivo de la página de contacto
+                if (typeof initContactoComic === 'function') initContactoComic(container);
+            });
+        }, 250);
 }
 
 barba.hooks.afterOnce((data) => {
