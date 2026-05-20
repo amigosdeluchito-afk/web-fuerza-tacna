@@ -1,6 +1,9 @@
+Options -Indexes
+DirectoryIndex index.html index.php
+
 RewriteEngine On
-RewriteBase /fuerza_tacna/
+RewriteBase /
 
 # Solución HTTrack: Si piden una fuente .woff2, entregamos el archivo .html físico disfrazado con el tipo MIME correcto
-RewriteCond %{DOCUMENT_ROOT}/fuerza_tacna/$1.html -f
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
 RewriteRule ^(assets/fonts/.+?)\.woff2$ $1.html [T=font/woff2,L]
