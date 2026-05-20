@@ -31,7 +31,7 @@ function injectGlobalAssets() {
                 transition: opacity 0.3s ease, visibility 0.3s ease !important;
             }
             main { position: relative; z-index: 0; }
-            main::before { content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('assets/img/pattern.svg'); background-repeat: no-repeat; background-size: cover; background-position: center; pointer-events: none; z-index: -1; }
+            main::before { content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('assets/img/pattern.svg'); background-repeat: no-repeat; background-size: cover; background-position: center; pointer-events: none; z-index: -1; transform: translateZ(0); will-change: transform; }
             
             /* --- Flechas Flotantes Globales --- */
             .mobile-arrows { display: flex !important; flex-direction: column; align-items: center; position: absolute; bottom: 10vh; z-index: 99999; text-decoration: none; margin: 0 !important; padding: 0 !important; }
@@ -568,20 +568,20 @@ function delay(n) {
 
 function pageTransition() {
     var tl = new TimelineMax(); 
-    tl.set(".loading-screen", { bottom: "-100%", height: "100%" });
+    tl.set(".loading-screen", { yPercent: 100, top: 0, bottom: "auto", height: "100%" });
     tl.to(".loading-screen", 1.2, {
         width: "100%",
-        bottom: "0%",
+        yPercent: 0,
         ease: "Expo.easeInOut",
     });
 
     tl.to(".loading-screen", 1, {
         width: "100%",
-        bottom: "100%",
+        yPercent: -100,
         ease: "Expo.easeInOut",
         delay: 0.3,
     });
-    tl.set(".loading-screen", { bottom: "-100%" });
+    tl.set(".loading-screen", { yPercent: 100 });
 
 }
 
