@@ -11,9 +11,7 @@ var mouseX = 0,
 TweenMax.set(cursor, { left: 0, top: 0 });
 TweenMax.set(follower, { left: 0, top: 0 });
 
-TweenMax.to({}, 0.016, {
-  repeat: -1,
-  onRepeat: function() {
+function renderCursor() {
     posX += (mouseX - posX) / 9;
     posY += (mouseY - posY) / 9;
     
@@ -32,8 +30,9 @@ TweenMax.to({}, 0.016, {
             force3D: true
         });
     }
-  }
-});
+    requestAnimationFrame(renderCursor);
+}
+requestAnimationFrame(renderCursor);
 
 $(document).on("mousemove", function(e) {
     mouseX = e.clientX;

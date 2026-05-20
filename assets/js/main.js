@@ -21,7 +21,7 @@ function injectGlobalAssets() {
             #intro button, #video-section button, #drone-section button, #votar-section button, .references-section button, #button-center { border-color: #ffc300 !important; }
             #hero-header { position: fixed; top: 15px; left: 2% !important; width: 96% !important; box-sizing: border-box !important; z-index: 1000; background: transparent; }
             @media (min-width: 992px) { #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; } #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; } #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; } #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; } }
-            #hero-header ul { background-color: rgba(255, 195, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 50px; padding: 18px 24px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.4); width: max-content !important; margin: 0 auto; }
+            #hero-header ul { background-color: rgba(255, 195, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 50px; padding: 18px 24px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.4); width: max-content !important; margin: 0 auto; will-change: transform, backdrop-filter; transform: translateZ(0); backface-visibility: hidden; }
             #hero-header ul li { margin: 0 15px !important; }
             #hero-section, #hero-drone-section, #hero-video-section, #hero-contact, #hero-design-section, #sumate-hyperspace-section, #contacto-escenario { min-height: 100vh !important; width: 100%; box-sizing: border-box; }
             body.hide-header #hero-header, body.hide-header .mobile-arrows {
@@ -230,7 +230,7 @@ function injectGlobalAssets() {
                 border-radius: 9999px !important;
                 z-index: 2 !important;
                 overflow: hidden !important;
-                transition: all 0.4s ease;
+                transition: all 0.4s ease; will-change: transform, backdrop-filter; transform: translateZ(0); backface-visibility: hidden;
                 box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
             }
             .glass-button::before {
