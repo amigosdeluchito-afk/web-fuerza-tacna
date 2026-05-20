@@ -9,10 +9,14 @@ if (empty($api_user) || empty($api_token)) {
     die("Acceso denegado.");
 }
 
-// PLAN OMEGA: Comando nativo interno del servidor
+// PLAN TITÁN: Comandos puros de Linux (Bypass total a cPanel)
 $repo_local = "/home/tacnwddf/repositories/web-fuerza-tacna";
-$out1 = shell_exec("/usr/bin/uapi VersionControl update repository_root=" . escapeshellarg($repo_local) . " 2>&1");
-$out2 = shell_exec("/usr/bin/uapi VersionControl deploy repository_root=" . escapeshellarg($repo_local) . " 2>&1");
+$public_html = "/home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com";
+
+// 1. Limpiar y descargar cambios de GitHub directamente
+$out1 = shell_exec("cd " . escapeshellarg($repo_local) . " && export GIT_TERMINAL_PROMPT=0 && git reset --hard 2>&1 && git pull 2>&1");
+// 2. Copiar archivos a la web pública ultrarrápido
+$out2 = shell_exec("rsync -av --exclude='.git' --exclude='.cpanel.yml' " . escapeshellarg($repo_local . "/") . " " . escapeshellarg($public_html . "/") . " 2>&1");
 
 echo "Update:\n$out1\nDeploy:\n$out2";
 
