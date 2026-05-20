@@ -1092,8 +1092,8 @@ window.showCandidateDetail = function(selectedName) {
             hideMode = true; // Todo lo que esté después de este wrapper se ocultará temporalmente
         } else if (hideMode && child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE' && child.id !== 'hero-header') {
             if (!child.classList.contains('hidden-by-detail')) {
-                child.setAttribute('data-original-display', child.style.display || '');
-                child.style.display = 'none';
+                child.setAttribute('data-original-visibility', child.style.visibility || '');
+                child.style.visibility = 'hidden';
                 child.classList.add('hidden-by-detail');
             }
         }
@@ -1140,7 +1140,7 @@ window.closeCandidateDetail = function() {
                 
                 // 2. Restauramos todas las secciones ocultas
                 document.querySelectorAll('.hidden-by-detail').forEach(child => {
-                    child.style.display = child.getAttribute('data-original-display') || '';
+                    child.style.visibility = child.getAttribute('data-original-visibility') || '';
                     child.classList.remove('hidden-by-detail');
                 });
 
