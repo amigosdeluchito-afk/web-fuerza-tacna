@@ -1,4 +1,8 @@
 <?php
+// Encender la luz para ver el error oculto
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once 'config.php';
 
 // Si ya está logueado, lo mandamos al panel
