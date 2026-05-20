@@ -57,6 +57,17 @@ function injectGlobalAssets() {
             #sumate-menu-item:hover > a::before { opacity: 1; animation: force-glow-pulse 1s infinite alternate ease-in-out; }
             #sumate-menu-item:hover .lucho-fuerza-peek { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+            /* --- Estilos Mapa Interactivo Tacna (Solución SPAs Barba.js) --- */
+            #mapa-tacna-container svg { width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
+            #mapa-tacna-container svg path, #mapa-tacna-container svg polygon, #mapa-tacna-container svg g { fill: #801039; stroke: url(#map-shiny-border); stroke-width: 2.5px; stroke-linejoin: round; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27); cursor: pointer; transform-origin: center; }
+            #mapa-tacna-container svg path:hover, #mapa-tacna-container svg polygon:hover, #mapa-tacna-container svg g:hover { fill: #ffc300; stroke: #ffffff; stroke-width: 3.5px; transform: translateY(-12px) scale(1.03); filter: drop-shadow(0 20px 25px rgba(0,0,0,0.5)); }
+            #mapa-tacna-container { animation: map-float 6s ease-in-out infinite; }
+            @keyframes map-float { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+            #map-tooltip { position: fixed; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 195, 0, 0.4); color: #fff; padding: 0.8rem 1.4rem; border-radius: 8px; pointer-events: none; opacity: 0; visibility: hidden; z-index: 999999; transform: translate(-50%, -100%) scale(0.9); transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27); box-shadow: 0 15px 35px rgba(0,0,0,0.4); text-align: center; }
+            #map-tooltip.visible { opacity: 1; visibility: visible; transform: translate(-50%, -130%) scale(1); }
+            #map-tooltip h4 { margin: 0 0 0.3rem 0; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; color: #ffc300; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1; }
+            #map-tooltip p { margin: 0; font-size: 0.75rem; font-weight: 600; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+
             /* --- Estilos Globales de Candidatos y Carrusel --- */
             #candidatos-section { background-color: transparent; position: relative !important; top: 0 !important; transform: none !important; min-height: 100vh; display: flex; align-items: center; width: 100%; overflow: hidden; z-index: 10; }
             .marquee-container { overflow: hidden; width: 100vw; left: 50%; transform: translateX(-50%); position: relative; display: flex; cursor: grab; }
@@ -1576,7 +1587,7 @@ function initMapaTacna(container) {
                         svgTag.prepend(defs);
                     }
                     if (!defs.querySelector('#map-shiny-border')) {
-                        defs.innerHTML += `
+                        defs.insertAdjacentHTML('beforeend', `
                             <linearGradient id="map-shiny-border" gradientUnits="objectBoundingBox" x1="0" y1="0" x2="1" y2="1">
                                 <stop offset="0%" stop-color="rgba(255, 195, 0, 0.2)" />
                                 <stop offset="35%" stop-color="rgba(255, 195, 0, 0.2)" />
