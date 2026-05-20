@@ -18,6 +18,7 @@ function SmoothScroll(target, speed, smooth) {
               ? document.documentElement 
               : target // safari is the new IE
   
+	target.addEventListener('wheel', scrolled, { passive: false });
 	target.addEventListener('mousewheel', scrolled, { passive: false });
 	target.addEventListener('DOMMouseScroll', scrolled, { passive: false });
 
@@ -48,6 +49,9 @@ function SmoothScroll(target, speed, smooth) {
 	}
 
 	function normalizeWheelDelta(e){
+		if (e.type === 'wheel') {
+			return e.deltaMode === 1 ? -e.deltaY / 3 : -e.deltaY / 100;
+		}
 		if(e.detail){
 			if(e.wheelDelta)
 				return e.wheelDelta/e.detail/40 * (e.detail>0 ? 1 : -1) // Opera
