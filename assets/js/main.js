@@ -1380,21 +1380,21 @@ function initSafeMagneticScroll() {
         snapTimeout = setTimeout(() => {
             const sections = [
                 // Top de las páginas (Snap a 0)
-                { id: 'hero-section', offset: 0, threshold: 0.20 },
-                { id: 'hero-drone-section', offset: 0, threshold: 0.20 },
-                { id: 'hero-video-section', offset: 0, threshold: 0.20 },
-                { id: 'hero-design-section', offset: 0, threshold: 0.20 },
-                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.20 },
-                { id: 'contacto-escenario', offset: 0, threshold: 0.20 }, 
+                { id: 'hero-section', offset: 0, threshold: 0.60 },
+                { id: 'hero-drone-section', offset: 0, threshold: 0.60 },
+                { id: 'hero-video-section', offset: 0, threshold: 0.60 },
+                { id: 'hero-design-section', offset: 0, threshold: 0.60 },
+                { id: 'sumate-hyperspace-section', offset: 0, threshold: 0.60 },
+                { id: 'contacto-escenario', offset: 0, threshold: 0.60 }, 
 
                 // Secciones de contenido (Centradas)
-                { id: 'intro', align: 'center', threshold: 0.25 }, 
-                { id: 'video-section', align: 'center', threshold: 0.25 },
-                { id: 'drone-section', align: 'center', threshold: 0.25 },
-                { id: 'votar-section', align: 'center', threshold: 0.25 },
-                { id: 'motor-norte-section', align: 'center', threshold: 0.25 },
-                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.25 },
-                { id: 'candidatos-section', align: 'center', threshold: 0.25 }
+                { id: 'intro', align: 'center', threshold: 0.60 }, 
+                { id: 'video-section', align: 'center', threshold: 0.60 },
+                { id: 'drone-section', align: 'center', threshold: 0.60 },
+                { id: 'votar-section', align: 'center', threshold: 0.60 },
+                { id: 'motor-norte-section', align: 'center', threshold: 0.60 },
+                { id: 'quienes-somos-timeline', align: 'center', threshold: 0.60 },
+                { id: 'candidatos-section', align: 'center', threshold: 0.60 }
             ];
 
             const currentY = window.scrollY;
@@ -1403,7 +1403,7 @@ function initSafeMagneticScroll() {
             let closestTarget = null;
             let closestId = null;
             let minDistance = Infinity;
-            let activeThreshold = 0.25; 
+            let activeThreshold = 0.60; 
 
             sections.forEach(secData => {
                 const el = document.getElementById(secData.id);
@@ -1428,22 +1428,18 @@ function initSafeMagneticScroll() {
                     minDistance = distance;
                     closestTarget = targetY;
                     closestId = secData.id;
-                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.25;
+                    activeThreshold = secData.threshold !== undefined ? secData.threshold : 0.60;
                 }
             });
 
             let shouldSnap = false;
 
             if (closestTarget !== null) {
-                if (closestId === window.lastSnappedId) {
-                    // Si seguimos en la misma sección, el rango para volver a centrarte es pequeño
-                    if (minDistance > 5 && minDistance < 80) {
+                if (minDistance < viewportHeight * activeThreshold) {
+                    // Siempre que la distancia sea mayor a 5px, aplicamos el imán
+                    if (minDistance > 5) {
                         shouldSnap = true;
-                    }
-                } else {
-                    if (minDistance < viewportHeight * activeThreshold) {
-                        shouldSnap = true;
-                        window.lastSnappedId = closestId; // Guardamos registro de quién te atrapó
+                        window.lastSnappedId = closestId; 
                     }
                 }
             }
@@ -1453,7 +1449,7 @@ function initSafeMagneticScroll() {
                 const startY = window.scrollY;
                 const distance = closestTarget - startY;
                 let startTime = null;
-                const duration = 900; // Fricción elegante
+                const duration = 700; // Fricción más rápida para que el imán se sienta ágil
                 
                 function customAnim(currentTime) {
                     if (!startTime) startTime = currentTime;
@@ -1471,7 +1467,7 @@ function initSafeMagneticScroll() {
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
-        }, 400); // PACIENCIA DEL IMÁN: Aumentado a 400ms para que sea mucho menos agresivo
+        }, 250); // PACIENCIA DEL IMÁN: 250ms es el tiempo ideal para darte libertad y luego centrarte.
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
