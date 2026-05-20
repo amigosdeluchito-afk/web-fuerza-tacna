@@ -1051,6 +1051,12 @@
                 align-items: center;
             }
 
+            /* --- Unificación del Imán: Apagamos el CSS nativo globalmente para que actúe el JS magnético --- */
+            html { scroll-snap-type: none !important; scroll-behavior: smooth; }
+            #hero-section, #intro, #video-section, #drone-section, #votar-section, .references-section {
+                scroll-snap-align: none !important;
+            }
+
             /* --- Ocultar flechas móviles en PC --- */
             @media (min-width: 769px) {
                 /* Oculta a Luchito y los botones rojos en la versión normal (PC) */
@@ -1108,11 +1114,6 @@
             @media (max-width: 768px) {
                 .initial-loader h1 { font-size: 3.5rem; }
                 
-                /* --- Unificación del Imán: Apagamos el CSS nativo para que actúe el JS y sea idéntico a las flechas --- */
-                html { scroll-snap-type: none !important; scroll-behavior: smooth; }
-                #hero-section, #intro, #video-section, #drone-section, #votar-section, .references-section {
-                    scroll-snap-align: none !important;
-                }
 
                 /* --- Responsive Mobile: Título apilado al mismo ancho --- */
                 .title-desktop { display: none !important; }
