@@ -1,4 +1,4 @@
 ---
 deployment:
   tasks:
-    - /bin/cp -R * /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
+    - /bin/rsync -av --exclude='.git' --exclude='.cpanel.yml' ./ /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
