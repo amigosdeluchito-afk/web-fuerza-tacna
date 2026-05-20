@@ -1,5 +1,4 @@
 ---
 deployment:
   tasks:
-    - /bin/cp -R * /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
-    - /bin/cp .htaccess /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
+    - /bin/rsync -a --exclude='.git' ./ /home/tacnwddf/fuerzatacna.tacnavuelveasonreir.com/
