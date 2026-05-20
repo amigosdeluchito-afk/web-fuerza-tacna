@@ -1433,36 +1433,46 @@ function initSafeMagneticScroll() {
             }
 
             if (shouldSnap) {
-                isAutoScrolling = true;
-                
-                // Detenemos la inercia nativa de smoothscroll para tomar el control instantáneamente
-                if (window.scroller && typeof window.scroller.stop === 'function') {
-                    window.scroller.stop();
-                }
+                // --- NUEVO: Chequeo anti-footer-trap ---
+                const lastSections = ['votar-section', 'motor-norte-section', 'candidatos-section'];
 
-                const startY = window.scrollY;
-                const distance = closestTarget - startY;
-                let startTime = null;
-                const duration = 650; // Animación ágil, ni muy lenta ni seca
-                
-                function customAnim(currentTime) {
-                    if (!startTime) startTime = currentTime;
-                    const progress = Math.min((currentTime - startTime) / duration, 1);
-                    const ease = 1 - Math.pow(1 - progress, 4); // easeOutQuart para efecto magnético perfecto
+                // Si el imán quiere atraparnos en la última sección, pero ya estamos MÁS ABAJO
+                // de su punto de anclaje, significa que queremos ver el footer. ¡Lo dejamos pasar!
+                if (lastSections.includes(closestId) && window.scrollY > closestTarget) {
+                    // No hacer nada. El scroll suave continuará su inercia hasta el final.
+                } else {
+                    // Proceder con el snap normal
+                    isAutoScrolling = true;
                     
-                    window.scrollTo(0, startY + distance * ease);
-                    
-                    if (progress < 1) {
-                        window.currentScrollAnim = requestAnimationFrame(customAnim);
-                    } else {
-                        window.currentScrollAnim = null;
-                        if (window.scroller && typeof window.scroller.setPostion === 'function') {
-                            window.scroller.setPostion(closestTarget);
-                        }
-                        setTimeout(() => { isAutoScrolling = false; }, 50);
+                    // Detenemos la inercia nativa de smoothscroll para tomar el control instantáneamente
+                    if (window.scroller && typeof window.scroller.stop === 'function') {
+                        window.scroller.stop();
                     }
+
+                    const startY = window.scrollY;
+                    const distance = closestTarget - startY;
+                    let startTime = null;
+                    const duration = 650; // Animación ágil, ni muy lenta ni seca
+                    
+                    function customAnim(currentTime) {
+                        if (!startTime) startTime = currentTime;
+                        const progress = Math.min((currentTime - startTime) / duration, 1);
+                        const ease = 1 - Math.pow(1 - progress, 4); // easeOutQuart para efecto magnético perfecto
+                        
+                        window.scrollTo(0, startY + distance * ease);
+                        
+                        if (progress < 1) {
+                            window.currentScrollAnim = requestAnimationFrame(customAnim);
+                        } else {
+                            window.currentScrollAnim = null;
+                            if (window.scroller && typeof window.scroller.setPostion === 'function') {
+                                window.scroller.setPostion(closestTarget);
+                            }
+                            setTimeout(() => { isAutoScrolling = false; }, 50);
+                        }
+                    }
+                    window.currentScrollAnim = requestAnimationFrame(customAnim);
                 }
-                window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
     };
 
