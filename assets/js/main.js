@@ -1349,26 +1349,17 @@ function initSafeMagneticScroll() {
     if (isMagneticScrollInitialized) return;
     isMagneticScrollInitialized = true;
     
-    let snapTimeout;
+    let inputTimeout;
+    let scrollTimeout;
     let isAutoScrolling = false;
 
-    // Detectar interacciones reales del usuario para cancelar el imán si se arrepiente
-    const handleUserInteraction = () => {
-        if (window.currentScrollAnim) {
-            cancelAnimationFrame(window.currentScrollAnim);
-            window.currentScrollAnim = null;
-            isAutoScrolling = false;
-            if (window.scroller && typeof window.scroller.setPostion === 'function') {
-                window.scroller.setPostion(window.scrollY);
-            }
-        }
-    };
-
-    const handleScroll = () => {
-        // Si el scroll es provocado por nuestro propio imán, no hacemos nada
+    const handleInputEnd = () => {
         if (isAutoScrolling) return;
 
-        clearTimeout(snapTimeout);
+        // ¿Hacia dónde se dirige la inercia del scroll suave? Si no hay smoothscroll, usamos la posición actual
+        const projectedY = (window.scroller && typeof window.scroller.getDestination === 'function') 
+            ? window.scroller.getDestination() 
+            : window.scrollY;
 
         // Pausar el imán temporalmente si la vista de detalle de un candidato o algún modal están abiertos
         const detailWrapper = document.getElementById('detalle-candidato-wrapper');
@@ -1376,13 +1367,6 @@ function initSafeMagneticScroll() {
         if (document.body.classList.contains('hide-header') || isDetailOpen) {
             return;
         }
-
-        snapTimeout = setTimeout(() => {
-            // Prevenir que el imán actúe si el usuario todavía está desplazándose con la inercia de smoothscroll
-            if (window.scroller && typeof window.scroller.isMoving === 'function' && window.scroller.isMoving()) {
-                handleScroll(); // Reprogramamos el chequeo para cuando termine
-                return;
-            }
 
             const sections = [
                 // Top de las páginas (Snap a 0)
@@ -1403,7 +1387,7 @@ function initSafeMagneticScroll() {
                 { id: 'candidatos-section', align: 'center', threshold: 0.60 }
             ];
 
-            const currentY = window.scrollY;
+            const currentY = window.scrollY; // Solo para calcular la posición real de los elementos
             const viewportHeight = window.innerHeight;
             
             let closestTarget = null;
@@ -1415,20 +1399,20 @@ function initSafeMagneticScroll() {
                 const el = document.getElementById(secData.id);
                 if (!el) return;
                 
-                // Calculamos la posición absoluta Y usando getBoundingClientRect para evitar fallos si el elemento está anidado
                 const rect = el.getBoundingClientRect();
+                const absoluteElTop = rect.top + currentY;
                 
                 let targetY;
                 if (secData.align === 'center') {
-                    // Calcula el centro exacto de la pantalla respecto al centro del elemento
-                    targetY = (rect.top + currentY) - (viewportHeight / 2) + (rect.height / 2);
+                    targetY = absoluteElTop - (viewportHeight / 2) + (rect.height / 2);
                 } else {
-                    targetY = (rect.top + currentY) - (secData.offset !== undefined ? secData.offset : 60);
+                    targetY = absoluteElTop - (secData.offset !== undefined ? secData.offset : 60);
                 }
                 
                 if (targetY < 0) targetY = 0; // Evita valores negativos
                 
-                const distance = Math.abs(currentY - targetY);
+                // Comparamos contra la posición PROYECTADA de la inercia
+                const distance = Math.abs(projectedY - targetY);
 
                 if (distance < minDistance) {
                     minDistance = distance;
@@ -1442,10 +1426,8 @@ function initSafeMagneticScroll() {
 
             if (closestTarget !== null) {
                 if (minDistance < viewportHeight * activeThreshold) {
-                    // Siempre que la distancia sea mayor a 5px, aplicamos el imán
                     if (minDistance > 5) {
                         shouldSnap = true;
-                        window.lastSnappedId = closestId; 
                     }
                 }
             }
@@ -1453,6 +1435,11 @@ function initSafeMagneticScroll() {
             if (shouldSnap) {
                 isAutoScrolling = true;
                 
+                // Detenemos la inercia nativa de smoothscroll para tomar el control instantáneamente
+                if (window.scroller && typeof window.scroller.stop === 'function') {
+                    window.scroller.stop();
+                }
+
                 const startY = window.scrollY;
                 const distance = closestTarget - startY;
                 let startTime = null;
@@ -1472,19 +1459,41 @@ function initSafeMagneticScroll() {
                         if (window.scroller && typeof window.scroller.setPostion === 'function') {
                             window.scroller.setPostion(closestTarget);
                         }
-                        // Pequeño delay para no interferir
                         setTimeout(() => { isAutoScrolling = false; }, 50);
                     }
                 }
                 window.currentScrollAnim = requestAnimationFrame(customAnim);
             }
-        }, 150); // PACIENCIA DEL IMÁN: Reducido a 150ms para una respuesta más rápida.
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('wheel', handleUserInteraction, { passive: true });
-    window.addEventListener('touchstart', handleUserInteraction, { passive: true });
-    window.addEventListener('touchmove', handleUserInteraction, { passive: true });
+    const handleScrollFallback = () => {
+        if (isAutoScrolling) return;
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            // Si el scroller NO se está moviendo, significa que el scroll fue por barra de desplazamiento
+            if (!window.scroller || !window.scroller.isMoving()) {
+                handleInputEnd();
+            }
+        }, 150);
+    };
+
+    const markUserInput = () => {
+        if (window.currentScrollAnim) {
+            cancelAnimationFrame(window.currentScrollAnim);
+            window.currentScrollAnim = null;
+            isAutoScrolling = false;
+            if (window.scroller && typeof window.scroller.setPostion === 'function') {
+                window.scroller.setPostion(window.scrollY);
+            }
+        }
+        clearTimeout(inputTimeout);
+        inputTimeout = setTimeout(handleInputEnd, 100); // Actúa rápido apenas dejas de mover la rueda/dedo
+    };
+
+    window.addEventListener('scroll', handleScrollFallback, { passive: true });
+    window.addEventListener('wheel', markUserInput, { passive: true });
+    window.addEventListener('touchstart', markUserInput, { passive: true });
+    window.addEventListener('touchmove', markUserInput, { passive: true });
 }
 
 function initVideoScrollFix(container) {

@@ -27,6 +27,11 @@ function SmoothScroll(target, speed, smooth) {
 		if (!moving) update();
 	};
 	this.isMoving = function() { return moving; };
+	this.getDestination = function() { return pos; };
+	this.stop = function() {
+		moving = false;
+		pos = target.scrollTop;
+	};
 
 	function scrolled(e) {
 		e.preventDefault(); // disable default scrolling
