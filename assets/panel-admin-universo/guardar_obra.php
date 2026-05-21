@@ -1,5 +1,8 @@
 <?php
-// 1. Cargar la librería de Google (Composer)
+// 1. Seguridad e inicio de sesión
+require_once __DIR__ . '/config.php';
+require_login();
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 // =========================================================================
@@ -23,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $service = new \Google_Service_Sheets($client);
 
         // 4. Recibir los datos del formulario (agregar_obra.php)
-        $segmento = $_POST['segmento'] ?? 'educacion';
+        $segmento = $_POST['segmento'] ?? 'EDUCACION';
         $nombre   = $_POST['nombre'] ?? '';
         $estado   = $_POST['estado'] ?? '';
         $monto    = $_POST['monto'] ?? '';

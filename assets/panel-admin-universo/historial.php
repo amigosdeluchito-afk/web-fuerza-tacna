@@ -36,6 +36,7 @@ if (file_exists(LOG_FILE)) {
 <header>
   <nav>
     <a href="index.php">📷 Fotos</a>
+    <a href="agregar_obra.php">➕ Agregar Obra</a>
     <a href="usuarios.php">👤 Usuarios</a>
     <a href="historial.php" class="active">🕒 Historial</a>
   </nav>

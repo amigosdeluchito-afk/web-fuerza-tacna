@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <header>
   <nav>
     <a href="index.php">📷 Fotos</a>
+    <a href="agregar_obra.php">➕ Agregar Obra</a>
     <a href="usuarios.php" class="active">👤 Usuarios</a>
     <a href="historial.php">🕒 Historial</a>
   </nav>
