@@ -608,7 +608,7 @@ async function cargarFotosObra() {
 
   const fd = new FormData();
   fd.append("action", "listar");
-  fd.append("segmento", segmento);
+  fd.append("segmento", segmento.toLowerCase());
  // "educacion", "vias"
   fd.append("carpeta", item.carpeta);
 
@@ -704,7 +704,7 @@ async function marcarPrincipal(numFoto) {
 
   const fd = new FormData();
   fd.append("action", "principal");
-  fd.append("segmento", segmento);
+  fd.append("segmento", segmento.toLowerCase());
 
   fd.append("carpeta", item.carpeta);
   fd.append("numero", numFoto);
@@ -734,7 +734,7 @@ async function eliminarFoto(numFoto) {
 
   const fd = new FormData();
   fd.append("action", "eliminar");
-  fd.append("segmento", segmento);
+  fd.append("segmento", segmento.toLowerCase());
 
   fd.append("carpeta", item.carpeta);
   fd.append("numero", numFoto);
@@ -765,7 +765,7 @@ async function eliminarTodasFotos() {
 
   const fd = new FormData();
   fd.append("action", "eliminar_todas");
-  fd.append("segmento", segmento);   // 👈 sin toLowerCase
+  fd.append("segmento", segmento.toLowerCase());
   fd.append("carpeta", item.carpeta);
 
   const resp = await fetch("fotos_api.php", { method: "POST", body: fd });
@@ -814,7 +814,7 @@ async function subirFotos(e) {
 
   const fd = new FormData();
   fd.append("action", "subir");
-  fd.append("segmento", segmento);
+  fd.append("segmento", segmento.toLowerCase());
 
  // ej. "educacion"
   fd.append("carpeta", item.carpeta);
@@ -867,7 +867,7 @@ function descargarZip() {
   if (!item || !item.carpeta) return;
 
  const params = new URLSearchParams({
-  segmento: segmento,
+  segmento: segmento.toLowerCase(),
   carpeta: item.carpeta
 });
 
