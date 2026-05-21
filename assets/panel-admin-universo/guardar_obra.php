@@ -58,6 +58,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         log_action('obra_agregar', "Agregó nueva obra: $nombre en $segmento");
 
+        // --- MAGIA NUEVA: PROCESAR FOTOS SI SE SUBIERON DESDE LA CREACIÓN ---
+        if (!empty($_FILES['fotos']['name'][0])) {
+            // Usar strtolower en segmento porque tus carpetas (ej. /educacion/) están en minúscula
+            $destDir = rtrim($GLOBALS['FOTOS_BASE'], '/\\') . '/' . strtolower($segmento) . '/' . $carpeta;
+            ensure_dir($destDir);
+
+            // Funciones de procesamiento de imágenes
+            if (!function_exists('mime_to_loader')) {
+                function mime_to_loader(string $mime): ?callable {
+                    return match ($mime) {
+                        'image/jpeg' => 'imagecreatefromjpeg', 'image/png' => 'imagecreatefrompng',
+                        'image/gif' => 'imagecreatefromgif', 'image/webp' => (function_exists('imagecreatefromwebp') ? 'imagecreatefromwebp' : null),
+                        default => null,
+                    };
+                }
+                function resize_to_max($srcImg, int $maxSide) {
+                    $w = imagesx($srcImg); $h = imagesy($srcImg);
+                    if ($w <= 0 || $h <= 0) return null;
+                    if (max($w, $h) <= $maxSide) {
+                        $dst = imagecreatetruecolor($w, $h);
+                        imagealphablending($dst, false); imagesavealpha($dst, true);
+                        imagecopy($dst, $srcImg, 0, 0, 0, 0, $w, $h);
+                        return $dst;
+                    }
+                    if ($w >= $h) { $nw = $maxSide; $nh = (int) round(($h * $maxSide) / $w); } 
+                    else { $nh = $maxSide; $nw = (int) round(($w * $maxSide) / $h); }
+                    $dst = imagecreatetruecolor($nw, $nh);
+                    imagealphablending($dst, false); imagesavealpha($dst, true);
+                    imagecopyresampled($dst, $srcImg, 0, 0, 0, 0, $nw, $nh, $w, $h);
+                    return $dst;
+                }
+                function save_webp($img, string $path, int $quality = 82): bool {
+                    if (!function_exists('imagewebp')) return false;
+                    return imagewebp($img, $path, $quality);
+                }
+            }
+
+            $names = $_FILES['fotos']['name']; $tmps = $_FILES['fotos']['tmp_name']; $errs = $_FILES['fotos']['error'];
+            if (!is_array($names)) { $names = [$names]; $tmps = [$tmps]; $errs = [$errs]; }
+
+            $slot = 1;
+            foreach ($names as $k => $originalName) {
+                if ($slot > 6) break; // Límite de 6 fotos
+                if (($errs[$k] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) continue;
+
+                $tmpPath = $tmps[$k]; $info = @getimagesize($tmpPath);
+                if (!$info || empty($info['mime'])) continue;
+                $loader = mime_to_loader($info['mime']); if (!$loader || !function_exists($loader)) continue;
+                $src = @$loader($tmpPath); if (!$src) continue;
+
+                $dstWeb = resize_to_max($src, defined('WEB_MAX') ? (int)WEB_MAX : 1600);
+                if (!$dstWeb) { imagedestroy($src); continue; }
+
+                if (save_webp($dstWeb, $destDir . "/$slot.webp", 82)) {
+                    if ($slot === 1) { // Miniaura para la foto principal
+                        $thumbImg = resize_to_max($dstWeb, defined('THUMB_MAX') ? (int)THUMB_MAX : 480);
+                        if ($thumbImg) { save_webp($thumbImg, $destDir . "/1.thumb.webp", 80); imagedestroy($thumbImg); }
+                    }
+                    $slot++;
+                }
+                imagedestroy($src); imagedestroy($dstWeb);
+            }
+        }
+        // --- FIN MAGIA NUEVA ---
+
         header("Location: agregar_obra.php?success=1");
         exit;
 
