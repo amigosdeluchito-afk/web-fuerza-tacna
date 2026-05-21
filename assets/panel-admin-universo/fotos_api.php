@@ -154,8 +154,11 @@ function handle_eliminar($segmento, $carpeta, $numero) {
         $i++;
     }
 
-    // Eliminar la miniatura para evitar que quede desactualizada
+    // Recrear la miniatura con la nueva imagen principal
     @unlink($dir . '/1.thumb.webp');
+    if (file_exists($dir . '/1.webp')) {
+        copy($dir . '/1.webp', $dir . '/1.thumb.webp');
+    }
 
     echo json_encode(['ok' => true]);
 }
@@ -249,8 +252,11 @@ function handle_principal($segmento, $carpeta, $numero) {
         $i++;
     }
 
-    // Eliminar la miniatura para evitar que quede desactualizada
+    // Recrear la miniatura con la nueva imagen principal
     @unlink($dir . '/1.thumb.webp');
+    if (file_exists($dir . '/1.webp')) {
+        copy($dir . '/1.webp', $dir . '/1.thumb.webp');
+    }
 
     echo json_encode(['ok' => true]);
 }
@@ -319,8 +325,11 @@ function handle_reordenar($segmento, $carpeta, $orden) {
         $i++;
     }
 
-    // Eliminar la miniatura para evitar que quede desactualizada
+    // Recrear la miniatura con la nueva imagen principal
     @unlink($dir . '/1.thumb.webp');
+    if (file_exists($dir . '/1.webp')) {
+        copy($dir . '/1.webp', $dir . '/1.thumb.webp');
+    }
 
     echo json_encode(['ok' => true]);
 }

@@ -375,6 +375,7 @@ window.initLeafletMap = function(container) {
 
         const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const dirFotos = window.FOTOS_DIR[segmento] || segmento;
+        const CACHE_BUSTER = "?v=" + new Date().getTime();
 
         validas.forEach((o) => {
             const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
@@ -395,8 +396,8 @@ window.initLeafletMap = function(container) {
                 window.PanelObra.open({
                     key: o.carpeta || `${o.nombre}|${o.x}|${o.y}`,
                     nombre, estado, monto, distrito: o.distrito, provincia: o.provincia, descripcion: o.descripcion || '',
-                    portada: base ? `${base}/1.thumb.webp` : null,
-                    fotos: base ? Array.from({length:6}, (_,i)=> `${base}/${i+1}.webp`) : [],
+                    portada: base ? `${base}/1.thumb.webp${CACHE_BUSTER}` : null,
+                    fotos: base ? Array.from({length:6}, (_,i)=> `${base}/${i+1}.webp${CACHE_BUSTER}`) : [],
                     onCenter: () => map.flyTo([lat, lng], Math.max(map.getZoom(), RESULT_ZOOM), { duration: 0.6, easeLinearity: 0.25 })
                 });
 
@@ -412,7 +413,7 @@ window.initLeafletMap = function(container) {
             marker.on('mouseout', () => labelMarker.getElement()?.querySelector('.obra-label__inner')?.classList.remove('is-hover'));
 
             if (!IS_TOUCH){
-                marker._thumbSrc = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}/1.thumb.webp` : null;
+                marker._thumbSrc = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}/1.thumb.webp${CACHE_BUSTER}` : null;
                 const pill = estadoToPill(estado);
                 const ghostHTML = `<div class="ghost-card">${imgFragmentFor(segmento, o.carpeta, nombre)}<div class="ghost-card__body"><div class="ghost-card__kicker">Obra <span class="pill ${pill.cls}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg> ${pill.txt}</span></div><div class="ghost-card__title">${nombre}</div><div class="ghost-card__meta">${monto}</div><div class="ghost-card__divider"></div><div class="meta-row">${(o.distrito||'-')} · ${(o.provincia||'-')}</div></div></div>`;
                 marker.bindTooltip(ghostHTML, { direction: 'top', sticky: false, className: 'ghost-tip ghost-card-tip', offset: L.point(0, -12), opacity: 1 });
