@@ -66,7 +66,6 @@ if (isset($_GET['success'])) {
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             border-radius: 8px;
             background: #fff;
-            transition: width 0.3s ease, max-width 0.3s ease;
         }
         
         /* Pines superpuestos de obras existentes */
@@ -344,11 +343,28 @@ if (isset($_GET['success'])) {
             const pctX = (mouseX - rectBefore.left) / rectBefore.width;
             const pctY = (mouseY - rectBefore.top) / rectBefore.height;
             
+            // Calculamos matemáticamente el tamaño de la imagen en zoom 1x
+            const paddingX = 40; // 20px padding left + right
+            const maxW = modalBody.clientWidth - paddingX;
+            const maxH = window.innerHeight * 0.8;
+            
+            const natW = imgMapa.naturalWidth || 1920;
+            const natH = imgMapa.naturalHeight || 1080;
+            const ratio = natW / natH;
+            
+            let baseW = natW;
+            let baseH = natH;
+            
+            if (baseW > maxW) { baseW = maxW; baseH = baseW / ratio; }
+            if (baseH > maxH) { baseH = maxH; baseW = baseH * ratio; }
+            
             if (currentZoom === 1) {
-                imgMapa.style.width = ''; imgMapa.style.maxWidth = '100%'; imgMapa.style.maxHeight = '80vh';
+                imgMapa.style.width = ''; imgMapa.style.height = ''; imgMapa.style.maxWidth = '100%'; imgMapa.style.maxHeight = '80vh';
                 modalBody.style.textAlign = 'center';
             } else {
-                imgMapa.style.width = (currentZoom * 100) + '%'; imgMapa.style.maxWidth = 'none'; imgMapa.style.maxHeight = 'none';
+                imgMapa.style.maxWidth = 'none'; imgMapa.style.maxHeight = 'none';
+                imgMapa.style.width = (baseW * currentZoom) + 'px';
+                imgMapa.style.height = (baseH * currentZoom) + 'px';
                 modalBody.style.textAlign = 'left';
             }
 
