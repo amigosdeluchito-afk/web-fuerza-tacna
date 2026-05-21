@@ -176,6 +176,16 @@ require_login();
       display: flex;
       flex-direction: column;
       gap: 4px;
+      cursor: grab;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .foto-card:active {
+      cursor: grabbing;
+    }
+    .foto-card.drag-over {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 2px #2563eb;
+      z-index: 10;
     }
 
     .foto-card img {
@@ -649,6 +659,8 @@ function renderGaleria(data) {
   data.fotos.forEach((foto, idx) => {
     const card = document.createElement("div");
     card.className = "foto-card";
+    card.draggable = true;
+    card.dataset.num = idx + 1;
 
     const img = document.createElement("img");
     img.src = foto.url;
@@ -684,12 +696,98 @@ function renderGaleria(data) {
 
     card.appendChild(actions);
     galeriaEl.appendChild(card);
+
+    // Drag & Drop events
+    card.addEventListener("dragstart", () => {
+      card.style.opacity = "0.5";
+      card.classList.add("dragging");
+    });
+    
+    card.addEventListener("dragend", () => {
+      card.style.opacity = "1";
+      card.classList.remove("dragging");
+      document.querySelectorAll(".foto-card").forEach(c => c.classList.remove("drag-over"));
+    });
+    
+    card.addEventListener("dragover", (e) => {
+      e.preventDefault(); // Permitir drop
+    });
+    
+    card.addEventListener("dragenter", (e) => {
+      e.preventDefault();
+      if (!card.classList.contains("dragging")) {
+        card.classList.add("drag-over");
+      }
+    });
+    
+    card.addEventListener("dragleave", () => {
+      card.classList.remove("drag-over");
+    });
+    
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      
+      const draggingCard = document.querySelector(".dragging");
+      if (draggingCard && draggingCard !== card) {
+        const allCards = [...galeriaEl.querySelectorAll(".foto-card")];
+        const draggedIdx = allCards.indexOf(draggingCard);
+        const droppedIdx = allCards.indexOf(card);
+        
+        if (draggedIdx < droppedIdx) {
+          card.parentNode.insertBefore(draggingCard, card.nextSibling);
+        } else {
+          card.parentNode.insertBefore(draggingCard, card);
+        }
+        
+        guardarNuevoOrden();
+      }
+    });
   });
 }
 
 // =============================
 //  ACCIONES: PRINCIPAL / ELIMINAR
 // =============================
+
+async function guardarNuevoOrden() {
+  const segSlugEl = document.getElementById("segmentoSlug");
+  const obraEl    = document.getElementById("obra");
+
+  const segmento = segSlugEl.value;
+  const idx = parseInt(obraEl.value, 10);
+  const lista = obrasPorSegmento[segmento] || [];
+  const item = lista[idx];
+
+  if (!item || !item.carpeta) return;
+
+  const galeriaEl = document.getElementById("galeria");
+  const allCards = [...galeriaEl.querySelectorAll(".foto-card")];
+  
+  // Extraemos el orden de los atributos dataset.num
+  const nuevoOrden = allCards.map(c => parseInt(c.dataset.num, 10));
+
+  const fd = new FormData();
+  fd.append("action", "reordenar");
+  fd.append("segmento", segmento.toLowerCase());
+  fd.append("carpeta", item.carpeta);
+  fd.append("orden", JSON.stringify(nuevoOrden));
+
+  try {
+    const resp = await fetch("fotos_api.php", { method: "POST", body: fd });
+    const data = await resp.json();
+
+    if (data.ok) {
+      await cargarFotosObra(); // Recargar para reflejar el nuevo orden en URLs y metadata
+    } else {
+      alert(data.error || "Error al reordenar");
+      await cargarFotosObra(); // Revertir visualmente si hay error
+    }
+  } catch (error) {
+    alert("Error de conexión al reordenar");
+    await cargarFotosObra();
+  }
+}
 
 async function marcarPrincipal(numFoto) {
   const segSlugEl = document.getElementById("segmentoSlug");

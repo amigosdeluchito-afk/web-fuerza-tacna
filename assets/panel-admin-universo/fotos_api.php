@@ -255,6 +255,75 @@ function handle_principal($segmento, $carpeta, $numero) {
     echo json_encode(['ok' => true]);
 }
 
+/**
+ * Reordenar fotos mediante Drag & Drop
+ * $orden es un array con los números antiguos en su nuevo orden. Ej: [3, 1, 2]
+ */
+function handle_reordenar($segmento, $carpeta, $orden) {
+    $dir = get_obra_dir($segmento, $carpeta);
+    if (!$dir || !is_dir($dir)) {
+        echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
+        return;
+    }
+
+    if (!is_array($orden) || empty($orden)) {
+        echo json_encode(['ok' => false, 'error' => 'Orden inválido']);
+        return;
+    }
+
+    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
+    $files  = glob($patron, GLOB_BRACE);
+    if (!$files) {
+        echo json_encode(['ok' => false, 'error' => 'No hay fotos']);
+        return;
+    }
+
+    // Excluir miniatura del procesamiento
+    $files = array_filter($files, fn($f) => strpos($f, '.thumb.') === false);
+
+    natsort($files);
+    $files = array_values($files);
+
+    if (count($files) !== count($orden)) {
+        echo json_encode(['ok' => false, 'error' => 'La cantidad de fotos no coincide']);
+        return;
+    }
+
+    // Crear arreglo ordenado basado en los índices pasados
+    $ordered = [];
+    foreach ($orden as $numAnterior) {
+        $idx = $numAnterior - 1;
+        if (!isset($files[$idx])) {
+            echo json_encode(['ok' => false, 'error' => 'Número de foto inválido en el orden']);
+            return;
+        }
+        $ordered[] = $files[$idx];
+    }
+
+    // Renombrar en dos pasos para evitar colisiones
+    $tempMap = [];
+    foreach ($ordered as $p) {
+        $dirName  = dirname($p);
+        $baseName = basename($p);
+        $tmpName  = $dirName . '/tmp_' . uniqid() . '_' . $baseName;
+        if (rename($p, $tmpName)) {
+            $tempMap[] = $tmpName;
+        }
+    }
+
+    $i = 1;
+    foreach ($tempMap as $tmpPath) {
+        $ext = pathinfo($tmpPath, PATHINFO_EXTENSION);
+        $newPath = $dir . '/' . $i . '.' . $ext;
+        rename($tmpPath, $newPath);
+        $i++;
+    }
+
+    // Eliminar la miniatura para evitar que quede desactualizada
+    @unlink($dir . '/1.thumb.webp');
+
+    echo json_encode(['ok' => true]);
+}
 
 
 /**
@@ -344,6 +413,11 @@ switch ($action) {
   case 'principal':
     $numero = isset($_POST['numero']) ? (int)$_POST['numero'] : 0;
     handle_principal($segmento, $carpeta, $numero);
+    break;
+
+  case 'reordenar':
+    $orden = isset($_POST['orden']) ? json_decode($_POST['orden'], true) : [];
+    handle_reordenar($segmento, $carpeta, $orden);
     break;
 
   case 'eliminar_todas':
