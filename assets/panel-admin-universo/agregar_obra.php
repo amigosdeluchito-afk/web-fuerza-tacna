@@ -151,6 +151,11 @@ if (isset($_GET['success'])) {
                     <div><label>Coordenada Y (Latitud):</label><input type="text" name="y" placeholder="Ej. 0.678"></div>
                 </div>
                 
+                <button type="button" id="btnAbrirMapa" class="btn-mapa">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    Abrir Mapa para ubicar Coordenadas
+                </button>
+
                 <!-- NUEVO: Subida de fotos integrada -->
                 <div style="margin-top: 25px; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px dashed #334155;">
                     <label style="margin-top: 0;">Fotos de la Obra (Opcional, máx. 6):</label>
@@ -160,11 +165,6 @@ if (isset($_GET['success'])) {
                     <div id="previewContainer" class="galeria"></div>
                 </div>
                 
-                <button type="button" id="btnAbrirMapa" class="btn-mapa">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                    Abrir Mapa para ubicar Coordenadas
-                </button>
-
                 <button type="submit" class="btn-submit">Guardar Obra en Excel</button>
             </form>
         </div>
