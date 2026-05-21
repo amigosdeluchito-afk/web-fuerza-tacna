@@ -259,16 +259,34 @@ if (isset($_GET['success'])) {
 
         // Lógica de Zoom
         let currentZoom = 1;
-        const zoomStep = 0.5;
+        const zoomStep = 0.2; // Más suave para el scroll
         const maxZoom = 4;
         const minZoom = 1;
 
         document.getElementById('btnZoomIn').addEventListener('click', () => {
-            if (currentZoom < maxZoom) { currentZoom += zoomStep; applyZoom(); }
+            // Hacemos que los botones den un salto más grande
+            if (currentZoom < maxZoom) { currentZoom = Math.min(maxZoom, currentZoom + 0.5); applyZoom(); }
         });
         document.getElementById('btnZoomOut').addEventListener('click', () => {
-            if (currentZoom > minZoom) { currentZoom -= zoomStep; applyZoom(); }
+            if (currentZoom > minZoom) { currentZoom = Math.max(minZoom, currentZoom - 0.5); applyZoom(); }
         });
+
+        // *** NUEVO: Zoom con la rueda del ratón ***
+        document.querySelector('.map-modal-body').addEventListener('wheel', function(e) {
+            e.preventDefault(); // Evita que la página de atrás se mueva
+
+            if (e.deltaY < 0) { // Rueda hacia arriba -> Zoom In
+                if (currentZoom < maxZoom) {
+                    currentZoom = Math.min(maxZoom, currentZoom + zoomStep);
+                    applyZoom();
+                }
+            } else { // Rueda hacia abajo -> Zoom Out
+                if (currentZoom > minZoom) {
+                    currentZoom = Math.max(minZoom, currentZoom - zoomStep);
+                    applyZoom();
+                }
+            }
+        }, { passive: false }); // passive:false es necesario para preventDefault
 
         function applyZoom() {
             document.getElementById('zoomNivel').innerText = Math.round(currentZoom * 100) + '%';
