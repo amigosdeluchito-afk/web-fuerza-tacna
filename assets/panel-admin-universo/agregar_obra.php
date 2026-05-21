@@ -230,7 +230,14 @@ if (isset($_GET['success'])) {
         document.getElementById('btnAbrirMapa').addEventListener('click', () => { 
             modal.classList.add('is-open'); 
             currentZoom = 1;
-            applyZoom();
+            document.getElementById('zoomNivel').innerText = '100%';
+            
+            imgMapa.style.width = ''; 
+            imgMapa.style.height = ''; 
+            imgMapa.style.maxWidth = '100%'; 
+            imgMapa.style.maxHeight = '80vh';
+            modalBody.style.textAlign = 'center';
+            
             cargarPinesExistentes(); 
         });
         document.getElementById('btnCerrarMapa').addEventListener('click', () => { modal.classList.remove('is-open'); });
@@ -270,6 +277,8 @@ if (isset($_GET['success'])) {
         
         let isDragging = false;
         let startX, startY, startScrollLeft, startScrollTop;
+        let baseMapWidth = 0;
+        let baseMapHeight = 0;
 
         // --- Arrastrar para mover (Pan) ---
         modalBody.addEventListener('mousedown', (e) => {
@@ -330,6 +339,12 @@ if (isset($_GET['success'])) {
             
             if (currentZoom === oldZoom) return; // Sin cambios
             
+            // Si estamos en 100% justo antes de hacer zoom, capturamos su tamaño real en pantalla
+            if (oldZoom === 1) {
+                baseMapWidth = imgMapa.clientWidth;
+                baseMapHeight = imgMapa.clientHeight;
+            }
+            
             document.getElementById('zoomNivel').innerText = Math.round(currentZoom * 100) + '%';
             
             const rectBefore = imgMapa.getBoundingClientRect();
@@ -343,28 +358,16 @@ if (isset($_GET['success'])) {
             const pctX = (mouseX - rectBefore.left) / rectBefore.width;
             const pctY = (mouseY - rectBefore.top) / rectBefore.height;
             
-            // Calculamos matemáticamente el tamaño de la imagen en zoom 1x
-            const paddingX = 40; // 20px padding left + right
-            const maxW = modalBody.clientWidth - paddingX;
-            const maxH = window.innerHeight * 0.8;
-            
-            const natW = imgMapa.naturalWidth || 1920;
-            const natH = imgMapa.naturalHeight || 1080;
-            const ratio = natW / natH;
-            
-            let baseW = natW;
-            let baseH = natH;
-            
-            if (baseW > maxW) { baseW = maxW; baseH = baseW / ratio; }
-            if (baseH > maxH) { baseH = maxH; baseW = baseH * ratio; }
-            
             if (currentZoom === 1) {
                 imgMapa.style.width = ''; imgMapa.style.height = ''; imgMapa.style.maxWidth = '100%'; imgMapa.style.maxHeight = '80vh';
                 modalBody.style.textAlign = 'center';
             } else {
+                // Fallback de seguridad por si el tamaño no cargó
+                if (!baseMapWidth) { baseMapWidth = imgMapa.clientWidth || 800; baseMapHeight = imgMapa.clientHeight || 600; }
+                
                 imgMapa.style.maxWidth = 'none'; imgMapa.style.maxHeight = 'none';
-                imgMapa.style.width = (baseW * currentZoom) + 'px';
-                imgMapa.style.height = (baseH * currentZoom) + 'px';
+                imgMapa.style.width = (baseMapWidth * currentZoom) + 'px';
+                imgMapa.style.height = (baseMapHeight * currentZoom) + 'px';
                 modalBody.style.textAlign = 'left';
             }
 
