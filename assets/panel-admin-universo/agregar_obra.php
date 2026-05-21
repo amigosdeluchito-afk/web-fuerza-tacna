@@ -395,25 +395,66 @@ if (isset($_GET['success'])) {
         }
 
         // --- LÓGICA DE PREVISUALIZACIÓN DE FOTOS ---
+        let selectedFiles = [];
+
         document.getElementById('inputFotos').addEventListener('change', function() {
-            const preview = document.getElementById('previewContainer');
-            preview.innerHTML = '';
-            let files = Array.from(this.files);
+            selectedFiles = Array.from(this.files);
             
-            if (files.length > 6) {
+            if (selectedFiles.length > 6) {
                 alert('Solo puedes subir un máximo de 6 fotos a la vez. Se guardarán las 6 primeras.');
-                files = files.slice(0, 6);
+                selectedFiles = selectedFiles.slice(0, 6);
+                actualizarInputFiles();
             }
 
-            files.forEach((file, i) => {
+            renderPreview();
+        });
+
+        function actualizarInputFiles() {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            document.getElementById('inputFotos').files = dt.files;
+        }
+
+        function renderPreview() {
+            const preview = document.getElementById('previewContainer');
+            preview.innerHTML = '';
+            
+            selectedFiles.forEach((file, i) => {
                 const url = URL.createObjectURL(file);
                 const div = document.createElement('div');
-                div.style.position = 'relative';
-                div.innerHTML = `<img src="${url}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-                                 ${i === 0 ? '<span style="position: absolute; top: -8px; left: -8px; background: #10b981; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; border: 1px solid #065f46;">Principal</span>' : ''}`;
+                div.className = 'foto-card';
+                div.draggable = true;
+                div.dataset.index = i;
+                
+                div.innerHTML = `
+                    <img src="${url}" alt="Previsualización">
+                    ${i === 0 ? '<div class="badge-principal">Principal</div>' : ''}
+                    <div class="foto-meta"><span style="color:#93c5fd">A subir...</span><span>${(file.size/1024).toFixed(1)} KB</span></div>
+                `;
+                
+                div.addEventListener('dragstart', () => { div.style.opacity = '0.5'; div.classList.add('dragging'); });
+                div.addEventListener('dragend', () => { div.style.opacity = '1'; div.classList.remove('dragging'); document.querySelectorAll('.foto-card').forEach(c => c.classList.remove('drag-over')); });
+                div.addEventListener('dragover', (e) => e.preventDefault());
+                div.addEventListener('dragenter', (e) => { e.preventDefault(); if (!div.classList.contains('dragging')) div.classList.add('drag-over'); });
+                div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+                div.addEventListener('drop', (e) => {
+                    e.preventDefault(); div.classList.remove('drag-over');
+                    const draggingCard = document.querySelector('.dragging');
+                    if (draggingCard && draggingCard !== div) {
+                        const fromIndex = parseInt(draggingCard.dataset.index);
+                        const toIndex = parseInt(div.dataset.index);
+                        
+                        const [movedItem] = selectedFiles.splice(fromIndex, 1);
+                        selectedFiles.splice(toIndex, 0, movedItem);
+                        
+                        actualizarInputFiles();
+                        renderPreview();
+                    }
+                });
+
                 preview.appendChild(div);
             });
-        });
+        }
     </script>
 </body>
 </html>
