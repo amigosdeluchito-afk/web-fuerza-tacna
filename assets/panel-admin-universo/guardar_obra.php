@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         $body = new \Google_Service_Sheets_ValueRange(['values' => $values]);
-        $params = ['valueInputOption' => 'USER_ENTERED'];
+        $params = ['valueInputOption' => 'RAW'];
 
         $result = $service->spreadsheets_values->append($spreadsheetId, $segmento, $body, $params);
 
