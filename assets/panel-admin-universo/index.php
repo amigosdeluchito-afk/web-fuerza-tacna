@@ -373,6 +373,7 @@ require_login();
             Formatos soportados: JPG, PNG, WEBP, GIF. Tamaño recomendado &lt; 5MB.<br>
             Si ya hay 6 fotos, no se podrán subir más.
           </div>
+          <div id="previewContainer" class="galeria"></div>
           <button type="submit" id="btnSubir" disabled>Subir imágenes</button>
           <div id="status" class="status"></div>
         </form>
@@ -580,6 +581,8 @@ async function cargarFotosObra() {
   btnZip.disabled   = true;
   btnSubir.disabled = true;
   btnEliminarTodo.disabled = true;
+  document.getElementById("previewContainer").innerHTML = "";
+  document.getElementById("files").value = "";
   
 
 
@@ -840,6 +843,7 @@ async function subirFotos(e) {
     if (data.ok) {
       statusEl.textContent = "Fotos subidas correctamente.";
       filesInput.value = "";
+      document.getElementById("previewContainer").innerHTML = "";
       await cargarFotosObra();
     } else {
       statusEl.textContent = data.error || "Error al subir fotos.";
@@ -898,12 +902,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   filesInput.addEventListener("change", () => {
     const segSlugEl = document.getElementById("segmentoSlug");
     const obraEl    = document.getElementById("obra");
+    const previewEl = document.getElementById("previewContainer");
     const segmento  = segSlugEl.value;
     const idx       = parseInt(obraEl.value, 10);
     const lista     = obrasPorSegmento[segmento] || [];
     const item      = lista[idx];
 
     btnSubir.disabled = !(filesInput.files.length && item && item.carpeta);
+
+    // Generar previsualización
+    previewEl.innerHTML = "";
+    if (filesInput.files.length > 0) {
+      Array.from(filesInput.files).forEach((file, i) => {
+        const sizeKB = (file.size / 1024).toFixed(1);
+        const objUrl = URL.createObjectURL(file);
+        
+        const card = document.createElement("div");
+        card.className = "foto-card";
+        card.style.borderColor = "#4f46e5"; // Borde distinto para identificar que es una previsualización
+        card.style.opacity = "0.8"; // Ligeramente transparente
+        
+        card.innerHTML = `
+          <img src="${objUrl}" alt="Previsualización ${i + 1}">
+          <div class="foto-meta">
+            <span style="color:#a5b4fc">A subir...</span>
+            <span>${sizeKB} KB</span>
+          </div>
+        `;
+        previewEl.appendChild(card);
+      });
+    }
   });
 
   uploadForm.addEventListener("submit", subirFotos);
