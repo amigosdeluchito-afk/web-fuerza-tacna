@@ -47,7 +47,7 @@ if (isset($_GET['success'])) {
         .btn-close-map:hover { background: #dc2626; }
         
         /* Contenedor escroleable para la imagen gigante */
-        .map-modal-body { flex: 1; overflow: auto; cursor: crosshair; position: relative; padding: 20px; display: flex; justify-content: center; align-items: flex-start;}
+        .map-modal-body { flex: 1; overflow: auto; cursor: crosshair; position: relative; padding: 20px; text-align: center; }
         .map-modal-body::-webkit-scrollbar { width: 10px; height: 10px; }
         .map-modal-body::-webkit-scrollbar-track { background: #0f172a; }
         .map-modal-body::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
@@ -57,10 +57,27 @@ if (isset($_GET['success'])) {
             max-height: 80vh;
             width: auto;
             height: auto;
+            display: block;
             border: 2px solid #334155;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             border-radius: 8px;
             background: #fff;
+        }
+        
+        /* Pines superpuestos de obras existentes */
+        #pinesContainer { pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .pin-existente {
+            position: absolute;
+            width: 12px; height: 12px;
+            background: #ef4444; border: 2px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 5px rgba(0,0,0,0.8);
+        }
+        .pin-label {
+            position: absolute; left: 12px; top: -8px;
+            background: rgba(15, 23, 42, 0.9); color: #f9fafb;
+            font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; font-family: system-ui;
         }
     </style>
 </head>
@@ -85,7 +102,7 @@ if (isset($_GET['success'])) {
         
             <form action="guardar_obra.php" method="POST">
                 <label>Segmento (Hoja de Excel destino):</label>
-                <select name="segmento" required>
+                <select name="segmento" id="selectSegmento" required>
                     <option value="EDUCACION">Educación</option>
                     <option value="AGUA Y SANEAMIENTO">Agua y Saneamiento</option>
                     <option value="TRANSPORTE">Transporte</option>
@@ -137,19 +154,62 @@ if (isset($_GET['success'])) {
             <button type="button" id="btnCerrarMapa" class="btn-close-map">Cerrar</button>
         </div>
         <div class="map-modal-body">
-            <!-- Cargamos tu mapa base real -->
-            <img id="imgMapaPuntos" src="../universoobras/IMG/mapa-base.png" alt="Mapa Base">
+            <div id="mapWrapper" style="position: relative; display: inline-block;">
+                <!-- Cargamos tu mapa base real -->
+                <img id="imgMapaPuntos" src="../universoobras/IMG/mapa-base.png" alt="Mapa Base">
+                <!-- Contenedor donde se dibujarán los puntos rojos -->
+                <div id="pinesContainer"></div>
+                <div id="loadingPines" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #ffc300; padding: 5px 10px; border-radius: 5px; font-size: 12px; display: none;">Cargando obras existentes...</div>
+            </div>
         </div>
     </div>
 
     <script>
+        const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
+        const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=`;
+
+        function parseGviz(text) {
+            const m = text.match(/setResponse\(([\s\S]+)\);?/);
+            if (!m) throw new Error("Error parseo");
+            return JSON.parse(m[1]);
+        }
+
         // Lógica para capturar las coordenadas con un clic
         const modal = document.getElementById('modalMapa');
         const imgMapa = document.getElementById('imgMapaPuntos');
         const inputX = document.querySelector('input[name="x"]');
         const inputY = document.querySelector('input[name="y"]');
+        const pinesContainer = document.getElementById('pinesContainer');
+        const loadingPines = document.getElementById('loadingPines');
 
-        document.getElementById('btnAbrirMapa').addEventListener('click', () => { modal.classList.add('is-open'); });
+        async function cargarPinesExistentes() {
+            pinesContainer.innerHTML = '';
+            loadingPines.style.display = 'block';
+            const segmento = document.getElementById('selectSegmento').value;
+            
+            try {
+                const resp = await fetch(SHEET_BASE_URL + encodeURIComponent(segmento));
+                const txt = await resp.text();
+                const json = parseGviz(txt);
+                
+                (json.table.rows || []).forEach(r => {
+                    if (!r.c) return;
+                    const nombre = r.c[0]?.v || '';
+                    const x = parseFloat(r.c[3]?.v);
+                    const y = parseFloat(r.c[4]?.v);
+                    
+                    if (!isNaN(x) && !isNaN(y) && x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+                        pinesContainer.innerHTML += `<div class="pin-existente" style="left: ${x * 100}%; top: ${y * 100}%;"><div class="pin-label">${nombre}</div></div>`;
+                    }
+                });
+            } catch (e) { console.error(e); }
+            loadingPines.style.display = 'none';
+        }
+
+        document.getElementById('btnAbrirMapa').addEventListener('click', () => { 
+            modal.classList.add('is-open'); 
+            cargarPinesExistentes(); 
+        });
         document.getElementById('btnCerrarMapa').addEventListener('click', () => { modal.classList.remove('is-open'); });
 
         imgMapa.addEventListener('click', function(e) {
