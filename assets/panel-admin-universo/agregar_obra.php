@@ -199,7 +199,8 @@ if (isset($_GET['success'])) {
                     const y = parseFloat(r.c[4]?.v);
                     
                     if (!isNaN(x) && !isNaN(y) && x >= 0 && x <= 1 && y >= 0 && y <= 1) {
-                        pinesContainer.innerHTML += `<div class="pin-existente" style="left: ${x * 100}%; top: ${y * 100}%;"><div class="pin-label">${nombre}</div></div>`;
+                        const visualY = 1 - y; // Invertimos Y para que se dibuje correctamente de arriba hacia abajo
+                        pinesContainer.innerHTML += `<div class="pin-existente" style="left: ${x * 100}%; top: ${visualY * 100}%;"><div class="pin-label">${nombre}</div></div>`;
                     }
                 });
             } catch (e) { console.error(e); }
@@ -215,8 +216,12 @@ if (isset($_GET['success'])) {
         imgMapa.addEventListener('click', function(e) {
             const rect = imgMapa.getBoundingClientRect();
             // Calculamos el porcentaje exacto (0.000 a 1.000)
-            const x = (e.clientX - rect.left) / rect.width;
-            const y = (e.clientY - rect.top) / rect.height;
+            const htmlX = (e.clientX - rect.left) / rect.width;
+            const htmlY = (e.clientY - rect.top) / rect.height;
+            
+            // Invertimos la coordenada Y para que Leaflet (el mapa público) lo entienda
+            const x = htmlX;
+            const y = 1 - htmlY;
             
             // Pegamos los valores con 4 decimales
             inputX.value = x.toFixed(4);
