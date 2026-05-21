@@ -685,7 +685,7 @@ function renderGaleria(data) {
     card.dataset.num = idx + 1;
 
     const img = document.createElement("img");
-    img.src = foto.url;
+    img.src = foto.thumb_url || foto.url;
     img.alt = `Foto ${idx + 1}`;
     card.appendChild(img);
 

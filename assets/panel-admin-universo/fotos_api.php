@@ -78,8 +78,19 @@ function handle_listar($segmento, $carpeta) {
             rawurlencode($carpeta) . "/" .
             rawurlencode($basename) . "?v=" . time();
 
+        // Buscar si existe su versión miniatura (.thumb.webp)
+        $thumb_basename = preg_replace('/\.([a-zA-Z0-9]+)$/', '.thumb.$1', $basename);
+        $thumb_url = $url; // Por defecto usamos la original como respaldo
+        if (file_exists($dir . '/' . $thumb_basename)) {
+            $thumb_url = "/assets/universoobras/IMG/fotos-obras/" .
+                rawurlencode($segmento) . "/" .
+                rawurlencode($carpeta) . "/" .
+                rawurlencode($thumb_basename) . "?v=" . time();
+        }
+
         $fotos[] = [
             'url'          => $url,
+            'thumb_url'    => $thumb_url,
             'size_kb'      => $size_kb,
             'es_principal' => $es_principal,
         ];
