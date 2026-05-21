@@ -257,6 +257,23 @@ require_login();
       color: #93c5fd;
     }
 
+    .progress-container {
+      width: 100%;
+      background-color: #1f2937;
+      border-radius: 999px;
+      margin-top: 10px;
+      overflow: hidden;
+      height: 8px;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: #10b981; /* Verde esmeralda */
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
     .download-zip {
       margin-top: 10px;
       display: flex;
@@ -384,6 +401,9 @@ require_login();
             Si ya hay 6 fotos, no se podrán subir más.
           </div>
           <div id="previewContainer" class="galeria"></div>
+          <div id="progressContainer" class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
           <button type="submit" id="btnSubir" disabled>Subir imágenes</button>
           <div id="status" class="status"></div>
         </form>
@@ -593,6 +613,8 @@ async function cargarFotosObra() {
   btnEliminarTodo.disabled = true;
   document.getElementById("previewContainer").innerHTML = "";
   document.getElementById("files").value = "";
+  document.getElementById("progressContainer").style.display = "none";
+  document.getElementById("progressBar").style.width = "0%";
   
 
 
@@ -923,10 +945,33 @@ async function subirFotos(e) {
   }
 
   statusEl.textContent = "Subiendo...";
+  const progressContainer = document.getElementById("progressContainer");
+  const progressBar = document.getElementById("progressBar");
+  
+  progressContainer.style.display = "block";
+  progressBar.style.width = "0%";
+  btnSubir.disabled = true;
 
   try {
-    const resp = await fetch("upload.php", { method: "POST", body: fd });
-    const text = await resp.text(); // leemos como texto primero
+    // Usamos XMLHttpRequest envuelto en Promesa para poder capturar el evento 'progress'
+    const text = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "upload.php", true);
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          progressBar.style.width = percentComplete + "%";
+          statusEl.textContent = `Subiendo (${Math.round(percentComplete)}%)...`;
+        }
+      });
+
+      xhr.onload = () => resolve(xhr.responseText);
+      xhr.onerror = () => reject(new Error("Error de red al subir archivos"));
+      xhr.send(fd);
+    });
+
+    progressContainer.style.display = "none"; // Ocultamos la barra al terminar
 
     let data;
     try {
@@ -935,6 +980,7 @@ async function subirFotos(e) {
       // PHP devolvió HTML o algo raro, no JSON
       console.error("Respuesta upload.php:", text);
       statusEl.textContent = "Error: respuesta no válida de upload.php.\nRevisa consola del navegador.";
+      btnSubir.disabled = false;
       return;
     }
 
@@ -945,10 +991,12 @@ async function subirFotos(e) {
       await cargarFotosObra();
     } else {
       statusEl.textContent = data.error || "Error al subir fotos.";
+      btnSubir.disabled = false;
     }
   } catch (err) {
     console.error(err);
     statusEl.textContent = "Error de red / PHP: " + err.message;
+    btnSubir.disabled = false;
   }
 }
 
