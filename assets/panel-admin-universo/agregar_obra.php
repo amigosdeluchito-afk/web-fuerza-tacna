@@ -83,6 +83,15 @@ if (isset($_GET['success'])) {
             background: rgba(15, 23, 42, 0.9); color: #f9fafb;
             font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; font-family: system-ui;
         }
+        
+        /* Estilos añadidos para la Galería de Fotos (Previsualización) */
+        .galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 15px; }
+        .foto-card { border-radius: 8px; border: 1px solid #1f2937; padding: 6px; background: #0f172a; position: relative; display: flex; flex-direction: column; gap: 6px; cursor: grab; transition: transform 0.2s; }
+        .foto-card:active { cursor: grabbing; }
+        .foto-card.drag-over { transform: scale(1.05); box-shadow: 0 0 0 2px #3b82f6; z-index: 10; }
+        .foto-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; display: block; }
+        .foto-meta { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; align-items: center; }
+        .badge-principal { position: absolute; top: 6px; left: 6px; background: #10b981; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -143,10 +152,13 @@ if (isset($_GET['success'])) {
                 </div>
                 
                 <!-- NUEVO: Subida de fotos integrada -->
-                <label>Fotos de la Obra (Opcional, máx 6):</label>
-                <input type="file" name="fotos[]" id="inputFotos" accept="image/*" multiple>
-                <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">La primera foto que elijas será la principal (la miniatura del mapa). Formatos: JPG, PNG, WEBP.</div>
-                <div id="previewContainer" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;"></div>
+                <div style="margin-top: 25px; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px dashed #334155;">
+                    <label style="margin-top: 0;">Fotos de la Obra (Opcional, máx. 6):</label>
+                    <input type="file" name="fotos[]" id="inputFotos" accept="image/*" multiple>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Formatos soportados: JPG, PNG, WEBP.</div>
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-top: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">💡 <strong>Tip:</strong> Puedes cambiar el orden arrastrando las imágenes antes de guardar. La primera será la principal.</div>
+                    <div id="previewContainer" class="galeria"></div>
+                </div>
                 
                 <button type="button" id="btnAbrirMapa" class="btn-mapa">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
