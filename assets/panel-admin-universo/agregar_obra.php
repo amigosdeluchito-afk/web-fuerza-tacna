@@ -70,7 +70,7 @@ if (isset($_GET['success'])) {
         }
         
         /* Pines superpuestos de obras existentes */
-        #pinesContainer { pointer-events: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #pinesContainer { pointer-events: none; position: absolute; top: 0; left: 0; }
         .pin-existente {
             position: absolute;
             width: 12px; height: 12px;
@@ -191,6 +191,15 @@ if (isset($_GET['success'])) {
         const inputY = document.querySelector('input[name="y"]');
         const pinesContainer = document.getElementById('pinesContainer');
         const loadingPines = document.getElementById('loadingPines');
+
+        // Sincronizar perfectamente el contenedor de pines con el tamaño de la imagen en todo momento
+        const resizeObserver = new ResizeObserver(() => {
+            pinesContainer.style.width = imgMapa.offsetWidth + 'px';
+            pinesContainer.style.height = imgMapa.offsetHeight + 'px';
+            pinesContainer.style.left = imgMapa.offsetLeft + 'px';
+            pinesContainer.style.top = imgMapa.offsetTop + 'px';
+        });
+        resizeObserver.observe(imgMapa);
 
         async function cargarPinesExistentes() {
             pinesContainer.innerHTML = '';
