@@ -691,6 +691,14 @@ async function cargarFotosObra() {
 
   renderGaleria(data);
   actualizarInfoObra(data);
+
+  // Actualizar el texto del <option> en la lista de obras en tiempo real
+  const selectedOption = obraEl.options[obraEl.selectedIndex];
+  if (selectedOption && item) {
+    const numFotos = data.total || 0;
+    const txtExtra = numFotos > 0 ? `   [ 📷 ${numFotos} fotos ]` : `   [ ⚪ sin fotos ]`;
+    selectedOption.textContent = item.nombre + txtExtra;
+  }
 }
 
 function renderGaleria(data) {
