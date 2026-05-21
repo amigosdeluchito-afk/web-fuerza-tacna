@@ -53,7 +53,10 @@ if (isset($_GET['success'])) {
         .map-modal-body::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
         
         .map-modal-body img {
-            max-width: none; /* Permite que la imagen se vea a tamaño real */
+            max-width: 100%;
+            max-height: 80vh;
+            width: auto;
+            height: auto;
             border: 2px solid #334155;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             border-radius: 8px;
