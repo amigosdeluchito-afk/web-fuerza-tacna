@@ -508,7 +508,7 @@ function poblarSegmentos() {
 //  CAMBIAR SEGMENTO / OBRAS
 // =============================
 
-function actualizarObras() {
+async function actualizarObras() {
   const segmentoEl = document.getElementById("segmento");
   const obraEl     = document.getElementById("obra");
   const segSlugEl  = document.getElementById("segmentoSlug");
@@ -547,6 +547,25 @@ function actualizarObras() {
     return;
   }
 
+  // Mostrar estado de carga mientras cuenta las fotos
+  obraEl.innerHTML = `<option value="">Cargando estado de fotos...</option>`;
+  obraEl.disabled = true;
+
+  let conteos = {};
+  try {
+    const fd = new FormData();
+    fd.append("action", "contar_segmento");
+    fd.append("segmento", segmento.toLowerCase());
+    const resp = await fetch("fotos_api.php", { method: "POST", body: fd });
+    const data = await resp.json();
+    if (data.ok) conteos = data.conteos || {};
+  } catch (e) {
+    console.error("Error obteniendo conteos:", e);
+  }
+
+  obraEl.innerHTML = "";
+  obraEl.disabled = false;
+
   const opt0 = document.createElement("option");
   opt0.value = "";
   opt0.textContent = "Selecciona obra...";
@@ -555,7 +574,16 @@ function actualizarObras() {
   lista.forEach((obra, idx) => {
     const opt = document.createElement("option");
     opt.value = String(idx); // índice dentro del arreglo
-    opt.textContent = obra.nombre;
+    
+    let txtExtra = "";
+    if (obra.carpeta) {
+      const numFotos = conteos[obra.carpeta] || 0;
+      txtExtra = numFotos > 0 ? `   [ 📷 ${numFotos} fotos ]` : `   [ ⚪ sin fotos ]`;
+    } else {
+      txtExtra = `   [ ⚠ sin carpeta ]`;
+    }
+    
+    opt.textContent = obra.nombre + txtExtra;
     obraEl.appendChild(opt);
   });
 }

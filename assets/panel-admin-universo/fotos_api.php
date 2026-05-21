@@ -348,6 +348,42 @@ function handle_reordenar($segmento, $carpeta, $orden) {
     echo json_encode(['ok' => true]);
 }
 
+/**
+ * Cuenta las fotos de todas las carpetas dentro de un segmento
+ */
+function handle_contar_segmento($segmento) {
+    global $FOTOS_BASE;
+    $segmento = trim($segmento);
+    if ($segmento === '') {
+        echo json_encode(['ok' => false, 'error' => 'Segmento inválido']);
+        return;
+    }
+
+    $dir = $FOTOS_BASE . '/' . $segmento;
+    $conteos = [];
+
+    if (is_dir($dir)) {
+        $items = scandir($dir);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $obraDir = $dir . '/' . $item;
+            if (is_dir($obraDir)) {
+                $patron = $obraDir . '/*.{jpg,jpeg,png,webp,gif}';
+                $files = glob($patron, GLOB_BRACE);
+                if ($files) {
+                    // Excluir miniaturas del conteo
+                    $files = array_filter($files, fn($f) => strpos($f, '.thumb.') === false);
+                    $conteos[$item] = count($files);
+                } else {
+                    $conteos[$item] = 0;
+                }
+            }
+        }
+    }
+
+    echo json_encode(['ok' => true, 'conteos' => $conteos]);
+}
+
 
 /**
  * Descargar ZIP con todas las fotos
@@ -445,6 +481,10 @@ switch ($action) {
 
   case 'eliminar_todas':
     handle_eliminar_todas($segmento, $carpeta);
+    break;
+
+  case 'contar_segmento':
+    handle_contar_segmento($segmento);
     break;
 
   default:
