@@ -100,14 +100,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         #pinesContainer { pointer-events: none; position: absolute; top: 0; left: 0; }
         .pin-existente { position: absolute; width: 12px; height: 12px; background: #ef4444; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 5px rgba(0,0,0,0.8); }
         .pin-label { position: absolute; left: 12px; top: -8px; background: rgba(15, 23, 42, 0.9); color: #f9fafb; font-size: 10px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; font-family: system-ui; }
+        
+        /* Estilos añadidos para la Galería de Fotos */
+        .galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 15px; }
+        .foto-card { border-radius: 8px; border: 1px solid #1f2937; padding: 6px; background: #0f172a; position: relative; display: flex; flex-direction: column; gap: 6px; cursor: grab; transition: transform 0.2s; }
+        .foto-card:active { cursor: grabbing; }
+        .foto-card.drag-over { transform: scale(1.05); box-shadow: 0 0 0 2px #3b82f6; z-index: 10; }
+        .foto-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; display: block; }
+        .foto-meta { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; align-items: center; }
+        .foto-actions { display: flex; gap: 4px; }
+        .foto-actions button { flex: 1; padding: 4px 0; border-radius: 4px; border: none; font-size: 10px; cursor: pointer; font-weight: bold; }
+        .btn-principal { background: transparent; color: #60a5fa; border: 1px solid #3b82f6; }
+        .btn-eliminar { background: #ef4444; color: #fff; }
+        .badge-principal { position: absolute; top: 6px; left: 6px; background: #10b981; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
     <header class="app-header">
       <nav>
-        <a href="index.php">📷 Fotos</a>
         <a href="agregar_obra.php">➕ Agregar Obra</a>
-        <a href="editar_obra.php" class="active">✏️ Editar Obra</a>
+        <a href="editar_obra.php" class="active">✏️ Editar Obra y Fotos</a>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
       </nav>
@@ -177,6 +189,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <button type="submit" class="btn-submit">💾 Guardar Cambios en Excel</button>
             </form>
+            
+            <!-- NUEVO: SECCIÓN DE GESTIÓN DE FOTOS INTEGRADA -->
+            <div id="fotosSection" style="display:none; margin-top: 30px; border-top: 1px solid #1f2937; padding-top: 20px;">
+                <h2 style="font-size: 18px; margin-top:0; color: #f9fafb; display:flex; justify-content:space-between; align-items:center;">
+                    📸 Gestión de Fotos
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btnEliminarTodo" disabled style="background:#ef4444; padding: 6px 12px; border-radius: 6px; border: none; color: white; cursor: pointer; font-size: 11px; font-weight: bold;">🗑 Eliminar todas</button>
+                        <button type="button" id="btnDescargarZip" disabled style="background:#10b981; padding: 6px 12px; border-radius: 6px; border: none; color: white; cursor: pointer; font-size: 11px; font-weight: bold;">⬇ Descargar ZIP</button>
+                    </div>
+                </h2>
+                <div id="galeriaEmpty" style="font-size: 13px; color: #9ca3af; margin-top: 10px; display:none;">Esta obra aún no tiene fotos.</div>
+                <div id="galeria" class="galeria"></div>
+
+                <form id="uploadForm" enctype="multipart/form-data" style="margin-top:20px; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px dashed #334155;">
+                    <label style="margin-top:0;">Agregar nuevas fotos (máx. 6 por obra)</label>
+                    <input type="file" id="files" name="fotos[]" accept="image/*" multiple>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Formatos soportados: JPG, PNG, WEBP. Arrastra las fotos arriba para reordenarlas.</div>
+                    <div id="previewContainerUpload" class="galeria"></div>
+                    <div id="progressContainer" style="display:none; width: 100%; background: #1e293b; border-radius: 999px; height: 8px; margin-top: 10px; overflow: hidden;"><div id="progressBar" style="height: 100%; background: #3b82f6; width: 0%; transition: width 0.2s;"></div></div>
+                    <button type="submit" id="btnSubirFotos" disabled class="btn-submit" style="margin-top: 15px; padding: 10px;">☁️ Subir imágenes seleccionadas</button>
+                    <div id="status" style="font-size: 12px; margin-top: 8px; color: #93c5fd;"></div>
+                </form>
+            </div>
         </div>
     </main>
 
@@ -285,7 +320,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const idx = this.value;
             const formEditar = document.getElementById('formEditar');
             
-            if (idx === "") { formEditar.style.display = 'none'; return; }
+            if (idx === "") { 
+                formEditar.style.display = 'none'; 
+                document.getElementById('fotosSection').style.display = 'none';
+                return; 
+            }
 
             const item = obrasPorSegmento[segmento][idx];
             
@@ -314,6 +353,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('inputY').value = item.y ? String(item.y).replace(',', '.') : '';
 
             formEditar.style.display = 'block';
+            document.getElementById('fotosSection').style.display = 'block';
+            cargarFotosObra(); // Llamada automática a la galería integrada
         });
 
         // ==========================
@@ -414,6 +455,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const rectAfter = imgMapa.getBoundingClientRect();
             if (currentZoom > 1) { modalBody.scrollLeft -= mouseX - (rectAfter.left + (rectAfter.width * pctX)); modalBody.scrollTop -= mouseY - (rectAfter.top + (rectAfter.height * pctY)); }
         }
+
+        // ==========================
+        //  NUEVA LÓGICA DE GESTIÓN DE FOTOS INTEGRADA
+        // ==========================
+        async function cargarFotosObra() {
+            const segmento = document.getElementById('formSegmento').value;
+            const carpeta = document.getElementById('formCarpeta').value;
+            const galeriaEl = document.getElementById('galeria');
+            const galeriaEmpty = document.getElementById('galeriaEmpty');
+            const btnZip = document.getElementById('btnDescargarZip');
+            const btnSubir = document.getElementById('btnSubirFotos');
+            const filesInput = document.getElementById('files');
+            const btnEliminarTodo = document.getElementById('btnEliminarTodo');
+
+            galeriaEl.innerHTML = ''; document.getElementById('previewContainerUpload').innerHTML = '';
+            filesInput.value = ''; document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('progressBar').style.width = '0%'; document.getElementById('status').textContent = '';
+
+            if (!carpeta || carpeta === '-') {
+                galeriaEmpty.style.display = 'block'; galeriaEmpty.textContent = "Esta obra aún no tiene carpeta configurada en el servidor.";
+                btnZip.disabled = true; btnSubir.disabled = true; btnEliminarTodo.disabled = true; return;
+            }
+
+            const fd = new FormData(); fd.append("action", "listar"); fd.append("segmento", segmento.toLowerCase()); fd.append("carpeta", carpeta);
+            const resp = await fetch("fotos_api.php", { method: "POST", body: fd });
+            const data = await resp.json();
+
+            if (!data.ok) { galeriaEmpty.style.display = "block"; galeriaEmpty.textContent = data.error || "Error al cargar la galería."; return; }
+
+            btnEliminarTodo.disabled = !(data.fotos && data.fotos.length);
+            btnZip.disabled = !(data.fotos && data.fotos.length);
+            btnSubir.disabled = (data.fotos && data.fotos.length >= 6) || !filesInput.files.length;
+
+            renderGaleria(data);
+        }
+
+        function renderGaleria(data) {
+            const galeriaEl = document.getElementById("galeria"); const galeriaEmpty = document.getElementById("galeriaEmpty");
+            galeriaEl.innerHTML = ""; galeriaEmpty.style.display = "none";
+            if (!data.fotos || !data.fotos.length) { galeriaEmpty.style.display = "block"; galeriaEmpty.textContent = "Aún no hay fotos. Sube algunas abajo."; return; }
+
+            data.fotos.forEach((foto, idx) => {
+                const card = document.createElement("div"); card.className = "foto-card"; card.draggable = true; card.dataset.num = idx + 1;
+                card.innerHTML = `
+                    <img src="${foto.thumb_url || foto.url}" alt="Foto ${idx + 1}">
+                    ${foto.es_principal ? '<div class="badge-principal">Principal</div>' : ''}
+                    <div class="foto-meta"><span>Foto ${idx + 1}</span><span>${foto.size_kb} KB</span></div>
+                    <div class="foto-actions">
+                        <button type="button" class="btn-principal" onclick="marcarPrincipal(${idx + 1})">Principal</button>
+                        <button type="button" class="btn-eliminar" onclick="eliminarFoto(${idx + 1})">Eliminar</button>
+                    </div>
+                `;
+                galeriaEl.appendChild(card);
+                card.addEventListener("dragstart", () => { card.style.opacity = "0.5"; card.classList.add("dragging"); });
+                card.addEventListener("dragend", () => { card.style.opacity = "1"; card.classList.remove("dragging"); document.querySelectorAll(".foto-card").forEach(c => c.classList.remove("drag-over")); });
+                card.addEventListener("dragover", (e) => e.preventDefault());
+                card.addEventListener("dragenter", (e) => { e.preventDefault(); if (!card.classList.contains("dragging")) card.classList.add("drag-over"); });
+                card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+                card.addEventListener("drop", (e) => {
+                    e.preventDefault(); card.classList.remove("drag-over");
+                    const draggingCard = document.querySelector(".dragging");
+                    if (draggingCard && draggingCard !== card) {
+                        const allCards = [...galeriaEl.querySelectorAll(".foto-card")];
+                        if (allCards.indexOf(draggingCard) < allCards.indexOf(card)) card.parentNode.insertBefore(draggingCard, card.nextSibling);
+                        else card.parentNode.insertBefore(draggingCard, card);
+                        guardarNuevoOrden();
+                    }
+                });
+            });
+        }
+
+        async function guardarNuevoOrden() {
+            const fd = new FormData(); fd.append("action", "reordenar"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
+            fd.append("orden", JSON.stringify([...document.querySelectorAll("#galeria .foto-card")].map(c => parseInt(c.dataset.num, 10))));
+            await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
+        }
+        async function marcarPrincipal(numFoto) {
+            const fd = new FormData(); fd.append("action", "principal"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value); fd.append("numero", numFoto);
+            await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
+        }
+        async function eliminarFoto(numFoto) {
+            if (!confirm("¿Seguro que deseas eliminar esta foto?")) return;
+            const fd = new FormData(); fd.append("action", "eliminar"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value); fd.append("numero", numFoto);
+            await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
+        }
+        document.getElementById('btnEliminarTodo').addEventListener('click', async () => {
+            if (!confirm("Vas a eliminar TODAS las fotos de esta obra. ¿Confirmas?")) return;
+            const fd = new FormData(); fd.append("action", "eliminar_todas"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
+            await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
+        });
+        document.getElementById('btnDescargarZip').addEventListener('click', () => {
+            window.location.href = "fotos_api.php?download_zip=1&" + new URLSearchParams({ segmento: document.getElementById('formSegmento').value.toLowerCase(), carpeta: document.getElementById('formCarpeta').value }).toString();
+        });
+        document.getElementById('files').addEventListener('change', function() {
+            const preview = document.getElementById('previewContainerUpload'); preview.innerHTML = ''; document.getElementById('btnSubirFotos').disabled = this.files.length === 0;
+            Array.from(this.files).forEach((file) => { preview.innerHTML += `<div class="foto-card" style="border-color:#3b82f6; opacity:0.8;"><img src="${URL.createObjectURL(file)}"><div class="foto-meta"><span style="color:#93c5fd">A subir...</span><span>${(file.size/1024).toFixed(1)} KB</span></div></div>`; });
+        });
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); const filesInput = document.getElementById("files"); if (!filesInput.files.length) return;
+            const fd = new FormData(); fd.append("action", "subir"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
+            for (const file of filesInput.files) fd.append("files[]", file);
+            const statusEl = document.getElementById("status"); const btnSubir = document.getElementById("btnSubirFotos"); document.getElementById("progressContainer").style.display = "block"; btnSubir.disabled = true;
+            try {
+                const text = await new Promise((res, rej) => { const xhr = new XMLHttpRequest(); xhr.open("POST", "upload.php", true); xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) { const pct = (e.loaded/e.total)*100; document.getElementById("progressBar").style.width = pct + "%"; statusEl.textContent = `Subiendo (${Math.round(pct)}%)...`; }}); xhr.onload = () => res(xhr.responseText); xhr.onerror = () => rej(new Error("Error de red")); xhr.send(fd); });
+                document.getElementById("progressContainer").style.display = "none";
+                const data = JSON.parse(text); if (data.ok) { statusEl.textContent = "¡Fotos subidas!"; cargarFotosObra(); } else { statusEl.textContent = data.error; btnSubir.disabled = false; }
+            } catch (err) { statusEl.textContent = "Error: " + err.message; btnSubir.disabled = false; }
+        });
 
         // Auto-inicializar 
         document.addEventListener("DOMContentLoaded", cargarDataInicial);
