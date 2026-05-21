@@ -43,11 +43,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $service->spreadsheets_values->update($spreadsheetId, $rango, $body, $params);
             log_action('obra_editar', "Editó obra: $nombre en $segmento (Fila $fila)");
+            
+            if (!empty($_POST['ajax'])) {
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => true, 'mensaje' => '¡Textos y mapa actualizados con éxito en tu Excel!']);
+                exit;
+            }
             $mensaje = '<div class="msg-success">¡Obra actualizada con éxito en Google Sheets! Puedes seguir editando otras o ir a la pestaña de Fotos.</div>';
         } else {
+            if (!empty($_POST['ajax'])) {
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => false, 'mensaje' => 'Error: Fila o segmento no válido.']);
+                exit;
+            }
             $mensaje = '<div class="msg-error">Error: Fila o segmento no válido.</div>';
         }
     } catch (Throwable $e) {
+        if (!empty($_POST['ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'mensaje' => 'Error: ' . $e->getMessage()]);
+            exit;
+        }
         $mensaje = '<div class="msg-error">Error: ' . $e->getMessage() . '</div>';
     }
 }
@@ -187,7 +203,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     Abrir Mapa para Reubicar el Pin
                 </button>
 
-                <button type="submit" class="btn-submit">💾 Guardar Cambios en Excel</button>
+                <div id="formMsg"></div>
+                <button type="submit" class="btn-submit" style="background: #10b981;">💾 Actualizar Textos y Mapa</button>
             </form>
             
             <!-- NUEVO: SECCIÓN DE GESTIÓN DE FOTOS INTEGRADA -->
@@ -562,6 +579,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById("progressContainer").style.display = "none";
                 const data = JSON.parse(text); if (data.ok) { statusEl.textContent = "¡Fotos subidas!"; cargarFotosObra(); } else { statusEl.textContent = data.error; btnSubir.disabled = false; }
             } catch (err) { statusEl.textContent = "Error: " + err.message; btnSubir.disabled = false; }
+        });
+
+        // ==========================
+        //  GUARDADO SILENCIOSO (AJAX) DEL EXCEL
+        // ==========================
+        document.getElementById('formEditar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Guardando en Excel...';
+            btn.disabled = true;
+
+            const fd = new FormData(form);
+            fd.append('ajax', '1'); // Le dice a PHP que no recargue la página
+
+            try {
+                const resp = await fetch('editar_obra.php', { method: 'POST', body: fd });
+                const data = await resp.json();
+                
+                const msgDiv = document.getElementById('formMsg');
+                msgDiv.innerHTML = `<div class="${data.ok ? 'msg-success' : 'msg-error'}" style="margin-top:15px; margin-bottom:0;">${data.mensaje}</div>`;
+                setTimeout(() => msgDiv.innerHTML = '', 4000);
+            } catch (err) {
+                alert('Error de conexión al guardar.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         });
 
         // Auto-inicializar 
