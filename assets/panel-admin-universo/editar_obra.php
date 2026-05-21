@@ -202,9 +202,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
                     Abrir Mapa para Reubicar el Pin
                 </button>
-
-                <div id="formMsg"></div>
-                <button type="submit" class="btn-submit" style="background: #10b981;">💾 Actualizar Textos y Mapa</button>
             </form>
             
             <!-- NUEVO: SECCIÓN DE GESTIÓN DE FOTOS INTEGRADA -->
@@ -228,6 +225,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button type="submit" id="btnSubirFotos" disabled class="btn-submit" style="margin-top: 15px; padding: 10px;">☁️ Subir imágenes seleccionadas</button>
                     <div id="status" style="font-size: 12px; margin-top: 8px; color: #93c5fd;"></div>
                 </form>
+            </div>
+            
+            <div id="globalSaveSection" style="display:none; margin-top: 30px; border-top: 1px solid #1f2937; padding-top: 20px;">
+                <div id="formMsg"></div>
+                <button type="button" id="btnGuardarGlobal" class="btn-submit" style="background: #10b981; font-size: 16px; padding: 16px; margin-top: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">💾 Guardar Todos los Cambios</button>
             </div>
         </div>
     </main>
@@ -340,6 +342,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (idx === "") { 
                 formEditar.style.display = 'none'; 
                 document.getElementById('fotosSection').style.display = 'none';
+                document.getElementById('globalSaveSection').style.display = 'none';
                 return; 
             }
 
@@ -371,6 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             formEditar.style.display = 'block';
             document.getElementById('fotosSection').style.display = 'block';
+            document.getElementById('globalSaveSection').style.display = 'block';
             cargarFotosObra(); // Llamada automática a la galería integrada
         });
 
@@ -546,7 +550,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         async function guardarNuevoOrden() {
             const fd = new FormData(); fd.append("action", "reordenar"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
             fd.append("orden", JSON.stringify([...document.querySelectorAll("#galeria .foto-card")].map(c => parseInt(c.dataset.num, 10))));
-            await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
+            await fetch("fotos_api.php", { method: "POST", body: fd }); 
+            cargarFotosObra();
+            
+            // Pequeño aviso visual para que el usuario sepa que su arrastre se guardó
+            const statusEl = document.getElementById("status");
+            statusEl.textContent = "✅ Nuevo orden guardado automáticamente.";
+            setTimeout(() => { if(statusEl.textContent.includes("orden")) statusEl.textContent = ""; }, 3000);
         }
         async function marcarPrincipal(numFoto) {
             const fd = new FormData(); fd.append("action", "principal"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value); fd.append("numero", numFoto);
@@ -584,12 +594,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ==========================
         //  GUARDADO SILENCIOSO (AJAX) DEL EXCEL
         // ==========================
+        document.getElementById('btnGuardarGlobal').addEventListener('click', () => {
+            document.getElementById('formEditar').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        });
+
         document.getElementById('formEditar').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
-            const btn = form.querySelector('button[type="submit"]');
+            const btn = document.getElementById('btnGuardarGlobal');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Guardando en Excel...';
+            btn.innerHTML = '⏳ Guardando todos los cambios...';
             btn.disabled = true;
 
             const fd = new FormData(form);
