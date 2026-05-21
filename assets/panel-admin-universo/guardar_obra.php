@@ -1,31 +1,36 @@
 <?php
-// 1. Seguridad e inicio de sesión
+// 1. Mostrar todos los errores para saber exactamente qué falla en el servidor
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// 2. Seguridad e inicio de sesión
 require_once __DIR__ . '/config.php';
 require_login();
 
+// 3. Verificaciones estrictas para evitar pantalla en blanco (Error 500)
+if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
+    die("<div style='background:#fff; padding:20px;'><h2 style='color:red;'>Error Crítico: No se encontró la carpeta 'vendor'</h2><p>Parece que la librería de Google no se subió a tu servidor. Esto suele pasar porque GitHub a veces ignora la carpeta 'vendor' por defecto. Sube la carpeta 'vendor' manualmente a tu servidor desde XAMPP.</p></div>");
+}
+
+$rutaCredenciales = __DIR__ . '/data/credenciales.json';
+if (!file_exists($rutaCredenciales)) {
+    die("<div style='background:#fff; padding:20px;'><h2 style='color:red;'>Error Crítico: No se encontró credenciales.json</h2><p>Debes subir este archivo manualmente a <b>assets/panel-admin-universo/data/</b> en tu servidor.</p></div>");
+}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
-// =========================================================================
-// ¡ATENCIÓN! REEMPLAZA ESTO CON EL ID DE TU GOOGLE SHEETS
-// Ej: https://docs.google.com/spreadsheets/d/1ABC123xyz.../edit -> ID es 1ABC123xyz...
-// =========================================================================
 $spreadsheetId = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // 2. Configurar el "Bot" usando tus credenciales
         $client = new \Google_Client();
         $client->setApplicationName('Panel de Obras Fuerza Tacna');
         $client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);
         $client->setAccessType('offline');
         
-        // Ruta a tu llave maestra JSON
-        $client->setAuthConfig(__DIR__ . '/data/credenciales.json');
-
-        // 3. Iniciar el servicio de Google Sheets
+        $client->setAuthConfig($rutaCredenciales);
         $service = new \Google_Service_Sheets($client);
 
-        // 4. Recibir los datos del formulario (agregar_obra.php)
         $segmento = $_POST['segmento'] ?? 'EDUCACION';
         $nombre   = $_POST['nombre'] ?? '';
         $estado   = $_POST['estado'] ?? '';
@@ -35,32 +40,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $x        = $_POST['x'] ?? '';
         $y        = $_POST['y'] ?? '';
         
-        // Generamos la "carpeta" en blanco o automáticamente basándonos en el nombre si lo prefieres.
-        // Por ahora lo dejamos en blanco o con un guion si no hay fotos aún.
-        $carpeta = '-'; 
-        $descripcion = '-';
+        // ¡MAGIA DE AUTOMATIZACIÓN! Crea el nombre de la carpeta de forma limpia.
+        // Ej: "Creación de Colegio" -> "creacion-de-colegio"
+        $carpeta = slugify($nombre); 
+        $descripcion = '';
 
-        // 5. Preparar la "Fila" para el Excel. 
-        // El ORDEN debe coincidir con tus columnas: nombre | estado | monto | distrito | provincia | x | y | carpeta | descripcion
         $values = [
-            [$nombre, $estado, $monto, $distrito, $provincia, $x, $y, $carpeta, $descripcion]
+            [$nombre, $estado, $monto, $x, $y, $provincia, $distrito, $carpeta, $descripcion]
         ];
 
         $body = new \Google_Service_Sheets_ValueRange(['values' => $values]);
-        $params = ['valueInputOption' => 'USER_ENTERED']; // Permite que Google detecte números correctamente
+        $params = ['valueInputOption' => 'USER_ENTERED'];
 
-        // 6. ¡Enviar los datos! 
-        // Insertará la fila al final de la hoja seleccionada (Ej: "educacion")
         $result = $service->spreadsheets_values->append($spreadsheetId, $segmento, $body, $params);
 
-        echo "<div style='font-family: Arial; padding: 40px; text-align: center;'>";
-        echo "<h2 style='color: green;'>¡Obra agregada con éxito!</h2>";
-        echo "<p>Los datos ya se guardaron en tu archivo de Excel.</p>";
-        echo "<a href='agregar_obra.php' style='padding: 10px 20px; background: #801039; color: #fff; text-decoration: none; border-radius: 5px;'>Agregar otra obra</a>";
-        echo "</div>";
+        log_action('obra_agregar', "Agregó nueva obra: $nombre en $segmento");
 
-    } catch (Exception $e) {
-        echo "<h2 style='color: red; font-family: Arial;'>Error de conexión:</h2>";
-        echo "<pre>" . $e->getMessage() . "</pre>";
+        header("Location: agregar_obra.php?success=1");
+        exit;
+
+    } catch (Throwable $e) { // Throwable atrapa TODO (Errores 500, fatales, sintaxis, etc)
+        die("<div style='background: #fff; padding: 20px; color: #333; font-family: Arial;'><h2 style='color: red;'>Error detectado en PHP:</h2><pre style='background:#f4f4f4; padding: 10px; border-left: 4px solid red;'>" . $e->getMessage() . " en la línea " . $e->getLine() . "</pre><br><a href='agregar_obra.php'>Volver atrás</a></div>");
     }
 }
