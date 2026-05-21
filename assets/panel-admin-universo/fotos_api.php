@@ -156,6 +156,7 @@ function handle_eliminar($segmento, $carpeta, $numero) {
 
     // Recrear la miniatura con la nueva imagen principal
     @unlink($dir . '/1.thumb.webp');
+    clearstatcache(true, $dir . '/1.webp');
     if (file_exists($dir . '/1.webp')) {
         copy($dir . '/1.webp', $dir . '/1.thumb.webp');
     }
@@ -254,6 +255,7 @@ function handle_principal($segmento, $carpeta, $numero) {
 
     // Recrear la miniatura con la nueva imagen principal
     @unlink($dir . '/1.thumb.webp');
+    clearstatcache(true, $dir . '/1.webp');
     if (file_exists($dir . '/1.webp')) {
         copy($dir . '/1.webp', $dir . '/1.thumb.webp');
     }
@@ -327,6 +329,7 @@ function handle_reordenar($segmento, $carpeta, $orden) {
 
     // Recrear la miniatura con la nueva imagen principal
     @unlink($dir . '/1.thumb.webp');
+    clearstatcache(true, $dir . '/1.webp');
     if (file_exists($dir . '/1.webp')) {
         copy($dir . '/1.webp', $dir . '/1.thumb.webp');
     }
