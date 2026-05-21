@@ -38,6 +38,10 @@ if (isset($_GET['success'])) {
         .btn-mapa { background: transparent; border: 1px solid #3b82f6; color: #60a5fa; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-mapa:hover { background: rgba(59, 130, 246, 0.1); color: #93c5fd; }
         
+        /* Botones de zoom */
+        .btn-zoom { background: #1e293b; color: #f9fafb; border: 1px solid #334155; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background 0.2s; }
+        .btn-zoom:hover { background: #334155; }
+        
         /* Ventana emergente (Modal) del Mapa */
         .map-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(2, 6, 23, 0.95); z-index: 1000; display: none; flex-direction: column; backdrop-filter: blur(5px); }
         .map-modal.is-open { display: flex; }
@@ -62,6 +66,7 @@ if (isset($_GET['success'])) {
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             border-radius: 8px;
             background: #fff;
+            transition: width 0.3s ease, max-width 0.3s ease;
         }
         
         /* Pines superpuestos de obras existentes */
@@ -151,7 +156,12 @@ if (isset($_GET['success'])) {
     <div id="modalMapa" class="map-modal">
         <div class="map-modal-header">
             <h3>🎯 Haz clic en el lugar exacto de la obra</h3>
-            <button type="button" id="btnCerrarMapa" class="btn-close-map">Cerrar</button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="btnZoomOut" class="btn-zoom">-</button>
+                <span id="zoomNivel" style="color: #94a3b8; font-size: 14px; min-width: 45px; text-align: center; font-weight: bold;">100%</span>
+                <button type="button" id="btnZoomIn" class="btn-zoom">+</button>
+                <button type="button" id="btnCerrarMapa" class="btn-close-map" style="margin-left: 10px;">Cerrar</button>
+            </div>
         </div>
         <div class="map-modal-body">
             <div id="mapWrapper" style="position: relative; display: inline-block;">
@@ -209,6 +219,8 @@ if (isset($_GET['success'])) {
 
         document.getElementById('btnAbrirMapa').addEventListener('click', () => { 
             modal.classList.add('is-open'); 
+            currentZoom = 1;
+            applyZoom();
             cargarPinesExistentes(); 
         });
         document.getElementById('btnCerrarMapa').addEventListener('click', () => { modal.classList.remove('is-open'); });
@@ -233,6 +245,31 @@ if (isset($_GET['success'])) {
             
             modal.classList.remove('is-open');
         });
+
+        // Lógica de Zoom
+        let currentZoom = 1;
+        const zoomStep = 0.5;
+        const maxZoom = 4;
+        const minZoom = 1;
+
+        document.getElementById('btnZoomIn').addEventListener('click', () => {
+            if (currentZoom < maxZoom) { currentZoom += zoomStep; applyZoom(); }
+        });
+        document.getElementById('btnZoomOut').addEventListener('click', () => {
+            if (currentZoom > minZoom) { currentZoom -= zoomStep; applyZoom(); }
+        });
+
+        function applyZoom() {
+            document.getElementById('zoomNivel').innerText = Math.round(currentZoom * 100) + '%';
+            const body = document.querySelector('.map-modal-body');
+            if (currentZoom === 1) {
+                imgMapa.style.width = ''; imgMapa.style.maxWidth = '100%'; imgMapa.style.maxHeight = '80vh';
+                body.style.textAlign = 'center';
+            } else {
+                imgMapa.style.width = (currentZoom * 100) + '%'; imgMapa.style.maxWidth = 'none'; imgMapa.style.maxHeight = 'none';
+                body.style.textAlign = 'left';
+            }
+        }
     </script>
 </body>
 </html>
