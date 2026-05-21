@@ -213,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button type="button" id="btnDescargarZip" disabled style="background:#10b981; padding: 6px 12px; border-radius: 6px; border: none; color: white; cursor: pointer; font-size: 11px; font-weight: bold;">⬇ Descargar ZIP</button>
                     </div>
                 </h2>
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-top: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">💡 <strong>Tip:</strong> Puedes cambiar el orden de las imágenes haciendo clic y arrastrándolas a una nueva posición. La primera foto siempre será la principal del mapa.</div>
                 <div id="galeriaEmpty" style="font-size: 13px; color: #9ca3af; margin-top: 10px; display:none;">Esta obra aún no tiene fotos.</div>
                 <div id="galeria" class="galeria"></div>
 
