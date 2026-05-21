@@ -214,8 +214,10 @@ if (isset($_GET['success'])) {
                 (json.table.rows || []).forEach(r => {
                     if (!r.c) return;
                     const nombre = r.c[0]?.v || '';
-                    const x = parseFloat(r.c[3]?.v);
-                    const y = parseFloat(r.c[4]?.v);
+                    
+                    // Reemplazamos coma por punto antes de leer el número para evitar que se vayan a la esquina (0,0)
+                    const x = parseFloat(String(r.c[3]?.v || '').replace(',', '.'));
+                    const y = parseFloat(String(r.c[4]?.v || '').replace(',', '.'));
                     
                     if (!isNaN(x) && !isNaN(y) && x >= 0 && x <= 1 && y >= 0 && y <= 1) {
                         const visualY = 1 - y; // Invertimos Y para que se dibuje correctamente de arriba hacia abajo
