@@ -236,7 +236,12 @@ if (isset($_GET['success'])) {
         });
         document.getElementById('btnCerrarMapa').addEventListener('click', () => { modal.classList.remove('is-open'); });
 
+        let dragDist = 0;
+
         imgMapa.addEventListener('click', function(e) {
+            // Ignorar clic si hubo arrastre (pan) de la imagen
+            if (dragDist > 10) return;
+
             const rect = imgMapa.getBoundingClientRect();
             // Calculamos el porcentaje exacto (0.000 a 1.000)
             const htmlX = (e.clientX - rect.left) / rect.width;
@@ -262,41 +267,104 @@ if (isset($_GET['success'])) {
         const zoomStep = 0.2; // Más suave para el scroll
         const maxZoom = 4;
         const minZoom = 1;
+        const modalBody = document.querySelector('.map-modal-body');
+        
+        let isDragging = false;
+        let startX, startY, startScrollLeft, startScrollTop;
+
+        // --- Arrastrar para mover (Pan) ---
+        modalBody.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return; // Solo clic izquierdo
+            isDragging = true;
+            dragDist = 0;
+            startX = e.clientX;
+            startY = e.clientY;
+            startScrollLeft = modalBody.scrollLeft;
+            startScrollTop = modalBody.scrollTop;
+            modalBody.style.cursor = 'grabbing';
+            e.preventDefault(); // Evitar comportamientos por defecto como seleccionar
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            dragDist += Math.abs(dx) + Math.abs(dy); // Acumulamos distancia
+            
+            modalBody.scrollLeft = startScrollLeft - dx;
+            modalBody.scrollTop = startScrollTop - dy;
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            startScrollLeft = modalBody.scrollLeft;
+            startScrollTop = modalBody.scrollTop;
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                modalBody.style.cursor = 'crosshair';
+            }
+        });
 
         document.getElementById('btnZoomIn').addEventListener('click', () => {
-            // Hacemos que los botones den un salto más grande
-            if (currentZoom < maxZoom) { currentZoom = Math.min(maxZoom, currentZoom + 0.5); applyZoom(); }
+            applyZoom(currentZoom + 0.5);
         });
         document.getElementById('btnZoomOut').addEventListener('click', () => {
-            if (currentZoom > minZoom) { currentZoom = Math.max(minZoom, currentZoom - 0.5); applyZoom(); }
+            applyZoom(currentZoom - 0.5);
         });
 
         // *** NUEVO: Zoom con la rueda del ratón ***
-        document.querySelector('.map-modal-body').addEventListener('wheel', function(e) {
+        modalBody.addEventListener('wheel', function(e) {
             e.preventDefault(); // Evita que la página de atrás se mueva
 
             if (e.deltaY < 0) { // Rueda hacia arriba -> Zoom In
-                if (currentZoom < maxZoom) {
-                    currentZoom = Math.min(maxZoom, currentZoom + zoomStep);
-                    applyZoom();
-                }
+                applyZoom(currentZoom + zoomStep, e.clientX, e.clientY);
             } else { // Rueda hacia abajo -> Zoom Out
-                if (currentZoom > minZoom) {
-                    currentZoom = Math.max(minZoom, currentZoom - zoomStep);
-                    applyZoom();
-                }
+                applyZoom(currentZoom - zoomStep, e.clientX, e.clientY);
             }
         }, { passive: false }); // passive:false es necesario para preventDefault
 
-        function applyZoom() {
+        function applyZoom(newZoom, mouseX, mouseY) {
+            const oldZoom = currentZoom;
+            currentZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+            
+            if (currentZoom === oldZoom) return; // Sin cambios
+            
             document.getElementById('zoomNivel').innerText = Math.round(currentZoom * 100) + '%';
-            const body = document.querySelector('.map-modal-body');
+            
+            const rectBefore = imgMapa.getBoundingClientRect();
+            const bodyRect = modalBody.getBoundingClientRect();
+
+            // Si se usa botones (+ y -), hacemos zoom hacia el centro del contenedor
+            if (mouseX === undefined) mouseX = bodyRect.left + bodyRect.width / 2;
+            if (mouseY === undefined) mouseY = bodyRect.top + bodyRect.height / 2;
+
+            // Porcentaje (0-1) del punto bajo el mouse en la imagen actual
+            const pctX = (mouseX - rectBefore.left) / rectBefore.width;
+            const pctY = (mouseY - rectBefore.top) / rectBefore.height;
+            
             if (currentZoom === 1) {
                 imgMapa.style.width = ''; imgMapa.style.maxWidth = '100%'; imgMapa.style.maxHeight = '80vh';
-                body.style.textAlign = 'center';
+                modalBody.style.textAlign = 'center';
             } else {
                 imgMapa.style.width = (currentZoom * 100) + '%'; imgMapa.style.maxWidth = 'none'; imgMapa.style.maxHeight = 'none';
-                body.style.textAlign = 'left';
+                modalBody.style.textAlign = 'left';
+            }
+
+            // Forzamos al navegador a recalcular el tamaño
+            void imgMapa.offsetWidth; 
+            
+            const rectAfter = imgMapa.getBoundingClientRect();
+            
+            if (currentZoom > 1) {
+                // Cuánto se desfasa el punto que antes estaba bajo el mouse
+                const diffX = mouseX - (rectAfter.left + (rectAfter.width * pctX));
+                const diffY = mouseY - (rectAfter.top + (rectAfter.height * pctY));
+                
+                // Ajustamos el scroll para compensar y mantener el punto bajo el cursor
+                modalBody.scrollLeft -= diffX;
+                modalBody.scrollTop -= diffY;
             }
         }
     </script>
