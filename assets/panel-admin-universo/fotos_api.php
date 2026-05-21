@@ -76,7 +76,7 @@ function handle_listar($segmento, $carpeta) {
         $url = "/assets/universoobras/IMG/fotos-obras/" .
             rawurlencode($segmento) . "/" .
             rawurlencode($carpeta) . "/" .
-            rawurlencode($basename);
+            rawurlencode($basename) . "?v=" . time();
 
         $fotos[] = [
             'url'          => $url,
