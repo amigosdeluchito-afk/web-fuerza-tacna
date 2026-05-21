@@ -33,6 +33,32 @@ if (isset($_GET['success'])) {
         .msg-error { background: rgba(239, 68, 68, 0.1); color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; border: 1px solid #dc2626; }
         .row { display: flex; gap: 15px; }
         .row > div { flex: 1; }
+        
+        /* Botón para abrir el mapa */
+        .btn-mapa { background: transparent; border: 1px solid #3b82f6; color: #60a5fa; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-mapa:hover { background: rgba(59, 130, 246, 0.1); color: #93c5fd; }
+        
+        /* Ventana emergente (Modal) del Mapa */
+        .map-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(2, 6, 23, 0.95); z-index: 1000; display: none; flex-direction: column; backdrop-filter: blur(5px); }
+        .map-modal.is-open { display: flex; }
+        .map-modal-header { padding: 15px 24px; background: #0f172a; border-bottom: 1px solid #1f2937; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 10; }
+        .map-modal-header h3 { margin: 0; font-size: 16px; color: #f9fafb; font-weight: 600; }
+        .btn-close-map { background: #ef4444; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-close-map:hover { background: #dc2626; }
+        
+        /* Contenedor escroleable para la imagen gigante */
+        .map-modal-body { flex: 1; overflow: auto; cursor: crosshair; position: relative; padding: 20px; display: flex; justify-content: center; align-items: flex-start;}
+        .map-modal-body::-webkit-scrollbar { width: 10px; height: 10px; }
+        .map-modal-body::-webkit-scrollbar-track { background: #0f172a; }
+        .map-modal-body::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+        
+        .map-modal-body img {
+            max-width: none; /* Permite que la imagen se vea a tamaño real */
+            border: 2px solid #334155;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            background: #fff;
+        }
     </style>
 </head>
 <body>
@@ -90,10 +116,55 @@ if (isset($_GET['success'])) {
                     <div><label>Coordenada X (Longitud):</label><input type="text" name="x" placeholder="Ej. 0.345"></div>
                     <div><label>Coordenada Y (Latitud):</label><input type="text" name="y" placeholder="Ej. 0.678"></div>
                 </div>
+                
+                <button type="button" id="btnAbrirMapa" class="btn-mapa">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    Abrir Mapa para ubicar Coordenadas
+                </button>
 
                 <button type="submit" class="btn-submit">Guardar Obra en Excel</button>
             </form>
         </div>
     </main>
+
+    <!-- VENTANA EMERGENTE DEL MAPA -->
+    <div id="modalMapa" class="map-modal">
+        <div class="map-modal-header">
+            <h3>🎯 Haz clic en el lugar exacto de la obra</h3>
+            <button type="button" id="btnCerrarMapa" class="btn-close-map">Cerrar</button>
+        </div>
+        <div class="map-modal-body">
+            <!-- Cargamos tu mapa base real -->
+            <img id="imgMapaPuntos" src="../universoobras/IMG/mapa-base.png" alt="Mapa Base">
+        </div>
+    </div>
+
+    <script>
+        // Lógica para capturar las coordenadas con un clic
+        const modal = document.getElementById('modalMapa');
+        const imgMapa = document.getElementById('imgMapaPuntos');
+        const inputX = document.querySelector('input[name="x"]');
+        const inputY = document.querySelector('input[name="y"]');
+
+        document.getElementById('btnAbrirMapa').addEventListener('click', () => { modal.classList.add('is-open'); });
+        document.getElementById('btnCerrarMapa').addEventListener('click', () => { modal.classList.remove('is-open'); });
+
+        imgMapa.addEventListener('click', function(e) {
+            const rect = imgMapa.getBoundingClientRect();
+            // Calculamos el porcentaje exacto (0.000 a 1.000)
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            
+            // Pegamos los valores con 4 decimales
+            inputX.value = x.toFixed(4);
+            inputY.value = y.toFixed(4);
+            
+            // Efecto visual verde de éxito y cerramos
+            inputX.style.borderColor = '#10b981'; inputY.style.borderColor = '#10b981';
+            setTimeout(() => { inputX.style.borderColor = '#1f2937'; inputY.style.borderColor = '#1f2937'; }, 1500);
+            
+            modal.classList.remove('is-open');
+        });
+    </script>
 </body>
 </html>
