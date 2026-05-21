@@ -3,3 +3,7 @@ assets/panel-admin-universo/data/credenciales.json
 
 # Ignorar historial de actividad local
 assets/panel-admin-universo/data/historial.log
+
+# Ignorar librerías pesadas y archivos comprimidos
+assets/panel-admin-universo/vendor/
+*.zip
