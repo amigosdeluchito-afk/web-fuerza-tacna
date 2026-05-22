@@ -171,13 +171,13 @@ window.initLeafletMap = function(container) {
     const map = L.map(mapEl, {
         crs: L.CRS.Simple,
         zoomControl: false,
-        zoomSnap: 0.1,
-        zoomDelta: 0.5,
+        zoomSnap: 0,           // 0 permite un zoom 100% fluido sin redondear (estilo Google Maps)
+        zoomDelta: 0.25,       // Pasos más pequeños y ágiles para la rueda del ratón
         inertia: true,
         inertiaDeceleration: 3000,
         maxBoundsViscosity: 1.0,
-        wheelPxPerZoomLevel: 100,
-        wheelDebounceTime: 40
+        wheelPxPerZoomLevel: 60, // Sensibilidad estándar (ni mucho ni poco)
+        wheelDebounceTime: 15    // Reacción casi instantánea al girar la rueda
     });
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
@@ -214,14 +214,18 @@ window.initLeafletMap = function(container) {
     const debouncedUpdateLabels = window.debounce(updateLabelsVisibility, 100);
 
     map.on('zoomstart', ()=>{ 
-        __LAST_ZOOM = map.getZoom(); 
-        hideAllLabels(); // Ocultar para máxima fluidez de la tarjeta gráfica al hacer zoom
+        try {
+            __LAST_ZOOM = map.getZoom(); 
+            hideAllLabels(); // Ocultar por GPU para máxima fluidez al hacer zoom
+        } catch(e){}
     });
     map.on('zoomend', () => {
-        const z = map.getZoom();
-        if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
-        updateHud(currentKey ?? '—');
-        debouncedUpdateLabels();
+        try {
+            const z = map.getZoom();
+            if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
+            updateHud(currentKey ?? '—');
+            debouncedUpdateLabels();
+        } catch(e){}
     });
     map.on('moveend', debouncedUpdateLabels);
 
@@ -230,11 +234,8 @@ window.initLeafletMap = function(container) {
     let PINS_LOADING = new Set();
 
     function hideAllLabels(){
-        pins.eachLayer(l=>{
-            if (!(l instanceof L.Marker)) return;
-            if (l.options.icon?.options.className !== 'obra-label') return;
-            l.getElement()?.querySelector('.obra-label__inner')?.classList.add('is-hidden');
-        });
+        // Ocultamiento en lote instantáneo usando la GPU (O(1) DOM operation)
+        if (mapEl) mapEl.classList.add('labels-suspended');
     }
 
     window.__OBRA_MARKERS = new Map();
@@ -270,6 +271,7 @@ window.initLeafletMap = function(container) {
     function relayoutSoon(){ requestAnimationFrame(() => requestAnimationFrame(() => { updateLabelsVisibility(); })); }
 
     function layoutEtiquetas(){
+        try {
         const z  = map.getZoom();
         const z0 = (typeof LABEL_MIN_ZOOM === 'number') ? LABEL_MIN_ZOOM : (window.BASE_ZOOM ?? z);
         const N  = cupoSegunZoom(z);
@@ -404,6 +406,11 @@ window.initLeafletMap = function(container) {
                 inner.style.setProperty('--ax', finalT.ax);
                 inner.classList.remove('is-hidden');
             }
+        }
+        } catch (err) {
+            console.error("Error en layoutEtiquetas:", err);
+        } finally {
+            if (mapEl) mapEl.classList.remove('labels-suspended');
         }
     }
 
