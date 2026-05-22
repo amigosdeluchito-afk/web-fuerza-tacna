@@ -189,8 +189,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" name="monto" id="inputMonto">
 
                 <div class="row">
-                    <div><label>Distrito:</label><input type="text" name="distrito" id="inputDistrito"></div>
-                    <div><label>Provincia:</label><input type="text" name="provincia" id="inputProvincia"></div>
+                    <div>
+                        <label>Provincia:</label>
+                        <select name="provincia" id="inputProvincia" required></select>
+                    </div>
+                    <div>
+                        <label>Distrito:</label>
+                        <select name="distrito" id="inputDistrito" required disabled><option value="">Primero elige provincia</option></select>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -266,6 +272,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             { key: "AGRICULTURA", nombre: "Agricultura" },
             { key: "SOCIAL",      nombre: "Social" }
         ];
+        const DISTRITOS_POR_PROVINCIA = {
+            "Tacna": ["Tacna", "Alto de la Alianza", "Calana", "Ciudad Nueva", "Coronel Gregorio Albarracín Lanchipa", "Inclán", "Pachía", "Palca", "Pocollay", "Sama", "La Yarada-Los Palos"],
+            "Tarata": ["Tarata", "Chucatamani", "Estique", "Estique-Pampa", "Sitajara", "Susapaya", "Tarucachi", "Ticaco"],
+            "Candarave": ["Candarave", "Cairani", "Camilaca", "Curibaya", "Huanuara", "Quilahuani"],
+            "Jorge Basadre": ["Locumba", "Ilabaya", "Ite"]
+        };
+
         const obrasPorSegmento = {};
 
         function parseGviz(text) {
@@ -368,8 +381,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             document.getElementById('inputMonto').value = item.monto;
-            document.getElementById('inputDistrito').value = item.distrito;
-            document.getElementById('inputProvincia').value = item.provincia;
+            
+            const provinciaSel = document.getElementById('inputProvincia');
+            const distritoSel = document.getElementById('inputDistrito');
+
+            provinciaSel.value = item.provincia || "Tacna";
+            provinciaSel.dispatchEvent(new Event('change'));
+
+            setTimeout(() => {
+                distritoSel.value = item.distrito;
+                if (distritoSel.value !== item.distrito && item.distrito) {
+                    const tempOption = document.createElement('option');
+                    tempOption.value = item.distrito; tempOption.textContent = item.distrito + " (Dato antiguo)";
+                    distritoSel.appendChild(tempOption);
+                    distritoSel.value = item.distrito;
+                }
+            }, 50);
+
             document.getElementById('inputX').value = item.x ? String(item.x).replace(',', '.') : '';
             document.getElementById('inputY').value = item.y ? String(item.y).replace(',', '.') : '';
 
@@ -625,8 +653,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
 
-        // Auto-inicializar 
-        document.addEventListener("DOMContentLoaded", cargarDataInicial);
+        // Auto-inicializar y lógica de Provincias/Distritos
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarDataInicial();
+
+            const inputProvincia = document.getElementById('inputProvincia');
+            const inputDistrito = document.getElementById('inputDistrito');
+
+            Object.keys(DISTRITOS_POR_PROVINCIA).forEach(prov => {
+                const option = document.createElement('option');
+                option.value = prov; option.textContent = prov;
+                inputProvincia.appendChild(option);
+            });
+
+            inputProvincia.addEventListener('change', function() {
+                const provinciaSeleccionada = this.value;
+                const distritos = DISTRITOS_POR_PROVINCIA[provinciaSeleccionada] || [];
+                const currentDistritoValue = inputDistrito.value;
+                inputDistrito.innerHTML = '<option value="">Selecciona un distrito...</option>';
+                distritos.forEach(dist => {
+                    const option = document.createElement('option');
+                    option.value = dist; option.textContent = dist;
+                    inputDistrito.appendChild(option);
+                });
+                if (distritos.includes(currentDistritoValue)) inputDistrito.value = currentDistritoValue;
+                inputDistrito.disabled = false;
+            });
+        });
     </script>
 </body>
 </html>

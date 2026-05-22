@@ -142,8 +142,14 @@ if (isset($_GET['success'])) {
                 <input type="text" name="monto" placeholder="Ej. 1,500,000.00">
 
                 <div class="row">
-                    <div><label>Distrito:</label><input type="text" name="distrito" placeholder="Ej. Gregorio Albarracín"></div>
-                    <div><label>Provincia:</label><input type="text" name="provincia" value="Tacna"></div>
+                    <div>
+                        <label>Provincia:</label>
+                        <select name="provincia" id="selectProvincia" required></select>
+                    </div>
+                    <div>
+                        <label>Distrito:</label>
+                        <select name="distrito" id="selectDistrito" required disabled><option value="">Primero elige provincia</option></select>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -467,6 +473,40 @@ if (isset($_GET['success'])) {
                 preview.appendChild(div);
             });
         }
+
+        // --- LÓGICA DE PROVINCIAS Y DISTRITOS DEPENDIENTES ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const DISTRITOS_POR_PROVINCIA = {
+                "Tacna": ["Tacna", "Alto de la Alianza", "Calana", "Ciudad Nueva", "Coronel Gregorio Albarracín Lanchipa", "Inclán", "Pachía", "Palca", "Pocollay", "Sama", "La Yarada-Los Palos"],
+                "Tarata": ["Tarata", "Chucatamani", "Estique", "Estique-Pampa", "Sitajara", "Susapaya", "Tarucachi", "Ticaco"],
+                "Candarave": ["Candarave", "Cairani", "Camilaca", "Curibaya", "Huanuara", "Quilahuani"],
+                "Jorge Basadre": ["Locumba", "Ilabaya", "Ite"]
+            };
+
+            const selectProvincia = document.getElementById('selectProvincia');
+            const selectDistrito = document.getElementById('selectDistrito');
+
+            Object.keys(DISTRITOS_POR_PROVINCIA).forEach(prov => {
+                const option = document.createElement('option');
+                option.value = prov;
+                option.textContent = prov;
+                selectProvincia.appendChild(option);
+            });
+
+            selectProvincia.addEventListener('change', function() {
+                const provinciaSeleccionada = this.value;
+                const distritos = DISTRITOS_POR_PROVINCIA[provinciaSeleccionada] || [];
+                selectDistrito.innerHTML = '<option value="">Selecciona un distrito...</option>';
+                distritos.forEach(dist => {
+                    const option = document.createElement('option');
+                    option.value = dist;
+                    option.textContent = dist;
+                    selectDistrito.appendChild(option);
+                });
+                selectDistrito.disabled = false;
+            });
+            selectProvincia.dispatchEvent(new Event('change'));
+        });
     </script>
 </body>
 </html>
