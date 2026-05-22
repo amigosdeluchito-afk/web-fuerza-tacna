@@ -20,19 +20,25 @@
   function ensureMounted(){
     console.log("PanelObra: Verificando montaje...");
     const { safe } = getUtils();
-    // 0) Anti-duplicados
-    document.querySelectorAll('#pv,#pvBackdrop').forEach((n, i) => i > 1 && n.remove());
+    // 0) Anti-duplicados: Limpiar cualquier instancia previa sobrante
+    document.querySelectorAll('#sheet').forEach((n, i) => i > 0 && n.remove());
+    document.querySelectorAll('#sheetBackdrop').forEach((n, i) => i > 0 && n.remove());
 
     // Barba.js Fix: Si la referencia existe pero el elemento ya no está en el DOM, recrear.
     const sheetInDom = document.getElementById('sheet');
-    if (els.sheet && (!document.body.contains(els.sheet) || !sheetInDom)) {
+    const backdropInDom = document.getElementById('sheetBackdrop');
+
+    if (els.sheet && (!document.body.contains(els.sheet) || !sheetInDom || !backdropInDom)) {
       console.log("PanelObra: Elemento perdido en el DOM, reseteando...");
       els.sheet = null;
       els.backdrop = null;
     }
 
-    if (!els.sheet && !sheetInDom){
+    if (!els.sheet && (!sheetInDom || !backdropInDom)){
       console.log("PanelObra: Creando nuevos elementos del panel...");
+      if (sheetInDom) sheetInDom.remove();
+      if (backdropInDom) backdropInDom.remove();
+
       const backdrop = el('div'); backdrop.id='sheetBackdrop';
       const sheet = el('aside'); sheet.id='sheet';
       sheet.setAttribute('role','dialog'); sheet.ariaModal='true';
@@ -53,11 +59,24 @@
       sheet.append(topBar, hero, body, handle);
       document.body.append(backdrop, sheet);
 
-      closeBtn.onclick = handle.onclick = backdrop.onclick = close;
       els = { backdrop, sheet, body, cover, closeBtn, handle, topBar, heroContent };
-    } else if (!els.sheet && sheetInDom) {
-      els = { backdrop: $('#sheetBackdrop'), sheet: sheetInDom, body: $('.sheet-body', sheetInDom), cover: $('.sheet-cover', sheetInDom), closeBtn: $('.sheet-close', sheetInDom), handle: $('.sheet-handle', sheetInDom), topBar: $('#sheetTopBar'), heroContent: $('.sheet-hero-content', sheetInDom) };
+    } else if (!els.sheet && sheetInDom && backdropInDom) {
+      els = { 
+        backdrop: backdropInDom, 
+        sheet: sheetInDom, 
+        body: $('.sheet-body', sheetInDom), 
+        cover: $('.sheet-cover', sheetInDom), 
+        closeBtn: $('.sheet-close', sheetInDom), 
+        handle: $('.sheet-handle', sheetInDom), 
+        topBar: document.getElementById('sheetTopBar') || $('#sheetTopBar', sheetInDom), 
+        heroContent: $('.sheet-hero-content', sheetInDom) 
+      };
     }
+
+    // SIEMPRE re-asignar los eventos de cierre al closure activo actual
+    if (els.closeBtn) els.closeBtn.onclick = close;
+    if (els.handle) els.handle.onclick = close;
+    if (els.backdrop) els.backdrop.onclick = close;
   }
 
   function loadCover(src){
@@ -282,6 +301,7 @@ function reEnterSheet() {
     requestAnimationFrame(() => {
       els.sheet.classList.add('is-open');
       if (window.gsap) {
+          gsap.killTweensOf(els.sheet.querySelectorAll('.stagger-el'));
         gsap.fromTo(els.sheet.querySelectorAll('.stagger-el'), 
           { opacity: 0, y: 25 }, 
           { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
@@ -334,6 +354,7 @@ if (isMobile){
   requestAnimationFrame(()=> {
     els.sheet.classList.add('is-open');
     if (window.gsap) {
+      gsap.killTweensOf(els.sheet.querySelectorAll('.stagger-el'));
       gsap.fromTo(els.sheet.querySelectorAll('.stagger-el'), 
         { opacity: 0, y: 25 }, 
         { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
@@ -354,7 +375,8 @@ if (isMobile){
       requestAnimationFrame(()=> {
         els.sheet.classList.add('is-open');
         if (window.gsap) {
-          gsap.fromTo(els.body.querySelectorAll('.stagger-el'), 
+          gsap.killTweensOf(els.sheet.querySelectorAll('.stagger-el'));
+          gsap.fromTo(els.sheet.querySelectorAll('.stagger-el'), 
             { opacity: 0, y: 25 }, 
             { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
           );
