@@ -229,24 +229,46 @@ placeholder.replaceWith(carrWrap);
 // miniaturas
 const fotos = Array.isArray(d.fotos) ? d.fotos : [];
 const fotosValidas = []; // Guardaremos solo las que carguen bien para el Lightbox
+const cacheKey = d.key;
+window.__PO_PHOTO_COUNTS = window.__PO_PHOTO_COUNTS || new Map();
+const knownCount = window.__PO_PHOTO_COUNTS.get(cacheKey);
 
-fotos.forEach((src, i)=>{
+function createPhotoCard(src) {
   const card = el('div','media');
   const im = el('img');
   im.loading='lazy'; im.decoding='async'; im.src=src; im.alt=d.nombre||'';
-  
-  im.addEventListener('error', ()=> card.remove()); // Oculta la miniatura si da 404
-  im.addEventListener('load', ()=> {
-    fotosValidas.push(src); // Solo si existe la guardamos para el visor gigante
-    im.addEventListener('click', ()=> {
-      const currentIdx = fotosValidas.indexOf(src);
-      window.PO_Viewer.open(fotosValidas, currentIdx);
-    });
-  });
-  
   card.appendChild(im);
   carr.appendChild(card);
-});
+  fotosValidas.push(src);
+  im.addEventListener('click', ()=> {
+    const currentIdx = fotosValidas.indexOf(src);
+    window.PO_Viewer.open(fotosValidas, currentIdx);
+  });
+}
+
+if (knownCount !== undefined) {
+  // Ya sabemos cuántas fotos tiene esta obra en esta sesión, cargamos exactamente esa cantidad sin causar 404s
+  for (let i = 0; i < knownCount; i++) {
+    createPhotoCard(fotos[i]);
+  }
+} else {
+  // No sabemos cuántas fotos hay, buscamos secuencialmente para minimizar errores
+  let currentIndex = 0;
+  function tryNextPhoto() {
+    if (currentIndex >= fotos.length) { window.__PO_PHOTO_COUNTS.set(cacheKey, currentIndex); return; }
+    const tempImg = new Image();
+    tempImg.onload = () => { 
+      createPhotoCard(fotos[currentIndex]); 
+      if (carr) carr.dispatchEvent(new Event('scroll')); // Refrescar flechas del carrusel por si aparecieron más fotos
+      currentIndex++; 
+      tryNextPhoto(); 
+    };
+    // Si falla, detiene la cadena (ya no busca la 6 si falló la 5) y memoriza el límite.
+    tempImg.onerror = () => { window.__PO_PHOTO_COUNTS.set(cacheKey, currentIndex); };
+    tempImg.src = fotos[currentIndex];
+  }
+  if (fotos.length > 0) tryNextPhoto();
+}
 
 
 // flechas
