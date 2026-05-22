@@ -97,9 +97,8 @@ if (isset($_GET['success'])) {
 <body>
     <header class="app-header">
       <nav>
-        <a href="index.php">📷 Fotos</a>
         <a href="agregar_obra.php" class="active">➕ Agregar Obra</a>
-        <a href="editar_obra.php">✏️ Editar Obra</a>
+        <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
       </nav>

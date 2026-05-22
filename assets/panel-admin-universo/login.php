@@ -7,7 +7,7 @@ require_once 'config.php';
 
 // Si ya está logueado, lo mandamos al panel
 if (!empty($_SESSION['user'])) {
-    header('Location: index.php');
+    header('Location: editar_obra.php');
     exit;
 }
 
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (check_login($user, $pass)) {
         session_regenerate_id(true);
         $_SESSION['user'] = $user;
-        header('Location: index.php');
+        header('Location: editar_obra.php');
         exit;
     } else {
         $error = 'Usuario o contraseña incorrectos.';
