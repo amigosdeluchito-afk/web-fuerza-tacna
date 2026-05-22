@@ -418,6 +418,12 @@ window.initLeafletMap = function(container) {
             window.__OBRA_DATA.set(k, { o, lat, lng });
 
             marker.on('click', () => {
+                // FIX: Cerrar cualquier tooltip fantasma que pueda estar bloqueando clics.
+                // Esto soluciona el bug donde un pin no responde al segundo clic después de una búsqueda.
+                if (map) {
+                    map.closeTooltip();
+                }
+
                 const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
                 // Timestamp dinámico que se actualiza CADA VEZ que haces clic para evitar caché de imágenes borradas o nuevas
                 const dinBuster = "?v=" + new Date().getTime();
