@@ -2,29 +2,6 @@
    MAPA-OBRAS.JS - CONFIGURACIÓN GLOBAL Y NÚCLEO DEL MAPA
    ========================================================= */
 
-/**
- * Convierte la respuesta de la API de Google Viz en un array de objetos.
- * Esta es la versión actualizada que incluye el campo 'descripcion'.
- */
-window.gvizToObjects = function(gvizJson) {
-    if (!gvizJson || !gvizJson.table || !gvizJson.table.rows) return [];
-    return gvizJson.table.rows.map(r => {
-        if (!r || !r.c) return {};
-        const c = r.c;
-        return {
-            nombre:      c[0]?.v || "",
-            estado:      c[1]?.v || "",
-            monto:       c[2]?.v || "",
-            x:           c[3]?.v || "",
-            y:           c[4]?.v || "",
-            provincia:   c[5]?.v || "",
-            distrito:    c[6]?.v || "",
-            carpeta:     c[7]?.v || "",
-            descripcion: c[8]?.v || c[8]?.f || "" // Añadimos .f por si Google le cambia el formato
-        };
-    });
-}
-
 window.initLeafletMap = function(container) {
     const target = container || document;
     const mapEl = target.querySelector('#map');
@@ -243,7 +220,7 @@ window.initLeafletMap = function(container) {
 
     const pins = L.layerGroup().addTo(map);
     const relayoutDebounced = (() => { let t; return () => { clearTimeout(t); t = setTimeout(relayoutSoon, 30); }; })();
-    let PINS_LOADING = false;
+    let PINS_LOADING = new Set();
 
     function hideAllLabels(){
         pins.eachLayer(l=>{
@@ -361,8 +338,8 @@ window.initLeafletMap = function(container) {
     }
 
     async function cargarPinesDesdeSheet(segmento, h, w){
-        if (PINS_LOADING) return;
-        PINS_LOADING = true;
+        if (PINS_LOADING.has(segmento)) return;
+        PINS_LOADING.add(segmento);
 
         // Limpieza de estados de pines previos para este segmento
         const clearPinsInternal = () => {
@@ -373,20 +350,28 @@ window.initLeafletMap = function(container) {
         };
 
         const TAB = window.SHEETS[segmento];
-        if (!TAB){ PINS_LOADING = false; return; }
+        if (!TAB){ PINS_LOADING.delete(segmento); return; }
 
         try{
-            if (!window.SHEET_CACHE[segmento]){
+            // Utilizamos una promesa centralizada para evitar race conditions con mapa-filtros.js
+            window.SHEET_FETCH_PROMISES = window.SHEET_FETCH_PROMISES || {};
+            if (!window.SHEET_CACHE[segmento] && !window.SHEET_FETCH_PROMISES[segmento]){
                 // Usamos reqId y headers=1 para destruir la caché y forzar las columnas
                 const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:J&headers=1`;
-                const resp = await fetch(url);
-                const txt = await resp.text();
-                const match = txt.match(/setResponse\(([\s\S]+)\);?/);
-                if (!match) throw new Error("Error GViz");
-                window.SHEET_CACHE[segmento] = gvizToObjects(JSON.parse(match[1]));
+                window.SHEET_FETCH_PROMISES[segmento] = fetch(url).then(r => r.text()).then(txt => {
+                    const match = txt.match(/setResponse\(([\s\S]+)\);?/);
+                    if (!match) throw new Error("Error GViz");
+                    window.SHEET_CACHE[segmento] = gvizToObjects(JSON.parse(match[1]));
+                });
             }
-        }catch(err){ console.error(err); PINS_LOADING = false; return; }
-        finally { PINS_LOADING = false; }
+            if (window.SHEET_FETCH_PROMISES[segmento]) {
+                await window.SHEET_FETCH_PROMISES[segmento];
+            }
+        }catch(err){ console.error(err); PINS_LOADING.delete(segmento); return; }
+        finally { PINS_LOADING.delete(segmento); }
+
+        // ABORTAR si el usuario ya cambió a otro segmento mientras esperábamos la descarga
+        if (currentKey !== segmento) return;
 
         const obras = window.SHEET_CACHE[segmento] || [];
         const toNum = v => { if (v == null) return NaN; const n = parseFloat(String(v).trim().replace(',', '.').replace('%','')); return Number.isFinite(n) ? n : NaN; };
