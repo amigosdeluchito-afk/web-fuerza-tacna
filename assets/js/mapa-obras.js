@@ -187,20 +187,6 @@ window.initLeafletMap = function(container) {
     if (!IS_MOBILE) L.control.zoom({ position: 'bottomright' }).addTo(map);
     const RESULT_ZOOM = IS_MOBILE ? 0 : 0.1;
 
-    window._LAST_GHOST = null;
-    map.on('popupopen tooltipopen', (e) => {
-        const newGhost = e.popup || e.tooltip;
-        try{
-            if (window._LAST_GHOST && window._LAST_GHOST !== newGhost){
-                if (window._LAST_GHOST._source) {
-                    if (typeof window._LAST_GHOST._source.isPopupOpen === 'function' && window._LAST_GHOST._source.isPopupOpen()) window._LAST_GHOST._source.closePopup();
-                    if (typeof window._LAST_GHOST._source.isTooltipOpen === 'function' && window._LAST_GHOST._source.isTooltipOpen()) window._LAST_GHOST._source.closeTooltip();
-                }
-            }
-        }catch(err){}
-        window._LAST_GHOST = newGhost;
-    });
-
     let currentOverlay = null;
     let currentBounds  = null;
     let currentKey     = null;
@@ -436,6 +422,7 @@ window.initLeafletMap = function(container) {
             window.__OBRA_MARKERS.clear();
             window.__OBRA_DATA.clear();
             window.__OBRA_LABELS.clear();
+            LAST_LABEL_POS.clear(); // Limpiar memoria de etiquetas al cambiar de mapa
         };
 
         const TAB = window.SHEETS[segmento];
@@ -503,13 +490,6 @@ window.initLeafletMap = function(container) {
                     // Cierra el tooltip del marcador actual de forma nativa
                     if (typeof marker.isTooltipOpen === 'function' && marker.isTooltipOpen()) {
                         marker.closeTooltip();
-                    }
-                    // Si quedó algún fantasma abierto, lo cerramos desde su origen para evitar el bug de Leaflet
-                    if (window._LAST_GHOST) {
-                        if (window._LAST_GHOST._source && typeof window._LAST_GHOST._source.isTooltipOpen === 'function' && window._LAST_GHOST._source.isTooltipOpen()) {
-                            window._LAST_GHOST._source.closeTooltip();
-                        }
-                        window._LAST_GHOST = null;
                     }
                 } catch (e) { console.warn("Tooltip cerrado omitido:", e); }
 
