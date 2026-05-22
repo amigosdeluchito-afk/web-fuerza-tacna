@@ -171,13 +171,13 @@ window.initLeafletMap = function(container) {
     const map = L.map(mapEl, {
         crs: L.CRS.Simple,
         zoomControl: false,
-        zoomSnap: 0,           // 0 permite un zoom 100% fluido sin redondear (estilo Google Maps)
-        zoomDelta: 0.25,       // Pasos más pequeños y ágiles para la rueda del ratón
+        zoomSnap: 0.1,         // Obliga a que cada paso de rueda sea visible y matemáticamente estable
+        zoomDelta: 0.4,        // Salto de zoom ágil pero notorio (sin ser brusco)
         inertia: true,
         inertiaDeceleration: 3000,
         maxBoundsViscosity: 1.0,
-        wheelPxPerZoomLevel: 60, // Sensibilidad estándar (ni mucho ni poco)
-        wheelDebounceTime: 15    // Reacción casi instantánea al girar la rueda
+        wheelPxPerZoomLevel: 100, // Sensibilidad equilibrada para ratones y trackpads
+        wheelDebounceTime: 30     // Agrupa los eventos para no asfixiar la tarjeta gráfica
     });
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
@@ -212,15 +212,26 @@ window.initLeafletMap = function(container) {
     let LABEL_MIN_ZOOM = null;
 
     const debouncedUpdateLabels = window.debounce(updateLabelsVisibility, 100);
+    let zoomFailsafe;
 
     map.on('zoomstart', ()=>{ 
         try {
             __LAST_ZOOM = map.getZoom(); 
-            hideAllLabels(); // Ocultar por GPU para máxima fluidez al hacer zoom
+            hideAllLabels();
+            
+            // FAILSAFE ANTI-CONGELAMIENTO: Obliga a Leaflet a destrabarse si la animación CSS falla por scrollear muy rápido
+            clearTimeout(zoomFailsafe);
+            zoomFailsafe = setTimeout(() => {
+                if (map._animatingZoom) {
+                    map._animatingZoom = false;
+                    map.fire('zoomend');
+                }
+            }, 350);
         } catch(e){}
     });
     map.on('zoomend', () => {
         try {
+            clearTimeout(zoomFailsafe); // Todo salió bien, cancelamos el failsafe
             const z = map.getZoom();
             if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
             updateHud(currentKey ?? '—');
