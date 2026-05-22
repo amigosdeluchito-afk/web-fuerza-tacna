@@ -191,8 +191,10 @@ window.initLeafletMap = function(container) {
         const newGhost = e.popup || e.tooltip;
         try{
             if (window._LAST_GHOST && window._LAST_GHOST !== newGhost){
-                if (map && typeof map.closePopup === 'function') map.closePopup(window._LAST_GHOST);
-                if (map && typeof map.closeTooltip === 'function') map.closeTooltip(window._LAST_GHOST);
+                if (window._LAST_GHOST._source) {
+                    if (typeof window._LAST_GHOST._source.closePopup === 'function') window._LAST_GHOST._source.closePopup();
+                    if (typeof window._LAST_GHOST._source.closeTooltip === 'function') window._LAST_GHOST._source.closeTooltip();
+                }
             }
         }catch(err){}
         window._LAST_GHOST = newGhost;
@@ -411,11 +413,17 @@ window.initLeafletMap = function(container) {
             marker.on('click', () => {
                 // FIX SEGURO: Cerrar cualquier tooltip fantasma sin romper la ejecución
                 try {
+                    // Cierra el tooltip del marcador actual de forma nativa
+                    if (typeof marker.closeTooltip === 'function') {
+                        marker.closeTooltip();
+                    }
+                    // Si quedó algún fantasma abierto, lo cerramos desde su origen para evitar el bug de Leaflet
                     if (window._LAST_GHOST) {
-                        if (map && typeof map.closeTooltip === 'function') map.closeTooltip(window._LAST_GHOST);
+                        if (window._LAST_GHOST._source && typeof window._LAST_GHOST._source.closeTooltip === 'function') {
+                            window._LAST_GHOST._source.closeTooltip();
+                        }
                         window._LAST_GHOST = null;
                     }
-                    if (map && typeof map.closeTooltip === 'function') map.closeTooltip();
                 } catch (e) { console.warn("Tooltip cerrado omitido:", e); }
 
                 const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
