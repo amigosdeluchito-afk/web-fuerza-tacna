@@ -2,6 +2,29 @@
    MAPA-OBRAS.JS - CONFIGURACIÓN GLOBAL Y NÚCLEO DEL MAPA
    ========================================================= */
 
+/**
+ * Convierte la respuesta de la API de Google Viz en un array de objetos.
+ * Esta es la versión actualizada que incluye el campo 'descripcion'.
+ */
+window.gvizToObjects = function(gvizJson) {
+    if (!gvizJson || !gvizJson.table || !gvizJson.table.rows) return [];
+    return gvizJson.table.rows.map(r => {
+        if (!r || !r.c) return {};
+        const c = r.c;
+        return {
+            nombre:      c[0]?.v || "",
+            estado:      c[1]?.v || "",
+            monto:       c[2]?.v || "",
+            x:           c[3]?.v || "",
+            y:           c[4]?.v || "",
+            provincia:   c[5]?.v || "",
+            distrito:    c[6]?.v || "",
+            carpeta:     c[7]?.v || "",
+            descripcion: c[8]?.v || ""  // <-- ¡LA PIEZA CLAVE QUE FALTABA!
+        };
+    });
+}
+
 window.initLeafletMap = function(container) {
     const target = container || document;
     const mapEl = target.querySelector('#map');
