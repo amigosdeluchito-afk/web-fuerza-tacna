@@ -84,8 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .card { width: 100%; max-width: 700px; background: #020617; border-radius: 18px; padding: 24px 28px 28px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.7), 0 0 0 1px rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.15); }
         h1 { margin-top: 0; font-size: 22px; color: #f9fafb; margin-bottom: 20px; }
         label { font-size: 13px; color: #e5e7eb; display: block; margin-top: 15px; margin-bottom: 4px; }
-        input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #1f2937; background: #020617; color: #e5e7eb; font-size: 14px; outline: none; box-sizing: border-box; }
-        input:focus, select:focus { border-color: #2563eb; }
+        input, select, textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #1f2937; background: #020617; color: #e5e7eb; font-size: 14px; outline: none; box-sizing: border-box; }
+        input:focus, select:focus, textarea:focus { border-color: #2563eb; }
         .btn-submit { margin-top: 25px; width: 100%; padding: 12px; background: #2563eb; color: #f9fafb; border: none; font-weight: 600; font-size: 14px; border-radius: 999px; cursor: pointer; transition: background 0.3s; }
         .btn-submit:hover { background: #1d4ed8; }
         .msg-success { background: rgba(16, 185, 129, 0.1); color: #34d399; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; border: 1px solid #059669; }
@@ -170,7 +170,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="segmento" id="formSegmento">
                 <input type="hidden" name="fila" id="formFila">
                 <input type="hidden" name="carpeta" id="formCarpeta">
-                <input type="hidden" name="descripcion" id="formDesc">
 
                 <label>Nombre de la Obra:</label>
                 <input type="text" name="nombre" id="inputNombre" required>
@@ -204,6 +203,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div><label>Coordenada Y (Latitud):</label><input type="text" name="y" id="inputY"></div>
                 </div>
                 
+                <label>Descripción de la Obra:</label>
+                <textarea name="descripcion" id="inputDesc" rows="4" style="resize: vertical;"></textarea>
+
                 <button type="button" id="btnAbrirMapa" class="btn-mapa">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
                     Abrir Mapa para Reubicar el Pin
@@ -365,9 +367,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('formSegmento').value = segmento;
             document.getElementById('formFila').value = parseInt(idx) + 2; 
             document.getElementById('formCarpeta').value = item.carpeta;
-            document.getElementById('formDesc').value = item.desc;
 
             document.getElementById('inputNombre').value = item.nombre;
+            document.getElementById('inputDesc').value = item.desc || '';
             
             const estadoSel = document.getElementById('inputEstado');
             let found = false;

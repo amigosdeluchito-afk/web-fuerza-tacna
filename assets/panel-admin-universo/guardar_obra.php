@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ¡MAGIA DE AUTOMATIZACIÓN! Crea el nombre de la carpeta de forma limpia.
         // Ej: "Creación de Colegio" -> "creacion-de-colegio"
         $carpeta = slugify($nombre); 
-        $descripcion = '';
+        $descripcion = trim($_POST['descripcion'] ?? '');
 
         $values = [
             [$nombre, $estado, $monto, $x, $y, $provincia, $distrito, $carpeta, $descripcion]
