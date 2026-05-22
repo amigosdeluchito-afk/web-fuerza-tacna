@@ -171,13 +171,14 @@ window.initLeafletMap = function(container) {
     const map = L.map(mapEl, {
         crs: L.CRS.Simple,
         zoomControl: false,
-        zoomSnap: 0.1,         // Obliga a que cada paso de rueda sea visible y matemáticamente estable
-        zoomDelta: 0.4,        // Salto de zoom ágil pero notorio (sin ser brusco)
+        zoomSnap: 0.1,
+        zoomDelta: 0.5,
         inertia: true,
         inertiaDeceleration: 3000,
         maxBoundsViscosity: 1.0,
-        wheelPxPerZoomLevel: 100, // Sensibilidad equilibrada para ratones y trackpads
-        wheelDebounceTime: 30     // Agrupa los eventos para no asfixiar la tarjeta gráfica
+        // VELOCIDAD EXTREMA: Alta sensibilidad y agrupación óptima
+        wheelPxPerZoomLevel: 35,  // Avanzas muchísimo zoom con apenas tocar la rueda
+        wheelDebounceTime: 40     // Pausa perfecta para que la tarjeta gráfica (CSS) no se sature
     });
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
