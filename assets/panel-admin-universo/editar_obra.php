@@ -265,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
-        const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+        const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
         const SEGMENTOS = [
             { key: "EDUCACION", nombre: "Educación" },
             { key: "VIAS",      nombre: "Vías y Caminos" },
@@ -294,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             for (const seg of SEGMENTOS) {
                 try {
-                    const url = `${SHEET_BASE_URL}&sheet=${encodeURIComponent(seg.key)}&range=A:J&t=${new Date().getTime()}`;
+                    const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(seg.key)}&range=A:J&headers=1`;
                     const resp = await fetch(url);
                     const txt = await resp.text();
                     const json = parseGviz(txt);
@@ -311,7 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             provincia: r.c[5]?.v || "",
                             distrito:  r.c[6]?.v || "",
                             carpeta:   r.c[7]?.v || "",
-                            desc:      r.c[8]?.v || ""
+                            desc:      r.c[8]?.v || r.c[8]?.f || ""
                         };
                     });
                 } catch (e) { console.error("Error al cargar " + seg.key, e); }

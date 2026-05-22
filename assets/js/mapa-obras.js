@@ -20,7 +20,7 @@ window.gvizToObjects = function(gvizJson) {
             provincia:   c[5]?.v || "",
             distrito:    c[6]?.v || "",
             carpeta:     c[7]?.v || "",
-            descripcion: c[8]?.v || ""  // <-- ¡LA PIEZA CLAVE QUE FALTABA!
+            descripcion: c[8]?.v || c[8]?.f || "" // Añadimos .f por si Google le cambia el formato
         };
     });
 }
@@ -377,8 +377,8 @@ window.initLeafletMap = function(container) {
 
         try{
             if (!window.SHEET_CACHE[segmento]){
-                // Forzamos leer hasta la columna J y rompemos la caché en el mapa público
-                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json&range=A:J&sheet=${encodeURIComponent(TAB)}&t=${new Date().getTime()}`;
+                // Usamos reqId y headers=1 para destruir la caché y forzar las columnas
+                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:J&headers=1`;
                 const resp = await fetch(url);
                 const txt = await resp.text();
                 const match = txt.match(/setResponse\(([\s\S]+)\);?/);

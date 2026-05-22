@@ -202,7 +202,7 @@ if (isset($_GET['success'])) {
 
     <script>
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
-        const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+        const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
 
         function parseGviz(text) {
             const m = text.match(/setResponse\(([\s\S]+)\);?/);
@@ -233,7 +233,7 @@ if (isset($_GET['success'])) {
             const segmento = document.getElementById('selectSegmento').value;
             
             try {
-                const url = `${SHEET_BASE_URL}&sheet=${encodeURIComponent(segmento)}&range=A:J&t=${new Date().getTime()}`;
+                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(segmento)}&range=A:J&headers=1`;
                 const resp = await fetch(url);
                 const txt = await resp.text();
                 const json = parseGviz(txt);
