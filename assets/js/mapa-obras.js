@@ -171,13 +171,13 @@ window.initLeafletMap = function(container) {
     const map = L.map(mapEl, {
         crs: L.CRS.Simple,
         zoomControl: false,
-        zoomSnap: 0.001,
-        zoomDelta: 0.12,
+        zoomSnap: 0.1,
+        zoomDelta: 0.5,
         inertia: true,
         inertiaDeceleration: 3000,
         maxBoundsViscosity: 1.0,
-        wheelPxPerZoomLevel: 160,
-        wheelDebounceTime: 50
+        wheelPxPerZoomLevel: 100,
+        wheelDebounceTime: 40
     });
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
