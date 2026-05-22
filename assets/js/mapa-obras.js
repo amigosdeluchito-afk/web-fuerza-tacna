@@ -191,8 +191,8 @@ window.initLeafletMap = function(container) {
         const newGhost = e.popup || e.tooltip;
         try{
             if (window._LAST_GHOST && window._LAST_GHOST !== newGhost){
-                if (window._LAST_GHOST.remove) window._LAST_GHOST.remove();
-                else { map.closePopup(window._LAST_GHOST); map.closeTooltip(window._LAST_GHOST); }
+                if (map && typeof map.closePopup === 'function') map.closePopup(window._LAST_GHOST);
+                if (map && typeof map.closeTooltip === 'function') map.closeTooltip(window._LAST_GHOST);
             }
         }catch(err){}
         window._LAST_GHOST = newGhost;
@@ -412,12 +412,10 @@ window.initLeafletMap = function(container) {
                 // FIX SEGURO: Cerrar cualquier tooltip fantasma sin romper la ejecución
                 try {
                     if (window._LAST_GHOST) {
-                        if (window._LAST_GHOST.remove) window._LAST_GHOST.remove();
-                        else if (map && typeof map.closeTooltip === 'function') map.closeTooltip(window._LAST_GHOST);
+                        if (map && typeof map.closeTooltip === 'function') map.closeTooltip(window._LAST_GHOST);
                         window._LAST_GHOST = null;
-                    } else if (map && typeof map.closeTooltip === 'function') {
-                        map.closeTooltip();
                     }
+                    if (map && typeof map.closeTooltip === 'function') map.closeTooltip();
                 } catch (e) { console.warn("Tooltip cerrado omitido:", e); }
 
                 const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
