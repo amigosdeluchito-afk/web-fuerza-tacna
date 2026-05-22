@@ -233,7 +233,8 @@ if (isset($_GET['success'])) {
             const segmento = document.getElementById('selectSegmento').value;
             
             try {
-                const resp = await fetch(SHEET_BASE_URL + encodeURIComponent(segmento));
+                // Le agregamos la hora exacta para romper la caché de Google
+                const resp = await fetch(SHEET_BASE_URL + encodeURIComponent(segmento) + "&t=" + new Date().getTime());
                 const txt = await resp.text();
                 const json = parseGviz(txt);
                 

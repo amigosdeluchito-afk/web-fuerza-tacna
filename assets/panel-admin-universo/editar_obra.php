@@ -294,7 +294,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             for (const seg of SEGMENTOS) {
                 try {
-                    const resp = await fetch(SHEET_BASE_URL + encodeURIComponent(seg.key));
+                    // Le agregamos la hora exacta para romper la caché de Google
+                    const resp = await fetch(SHEET_BASE_URL + encodeURIComponent(seg.key) + "&t=" + new Date().getTime());
                     const txt = await resp.text();
                     const json = parseGviz(txt);
                     
