@@ -377,8 +377,13 @@ window.initLeafletMap = function(container) {
 
         try{
             if (!window.SHEET_CACHE[segmento]){
-                const json = await fetchSheetGVizJSON(window.SHEET_ID, { sheetName: TAB });
-                window.SHEET_CACHE[segmento] = gvizToObjects(json);
+                // Forzamos leer hasta la columna J y rompemos la caché en el mapa público
+                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json&range=A:J&sheet=${encodeURIComponent(TAB)}&t=${new Date().getTime()}`;
+                const resp = await fetch(url);
+                const txt = await resp.text();
+                const match = txt.match(/setResponse\(([\s\S]+)\);?/);
+                if (!match) throw new Error("Error GViz");
+                window.SHEET_CACHE[segmento] = gvizToObjects(JSON.parse(match[1]));
             }
         }catch(err){ console.error(err); PINS_LOADING = false; return; }
         finally { PINS_LOADING = false; }

@@ -202,7 +202,7 @@ if (isset($_GET['success'])) {
 
     <script>
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
-        const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=`;
+        const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&range=A:J&sheet=`;
 
         function parseGviz(text) {
             const m = text.match(/setResponse\(([\s\S]+)\);?/);
