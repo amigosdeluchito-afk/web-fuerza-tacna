@@ -367,11 +367,17 @@ window.initLeafletMap = function(container) {
             if (window.SHEET_FETCH_PROMISES[segmento]) {
                 await window.SHEET_FETCH_PROMISES[segmento];
             }
-        }catch(err){ console.error(err); PINS_LOADING.delete(segmento); return; }
-        finally { PINS_LOADING.delete(segmento); }
+        }catch(err){
+            console.error("Error al cargar datos de la hoja:", err);
+            PINS_LOADING.delete(segmento);
+            return;
+        }
 
         // ABORTAR si el usuario ya cambió a otro segmento mientras esperábamos la descarga
-        if (currentKey !== segmento) return;
+        if (currentKey !== segmento) {
+            PINS_LOADING.delete(segmento);
+            return;
+        }
 
         const obras = window.SHEET_CACHE[segmento] || [];
         const toNum = v => { if (v == null) return NaN; const n = parseFloat(String(v).trim().replace(',', '.').replace('%','')); return Number.isFinite(n) ? n : NaN; };
@@ -464,7 +470,7 @@ window.initLeafletMap = function(container) {
         __LABELS_UNLOCKED = false;
         LABEL_MIN_ZOOM = (window.BASE_ZOOM ?? map.getZoom()) + 0.20;
         hideAllLabels(); updateLabelsVisibility();
-        PINS_LOADING = false;
+        PINS_LOADING.delete(segmento);
     }
 
     window.swapSegment = function(key, revealAfter = false){
