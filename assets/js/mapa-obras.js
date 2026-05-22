@@ -211,14 +211,19 @@ window.initLeafletMap = function(container) {
     let __LABELS_UNLOCKED = false;
     let LABEL_MIN_ZOOM = null;
 
-    map.on('zoomstart', ()=>{ __LAST_ZOOM = map.getZoom(); });
+    const debouncedUpdateLabels = window.debounce(updateLabelsVisibility, 100);
+
+    map.on('zoomstart', ()=>{ 
+        __LAST_ZOOM = map.getZoom(); 
+        hideAllLabels(); // Ocultar para máxima fluidez de la tarjeta gráfica al hacer zoom
+    });
     map.on('zoomend', () => {
         const z = map.getZoom();
         if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
         updateHud(currentKey ?? '—');
-        updateLabelsVisibility();
+        debouncedUpdateLabels();
     });
-    map.on('moveend', updateLabelsVisibility);
+    map.on('moveend', debouncedUpdateLabels);
 
     const pins = L.layerGroup().addTo(map);
     const relayoutDebounced = (() => { let t; return () => { clearTimeout(t); t = setTimeout(relayoutSoon, 30); }; })();
@@ -278,28 +283,49 @@ window.initLeafletMap = function(container) {
         const view = map.getBounds();
         
         const pinRects = [];
+        const pinTotalRadius = Math.ceil(PIN_RADIUS + PAD_PIN);
+
+        // OPTIMIZACIÓN 1: Extraer posiciones de los pines usando matemática pura (0 lecturas del DOM)
         pins.eachLayer(l=>{
             if (!(l instanceof L.Marker)) return;
             if (l.options.icon?.options.className === 'obra-label') return;
-            const el = l.getElement(); if (!el) return;
             const ll = l.getLatLng();  if (!view.contains(ll)) return;
-            const r = el.getBoundingClientRect();
-            if (r.right < 0 || r.left > window.innerWidth || r.bottom < 0 || r.top > window.innerHeight) return;
-            pinRects.push({ left: r.left - PAD_PIN, top: r.top - PAD_PIN, right: r.right + PAD_PIN, bottom: r.bottom + PAD_PIN });
+            const p = map.latLngToContainerPoint(ll);
+            pinRects.push({ left: p.x - pinTotalRadius, top: p.y - pinTotalRadius, right: p.x + pinTotalRadius, bottom: p.y + pinTotalRadius });
         });
 
         const cand = [];
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+        const cx = winW / 2;
+        const cy = winH / 2;
+
+        // OPTIMIZACIÓN 2: Recolectar datos y medir etiquetas 1 sola vez en su vida
         pins.eachLayer(l=>{
             if (!(l instanceof L.Marker)) return;
             if (l.options.icon?.options.className !== 'obra-label') return;
             const ll = l.getLatLng(); if (!view.contains(ll)) return;
             const inner = l.getElement()?.querySelector('.obra-label__inner'); if (!inner) return;
+            
+            let w = inner.getAttribute('data-w');
+            let h = inner.getAttribute('data-h');
+            if (!w || !h) {
+                const wasHidden = inner.classList.contains('is-hidden');
+                if (wasHidden) inner.classList.remove('is-hidden');
+                const rect = inner.getBoundingClientRect();
+                w = rect.width || 120; // Fallback
+                h = rect.height || 30; // Fallback
+                inner.setAttribute('data-w', w);
+                inner.setAttribute('data-h', h);
+                if (wasHidden) inner.classList.add('is-hidden');
+            } else {
+                w = parseFloat(w); h = parseFloat(h);
+            }
+
             inner.classList.add('is-hidden');
-            inner.style.removeProperty('--lx'); inner.style.removeProperty('--ly'); inner.style.removeProperty('--ax');
             const p  = map.latLngToContainerPoint(ll);
-            const cx = window.innerWidth/2, cy = window.innerHeight/2;
             const key = l._leaflet_id;
-            cand.push({ key, el: inner, marker: l, score: l._obra ? obraScore(l._obra) : 0, distCentro: Math.hypot(p.x - cx, p.y - cy), wasPlaced: !!LAST_LABEL_POS.get(key) });
+            cand.push({ key, inner, marker: l, p, w, h, score: l._obra ? obraScore(l._obra) : 0, distCentro: Math.hypot(p.x - cx, p.y - cy), wasPlaced: !!LAST_LABEL_POS.get(key) });
         });
 
         cand.sort((a,b)=> (b.wasPlaced - a.wasPlaced) || (b.score - a.score) || (a.distCentro - b.distCentro));
@@ -308,33 +334,75 @@ window.initLeafletMap = function(container) {
         const rectsLabels = [];
         let placed = 0;
 
+        // OPTIMIZACIÓN 3: Calcular colisiones en memoria virtual (0 llamadas al DOM interlazadas)
         for (const it of cand){
             if (placed >= N) break;
-            const el = it.el, key = it.key, remembered = LAST_LABEL_POS.get(key);
+            const { inner, key, p, w, h } = it;
+            const remembered = LAST_LABEL_POS.get(key);
             const tries = remembered ? [remembered, ...baseTry.filter(t => !(t.x===remembered.x && t.y===remembered.y && t.ax===remembered.ax))] : baseTry;
-            let ok = false;
+            
+            let finalT = null;
+
             for (const t of tries){
-                el.classList.remove('is-hidden');
-                el.style.setProperty('--lx', t.x+'px'); el.style.setProperty('--ly', t.y+'px'); el.style.setProperty('--ax', t.ax);
-                const r = el.getBoundingClientRect();
-                if (r.right < 0 || r.left > window.innerWidth || r.bottom < 0 || r.top > window.innerHeight){ el.classList.add('is-hidden'); continue; }
+                let l, r_edge, top, bot;
+                if (t.ax === 'left') { l = p.x + t.x; r_edge = l + w; } 
+                else if (t.ax === 'right') { r_edge = p.x + t.x; l = r_edge - w; } 
+                else { l = p.x + t.x - w/2; r_edge = p.x + t.x + w/2; }
+                
+                top = p.y + t.y;
+                bot = top + h;
+
+                if (r_edge < 0 || l > winW || bot < 0 || top > winH) continue;
+
                 let choca = false;
-                for (const rr of rectsLabels){ if (!(r.right < rr.left-PAD_LABEL || r.left > rr.right+PAD_LABEL || r.bottom < rr.top-PAD_LABEL || r.top > rr.bottom+PAD_LABEL)){ choca = true; break; } }
-                if (choca){ el.classList.add('is-hidden'); continue; }
-                for (const rp of pinRects){ if (!(r.right < rp.left || r.left > rp.right || r.bottom < rp.top || r.top > rp.bottom)){ choca = true; break; } }
-                if (choca){ el.classList.add('is-hidden'); continue; }
-                rectsLabels.push(r); LAST_LABEL_POS.set(key, { x:t.x, y:t.y, ax:t.ax }); ok = true; placed++; break;
+                for (const rr of rectsLabels){
+                    if (!(r_edge < rr.left-PAD_LABEL || l > rr.right+PAD_LABEL || bot < rr.top-PAD_LABEL || top > rr.bottom+PAD_LABEL)){ choca = true; break; }
+                }
+                if (choca) continue;
+
+                for (const rp of pinRects){
+                    if (!(r_edge < rp.left || l > rp.right || bot < rp.top || top > rp.bottom)){ choca = true; break; }
+                }
+                if (choca) continue;
+
+                rectsLabels.push({ left: l, right: r_edge, top: top, bottom: bot });
+                LAST_LABEL_POS.set(key, { x:t.x, y:t.y, ax:t.ax }); 
+                finalT = t;
+                placed++; 
+                break;
             }
-            if (!ok){
+
+            if (!finalT){
                 const jx = (Math.random() < 0.5 ? -1 : 1) * 8, jy = (Math.random() < 0.5 ? -1 : 1) * 6;
-                el.classList.remove('is-hidden');
-                el.style.setProperty('--lx', (offNear + jx) + 'px'); el.style.setProperty('--ly', (BASE_Y - yBias + jy) + 'px'); el.style.setProperty('--ax', 'left');
-                const rj = el.getBoundingClientRect();
+                const tx = offNear + jx, ty = BASE_Y - yBias + jy, ax = 'left';
+                let l = p.x + tx, r_edge = l + w, top = p.y + ty, bot = top + h;
+
                 let chocaJ = false;
-                for (const rr of rectsLabels){ if (!(rj.right < rr.left-PAD_LABEL || rj.left > rr.right+PAD_LABEL || rj.bottom < rr.top-PAD_LABEL || rj.top > rr.bottom+PAD_LABEL)){ chocaJ = true; break; } }
-                if (!chocaJ){ for (const rp of pinRects){ if (!(rj.right < rp.left || rj.left > rp.right || rj.bottom < rp.top || rj.top > rp.bottom)){ chocaJ = true; break; } } }
-                if (!chocaJ){ rectsLabels.push(rj); LAST_LABEL_POS.set(key, { x: offNear + jx, y: BASE_Y - yBias + jy, ax: 'left' }); placed++; }
-                else { el.classList.add('is-hidden'); LAST_LABEL_POS.delete(key); }
+                for (const rr of rectsLabels){
+                    if (!(r_edge < rr.left-PAD_LABEL || l > rr.right+PAD_LABEL || bot < rr.top-PAD_LABEL || top > rr.bottom+PAD_LABEL)){ chocaJ = true; break; }
+                }
+                if (!chocaJ){
+                    for (const rp of pinRects){
+                        if (!(r_edge < rp.left || l > rp.right || bot < rp.top || top > rp.bottom)){ chocaJ = true; break; }
+                    }
+                }
+
+                if (!chocaJ){ 
+                    rectsLabels.push({ left: l, right: r_edge, top: top, bottom: bot });
+                    LAST_LABEL_POS.set(key, { x: tx, y: ty, ax: ax }); 
+                    finalT = { x: tx, y: ty, ax: ax };
+                    placed++; 
+                } else {
+                    LAST_LABEL_POS.delete(key);
+                }
+            }
+
+            // Escritura Batch al final
+            if (finalT) {
+                inner.style.setProperty('--lx', finalT.x+'px'); 
+                inner.style.setProperty('--ly', finalT.y+'px'); 
+                inner.style.setProperty('--ax', finalT.ax);
+                inner.classList.remove('is-hidden');
             }
         }
     }
