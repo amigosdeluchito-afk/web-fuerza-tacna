@@ -192,8 +192,8 @@ window.initLeafletMap = function(container) {
         try{
             if (window._LAST_GHOST && window._LAST_GHOST !== newGhost){
                 if (window._LAST_GHOST._source) {
-                    if (typeof window._LAST_GHOST._source.closePopup === 'function') window._LAST_GHOST._source.closePopup();
-                    if (typeof window._LAST_GHOST._source.closeTooltip === 'function') window._LAST_GHOST._source.closeTooltip();
+                    if (typeof window._LAST_GHOST._source.isPopupOpen === 'function' && window._LAST_GHOST._source.isPopupOpen()) window._LAST_GHOST._source.closePopup();
+                    if (typeof window._LAST_GHOST._source.isTooltipOpen === 'function' && window._LAST_GHOST._source.isTooltipOpen()) window._LAST_GHOST._source.closeTooltip();
                 }
             }
         }catch(err){}
@@ -414,12 +414,12 @@ window.initLeafletMap = function(container) {
                 // FIX SEGURO: Cerrar cualquier tooltip fantasma sin romper la ejecución
                 try {
                     // Cierra el tooltip del marcador actual de forma nativa
-                    if (typeof marker.closeTooltip === 'function') {
+                    if (typeof marker.isTooltipOpen === 'function' && marker.isTooltipOpen()) {
                         marker.closeTooltip();
                     }
                     // Si quedó algún fantasma abierto, lo cerramos desde su origen para evitar el bug de Leaflet
                     if (window._LAST_GHOST) {
-                        if (window._LAST_GHOST._source && typeof window._LAST_GHOST._source.closeTooltip === 'function') {
+                        if (window._LAST_GHOST._source && typeof window._LAST_GHOST._source.isTooltipOpen === 'function' && window._LAST_GHOST._source.isTooltipOpen()) {
                             window._LAST_GHOST._source.closeTooltip();
                         }
                         window._LAST_GHOST = null;
@@ -634,7 +634,12 @@ window.initLeafletMap = function(container) {
                 target.querySelectorAll('.chips, .fp, #resultsDock').forEach(el => el.style.visibility = 'visible');
                 if (elNext) void elNext.offsetWidth;
                 next.setOpacity(1); if (prev) prev.setOpacity(0);
-                if (elNext) elNext.addEventListener('transitionend', ()=>{ if (prev) map.removeLayer(prev); }, { once:true });
+                if (elNext) {
+                    let transitionDone = false;
+                    const cleanupPrev = () => { if (!transitionDone) { transitionDone = true; if (prev) map.removeLayer(prev); } };
+                    elNext.addEventListener('transitionend', cleanupPrev, { once:true });
+                    setTimeout(cleanupPrev, 1200); // Failsafe por si el navegador omite el evento
+                }
                 else if (prev) map.removeLayer(prev);
                 
                 currentOverlay = next; currentBounds = bounds;

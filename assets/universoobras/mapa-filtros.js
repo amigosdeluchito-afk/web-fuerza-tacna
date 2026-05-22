@@ -59,8 +59,9 @@ function syncResultsWithFilters() {
             if (hasItems) results.classList.remove('is-hidden');
         }
     };
-    const observer = new MutationObserver(apply);
-    observer.observe(dock, { attributes: true, attributeFilter: ['class'] });
+    if (window._dockObserver) window._dockObserver.disconnect();
+    window._dockObserver = new MutationObserver(apply);
+    window._dockObserver.observe(dock, { attributes: true, attributeFilter: ['class'] });
     apply();
 }
 
@@ -447,14 +448,34 @@ window.buildFilterOptions = async function() {
 
 // --- 7. MANEJO DE EVENTOS ---
 window.attachFilterEvents = function() {
-    document.getElementById('fApply')?.addEventListener('click', () => {
+    // Limpieza agresiva de listeners clonando los nodos de acción
+    const btnApply = document.getElementById('fApply');
+    if (btnApply) {
+        const newApply = btnApply.cloneNode(true);
+        btnApply.parentNode.replaceChild(newApply, btnApply);
+        newApply.addEventListener('click', () => {
         applyFilters();
         resetDirty();
     });
+    }
 
-    document.getElementById('fClear')?.addEventListener('click', clearFilters);
+    const btnClear = document.getElementById('fClear');
+    if (btnClear) {
+        const newClear = btnClear.cloneNode(true);
+        btnClear.parentNode.replaceChild(newClear, btnClear);
+        newClear.addEventListener('click', clearFilters);
+    }
 
-    document.getElementById('fClearHistory')?.addEventListener('click', clearHistory);
+    const btnHistory = document.getElementById('fClearHistory');
+    if (btnHistory) {
+        const newHistory = btnHistory.cloneNode(true);
+        btnHistory.parentNode.replaceChild(newHistory, btnHistory);
+        newHistory.addEventListener('click', clearHistory);
+    }
+
+    // Prevenir duplicación en los divs expandibles
+    if (window._filterFieldsAttached) return;
+    window._filterFieldsAttached = true;
 
     // Adjuntar escuchadores de clic a toda el área de cada `.f-field`
     const filterFields = document.querySelectorAll('#fpPanel .f-field'); // Seleccionamos todos los campos de filtro

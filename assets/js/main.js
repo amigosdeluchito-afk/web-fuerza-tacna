@@ -651,6 +651,9 @@ $(function () {
                 async leave(data) {
                     const done = this.async();
 
+                    if (typeof window.obrasCleanup === 'function') {
+                        window.obrasCleanup();
+                    }
                     pageTransition();
                     await delay(1000);
                     done();
