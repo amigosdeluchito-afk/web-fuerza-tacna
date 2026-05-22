@@ -176,9 +176,9 @@ window.initLeafletMap = function(container) {
         inertia: true,
         inertiaDeceleration: 3000,
         maxBoundsViscosity: 1.0,
-        // VELOCIDAD EXTREMA: Alta sensibilidad y agrupación óptima
-        wheelPxPerZoomLevel: 35,  // Avanzas muchísimo zoom con apenas tocar la rueda
-        wheelDebounceTime: 40     // Pausa perfecta para que la tarjeta gráfica (CSS) no se sature
+        // Sensibilidad balanceada para evitar que el motor de Leaflet se ahogue con scrolls rápidos
+        wheelPxPerZoomLevel: 60,
+        wheelDebounceTime: 40
     });
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
@@ -198,34 +198,28 @@ window.initLeafletMap = function(container) {
     let __LABELS_UNLOCKED = false;
     let LABEL_MIN_ZOOM = null;
 
-    const debouncedUpdateLabels = window.debounce(updateLabelsVisibility, 100);
-    let zoomFailsafe;
+    let updateLabelsTimer;
+    const requestLabelsUpdate = () => {
+        clearTimeout(updateLabelsTimer);
+        updateLabelsTimer = setTimeout(updateLabelsVisibility, 100);
+    };
 
     map.on('zoomstart', ()=>{ 
         try {
             __LAST_ZOOM = map.getZoom(); 
+            clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
             hideAllLabels();
-            
-            // FAILSAFE ANTI-CONGELAMIENTO: Obliga a Leaflet a destrabarse si la animación CSS falla por scrollear muy rápido
-            clearTimeout(zoomFailsafe);
-            zoomFailsafe = setTimeout(() => {
-                if (map._animatingZoom) {
-                    map._animatingZoom = false;
-                    map.fire('zoomend');
-                }
-            }, 350);
         } catch(e){}
     });
     map.on('zoomend', () => {
         try {
-            clearTimeout(zoomFailsafe); // Todo salió bien, cancelamos el failsafe
             const z = map.getZoom();
             if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
             updateHud(currentKey ?? '—');
-            debouncedUpdateLabels();
+            requestLabelsUpdate();
         } catch(e){}
     });
-    map.on('moveend', debouncedUpdateLabels);
+    map.on('moveend', requestLabelsUpdate);
 
     const pins = L.layerGroup().addTo(map);
     const relayoutDebounced = (() => { let t; return () => { clearTimeout(t); t = setTimeout(relayoutSoon, 30); }; })();
@@ -485,14 +479,6 @@ window.initLeafletMap = function(container) {
             window.__OBRA_DATA.set(k, { o, lat, lng });
 
             marker.on('click', () => {
-                // FIX SEGURO: Cerrar cualquier tooltip fantasma sin romper la ejecución
-                try {
-                    // Cierra el tooltip del marcador actual de forma nativa
-                    if (typeof marker.isTooltipOpen === 'function' && marker.isTooltipOpen()) {
-                        marker.closeTooltip();
-                    }
-                } catch (e) { console.warn("Tooltip cerrado omitido:", e); }
-
                 const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
                 // Timestamp dinámico que se actualiza CADA VEZ que haces clic para evitar caché de imágenes borradas o nuevas
                 const dinBuster = "?v=" + new Date().getTime();
@@ -528,11 +514,6 @@ window.initLeafletMap = function(container) {
                 const ghostHTML = `<div class="ghost-card">${fragHTML}<div class="ghost-card__body"><div class="ghost-card__kicker">Obra <span class="pill ${pill.cls}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg> ${pill.txt}</span></div><div class="ghost-card__title">${nombre}</div><div class="ghost-card__meta">${monto}</div><div class="ghost-card__divider"></div><div class="meta-row">${(o.distrito||'-')} · ${(o.provincia||'-')}</div></div></div>`;
                 marker.bindTooltip(ghostHTML, { direction: 'top', sticky: false, className: 'ghost-tip ghost-card-tip', offset: L.point(0, -12), opacity: 1 });
                 marker.on('tooltipopen', (e) => {
-                    const pt = map.latLngToContainerPoint(marker.getLatLng());
-                    e.tooltip.options.direction = pt.y < 160 ? 'bottom' : 'top';
-                    e.tooltip.options.offset = pt.y < 160 ? L.point(0, 12) : L.point(0, -12);
-                    e.tooltip.update();
-                    
                     const tooltipEl = e.tooltip.getElement();
                     if (tooltipEl) {
                         const imgEl = tooltipEl.querySelector('.ghost-card__img img, img');
