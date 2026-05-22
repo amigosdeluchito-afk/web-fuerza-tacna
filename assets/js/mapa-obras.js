@@ -409,11 +409,16 @@ window.initLeafletMap = function(container) {
             window.__OBRA_DATA.set(k, { o, lat, lng });
 
             marker.on('click', () => {
-                // FIX: Cerrar cualquier tooltip fantasma que pueda estar bloqueando clics.
-                // Esto soluciona el bug donde un pin no responde al segundo clic después de una búsqueda.
-                if (map) {
-                    map.closeTooltip();
-                }
+                // FIX SEGURO: Cerrar cualquier tooltip fantasma sin romper la ejecución
+                try {
+                    if (window._LAST_GHOST) {
+                        if (window._LAST_GHOST.remove) window._LAST_GHOST.remove();
+                        else if (map && typeof map.closeTooltip === 'function') map.closeTooltip(window._LAST_GHOST);
+                        window._LAST_GHOST = null;
+                    } else if (map && typeof map.closeTooltip === 'function') {
+                        map.closeTooltip();
+                    }
+                } catch (e) { console.warn("Tooltip cerrado omitido:", e); }
 
                 const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
                 // Timestamp dinámico que se actualiza CADA VEZ que haces clic para evitar caché de imágenes borradas o nuevas

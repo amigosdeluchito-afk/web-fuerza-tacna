@@ -17,6 +17,21 @@
   // Acceso seguro a utilidades
   const getUtils = () => window.PO_Utils || { safe: s => s, formatMoney: s => s, estadoToPill: () => ({cls:'', txt:''}) };
 
+  // Función blindada para animar elementos. Si GSAP falla, fuerza la visibilidad a 1.
+  function animatePanelIn() {
+    try {
+      const items = Array.from(els.sheet.querySelectorAll('.stagger-el'));
+      if (window.gsap && typeof gsap.killTweensOf === 'function') {
+        gsap.killTweensOf(items);
+        gsap.fromTo(items, { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 });
+      } else {
+        items.forEach(e => { e.style.opacity = '1'; e.style.transform = 'none'; });
+      }
+    } catch(e) {
+      els.sheet.querySelectorAll('.stagger-el').forEach(e => { e.style.opacity = '1'; e.style.transform = 'none'; });
+    }
+  }
+
   function ensureMounted(){
     console.log("PanelObra: Verificando montaje...");
     const { safe } = getUtils();
@@ -300,13 +315,7 @@ function reEnterSheet() {
     els.sheet.classList.remove('no-trans');
     requestAnimationFrame(() => {
       els.sheet.classList.add('is-open');
-      if (window.gsap) {
-          gsap.killTweensOf(els.sheet.querySelectorAll('.stagger-el'));
-        gsap.fromTo(els.sheet.querySelectorAll('.stagger-el'), 
-          { opacity: 0, y: 25 }, 
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
-        );
-      }
+        animatePanelIn();
     });
   });
 }
@@ -353,13 +362,7 @@ if (isMobile){
   els.sheet.style.transform = '';              // ← quita el inline ANTES de .is-open
   requestAnimationFrame(()=> {
     els.sheet.classList.add('is-open');
-    if (window.gsap) {
-      gsap.killTweensOf(els.sheet.querySelectorAll('.stagger-el'));
-      gsap.fromTo(els.sheet.querySelectorAll('.stagger-el'), 
-        { opacity: 0, y: 25 }, 
-        { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
-      );
-    }
+    animatePanelIn();
   });
   document.body.style.overflow = 'hidden';
   } else {
@@ -374,13 +377,7 @@ if (isMobile){
       void els.sheet.getBoundingClientRect(); // fuerza reflow
       requestAnimationFrame(()=> {
         els.sheet.classList.add('is-open');
-        if (window.gsap) {
-          gsap.killTweensOf(els.sheet.querySelectorAll('.stagger-el'));
-          gsap.fromTo(els.sheet.querySelectorAll('.stagger-el'), 
-            { opacity: 0, y: 25 }, 
-            { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
-          );
-        }
+        animatePanelIn();
       });
     }
   }
