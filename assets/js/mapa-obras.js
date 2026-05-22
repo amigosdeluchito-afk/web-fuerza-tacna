@@ -660,7 +660,7 @@ window.initLeafletMap = function(container) {
             const chip = target.querySelector(`.chip[data-map="${seg}"]`);
             chip ? chip.click() : swapSegment(seg);
             // Esperamos con un polling más rápido y chequeo de isSwapping
-            await new Promise(res=>{ const t = setInterval(()=>{ if (!isSwapping && !PINS_LOADING && currentKey === seg){ clearInterval(t); res(); } }, 50); });
+            await new Promise(res=>{ const t = setInterval(()=>{ if (!isSwapping && !PINS_LOADING.has(seg) && currentKey === seg){ clearInterval(t); res(); } }, 50); });
         }
         let m = window.__OBRA_MARKERS.get(key), d = window.__OBRA_DATA.get(key);
         if (!m && !d){
@@ -671,7 +671,7 @@ window.initLeafletMap = function(container) {
                 isAutoCenterBlocked = true;
                 const chip = target.querySelector(`.chip[data-map="${seg}"]`);
                 chip ? chip.click() : swapSegment(seg);
-                await new Promise(res=>{ const t = setInterval(()=>{ if (!isSwapping && !PINS_LOADING && currentKey === seg){ clearInterval(t); res(); } }, 50); });
+                await new Promise(res=>{ const t = setInterval(()=>{ if (!isSwapping && !PINS_LOADING.has(seg) && currentKey === seg){ clearInterval(t); res(); } }, 50); });
                 m = window.__OBRA_MARKERS.get(key); d = window.__OBRA_DATA.get(key);
             }
         }

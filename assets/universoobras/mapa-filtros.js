@@ -112,11 +112,20 @@ window.closeDock = function() {
 async function _getUniverseData() {
     const segs = FILTERS.segments.size ? [...FILTERS.segments] : Object.keys(SHEETS).filter(s => s !== 'base' && SHEETS[s]);
     const allData = [];
+    window.SHEET_FETCH_PROMISES = window.SHEET_FETCH_PROMISES || {};
     for (const seg of segs) {
-        if (SHEETS[seg]) {
-            if (!window.SHEET_CACHE[seg]) {
-                const json = await fetchSheetGVizJSON(SHEET_ID, { sheetName: SHEETS[seg] });
-                window.SHEET_CACHE[seg] = gvizToObjects(json);
+        const TAB = SHEETS[seg];
+        if (TAB) {
+            if (!window.SHEET_CACHE[seg] && !window.SHEET_FETCH_PROMISES[seg]) {
+                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:J&headers=1`;
+                window.SHEET_FETCH_PROMISES[seg] = fetch(url).then(r => r.text()).then(txt => {
+                    const match = txt.match(/setResponse\(([\s\S]+)\);?/);
+                    if (!match) throw new Error("Error GViz");
+                    window.SHEET_CACHE[seg] = gvizToObjects(JSON.parse(match[1]));
+                });
+            }
+            if (window.SHEET_FETCH_PROMISES[seg]) {
+                await window.SHEET_FETCH_PROMISES[seg];
             }
             allData.push(...(window.SHEET_CACHE[seg] || []).map(o => ({ ...o, seg })));
         }
