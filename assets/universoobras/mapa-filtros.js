@@ -549,15 +549,20 @@ function initFilters() {
     }
 
     // Cerrar automáticamente al hacer clic fuera del panel
-    document.addEventListener('click', (e) => {
+    if (window._filtersOutsideClick) document.removeEventListener('click', window._filtersOutsideClick);
+    window._filtersOutsideClick = (e) => {
         const dockEl = document.getElementById('filtersDock');
         if (dockEl && dockEl.contains(e.target)) return;
         if (dockEl && dockEl.getAttribute('aria-expanded') === 'true') {
             closeDock();
         }
-    });
+    };
+    document.addEventListener('click', window._filtersOutsideClick);
 
     attachFilterEvents();
     syncResultsWithFilters();
-    window.addEventListener('resize', placeResultsDock);
+    
+    if (window._filtersResizeHandler) window.removeEventListener('resize', window._filtersResizeHandler);
+    window._filtersResizeHandler = placeResultsDock;
+    window.addEventListener('resize', window._filtersResizeHandler);
 }

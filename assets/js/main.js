@@ -841,6 +841,14 @@ function initCandidatos(container) {
         window.addEventListener('touchmove', moveDrag, { passive: true });
         
         window.marqueeAnimFrame = requestAnimationFrame(animateMarquee);
+        
+        // Completar la función de limpieza prometida al inicio
+        window.marqueeCleanup = () => {
+            window.removeEventListener('mouseup', endDrag);
+            window.removeEventListener('touchend', endDrag);
+            window.removeEventListener('mousemove', moveDrag);
+            window.removeEventListener('touchmove', moveDrag);
+        };
     }, 150); // El retraso de 150ms garantiza que el CSS y anchos se apliquen primero
 }
 

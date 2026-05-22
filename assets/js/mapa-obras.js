@@ -731,7 +731,11 @@ window.initLeafletMap = function(container) {
     });
 
     // Resize
-    window.addEventListener('resize', () => map.invalidateSize());
+    if (window._mapResizeHandler) {
+        window.removeEventListener('resize', window._mapResizeHandler);
+    }
+    window._mapResizeHandler = () => { if (map) map.invalidateSize(); };
+    window.addEventListener('resize', window._mapResizeHandler);
     
     // Auto-arranque de Obras
     setTimeout(() => {
@@ -740,7 +744,10 @@ window.initLeafletMap = function(container) {
         const vImg = document.getElementById('introVideo');
         
         if (vContainer && vImg && typeof gsap !== 'undefined') {
-            window.addEventListener('mousemove', (e) => {
+            if (window._introVideoWiggle) {
+                window.removeEventListener('mousemove', window._introVideoWiggle);
+            }
+            window._introVideoWiggle = (e) => {
                 // Solo aplicar si el video es visible
                 if (vContainer.style.opacity === '0') return;
 
@@ -757,7 +764,8 @@ window.initLeafletMap = function(container) {
                     rotateY: xPos * 2,
                     ease: "power2.out"
                 });
-            });
+            };
+            window.addEventListener('mousemove', window._introVideoWiggle);
         }
 
         // Forzar play del video
