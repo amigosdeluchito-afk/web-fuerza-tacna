@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
     <a href="usuarios.php" class="active">👤 Usuarios</a>
     <a href="historial.php">🕒 Historial</a>
+    <a href="ver_accesos.php">🕵️ Accesos IP</a>
   </nav>
   <div class="user">
     <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php" style="color:#9ca3af;">Salir</a>

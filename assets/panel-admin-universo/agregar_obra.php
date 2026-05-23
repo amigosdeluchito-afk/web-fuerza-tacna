@@ -101,6 +101,7 @@ if (isset($_GET['success'])) {
         <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
+        <a href="ver_accesos.php">🕵️ Accesos IP</a>
       </nav>
       <div class="user">
         <?= htmlspecialchars(current_user() ?? '') ?> ·

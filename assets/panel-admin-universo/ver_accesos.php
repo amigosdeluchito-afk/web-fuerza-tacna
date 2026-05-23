@@ -19,10 +19,13 @@ $logs = array_reverse($logs); // Mostrar los más recientes primero
     body {
       background:#050816; color:#fff;
       font-family: system-ui, -apple-system, sans-serif;
-      padding: 30px; margin: 0;
+      margin: 0;
     }
-    a.btn-back { color: #60a5fa; text-decoration: none; margin-bottom: 20px; display: inline-block; }
-    a.btn-back:hover { text-decoration: underline; }
+    header { padding:16px 24px; border-bottom:1px solid #111827; display:flex; justify-content:space-between; align-items:center;}
+    nav a { color:#9ca3af; margin-right:16px; text-decoration:none; font-size:14px; }
+    nav a.active { color:#ffffff; font-weight:600; }
+    .user { font-size:13px; color:#9ca3af; }
+    main { padding: 30px; max-width: 1000px; margin: 0 auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #0b1020; border-radius: 8px; overflow: hidden; }
     th, td { padding: 12px 15px; border-bottom: 1px solid #1e293b; text-align: left; }
     th { background: #1e3a8a; color: #93c5fd; font-weight: 600; }
@@ -32,8 +35,20 @@ $logs = array_reverse($logs); // Mostrar los más recientes primero
 </head>
 <body>
 
-  <a href="index.php" class="btn-back">← Volver al Panel Principal</a>
+<header>
+  <nav>
+    <a href="agregar_obra.php">➕ Agregar Obra</a>
+    <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
+    <a href="usuarios.php">👤 Usuarios</a>
+    <a href="historial.php">🕒 Historial</a>
+    <a href="ver_accesos.php" class="active">🕵️ Accesos IP</a>
+  </nav>
+  <div class="user">
+    <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php" style="color:#9ca3af;">Salir</a>
+  </div>
+</header>
   
+<main>
   <h1>Registro de Accesos (Escudo Temporal)</h1>
   <p>Esta lista muestra las direcciones IP y dispositivos de las personas que han colocado la contraseña correctamente en la web.</p>
 
@@ -62,6 +77,7 @@ $logs = array_reverse($logs); // Mostrar los más recientes primero
       <?php endif; ?>
     </tbody>
   </table>
+</main>
 
 </body>
 </html>

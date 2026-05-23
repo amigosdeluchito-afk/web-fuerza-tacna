@@ -138,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="editar_obra.php" class="active">✏️ Editar Obra y Fotos</a>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
+        <a href="ver_accesos.php">🕵️ Accesos IP</a>
       </nav>
       <div class="user">
         <?= htmlspecialchars(current_user() ?? '') ?> ·

@@ -39,6 +39,7 @@ if (file_exists(LOG_FILE)) {
     <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
     <a href="usuarios.php">👤 Usuarios</a>
     <a href="historial.php" class="active">🕒 Historial</a>
+    <a href="ver_accesos.php">🕵️ Accesos IP</a>
   </nav>
   <div class="user">
     <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php" style="color:#9ca3af;">Salir</a>
