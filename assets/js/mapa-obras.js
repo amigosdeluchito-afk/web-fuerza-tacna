@@ -511,7 +511,7 @@ window.initLeafletMap = function(container) {
             const color = colorPinPorEstado(estado);
             
             const icon = L.divIcon({ className: 'obra-pin', html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>`, iconSize: [16,16], iconAnchor: [8,8] });
-            const marker = L.marker([lat, lng], { icon }).addTo(pins);
+            const marker = L.marker([lat, lng], { icon, riseOnHover: true, riseOffset: 3000 }).addTo(pins);
             const k = _obraKey(o);
             window.__OBRA_MARKERS.set(k, marker);
             window.__OBRA_DATA.set(k, { o, lat, lng });
