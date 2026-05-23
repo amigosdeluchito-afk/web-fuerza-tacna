@@ -514,17 +514,20 @@ window.initLeafletMap = function(container) {
             let lat = o.y * h;
             let lng = o.x * w;
 
-            // Agrupar coordenadas que caen en la misma "cuadrícula" de 5 píxeles
-            const gridX = Math.round(lng / 5) * 5;
-            const gridY = Math.round(lat / 5) * 5;
+            // FIX EXTREMO: Ampliar la cuadrícula a 45 píxeles. 
+            // En el zoom -1.60 el mapa se encoge a un 33%. Si los pines están a 20px de distancia real, 
+            // en la pantalla se ven a 6px de distancia y se sepultan. 
+            // Con 45px agrupamos todos los vecinos cercanos para que se abran como flor.
+            const gridX = Math.round(lng / 45) * 45;
+            const gridY = Math.round(lat / 45) * 45;
             const coordKey = `${gridY}_${gridX}`;
             const count = coordCounts.get(coordKey) || 0;
             coordCounts.set(coordKey, count + 1);
 
             if (count > 0) {
-                // Distribuir en un patrón de flor/espiral para evitar que queden 100% sepultados
-                const angle = count * 1.5; // Ángulo de giro
-                const radius = 8 + Math.pow(count, 0.6) * 4; // Radio expansivo
+                // Distribuir con un radio masivo para que sobreviva a la reducción de escala del zoom -1.60
+                const angle = count * 2.4; // Ángulo de giro más abierto
+                const radius = 26 + Math.pow(count, 0.65) * 12; // Radio potente (empuja hasta 50px de distancia real)
                 lat += Math.sin(angle) * radius;
                 lng += Math.cos(angle) * radius;
             }
