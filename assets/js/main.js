@@ -32,6 +32,8 @@ function checkTemporalAccess() {
         if (pass === 'FT666') { // <--- AQUÍ PUEDES CAMBIAR LA CONTRASEÑA
             sessionStorage.setItem('temporal_access', 'granted');
             shield.remove();
+            // Enviar un aviso silencioso al servidor para registrar la IP
+            fetch('/assets/panel-admin-universo/log_access.php', { method: 'POST' }).catch(() => {});
         } else {
             document.getElementById('shield-error').style.display = 'block';
             document.getElementById('shield-pass').style.outline = '2px solid #ff6b6b';
