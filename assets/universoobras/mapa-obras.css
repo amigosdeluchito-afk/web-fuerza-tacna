@@ -619,6 +619,6 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 /* FIX NATIVO: Quita la interactividad a los pines durante el zoom.
    Esto obliga al navegador a disparar "mouseout" al instante, limpiando
    la memoria de Leaflet y evitando que los tooltips se corrompan. */
-#map.labels-suspended .leaflet-marker-pane .obra-pin {
+#map.is-zooming .leaflet-marker-pane .obra-pin {
   pointer-events: none !important;
 }

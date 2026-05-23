@@ -208,24 +208,16 @@ window.initLeafletMap = function(container) {
 
     map.on('zoomstart', ()=>{ 
         try {
+            if (mapEl) mapEl.classList.add('is-zooming');
             __LAST_ZOOM = map.getZoom(); 
             clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
             hideAllLabels();
             
-            // FIX INFALIBLE: Cierra cualquier tarjeta fantasma abierta para evitar que la memoria 
-            // de Leaflet se corrompa al hacer zoom rápido mientras el mouse está sobre un pin.
-            if (window.__OBRA_MARKERS) {
-                for (const m of window.__OBRA_MARKERS.values()) {
-                    if (typeof m.closeTooltip === 'function' && m.isTooltipOpen && m.isTooltipOpen()) {
-                        m.closeTooltip();
-                    }
-                }
-            }
-
             // FAILSAFE VITAL: Si el navegador entra en reposo y olvida avisar que el zoom terminó, destrabamos el mapa a la fuerza.
             clearTimeout(zoomFailsafe);
             zoomFailsafe = setTimeout(() => {
                 if (map) {
+                    if (mapEl) mapEl.classList.remove('is-zooming');
                     let destrabado = false;
                     if (map._animatingZoom) { map._animatingZoom = false; destrabado = true; }
                     if (map._zooming) { map._zooming = false; destrabado = true; } // Libera la capacidad de arrastrar el mapa
@@ -242,6 +234,7 @@ window.initLeafletMap = function(container) {
     map.on('zoomend', () => {
         try {
             clearTimeout(zoomFailsafe); // Todo salió bien, cancelamos el salvavidas
+            if (mapEl) mapEl.classList.remove('is-zooming');
             const z = map.getZoom();
             if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
             updateHud(currentKey ?? '—');
