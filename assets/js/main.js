@@ -1,4 +1,53 @@
 
+
+// --- ESCUDO TEMPORAL DE REVISIÓN ---
+function checkTemporalAccess() {
+    // Si ya ingresaron la contraseña en esta sesión, los dejamos pasar
+    if (sessionStorage.getItem('temporal_access') === 'granted') return;
+
+    // Crear pantalla de bloqueo a pantalla completa
+    const shield = document.createElement('div');
+    shield.id = 'temporal-shield';
+    shield.style.cssText = `
+        position: fixed; inset: 0; width: 100vw; height: 100vh;
+        background: rgba(20, 20, 20, 0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+        z-index: 9999999999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+    `;
+    shield.innerHTML = `
+        <div style="background: #801039; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border: 2px solid #ffc300; max-width: 90%; width: 350px;">
+            <h2 style="color: #ffc300; margin: 0 0 10px 0; font-size: 1.5rem; text-transform: uppercase;">ACCESO PRIVADO</h2>
+            <p style="color: #fff; font-family: system-ui, sans-serif; font-size: 0.9rem; margin-bottom: 25px; font-weight: 300;">Sitio en fase de revisión. Ingrese la contraseña:</p>
+            <input type="password" id="shield-pass" style="padding: 12px; border: none; border-radius: 8px; margin-bottom: 15px; width: 100%; box-sizing: border-box; font-size: 16px; text-align: center; outline: 2px solid transparent; transition: outline 0.3s;" placeholder="Contraseña">
+            <button id="shield-btn" style="background: #ffc300; color: #801039; border: none; padding: 12px 20px; font-family: 'Arial Black Web', 'Arial Black', sans-serif; font-weight: 900; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; transition: transform 0.2s;">ENTRAR</button>
+            <p id="shield-error" style="color: #ff6b6b; display: none; margin-top: 15px; font-family: system-ui, sans-serif; font-size: 13px; margin-bottom: 0;">Contraseña incorrecta</p>
+        </div>
+    `;
+    
+    // Se inyecta en lo más alto del documento antes de que cargue el resto de la web
+    document.documentElement.appendChild(shield);
+    
+    const verifyPass = () => {
+        const pass = document.getElementById('shield-pass').value;
+        if (pass === 'Fuerza2024') { // <--- AQUÍ PUEDES CAMBIAR LA CONTRASEÑA
+            sessionStorage.setItem('temporal_access', 'granted');
+            shield.remove();
+        } else {
+            document.getElementById('shield-error').style.display = 'block';
+            document.getElementById('shield-pass').style.outline = '2px solid #ff6b6b';
+        }
+    };
+    
+    // Esperar unos milisegundos a que los elementos estén insertados para activar botones
+    setTimeout(() => {
+        document.getElementById('shield-btn').addEventListener('click', verifyPass);
+        document.getElementById('shield-pass').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyPass();
+        });
+    }, 50);
+}
+checkTemporalAccess();
+
 // Obligar al navegador a empezar desde arriba al recargar (F5)
 if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
