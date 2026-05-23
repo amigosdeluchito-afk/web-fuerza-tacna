@@ -212,6 +212,16 @@ window.initLeafletMap = function(container) {
             clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
             hideAllLabels();
             
+            // FIX INFALIBLE: Cierra cualquier tarjeta fantasma abierta para evitar que la memoria 
+            // de Leaflet se corrompa al hacer zoom rápido mientras el mouse está sobre un pin.
+            if (window.__OBRA_MARKERS) {
+                for (const m of window.__OBRA_MARKERS.values()) {
+                    if (typeof m.closeTooltip === 'function' && m.isTooltipOpen && m.isTooltipOpen()) {
+                        m.closeTooltip();
+                    }
+                }
+            }
+
             // FAILSAFE VITAL: Si el navegador entra en reposo y olvida avisar que el zoom terminó, destrabamos el mapa a la fuerza.
             clearTimeout(zoomFailsafe);
             zoomFailsafe = setTimeout(() => {
@@ -505,6 +515,11 @@ window.initLeafletMap = function(container) {
             window.__OBRA_DATA.set(k, { o, lat, lng });
 
             marker.on('click', () => {
+                // Cierra la tarjeta fantasma para que no se buguee al abrir el panel de detalle
+                if (typeof marker.closeTooltip === 'function' && marker.isTooltipOpen && marker.isTooltipOpen()) {
+                    marker.closeTooltip();
+                }
+                
                 const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
                 // Timestamp dinámico que se actualiza CADA VEZ que haces clic para evitar caché de imágenes borradas o nuevas
                 const dinBuster = "?v=" + new Date().getTime();
