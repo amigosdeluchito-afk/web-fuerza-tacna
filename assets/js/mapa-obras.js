@@ -215,9 +215,16 @@ window.initLeafletMap = function(container) {
             // FAILSAFE VITAL: Si el navegador entra en reposo y olvida avisar que el zoom terminó, destrabamos el mapa a la fuerza.
             clearTimeout(zoomFailsafe);
             zoomFailsafe = setTimeout(() => {
-                if (map && map._animatingZoom) {
-                    map._animatingZoom = false;
-                    map.fire('zoomend');
+                if (map) {
+                    let destrabado = false;
+                    if (map._animatingZoom) { map._animatingZoom = false; destrabado = true; }
+                    if (map._zooming) { map._zooming = false; destrabado = true; } // Libera la capacidad de arrastrar el mapa
+                    if (map.scrollWheelZoom && map.scrollWheelZoom._isWheeling) { map.scrollWheelZoom._isWheeling = false; destrabado = true; }
+                    
+                    if (destrabado) {
+                        if (map._mapPane) map._mapPane.classList.remove('leaflet-zoom-anim'); // Limpia restos de CSS
+                        map.fire('zoomend');
+                    }
                 }
             }, 400);
         } catch(e){}
