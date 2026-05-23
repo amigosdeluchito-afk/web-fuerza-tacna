@@ -263,6 +263,10 @@ window.initLeafletMap = function(container) {
     function relayoutSoon(){ requestAnimationFrame(() => requestAnimationFrame(() => { updateLabelsVisibility(); })); }
 
     function layoutEtiquetas(){
+        // FIX VITAL: Quitar la suspensión de GPU ANTES de medir. 
+        // Si medimos mientras está suspendido, el ancho dará 0 y forzará 120px de separación irreal.
+        if (mapEl) mapEl.classList.remove('labels-suspended');
+        
         try {
         const z  = map.getZoom();
         const z0 = (typeof LABEL_MIN_ZOOM === 'number') ? LABEL_MIN_ZOOM : (window.BASE_ZOOM ?? z);
@@ -406,8 +410,6 @@ window.initLeafletMap = function(container) {
         }
         } catch (err) {
             console.error("Error en layoutEtiquetas:", err);
-        } finally {
-            if (mapEl) mapEl.classList.remove('labels-suspended');
         }
     }
 
