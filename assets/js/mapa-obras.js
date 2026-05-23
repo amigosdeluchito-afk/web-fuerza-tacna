@@ -205,9 +205,11 @@ window.initLeafletMap = function(container) {
     };
 
     let zoomFailsafe;
+    let removeZoomTimer;
 
     map.on('zoomstart', ()=>{ 
         try {
+            clearTimeout(removeZoomTimer);
             if (mapEl) mapEl.classList.add('is-zooming');
             __LAST_ZOOM = map.getZoom(); 
             clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
@@ -217,7 +219,6 @@ window.initLeafletMap = function(container) {
             clearTimeout(zoomFailsafe);
             zoomFailsafe = setTimeout(() => {
                 if (map) {
-                    if (mapEl) mapEl.classList.remove('is-zooming');
                     let destrabado = false;
                     if (map._animatingZoom) { map._animatingZoom = false; destrabado = true; }
                     if (map._zooming) { map._zooming = false; destrabado = true; } // Libera la capacidad de arrastrar el mapa
@@ -226,6 +227,8 @@ window.initLeafletMap = function(container) {
                     if (destrabado) {
                         if (map._mapPane) map._mapPane.classList.remove('leaflet-zoom-anim'); // Limpia restos de CSS
                         map.fire('zoomend');
+                    } else {
+                        if (mapEl) mapEl.classList.remove('is-zooming');
                     }
                 }
             }, 400);
@@ -234,7 +237,15 @@ window.initLeafletMap = function(container) {
     map.on('zoomend', () => {
         try {
             clearTimeout(zoomFailsafe); // Todo salió bien, cancelamos el salvavidas
-            if (mapEl) mapEl.classList.remove('is-zooming');
+            
+            // FIX ANTI-CORRUPCIÓN: Retrasamos devolverle la interactividad a los pines unos milisegundos.
+            // Esto asegura que la animación nativa de cierre del tooltip termine por completo 
+            // antes de que el usuario pueda volver a hacer hover, evitando que Leaflet colapse en zooms lejanos (-2.10).
+            clearTimeout(removeZoomTimer);
+            removeZoomTimer = setTimeout(() => {
+                if (mapEl) mapEl.classList.remove('is-zooming');
+            }, 200);
+
             const z = map.getZoom();
             if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
             updateHud(currentKey ?? '—');
