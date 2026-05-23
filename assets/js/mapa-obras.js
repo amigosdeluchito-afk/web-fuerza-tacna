@@ -204,15 +204,27 @@ window.initLeafletMap = function(container) {
         updateLabelsTimer = setTimeout(updateLabelsVisibility, 100);
     };
 
+    let zoomFailsafe;
+
     map.on('zoomstart', ()=>{ 
         try {
             __LAST_ZOOM = map.getZoom(); 
             clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
             hideAllLabels();
+            
+            // FAILSAFE VITAL: Si el navegador entra en reposo y olvida avisar que el zoom terminó, destrabamos el mapa a la fuerza.
+            clearTimeout(zoomFailsafe);
+            zoomFailsafe = setTimeout(() => {
+                if (map && map._animatingZoom) {
+                    map._animatingZoom = false;
+                    map.fire('zoomend');
+                }
+            }, 400);
         } catch(e){}
     });
     map.on('zoomend', () => {
         try {
+            clearTimeout(zoomFailsafe); // Todo salió bien, cancelamos el salvavidas
             const z = map.getZoom();
             if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
             updateHud(currentKey ?? '—');
