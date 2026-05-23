@@ -503,11 +503,32 @@ window.initLeafletMap = function(container) {
         const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const dirFotos = window.FOTOS_DIR[segmento] || segmento;
 
+        // FIX VITAL: Mapa de dispersión (Spiderfying) para obras con coordenadas idénticas o muy cercanas
+        const coordCounts = new Map();
+
         validas.forEach((o) => {
             const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
             const rawMonto = (o.monto || '').trim();
             const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
-            const lat = o.y * h, lng = o.x * w;
+            
+            let lat = o.y * h;
+            let lng = o.x * w;
+
+            // Agrupar coordenadas que caen en la misma "cuadrícula" de 5 píxeles
+            const gridX = Math.round(lng / 5) * 5;
+            const gridY = Math.round(lat / 5) * 5;
+            const coordKey = `${gridY}_${gridX}`;
+            const count = coordCounts.get(coordKey) || 0;
+            coordCounts.set(coordKey, count + 1);
+
+            if (count > 0) {
+                // Distribuir en un patrón de flor/espiral para evitar que queden 100% sepultados
+                const angle = count * 1.5; // Ángulo de giro
+                const radius = 8 + Math.pow(count, 0.6) * 4; // Radio expansivo
+                lat += Math.sin(angle) * radius;
+                lng += Math.cos(angle) * radius;
+            }
+
             const color = colorPinPorEstado(estado);
             
             const icon = L.divIcon({ className: 'obra-pin', html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>`, iconSize: [16,16], iconAnchor: [8,8] });
