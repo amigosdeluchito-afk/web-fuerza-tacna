@@ -29,7 +29,7 @@ function checkTemporalAccess() {
     
     const verifyPass = () => {
         const pass = document.getElementById('shield-pass').value;
-        if (pass === 'Fuerza2024') { // <--- AQUÍ PUEDES CAMBIAR LA CONTRASEÑA
+        if (pass === 'FT666') { // <--- AQUÍ PUEDES CAMBIAR LA CONTRASEÑA
             sessionStorage.setItem('temporal_access', 'granted');
             shield.remove();
         } else {
