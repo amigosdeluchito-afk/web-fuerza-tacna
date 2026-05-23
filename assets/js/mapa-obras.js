@@ -393,7 +393,12 @@ window.initLeafletMap = function(container) {
 
             // Escritura Batch al final
             if (finalT) {
-                inner.style.setProperty('--lx', finalT.x+'px'); 
+                // FIX VISUAL: Ajustar el anclaje real en pantalla para las etiquetas ubicadas a la izquierda
+                let computedX = finalT.x;
+                if (finalT.ax === 'right') computedX = finalT.x - w;
+                else if (finalT.ax === 'center') computedX = finalT.x - w / 2;
+
+                inner.style.setProperty('--lx', computedX+'px'); 
                 inner.style.setProperty('--ly', finalT.y+'px'); 
                 inner.style.setProperty('--ax', finalT.ax);
                 inner.classList.remove('is-hidden');
