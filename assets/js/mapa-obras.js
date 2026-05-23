@@ -506,7 +506,7 @@ window.initLeafletMap = function(container) {
         // FIX INFALIBLE: Clusterización por radio (Distance-based clustering) O(N^2)
         // Elimina el "bug de la cuadrícula" donde 2 pines pegados caían en celdas distintas y no se separaban.
         const clusters = [];
-        const CLUSTER_DIST = 60; // Agrupar pines a menos de 60 píxeles de distancia no-zoomeada
+        const CLUSTER_DIST = 85; // Distancia ampliada para capturar grupos dispersos
 
         validas.forEach((o) => {
             const lat = o.y * h;
@@ -517,6 +517,9 @@ window.initLeafletMap = function(container) {
                 const dist = Math.hypot(cluster.lat - lat, cluster.lng - lng);
                 if (dist < CLUSTER_DIST) {
                     cluster.points.push({ o, lat, lng });
+                    // Actualizar el Centro de Masa (Centroide) para agrupar orgánicamente
+                    cluster.lat = ((cluster.lat * (cluster.points.length - 1)) + lat) / cluster.points.length;
+                    cluster.lng = ((cluster.lng * (cluster.points.length - 1)) + lng) / cluster.points.length;
                     found = true;
                     break;
                 }
@@ -536,10 +539,11 @@ window.initLeafletMap = function(container) {
                 if (total > 1) {
                     // Distribución circular perfecta de 360 grados
                     const angle = index * ((Math.PI * 2) / total); 
-                    // Radio expansivo para que sobreviva hasta los zooms más extremos (-2.00)
-                    const radius = 30 + (total * 6); 
-                    lat += Math.sin(angle) * radius;
-                    lng += Math.cos(angle) * radius;
+                    const radius = 35 + (total * 7); 
+                    // FIX MATEMÁTICO: El círculo debe dibujarse alrededor del CENTRO del cluster.
+                    // Sumarlo a las coordenadas individuales causaba que los pines se empujaran unos contra otros y se fusionaran.
+                    lat = cluster.lat + Math.sin(angle) * radius;
+                    lng = cluster.lng + Math.cos(angle) * radius;
                 }
 
                 const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
