@@ -616,9 +616,16 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   display: none !important;
 }
 
-/* FIX NATIVO: Quita la interactividad a los pines durante el zoom.
-   Esto obliga al navegador a disparar "mouseout" al instante, limpiando
-   la memoria de Leaflet y evitando que los tooltips se corrompan. */
-#map.is-zooming .leaflet-marker-pane .obra-pin {
+/* FIX LEAFLET EXTREMO: Desactivar animaciones nativas de los tooltips (Tarjetas Fantasma).
+   Al hacerlos instantáneos (0ms), Leaflet nunca pierde la cuenta de qué tarjeta está abriendo 
+   o cerrando, eliminando por completo la corrupción de memoria al hacer scrolls súper rápidos. */
+.leaflet-tooltip, .ghost-card-tip {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Asegurar que el contenedor de tooltips NUNCA funcione como un muro invisible que bloquee
+   los clics hacia los pines que están detrás o muy pegados a él. */
+.leaflet-tooltip-pane {
   pointer-events: none !important;
 }

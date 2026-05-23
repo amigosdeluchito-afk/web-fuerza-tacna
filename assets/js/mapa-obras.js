@@ -205,16 +205,24 @@ window.initLeafletMap = function(container) {
     };
 
     let zoomFailsafe;
-    let removeZoomTimer;
 
     map.on('zoomstart', ()=>{ 
         try {
-            clearTimeout(removeZoomTimer);
-            if (mapEl) mapEl.classList.add('is-zooming');
             __LAST_ZOOM = map.getZoom(); 
             clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
             hideAllLabels();
             
+            // FIX INFALIBLE: Cerramos manualmente cualquier tarjeta abierta apenas inicia el zoom.
+            // Al haber apagado las animaciones CSS, esto toma 0 milisegundos y Leaflet 
+            // limpia su memoria al instante, garantizando que el hover siempre funcione.
+            if (window.__OBRA_MARKERS) {
+                for (const m of window.__OBRA_MARKERS.values()) {
+                    if (typeof m.closeTooltip === 'function' && m.isTooltipOpen && m.isTooltipOpen()) {
+                        m.closeTooltip();
+                    }
+                }
+            }
+
             // FAILSAFE VITAL: Si el navegador entra en reposo y olvida avisar que el zoom terminó, destrabamos el mapa a la fuerza.
             clearTimeout(zoomFailsafe);
             zoomFailsafe = setTimeout(() => {
@@ -227,8 +235,6 @@ window.initLeafletMap = function(container) {
                     if (destrabado) {
                         if (map._mapPane) map._mapPane.classList.remove('leaflet-zoom-anim'); // Limpia restos de CSS
                         map.fire('zoomend');
-                    } else {
-                        if (mapEl) mapEl.classList.remove('is-zooming');
                     }
                 }
             }, 400);
@@ -237,14 +243,6 @@ window.initLeafletMap = function(container) {
     map.on('zoomend', () => {
         try {
             clearTimeout(zoomFailsafe); // Todo salió bien, cancelamos el salvavidas
-            
-            // FIX ANTI-CORRUPCIÓN: Retrasamos devolverle la interactividad a los pines unos milisegundos.
-            // Esto asegura que la animación nativa de cierre del tooltip termine por completo 
-            // antes de que el usuario pueda volver a hacer hover, evitando que Leaflet colapse en zooms lejanos (-2.10).
-            clearTimeout(removeZoomTimer);
-            removeZoomTimer = setTimeout(() => {
-                if (mapEl) mapEl.classList.remove('is-zooming');
-            }, 200);
 
             const z = map.getZoom();
             if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
