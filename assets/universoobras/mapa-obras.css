@@ -605,6 +605,17 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .leaflet-marker-pane .leaflet-marker-icon.obra-label {
   pointer-events: none !important;
 }
+.obra-label__inner {
+  pointer-events: none !important;
+}
+
+/* FIX: Destruir el "muro invisible" del menú superior para que deje pasar el scroll hacia el mapa */
+#hero-header {
+  pointer-events: none !important;
+}
+#hero-header .logo-container, #hero-header ul, #hero-header .button-container {
+  pointer-events: auto !important;
+}
 
 /* Eliminamos las reglas restrictivas que bloqueaban la apertura */
 #sheet:not(.is-open) {
