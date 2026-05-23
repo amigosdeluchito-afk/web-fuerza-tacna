@@ -601,6 +601,11 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   display: block !important;
 }
 
+/* Evitar que las etiquetas de texto funcionen como escudos y bloqueen el hover de los pines */
+.leaflet-marker-pane .leaflet-marker-icon.obra-label {
+  pointer-events: none !important;
+}
+
 /* Eliminamos las reglas restrictivas que bloqueaban la apertura */
 #sheet:not(.is-open) {
   pointer-events: none;
