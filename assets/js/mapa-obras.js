@@ -503,42 +503,56 @@ window.initLeafletMap = function(container) {
         const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const dirFotos = window.FOTOS_DIR[segmento] || segmento;
 
-        // FIX VITAL: Mapa de dispersión (Spiderfying) para obras con coordenadas idénticas o muy cercanas
-        const coordCounts = new Map();
+        // FIX INFALIBLE: Clusterización por radio (Distance-based clustering) O(N^2)
+        // Elimina el "bug de la cuadrícula" donde 2 pines pegados caían en celdas distintas y no se separaban.
+        const clusters = [];
+        const CLUSTER_DIST = 60; // Agrupar pines a menos de 60 píxeles de distancia no-zoomeada
 
         validas.forEach((o) => {
-            const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
-            const rawMonto = (o.monto || '').trim();
-            const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
-            
-            let lat = o.y * h;
-            let lng = o.x * w;
+            const lat = o.y * h;
+            const lng = o.x * w;
+            let found = false;
 
-            // FIX EXTREMO: Ampliar la cuadrícula a 45 píxeles. 
-            // En el zoom -1.60 el mapa se encoge a un 33%. Si los pines están a 20px de distancia real, 
-            // en la pantalla se ven a 6px de distancia y se sepultan. 
-            // Con 45px agrupamos todos los vecinos cercanos para que se abran como flor.
-            const gridX = Math.round(lng / 45) * 45;
-            const gridY = Math.round(lat / 45) * 45;
-            const coordKey = `${gridY}_${gridX}`;
-            const count = coordCounts.get(coordKey) || 0;
-            coordCounts.set(coordKey, count + 1);
-
-            if (count > 0) {
-                // Distribuir con un radio masivo para que sobreviva a la reducción de escala del zoom -1.60
-                const angle = count * 2.4; // Ángulo de giro más abierto
-                const radius = 26 + Math.pow(count, 0.65) * 12; // Radio potente (empuja hasta 50px de distancia real)
-                lat += Math.sin(angle) * radius;
-                lng += Math.cos(angle) * radius;
+            for (const cluster of clusters) {
+                const dist = Math.hypot(cluster.lat - lat, cluster.lng - lng);
+                if (dist < CLUSTER_DIST) {
+                    cluster.points.push({ o, lat, lng });
+                    found = true;
+                    break;
+                }
             }
 
-            const color = colorPinPorEstado(estado);
+            if (!found) {
+                clusters.push({ lat, lng, points: [{ o, lat, lng }] });
+            }
+        });
+
+        clusters.forEach((cluster) => {
+            const total = cluster.points.length;
             
-            const icon = L.divIcon({ className: 'obra-pin', html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>`, iconSize: [16,16], iconAnchor: [8,8] });
-            const marker = L.marker([lat, lng], { icon, riseOnHover: true, riseOffset: 3000 }).addTo(pins);
-            const k = _obraKey(o);
-            window.__OBRA_MARKERS.set(k, marker);
-            window.__OBRA_DATA.set(k, { o, lat, lng });
+            cluster.points.forEach((pt, index) => {
+                let { o, lat, lng } = pt;
+                
+                if (total > 1) {
+                    // Distribución circular perfecta de 360 grados
+                    const angle = index * ((Math.PI * 2) / total); 
+                    // Radio expansivo para que sobreviva hasta los zooms más extremos (-2.00)
+                    const radius = 30 + (total * 6); 
+                    lat += Math.sin(angle) * radius;
+                    lng += Math.cos(angle) * radius;
+                }
+
+                const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
+                const rawMonto = (o.monto || '').trim();
+                const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
+                
+                const color = colorPinPorEstado(estado);
+                
+                const icon = L.divIcon({ className: 'obra-pin', html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>`, iconSize: [16,16], iconAnchor: [8,8] });
+                const marker = L.marker([lat, lng], { icon, riseOnHover: true, riseOffset: 3000 }).addTo(pins);
+                const k = _obraKey(o);
+                window.__OBRA_MARKERS.set(k, marker);
+                window.__OBRA_DATA.set(k, { o, lat, lng });
 
             marker.on('click', () => {
                 // Cierra la tarjeta fantasma para que no se buguee al abrir el panel de detalle
@@ -591,6 +605,7 @@ window.initLeafletMap = function(container) {
                     }
                 });
             }
+        });
         });
 
         __LABELS_UNLOCKED = false;
