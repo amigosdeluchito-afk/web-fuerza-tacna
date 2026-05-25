@@ -178,33 +178,18 @@ window.initLeafletMap = function(container) {
         maxBoundsViscosity: 1.0,
         // Sensibilidad balanceada para evitar que el motor de Leaflet se ahogue con scrolls rápidos
         wheelPxPerZoomLevel: 60,
-        wheelDebounceTime: 40
+        wheelDebounceTime: 40,
+
+        // FIX DEFINITIVO (NÚCLEO DE LEAFLET):
+        // Apagamos el frágil motor de animaciones CSS. En zonas de alta carga gráfica, 
+        // el navegador desecha el evento 'transitionend' y Leaflet se queda congelado esperando.
+        // Al ponerlo en 'false', el zoom es instantáneo y físicamente imposible de trabar.
+        zoomAnimation: false,
+        markerZoomAnimation: false
     });
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
     
-    // =========================================================================
-    // FIX ARQUITECTÓNICO DEFINITIVO 2.0: Resurrección del motor de Leaflet.
-    // Si el navegador pierde el evento 'transitionend' por alta carga gráfica
-    // en zonas densas de pines, Leaflet se queda congelado ("zona muerta").
-    // Este escudo detecta cada nuevo gesto de la rueda y formatea la memoria 
-    // de Leaflet antes de que este se dé cuenta, obligándolo a hacer zoom.
-    // =========================================================================
-    let __lastWheelTime = 0;
-    mapEl.addEventListener('wheel', () => {
-        const now = Date.now();
-        if (now - __lastWheelTime > 250) { // Nuevo gesto detectado
-            if (map._animatingZoom) {
-                map._animatingZoom = false;
-                if (map._mapPane) map._mapPane.classList.remove('leaflet-zoom-anim');
-            }
-            if (map.scrollWheelZoom && map.scrollWheelZoom._isWheeling) {
-                map.scrollWheelZoom._isWheeling = false;
-            }
-        }
-        __lastWheelTime = now;
-    }, { passive: true, capture: true }); // capture: true lo ejecuta ANTES que Leaflet
-
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) L.control.zoom({ position: 'bottomright' }).addTo(map);
     const RESULT_ZOOM = IS_MOBILE ? 0 : 0.1;
