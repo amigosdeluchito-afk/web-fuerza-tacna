@@ -154,6 +154,29 @@ window.initMapEngine = async function(container) {
         console.log("UI Revelada de forma natural");
     };
 
+    // =================================================================================
+    // FIX SUPREMO: ARRANQUE INDESTRUCTIBLE DE INTERFAZ
+    // Mostramos la interfaz de inmediato. Si MapLibre tarda en descargar o falla,
+    // el usuario igual verá el video, los botones y el texto sin quedarse congelado.
+    // =================================================================================
+    setTimeout(() => {
+        const videoIntro = document.getElementById('video-intro-container');
+        if (videoIntro) {
+            videoIntro.style.visibility = 'visible';
+            videoIntro.style.opacity = '1';
+            const v = videoIntro.querySelector('video');
+            if (v) { v.muted = true; v.loop = true; v.play().catch(() => {}); }
+        }
+        
+        const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
+        const dock = getEl('filtersDock');
+        if (chipsEl) { chipsEl.style.opacity = '0'; chipsEl.style.visibility = 'hidden'; }
+        if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
+        
+        setTimeout(initGooeyText, 1200); 
+        setTimeout(revealUI, 2000);
+    }, 100);
+
     // Configuraciones
     const stepsBack = () => (window.innerWidth <= 900 ? 4 : 3);
 
@@ -198,11 +221,6 @@ window.initMapEngine = async function(container) {
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
-    let currentKey = null;
-    let isSwapping = false;
-    let pendingKey = null;
-    let isAutoCenterBlocked = false;
-    
     window.__OBRA_MARKERS = new Map();
     window.__OBRA_DATA    = new Map();
     window.SHEET_CACHE = window.SHEET_CACHE || Object.create(null);
@@ -386,9 +404,11 @@ window.initMapEngine = async function(container) {
             if (videoIntro) videoIntro._gooeyActive = false; // Reset para permitir reinicio de texto
 
             // Cerrar ficha de obra si está abierta para limpiar la pantalla
-            if (window.PanelObra && typeof window.PanelObra.close === 'function') {
-                window.PanelObra.close();
-            }
+            try {
+                if (window.PanelObra && typeof window.PanelObra.close === 'function') {
+                    window.PanelObra.close();
+                }
+            } catch(e) {}
 
             if (videoIntro) {
                 videoIntro.style.visibility = 'visible';
@@ -402,11 +422,16 @@ window.initMapEngine = async function(container) {
                 mapEl.style.pointerEvents = 'none';
             }
             
-            if (map.getSource('plano-base')) {
-                if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
-                map.removeSource('plano-base');
+            try {
+                if (map && map.style && map.getSource('plano-base')) {
+                    if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
+                    map.removeSource('plano-base');
+                }
+                updateHud('Inicio');
+            } catch(e) {
+                console.warn("Map cleanup deferred", e);
             }
-            updateHud('Inicio');
+            
             updateLegendVisibility('base');
 
             // Simular "recarga" ocultando y volviendo a mostrar la UI con su delay
@@ -637,19 +662,10 @@ window.initMapEngine = async function(container) {
             window.addEventListener('mousemove', window._introVideoWiggle);
         }
 
-        // Forzar play del video
-        const v = document.getElementById('introVideo');
-        if (v) {
-            v.muted = true; // El audio debe estar silenciado para autoplay
-            v.loop = true;  // Aseguramos el bucle infinito por código
-            v.play().catch(e => console.log("Esperando interacción..."));
-        }
-
-        map.resize();
-
-        // FORMA NATURAL: Arrancamos el mapa en su estado base (El video inicial).
-        // Esto encadena orgánicamente los temporizadores que revelan la interfaz completa.
-        swapSegment('base');
+        if (map) map.resize();
+        
+        // Ya no llamamos a swapSegment('base') aquí para evitar doble animación,
+        // la interfaz ya fue arrancada en el bloque independiente al inicio.
     }, 500);
 
     // Función de limpieza obligatoria para Barba.js
