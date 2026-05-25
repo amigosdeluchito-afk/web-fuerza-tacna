@@ -12,14 +12,25 @@ async function loadMapLibre() {
         const script = document.createElement('script');
         script.src = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js';
         script.onload = resolve;
+        script.onerror = resolve; // Failsafe para redes inestables
         document.head.appendChild(script);
     });
 }
 
 window.initMapEngine = async function(container) {
     const target = container || document;
-    const mapEl = target.querySelector('#map');
+    const mapEl = target.querySelector('#map') || document.getElementById('map');
     if (!mapEl) return;
+
+    // =================================================================================
+    // FIX CRÍTICO: RESTAURACIÓN DE VARIABLES DE ENTORNO
+    // Al faltar estas variables, la función revealUI lanzaba un error fatal invisible 
+    // y el menú jamás llegaba a aparecer.
+    // =================================================================================
+    let currentKey = 'base';
+    let isSwapping = false;
+    let pendingKey = null;
+    let isAutoCenterBlocked = false;
 
     // Limpieza de mapa previo para que no choque con Barba.js
     if (window.mapInstance) {
