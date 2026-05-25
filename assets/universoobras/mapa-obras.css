@@ -629,8 +629,10 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 }
 
 /* Eliminamos las reglas restrictivas que bloqueaban la apertura */
-#sheet:not(.is-open) {
-  pointer-events: none;
+#sheet:not(.is-open),
+#sheetBackdrop:not(.is-open) {
+  pointer-events: none !important;
+  visibility: hidden !important;
 }
 
 /* Ocultamiento ultrarrápido por GPU durante el zoom */
