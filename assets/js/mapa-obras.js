@@ -183,32 +183,6 @@ window.initLeafletMap = function(container) {
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
     
-    // =========================================================================
-    // FIX ARQUITECTÓNICO DEFINITIVO: Escudo Anti-SmoothScroll y Auto-Sanación
-    // Erradica de raíz los conflictos de eventos y las "zonas muertas" del mapa.
-    // =========================================================================
-    let __lastWheelTime = 0;
-    mapEl.addEventListener('wheel', (e) => {
-        // 1. ESCUDO: Detenemos la propagación para que smoothscroll.js u otros 
-        // plugins globales en el documento NO roben el evento ni lo cancelen.
-        e.stopPropagation();
-
-        // 2. AUTO-SANACIÓN: Si pasaron más de 400ms desde el último giro, el mapa DEBE 
-        // estar en reposo. Si Leaflet indica que sigue "animando", significa que 
-        // el navegador perdió un evento y el mapa se trabó. Lo reiniciamos al instante.
-        const now = Date.now();
-        if (now - __lastWheelTime > 400) {
-            if (map._animatingZoom) {
-                map._animatingZoom = false;
-                if (map._mapPane) map._mapPane.classList.remove('leaflet-zoom-anim');
-            }
-            if (map.scrollWheelZoom && map.scrollWheelZoom._isWheeling) {
-                map.scrollWheelZoom._isWheeling = false;
-            }
-        }
-        __lastWheelTime = now;
-    }, { passive: false });
-
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) L.control.zoom({ position: 'bottomright' }).addTo(map);
     const RESULT_ZOOM = IS_MOBILE ? 0 : 0.1;

@@ -39,6 +39,14 @@ function SmoothScroll(target, speed, smooth) {
 	};
 
 	function scrolled(e) {
+		// FIX DEFINITIVO Y ARQUITECTÓNICO:
+		// Si el cursor está sobre el mapa interactivo de Leaflet (#map) o sobre cualquier panel
+		// que tenga su propio scroll interno, apagamos SmoothScroll temporalmente para que 
+		// no haya choques, dejando actuar al comportamiento nativo.
+		if (e.target && e.target.closest) {
+			if (e.target.closest('#map, .sheet-body, .search-list, .timeline-modal-content, .fp-drawer-content-wrapper, .candidato-sidebar, .marquee-container')) return;
+		}
+
 		e.preventDefault(); // disable default scrolling
 
 		var delta = normalizeWheelDelta(e)
