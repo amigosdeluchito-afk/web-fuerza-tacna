@@ -23,19 +23,6 @@ window.initMapEngine = async function(container) {
     if (!mapEl) return;
 
     // =================================================================================
-    // PERRO GUARDIÁN (WATCHDOG): Bloquea de forma permanente cualquier script fantasma 
-    // que intente vaciar u ocultar el texto central después de cargar la página.
-    // =================================================================================
-    setInterval(() => {
-        const g1 = document.getElementById('gooey-text-1');
-        const g2 = document.getElementById('gooey-text-2');
-        const gc = document.getElementById('gooey-text-container');
-        if (g1 && g1.textContent !== "UNIVERSO") g1.textContent = "UNIVERSO";
-        if (g2 && g2.textContent !== "OBRAS") g2.textContent = "OBRAS";
-        if (gc && gc.style.display !== 'flex') gc.style.setProperty('display', 'flex', 'important');
-    }, 200);
-
-    // =================================================================================
     // FIX CRÍTICO: RESTAURACIÓN DE VARIABLES DE ENTORNO
     // Al faltar estas variables, la función revealUI lanzaba un error fatal invisible 
     // y el menú jamás llegaba a aparecer.
