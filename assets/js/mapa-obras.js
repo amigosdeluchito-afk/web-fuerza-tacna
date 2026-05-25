@@ -382,7 +382,11 @@ window.initLeafletMap = function(container) {
                 mapEl.style.visibility = 'hidden';
                 mapEl.style.pointerEvents = 'none';
             }
-            pins.clearLayers();
+            
+            if (map.getSource('plano-base')) {
+                if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
+                map.removeSource('plano-base');
+            }
             updateHud('Inicio');
             updateLegendVisibility('base');
 
@@ -402,7 +406,6 @@ window.initLeafletMap = function(container) {
         const prevKey = currentKey;
         isSwapping = true; 
         currentKey = key; // Definimos el intento de navegación inmediatamente
-        pins.clearLayers();
         setBackgroundFor(key);
         const url = encodeURI(rawUrl);
 
@@ -445,79 +448,59 @@ window.initLeafletMap = function(container) {
         };
         probe.onload = () => {
             clearTimeout(probeTimer);
+            
+            if (currentKey !== key || currentKey === 'base') {
+                isSwapping = false;
+                return;
+            }
+
             const w = probe.naturalWidth, h = probe.naturalHeight;
-            const bounds = [[0,0],[h,w]];
-            map.invalidateSize();
-            const fitZ = map.getBoundsZoom(bounds, true), startZ = fitZ - stepsBack();
-            const [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
-
-            // Sincronizamos el zoom de todos los mapas basándonos en 'educacion'
-            if (GLOBAL_ZOOM === null || key === 'educacion') {
-                GLOBAL_ZOOM = startZ;
-            }
-            const z0 = GLOBAL_ZOOM;
-
-            // INICIALIZACIÓN: Leaflet necesita un setView inicial para procesar capas.
-            // 1. Si venimos de Inicio (isFromBase), lo hacemos siempre para 'despertar' el mapa.
-            // 2. Si no es el inicio, solo centramos si no hay una búsqueda activa (!isAutoCenterBlocked).
-            if (isFromBase || !isAutoCenterBlocked) {
-                map.setView([h * gFy, w * gFx], z0, { animate:false });
-            }
-            window.BASE_ZOOM = z0; __LABELS_UNLOCKED = false; LABEL_MIN_ZOOM = z0 + 0.20;
-            map.setMinZoom(z0 - 0.5); map.setMaxZoom(fitZ + 6); map.setMaxBounds(padBounds(bounds, 1.0));
+            // Mapear el PNG a coordenadas geográficas en MapLibre (escala 0.005)
+            const lon = w * 0.005; 
+            const lat = h * 0.005;
+            const bounds = [ [0, 0], [lon, lat] ];
             
-            const next = L.imageOverlay(url, bounds, { opacity: 0, zIndex: 2 });
-            next.addTo(map);
-            
-            const prev = currentOverlay;
-            const onLoaded = () => {
-                // Si el usuario ya cambió a otro segmento o volvió a Inicio mientras cargaba la imagen
-                if (currentKey !== key || currentKey === 'base') {
-                    if (next) map.removeLayer(next);
-                    isSwapping = false;
-                    return;
-                }
+            map.resize();
 
-                next.off('load', onLoaded); clearTimeout(overlayWatchdog);
-                // EVITAR LAG: No re-centrar en el onLoaded si hay una búsqueda activa.
-                // La cámara de búsqueda (flyTo) ya está o estará en movimiento.
-                if (!isAutoCenterBlocked) {
-                    map.setView([h * gFy, w * gFx], z0, { animate:false });
-                }
-                
-                const elNext = next.getElement();
-                target.querySelectorAll('.chips, .fp, #resultsDock').forEach(el => el.style.visibility = 'visible');
-                if (elNext) void elNext.offsetWidth;
-                next.setOpacity(1); if (prev) prev.setOpacity(0);
-                if (elNext) {
-                    let transitionDone = false;
-                    const cleanupPrev = () => { if (!transitionDone) { transitionDone = true; if (prev) map.removeLayer(prev); } };
-                    elNext.addEventListener('transitionend', cleanupPrev, { once:true });
-                    setTimeout(cleanupPrev, 1200); // Failsafe por si el navegador omite el evento
-                }
-                else if (prev) map.removeLayer(prev);
-                
-                currentOverlay = next; currentBounds = bounds;
-                
-                updateHud(key); relayoutSoon(); updateLegendVisibility(key);
-                isSwapping = false; if (pendingKey){ const k = pendingKey; pendingKey = null; swapSegment(k); }
-            };
-            next.on('error', () => { 
-                clearTimeout(overlayWatchdog); isSwapping = false; 
-                map.removeLayer(next); 
-                if (pendingKey) swapSegment(pendingKey); 
+            if (map.getSource('plano-base')) {
+                if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
+                map.removeSource('plano-base');
+            }
+
+            map.addSource('plano-base', {
+                type: 'image',
+                url: url,
+                coordinates: [ [0, lat], [lon, lat], [lon, 0], [0, 0] ]
             });
-            next.once('load', onLoaded); next.addTo(map);
-            const elMaybe = next.getElement();
-            if (elMaybe && (elMaybe.complete || elMaybe.naturalWidth > 0)) setTimeout(onLoaded, 0);
-            var overlayWatchdog = setTimeout(() => { onLoaded(); }, 400);
+
+            map.addLayer({
+                id: 'plano-layer',
+                type: 'raster',
+                source: 'plano-base',
+                paint: { 'raster-fade-duration': 600 } 
+            });
+
+            const [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
+            const cx = lon * gFx;
+            const cy = lat * (1 - gFy); // Invertimos Y porque MapLibre sube al norte
+
+            if (isFromBase || !isAutoCenterBlocked) {
+                map.fitBounds(bounds, { padding: 50, duration: 0 });
+                map.setMaxBounds([ [-lon*0.5, -lat*0.5], [lon*1.5, lat*1.5] ]);
+                map.setCenter([cx, cy]);
+            }
+
+            target.querySelectorAll('.chips, .fp, #resultsDock').forEach(el => el.style.visibility = 'visible');
+            
+            updateHud(key); 
+            updateLegendVisibility(key);
+            isSwapping = false; 
+            if (pendingKey){ const k = pendingKey; pendingKey = null; swapSegment(k); }
 
             (async ()=>{
                 try{ 
-                    if (currentKey === 'base') return;
-                    pins.clearLayers(); 
                     if (currentKey !== key) return; // Cancelar si el usuario navegó a otro lado
-                    await cargarPinesDesdeSheet(key, h, w);
+                    await cargarPinesDesdeSheet(key, lat, lon);
                 if (window.SHEETS[key]) { 
                     // Llamamos a las funciones que ahora viven en mapa-filtros.js
                     if (typeof buildFilterOptions === 'function') buildFilterOptions();
