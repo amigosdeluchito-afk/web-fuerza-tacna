@@ -573,11 +573,19 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .leaflet-overlay-pane  { z-index: 200 !important; }  /* imageOverlay */
 .leaflet-shadow-pane   { z-index: 300 !important; }
 .leaflet-marker-pane   { z-index: 1200 !important; } /* PINS arriba */
-.leaflet-tooltip-pane  { z-index: 1300 !important; }
+.leaflet-tooltip-pane  { z-index: 1300 !important; pointer-events: none !important; }
 .leaflet-popup-pane    { z-index: 1400 !important; }
 
 /* Controles por debajo de pines, por encima del overlay */
-.leaflet-control-container { z-index: 900 !important; }
+.leaflet-control-container,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 900 !important;
+  pointer-events: none !important;
+}
+.leaflet-control {
+  pointer-events: auto !important;
+}
 
 /* Rehabilita interacción en markers (tu CSS base los pone en none) */
 .leaflet-marker-icon { pointer-events: auto !important; }
@@ -586,7 +594,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .leaflet-marker-pane .leaflet-marker-icon { opacity: 1 !important; filter: none !important; }
 
 /* (Opcional) Asegura que la imagen de fondo no cree un stacking raro */
-.leaflet-image-layer { z-index: 0 !important; } /* relativo a su pane (overlay:200) */
+.leaflet-image-layer { z-index: 0 !important; pointer-events: none !important; } /* relativo a su pane (overlay:200) */
 
 /* Solo móvil: ocultar el HUD de zoom */
 @media (max-width: 600px){
@@ -606,6 +614,9 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   pointer-events: none !important;
 }
 .obra-label__inner {
+  pointer-events: none !important;
+}
+.obra-label__inner * {
   pointer-events: none !important;
 }
 
@@ -633,10 +644,19 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .leaflet-tooltip, .ghost-card-tip {
   transition: none !important;
   animation: none !important;
+  pointer-events: none !important;
 }
 
 /* Asegurar que el contenedor de tooltips NUNCA funcione como un muro invisible que bloquee
    los clics hacia los pines que están detrás o muy pegados a él. */
 .leaflet-tooltip-pane {
   pointer-events: none !important;
+}
+
+/* Prevenir que el Chat de IA capture scrolls cuando está cerrado */
+#ft-chat-container.ft-chat-closed {
+  pointer-events: none !important;
+}
+#ft-chat-container.ft-chat-closed #ft-chat-fab {
+  pointer-events: auto !important;
 }

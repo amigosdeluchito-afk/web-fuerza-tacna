@@ -237,7 +237,7 @@ window.initLeafletMap = function(container) {
                         map.fire('zoomend');
                     }
                 }
-            }, 400);
+            }, 600);
         } catch(e){}
     });
     map.on('zoomend', () => {
