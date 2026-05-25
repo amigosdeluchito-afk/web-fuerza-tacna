@@ -148,11 +148,22 @@ window.initMapEngine = async function(container) {
     const revealUI = () => {
         const chips = target.querySelector('.chips') || document.querySelector('.chips');
         const kpiGrid = target.querySelector('#intro-kpi-grid') || document.getElementById('intro-kpi-grid');
+        const dock = getEl('filtersDock');
+        const mapEl = getEl('map');
         
         if (chips) { 
             chips.style.opacity = '1'; 
             chips.style.visibility = 'visible'; 
             chips.classList.add('is-glass');
+        }
+        if (dock) {
+            dock.style.opacity = '1';
+            dock.style.visibility = 'visible';
+        }
+        if (mapEl) {
+            mapEl.style.opacity = '1';
+            mapEl.style.visibility = 'visible';
+            mapEl.style.pointerEvents = 'auto';
         }
 
         if (kpiGrid) {
@@ -408,9 +419,9 @@ window.initMapEngine = async function(container) {
             }
             }
             if (mapEl) {
-                mapEl.style.opacity = '0';
-                mapEl.style.visibility = 'hidden';
-                mapEl.style.pointerEvents = 'none';
+                mapEl.style.opacity = '1';
+                mapEl.style.visibility = 'visible';
+                mapEl.style.pointerEvents = 'auto';
             }
             
             try {
@@ -428,8 +439,8 @@ window.initMapEngine = async function(container) {
             // Simular "recarga" ocultando y volviendo a mostrar la UI con su delay
             const dock = getEl('filtersDock');
             const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
-            if (chipsEl) { chipsEl.style.opacity = '0'; chipsEl.style.visibility = 'hidden'; }
-            if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
+            if (chipsEl) { chipsEl.style.opacity = '1'; chipsEl.style.visibility = 'visible'; }
+            if (dock) { dock.style.opacity = '1'; dock.style.visibility = 'visible'; }
         setTimeout(initGooeyText, 500); 
         setTimeout(revealUI, 800);
             return;

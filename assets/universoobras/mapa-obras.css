@@ -14,7 +14,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 /* Contenedor mapa con fade (oculto pero con tamaño) */
 #map{
   position:fixed !important; inset:0 !important; z-index:1 !important; width:100% !important; height:100vh !important; background:transparent;
-  opacity:0; visibility:hidden; pointer-events:none;
+  opacity:1; visibility:visible; pointer-events:auto;
   transition:opacity 800ms ease;
 }
 
@@ -338,8 +338,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   display:flex; justify-content: center;
   pointer-events: none; /* Deja pasar clics al mapa excepto en los botones */
   /* Empiezan ocultos para que el video sea el protagonista */
-  opacity: 0;
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
   transition: opacity 1s ease, visibility 1s ease;
 }
 .chips-group{

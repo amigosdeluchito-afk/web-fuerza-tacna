@@ -26,8 +26,8 @@
   padding: 0;
   pointer-events: none; /* El wrapper es invisible al clic, solo sus hijos reaccionan */
   /* El dock de filtros también nace oculto */
-  opacity: 0;
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
   transition: opacity 1s ease, visibility 1s ease;
 }
 
