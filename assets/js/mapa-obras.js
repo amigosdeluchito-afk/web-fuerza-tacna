@@ -162,26 +162,6 @@ window.initMapEngine = async function(container) {
         console.log("UI Revelada con máxima prioridad absoluta");
     };
 
-    setTimeout(() => {
-        const videoIntro = document.getElementById('video-intro-container');
-        if (videoIntro) {
-            videoIntro.style.visibility = 'visible';
-            videoIntro.style.opacity = '1';
-            const v = videoIntro.querySelector('video');
-            if (v) { 
-                v.muted = true; 
-                v.loop = true; 
-                v.setAttribute('playsinline', '');
-                v.setAttribute('webkit-playsinline', '');
-                v.play().catch(() => {});
-            }
-        }
-        
-        // Forzamos la aparición de la UI en medio segundo, prohibiendo al navegador fallar
-        setTimeout(revealUI, 500);
-        setTimeout(initGooeyText, 800);
-    }, 50);
-
     // Configuraciones
     const stepsBack = () => (window.innerWidth <= 900 ? 4 : 3);
 
@@ -419,7 +399,13 @@ window.initMapEngine = async function(container) {
                 videoIntro.style.visibility = 'visible';
                 videoIntro.style.opacity = '1';
                 const v = videoIntro.querySelector('video');
-                if (v) { v.loop = true; v.play().catch(() => {}); }
+            if (v) { 
+                v.muted = true; 
+                v.loop = true; 
+                v.setAttribute('playsinline', '');
+                v.setAttribute('webkit-playsinline', '');
+                v.play().catch(() => {}); 
+            }
             }
             if (mapEl) {
                 mapEl.style.opacity = '0';
@@ -444,8 +430,8 @@ window.initMapEngine = async function(container) {
             const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
             if (chipsEl) { chipsEl.style.opacity = '0'; chipsEl.style.visibility = 'hidden'; }
             if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
-            setTimeout(initGooeyText, 800); 
-            setTimeout(revealUI, 1200);
+        setTimeout(initGooeyText, 500); 
+        setTimeout(revealUI, 800);
             return;
         }
 
@@ -669,8 +655,8 @@ window.initMapEngine = async function(container) {
 
         if (map) map.resize();
         
-        // Ya no llamamos a swapSegment('base') aquí para evitar doble animación,
-        // la interfaz ya fue arrancada en el bloque independiente al inicio.
+        // FORMA NATURAL RESTAURADA: Encadenamos todo desde la base de manera orgánica.
+        swapSegment('base');
     }, 500);
 
     // Función de limpieza obligatoria para Barba.js
