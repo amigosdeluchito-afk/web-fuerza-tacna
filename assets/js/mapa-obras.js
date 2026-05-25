@@ -23,6 +23,14 @@ window.initMapEngine = async function(container) {
     if (!mapEl) return;
 
     // =================================================================================
+    // FORZADO INMEDIATO DE TEXTOS: Garantiza que nunca estén vacíos en el DOM
+    // =================================================================================
+    const gText1 = target.querySelector('#gooey-text-1') || document.getElementById('gooey-text-1');
+    const gText2 = target.querySelector('#gooey-text-2') || document.getElementById('gooey-text-2');
+    if (gText1) gText1.textContent = "UNIVERSO";
+    if (gText2) gText2.textContent = "OBRAS";
+
+    // =================================================================================
     // FIX CRÍTICO: RESTAURACIÓN DE VARIABLES DE ENTORNO
     // Al faltar estas variables, la función revealUI lanzaba un error fatal invisible 
     // y el menú jamás llegaba a aparecer.
@@ -43,9 +51,9 @@ window.initMapEngine = async function(container) {
 
     // --- NUEVO: Lógica Gooey Text (Opción 1) ---
     const initGooeyText = () => {
-        const container = getEl('gooey-text-container');
-        const el1 = getEl('gooey-text-1');
-        const el2 = getEl('gooey-text-2');
+        const container = document.getElementById('gooey-text-container') || getEl('gooey-text-container');
+        const el1 = document.getElementById('gooey-text-1') || getEl('gooey-text-1');
+        const el2 = document.getElementById('gooey-text-2') || getEl('gooey-text-2');
         if (!el1 || !el2 || !container) return;
         
         el1.textContent = "UNIVERSO";
