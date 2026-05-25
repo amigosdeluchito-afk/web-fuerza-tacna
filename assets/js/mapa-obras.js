@@ -47,13 +47,13 @@ window.initMapEngine = async function(container) {
         // Esto garantiza encontrar los textos aunque vivan fuera del <main>, 
         // y a la vez evita animar la página vieja de Barba.js.
         const cList = document.querySelectorAll('#gooey-text-container');
-        const container = cList[cList.length - 1];
+        const container = cList.length > 0 ? cList[cList.length - 1] : null;
         
         const e1List = document.querySelectorAll('#gooey-text-1');
-        const el1 = e1List[e1List.length - 1];
+        const el1 = e1List.length > 0 ? e1List[e1List.length - 1] : null;
         
         const e2List = document.querySelectorAll('#gooey-text-2');
-        const el2 = e2List[e2List.length - 1];
+        const el2 = e2List.length > 0 ? e2List[e2List.length - 1] : null;
 
         if (!el1 || !el2 || !container) return;
         
