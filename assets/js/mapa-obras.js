@@ -51,6 +51,15 @@ window.initMapEngine = async function(container) {
         if (container._gooeyActive) return; // Evitar que se duplique el bucle
         container._gooeyActive = true;
 
+        // INYECCIÓN DE SEGURIDAD: Si no existe el filtro SVG en el HTML, el navegador 
+        // oculta todo el texto al aplicar url(#threshold). Esto garantiza que siempre exista.
+        if (!document.getElementById('threshold')) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.style.display = 'none';
+            svg.innerHTML = '<defs><filter id="threshold"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" /><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140" /></filter></defs>';
+            document.body.appendChild(svg);
+        }
+
         const texts = [
             "BIENVENIDO A TACNA",
             "EL FUTURO SE CONSTRUYE HOY",
@@ -76,12 +85,12 @@ window.initMapEngine = async function(container) {
         const setMorph = (fraction) => {
             const blurIn = Math.min(8 / fraction - 8, 100);
             el2.style.filter = `blur(${blurIn}px)`;
-            el2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+            el2.style.opacity = Math.pow(fraction, 0.4).toFixed(3);
 
             const f1 = 1 - fraction;
             const blurOut = Math.min(8 / f1 - 8, 100);
             el1.style.filter = `blur(${blurOut}px)`;
-            el1.style.opacity = `${Math.pow(f1, 0.4) * 100}%`;
+            el1.style.opacity = Math.pow(f1, 0.4).toFixed(3);
         };
 
         function animate() {
