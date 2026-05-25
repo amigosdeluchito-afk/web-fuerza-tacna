@@ -27,8 +27,10 @@ window.initMapEngine = async function(container) {
     // =================================================================================
     const gText1 = target.querySelector('#gooey-text-1') || document.getElementById('gooey-text-1');
     const gText2 = target.querySelector('#gooey-text-2') || document.getElementById('gooey-text-2');
+    const gContainer = target.querySelector('#gooey-text-container') || document.getElementById('gooey-text-container');
     if (gText1) gText1.textContent = "UNIVERSO";
     if (gText2) gText2.textContent = "OBRAS";
+    if (gContainer) gContainer.style.display = 'flex';
 
     // =================================================================================
     // FIX CRÍTICO: RESTAURACIÓN DE VARIABLES DE ENTORNO
@@ -59,6 +61,7 @@ window.initMapEngine = async function(container) {
         el1.textContent = "UNIVERSO";
         el2.textContent = "OBRAS";
         
+        container.style.display = 'flex';
         container.style.opacity = '1';
         container.style.visibility = 'visible';
         container.style.filter = 'none';
