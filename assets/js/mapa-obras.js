@@ -27,7 +27,7 @@ window.initMapEngine = async function(container) {
         window.mapInstance = null;
     }
 
-    // Función auxiliar para buscar elementos de manera natural (soporta DOM global)
+    // Función auxiliar para buscar elementos solo dentro del nuevo contenedor
     const getEl = (id) => target.querySelector('#' + id) || document.getElementById(id);
 
     // --- NUEVO: Lógica Gooey Text (Opción 1) ---
