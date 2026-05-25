@@ -504,7 +504,10 @@ window.initMapEngine = async function(container) {
                 map.setCenter([cx, cy]);
             }
 
-            target.querySelectorAll('.chips, .fp, #resultsDock').forEach(el => el.style.visibility = 'visible');
+            target.querySelectorAll('.chips, .fp, #resultsDock').forEach(el => {
+                el.style.visibility = 'visible';
+                el.style.opacity = '1';
+            });
             
             updateHud(key); 
             updateLegendVisibility(key);
@@ -640,8 +643,8 @@ window.initMapEngine = async function(container) {
         // Ya no arrancamos swapSegment('base') de inmediato
 
         // Inicializar menús de filtros inmediatamente aunque estemos en base
-        buildFilterOptions();
-        attachFilterEvents();
+        if (typeof buildFilterOptions === 'function') buildFilterOptions();
+        if (typeof attachFilterEvents === 'function') attachFilterEvents();
 
         // Sincronización de entrada: Menú -> Texto
         setTimeout(() => {
