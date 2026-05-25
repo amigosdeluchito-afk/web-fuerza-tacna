@@ -2,15 +2,29 @@
    MAPA-OBRAS.JS - CONFIGURACIÓN GLOBAL Y NÚCLEO DEL MAPA
    ========================================================= */
 
-window.initLeafletMap = function(container) {
+async function loadMapLibre() {
+    if (window.maplibregl) return;
+    return new Promise((resolve) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css';
+        document.head.appendChild(link);
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js';
+        script.onload = resolve;
+        document.head.appendChild(script);
+    });
+}
+
+window.initMapEngine = async function(container) {
     const target = container || document;
     const mapEl = target.querySelector('#map');
     if (!mapEl) return;
 
     // Limpieza de mapa previo para que no choque con Barba.js
-    if (window.leafletMapInstance) {
-        window.leafletMapInstance.remove();
-        window.leafletMapInstance = null;
+    if (window.mapInstance) {
+        window.mapInstance.remove();
+        window.mapInstance = null;
     }
 
     // Función auxiliar para buscar elementos solo dentro del nuevo contenedor
