@@ -67,9 +67,9 @@ window.initMapEngine = async function(container) {
         }
 
         const texts = [
-            "BIENVENIDO A TACNA",
-            "EL FUTURO SE CONSTRUYE HOY",
-            "OBRAS FUERZA TACNA"
+            "UNIVERSO OBRAS",
+            "FUERZA TACNA",
+            "EL FUTURO ES AHORA"
         ];
 
         container.style.setProperty('display', 'flex', 'important');
