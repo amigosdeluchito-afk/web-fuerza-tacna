@@ -48,16 +48,86 @@ window.initMapEngine = async function(container) {
         const el2 = document.getElementById('gooey-text-2') || getEl('gooey-text-2');
         if (!el1 || !el2 || !container) return;
         
-        el1.textContent = "UNIVERSO";
-        el2.textContent = "OBRAS";
-        
+        if (container._gooeyActive) return; // Evitar que se duplique el bucle
+        container._gooeyActive = true;
+
+        const texts = [
+            "UNIVERSO OBRAS",
+            "FUERZA TACNA",
+            "EL FUTURO ES AHORA"
+        ];
+
         container.style.display = 'flex';
         container.style.opacity = '1';
         container.style.visibility = 'visible';
-        container.style.filter = 'none';
-        
-        console.log("Texto central listo, enviando evento de finalización para KPIs...");
-        window.dispatchEvent(new CustomEvent('gooeyTextFinished'));
+        container.style.filter = 'url(#threshold)';
+
+        let textIndex = 0;
+        let time = new Date();
+        let morph = 0;
+        const morphTime = 2.0; 
+        const cooldownTime = 1.2; 
+        let cooldown = cooldownTime;
+
+        // Colocamos el primer texto de forma inicial
+        el1.textContent = texts[0];
+        el2.textContent = "";
+
+        const setMorph = (fraction) => {
+            const blurIn = Math.min(8 / fraction - 8, 100);
+            el2.style.filter = `blur(${blurIn}px)`;
+            el2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+
+            const f1 = 1 - fraction;
+            const blurOut = Math.min(8 / f1 - 8, 100);
+            el1.style.filter = `blur(${blurOut}px)`;
+            el1.style.opacity = `${Math.pow(f1, 0.4) * 100}%`;
+        };
+
+        function animate() {
+            if (!document.body.contains(container) || !container._gooeyActive) return;
+
+            const newTime = new Date();
+            const dt = (newTime.getTime() - time.getTime()) / 1000;
+            time = newTime;
+
+            const shouldIncrementIndex = cooldown > 0;
+            cooldown -= dt;
+
+            if (cooldown <= 0) {
+                if (shouldIncrementIndex) {
+                    // Si ya mostramos todos los textos, apagamos y revelamos los KPIs
+                    if (textIndex >= texts.length - 1) {
+                        container.style.opacity = '0';
+                        container._gooeyActive = false;
+                        setTimeout(() => { container.style.display = 'none'; }, 2000);
+                        
+                        console.log("Gooey: Secuencia completada. Iniciando KPIs...");
+                        window.dispatchEvent(new CustomEvent('gooeyTextFinished'));
+                        return;
+                    }
+
+                    textIndex++;
+                    el1.textContent = texts[textIndex - 1];
+                    el2.textContent = texts[textIndex];
+                }
+
+                morph -= cooldown;
+                cooldown = 0;
+                let fraction = morph / morphTime;
+                if (fraction > 1) {
+                    cooldown = cooldownTime;
+                    fraction = 1;
+                }
+                setMorph(fraction);
+            } else {
+                morph = 0;
+                if (textIndex === 0) setMorph(0);
+                else setMorph(1);
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
     };
 
     const revealUI = () => {
