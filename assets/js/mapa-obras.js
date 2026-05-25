@@ -63,21 +63,18 @@ window.initMapEngine = async function(container) {
         // INYECCIÓN DE SEGURIDAD: Si no existe el filtro SVG en el HTML, el navegador 
         // oculta todo el texto al aplicar url(#threshold). Esto garantiza que siempre exista.
         if (!document.getElementById('threshold')) {
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.style.display = 'none';
-            svg.innerHTML = '<defs><filter id="threshold"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" /><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140" /></filter></defs>';
-            document.body.appendChild(svg);
+            document.body.insertAdjacentHTML('beforeend', '<svg style="display:none"><defs><filter id="threshold"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" /><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140" /></filter></defs></svg>');
         }
 
         const texts = [
-            "UNIVERSO OBRAS",
-            "FUERZA TACNA",
-            "EL FUTURO ES AHORA"
+            "BIENVENIDO A TACNA",
+            "EL FUTURO SE CONSTRUYE HOY",
+            "OBRAS FUERZA TACNA"
         ];
 
-        container.style.display = 'flex';
-        container.style.opacity = '1';
-        container.style.visibility = 'visible';
+        container.style.setProperty('display', 'flex', 'important');
+        container.style.setProperty('opacity', '1', 'important');
+        container.style.setProperty('visibility', 'visible', 'important');
         container.style.filter = 'url(#threshold)';
 
         let textIndex = 0;
