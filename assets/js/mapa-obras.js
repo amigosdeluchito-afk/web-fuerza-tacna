@@ -23,14 +23,17 @@ window.initMapEngine = async function(container) {
     if (!mapEl) return;
 
     // =================================================================================
-    // FORZADO INMEDIATO DE TEXTOS: Garantiza que nunca estén vacíos en el DOM
+    // PERRO GUARDIÁN (WATCHDOG): Bloquea de forma permanente cualquier script fantasma 
+    // que intente vaciar u ocultar el texto central después de cargar la página.
     // =================================================================================
-    const gText1 = target.querySelector('#gooey-text-1') || document.getElementById('gooey-text-1');
-    const gText2 = target.querySelector('#gooey-text-2') || document.getElementById('gooey-text-2');
-    const gContainer = target.querySelector('#gooey-text-container') || document.getElementById('gooey-text-container');
-    if (gText1) gText1.textContent = "UNIVERSO";
-    if (gText2) gText2.textContent = "OBRAS";
-    if (gContainer) gContainer.style.display = 'flex';
+    setInterval(() => {
+        const g1 = document.getElementById('gooey-text-1');
+        const g2 = document.getElementById('gooey-text-2');
+        const gc = document.getElementById('gooey-text-container');
+        if (g1 && g1.textContent !== "UNIVERSO") g1.textContent = "UNIVERSO";
+        if (g2 && g2.textContent !== "OBRAS") g2.textContent = "OBRAS";
+        if (gc && gc.style.display !== 'flex') gc.style.setProperty('display', 'flex', 'important');
+    }, 200);
 
     // =================================================================================
     // FIX CRÍTICO: RESTAURACIÓN DE VARIABLES DE ENTORNO

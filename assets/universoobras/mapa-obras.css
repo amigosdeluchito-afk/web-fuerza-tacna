@@ -68,6 +68,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   text-shadow: 0 10px 30px rgba(0,0,0,0.6);
   opacity: 1 !important;
   visibility: visible !important;
+  display: block !important;
 }
 
 /* --- GRID DE TARJETAS KPI (ESTILO REACT PORT) --- */
