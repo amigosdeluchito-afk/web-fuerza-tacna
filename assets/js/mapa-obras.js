@@ -43,9 +43,11 @@ window.initMapEngine = async function(container) {
 
     // --- NUEVO: Lógica Gooey Text (Opción 1) ---
     const initGooeyText = () => {
-        const container = document.getElementById('gooey-text-container') || getEl('gooey-text-container');
-        const el1 = document.getElementById('gooey-text-1') || getEl('gooey-text-1');
-        const el2 = document.getElementById('gooey-text-2') || getEl('gooey-text-2');
+        // FIX BARBA.JS: Buscamos estrictamente en el contenedor nuevo (target), 
+        // de lo contrario getElementById agarra la página vieja oculta y la anima en el limbo.
+        const container = target.querySelector('#gooey-text-container');
+        const el1 = target.querySelector('#gooey-text-1');
+        const el2 = target.querySelector('#gooey-text-2');
         if (!el1 || !el2 || !container) return;
         
         if (container._gooeyActive) return; // Evitar que se duplique el bucle
@@ -61,9 +63,9 @@ window.initMapEngine = async function(container) {
         }
 
         const texts = [
-            "BIENVENIDO A TACNA",
-            "EL FUTURO SE CONSTRUYE HOY",
-            "OBRAS FUERZA TACNA"
+            "UNIVERSO OBRAS",
+            "FUERZA TACNA",
+            "EL FUTURO ES AHORA"
         ];
 
         container.style.display = 'flex';
