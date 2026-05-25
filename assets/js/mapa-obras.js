@@ -52,9 +52,9 @@ window.initMapEngine = async function(container) {
         container._gooeyActive = true;
 
         const texts = [
-            "UNIVERSO OBRAS",
-            "FUERZA TACNA",
-            "EL FUTURO ES AHORA"
+            "BIENVENIDO A TACNA",
+            "EL FUTURO SE CONSTRUYE HOY",
+            "OBRAS FUERZA TACNA"
         ];
 
         container.style.display = 'flex';
