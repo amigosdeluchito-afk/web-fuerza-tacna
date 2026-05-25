@@ -43,11 +43,18 @@ window.initMapEngine = async function(container) {
 
     // --- NUEVO: Lógica Gooey Text (Opción 1) ---
     const initGooeyText = () => {
-        // FIX BARBA.JS: Buscamos estrictamente en el contenedor nuevo (target), 
-        // de lo contrario getElementById agarra la página vieja oculta y la anima en el limbo.
-        const container = target.querySelector('#gooey-text-container');
-        const el1 = target.querySelector('#gooey-text-1');
-        const el2 = target.querySelector('#gooey-text-2');
+        // FIX SUPREMO: Usamos querySelectorAll y tomamos siempre el último elemento.
+        // Esto garantiza encontrar los textos aunque vivan fuera del <main>, 
+        // y a la vez evita animar la página vieja de Barba.js.
+        const cList = document.querySelectorAll('#gooey-text-container');
+        const container = cList[cList.length - 1];
+        
+        const e1List = document.querySelectorAll('#gooey-text-1');
+        const el1 = e1List[e1List.length - 1];
+        
+        const e2List = document.querySelectorAll('#gooey-text-2');
+        const el2 = e2List[e2List.length - 1];
+
         if (!el1 || !el2 || !container) return;
         
         if (container._gooeyActive) return; // Evitar que se duplique el bucle
@@ -393,7 +400,8 @@ window.initMapEngine = async function(container) {
             pendingKey = null;
             isAutoCenterBlocked = false; // Resetear bandera al volver a inicio
 
-            if (videoIntro) videoIntro._gooeyActive = false; // Reset para permitir reinicio de texto
+            const allGooey = document.querySelectorAll('#gooey-text-container');
+            if (allGooey.length > 0) allGooey[allGooey.length - 1]._gooeyActive = false; // Reset real del texto
 
             // Cerrar ficha de obra si está abierta para limpiar la pantalla
             try {
