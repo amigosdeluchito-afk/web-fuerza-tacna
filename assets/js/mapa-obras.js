@@ -161,318 +161,44 @@ window.initLeafletMap = function(container) {
         if (hud) hud.textContent = `${label} | zoom: ${map.getZoom().toFixed(2)}`;
     }
 
-    // SEGURIDAD: Si el div #map ya tiene un mapa de Leaflet, abortamos para evitar el crash.
-    if (mapEl._leaflet_id) {
-        console.warn("initLeafletMap: El mapa ya estaba inicializado. Abortando para evitar colisión.");
-        return;
-    }
+    await loadMapLibre();
 
-    // Inicializar Mapa
-    const map = L.map(mapEl, {
-        crs: L.CRS.Simple,
-        zoomControl: false,
-        zoomSnap: 0.1,
-        zoomDelta: 0.5,
-        inertia: true,
-        inertiaDeceleration: 3000,
-        maxBoundsViscosity: 1.0,
-
-        // FIX SUPREMO 4.0: Apagamos los motores nativos frágiles
-        scrollWheelZoom: false, // Apagamos el lector de rueda nativo de Leaflet
-        zoomAnimation: false,
-        markerZoomAnimation: false
+    const map = new maplibregl.Map({
+        container: mapEl,
+        style: { version: 8, sources: {}, layers: [] },
+        center: [0, 0],
+        zoom: 0,
+        maxPitch: 0,
+        dragRotate: false,
+        attributionControl: false
     });
+    
     mapEl.style.background = 'transparent';
-    window.leafletMapInstance = map;
-
-    // =========================================================================
-    // FIX SUPREMO 4.0: MOTOR DE ZOOM CUSTOM (BYPASS ABSOLUTO)
-    // Reemplaza por completo el motor de rueda de Leaflet. 
-    // Elimina el congelamiento en zonas densas garantizando un 100% de respuesta.
-    // =========================================================================
-    let targetZoom = null;
-    let zoomFrame = null;
-
-    mapEl.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        e.stopPropagation(); // Destruye conflictos con SmoothScroll de raíz
-
-        const rawDelta = e.deltaY * -1;
-        if (rawDelta === 0) return;
-
-        // Sensibilidad: Trackpad (fluido) vs Ratón Clásico (pasos fijos)
-        const zDelta = Math.abs(rawDelta) < 50 ? (rawDelta * 0.015) : (Math.sign(rawDelta) * 0.4);
-
-        if (targetZoom === null) targetZoom = map.getZoom();
-        targetZoom += zDelta;
-
-        // Respetar límites
-        if (targetZoom < map.getMinZoom()) targetZoom = map.getMinZoom();
-        if (targetZoom > map.getMaxZoom()) targetZoom = map.getMaxZoom();
-
-        if (!zoomFrame) {
-            zoomFrame = requestAnimationFrame(() => {
-                try {
-                    const mousePos = map.mouseEventToContainerPoint(e);
-                    map.setZoomAround(mousePos, targetZoom, { animate: false });
-                } catch(err) {}
-                targetZoom = null;
-                zoomFrame = null;
-            });
-        }
-    }, { passive: false, capture: true });
+    window.mapInstance = map;
     
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
-    if (!IS_MOBILE) L.control.zoom({ position: 'bottomright' }).addTo(map);
-    const RESULT_ZOOM = IS_MOBILE ? 0 : 0.1;
+    if (!IS_MOBILE) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
-    let currentOverlay = null;
-    let currentBounds  = null;
-    let currentKey     = null;
-    let isSwapping     = false;
-    let pendingKey     = null;
-    let isAutoCenterBlocked = false; // Bandera para evitar que el mapa robe el foco durante una búsqueda
-    let GLOBAL_ZOOM    = null;
-    let __LAST_ZOOM = null;
-    let __LABELS_UNLOCKED = false;
-    let LABEL_MIN_ZOOM = null;
-
-    let updateLabelsTimer;
-    const requestLabelsUpdate = () => {
-        clearTimeout(updateLabelsTimer);
-        updateLabelsTimer = setTimeout(updateLabelsVisibility, 100);
-    };
-
-    map.on('zoomstart', ()=>{ 
-        try {
-            __LAST_ZOOM = map.getZoom(); 
-            clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
-            hideAllLabels();
-        } catch(e){}
-    });
-    map.on('zoomend', () => {
-        try {
-            const z = map.getZoom();
-            if (!__LABELS_UNLOCKED && typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 >= LABEL_MIN_ZOOM) { __LABELS_UNLOCKED = true; }
-            updateHud(currentKey ?? '—');
-            requestLabelsUpdate();
-        } catch(e){}
-    });
-    map.on('moveend', requestLabelsUpdate);
-
-    const pins = L.layerGroup().addTo(map);
-    const relayoutDebounced = (() => { let t; return () => { clearTimeout(t); t = setTimeout(relayoutSoon, 30); }; })();
-    let PINS_LOADING = new Set();
-
-    function hideAllLabels(){
-        // Ocultamiento en lote instantáneo usando la GPU (O(1) DOM operation)
-        if (mapEl) mapEl.classList.add('labels-suspended');
-    }
-
+    let currentKey = null;
+    let isSwapping = false;
+    let pendingKey = null;
+    let isAutoCenterBlocked = false;
+    
     window.__OBRA_MARKERS = new Map();
     window.__OBRA_DATA    = new Map();
-    window.__OBRA_LABELS = new Map();
-    window.__THUMB_STATUS = new Map();
-    window.__MISSING_THUMBS = new Set();
     window.SHEET_CACHE = window.SHEET_CACHE || Object.create(null);
-    
-    // Nota: Las utilidades como safe(), twoLineName(), etc., se toman de mapa-utils.js
+    let PINS_LOADING = new Set();
 
-    const LAST_LABEL_POS = new Map();
-    function cupoSegunZoom(z){
-        const z0 = (typeof LABEL_MIN_ZOOM === 'number') ? LABEL_MIN_ZOOM : (window.BASE_ZOOM ?? z);
-        const dz = z - z0;
-        if (dz < 0.00) return 0;
-        if (dz < 0.35) return 10;
-        if (dz < 0.80) return 18;
-        if (dz < 1.20) return 36;
-        if (dz < 1.60) return 72;
-        return 120;
-    }
-
-    function updateLabelsVisibility(){
-        const z = map.getZoom();
-        if (!__LABELS_UNLOCKED) {
-            if (typeof LABEL_MIN_ZOOM === 'number' && z + 1e-6 < LABEL_MIN_ZOOM){ hideAllLabels(); return; }
-            __LABELS_UNLOCKED = true;
-        }
-        layoutEtiquetas();
-    }
-
-    function relayoutSoon(){ requestAnimationFrame(() => requestAnimationFrame(() => { updateLabelsVisibility(); })); }
-
-    function layoutEtiquetas(){
-        // FIX VITAL: Quitar la suspensión de GPU ANTES de medir. 
-        // Si medimos mientras está suspendido, el ancho dará 0 y forzará 120px de separación irreal.
-        if (mapEl) mapEl.classList.remove('labels-suspended');
-        
-        try {
-        const z  = map.getZoom();
-        const z0 = (typeof LABEL_MIN_ZOOM === 'number') ? LABEL_MIN_ZOOM : (window.BASE_ZOOM ?? z);
-        const N  = cupoSegunZoom(z);
-        const k = Math.min(1, Math.max(0, (z - z0) / 1.2));
-        const PIN_SIZE = 16, PIN_BORDER = 2, PIN_RADIUS = (PIN_SIZE/2) + PIN_BORDER, CLEAR = 1.5, BIAS = -4, BASE_Y = -3;
-        const dyn = Math.max(2, Math.round(9 - 5*k) + BIAS);
-        const offNear = Math.max(dyn, PIN_RADIUS + CLEAR);
-        const offFarY = 10, longX = offNear + 8, longY = offFarY + 6;
-        const yBias = (offNear <= PIN_RADIUS + CLEAR + 2) ? 2 : 0;
-        const PAD_LABEL = 4, PAD_PIN = 6;
-        const view = map.getBounds();
-        
-        const pinRects = [];
-        const pinTotalRadius = Math.ceil(PIN_RADIUS + PAD_PIN);
-
-        // OPTIMIZACIÓN 1: Extraer posiciones de los pines usando matemática pura (0 lecturas del DOM)
-        pins.eachLayer(l=>{
-            if (!(l instanceof L.Marker)) return;
-            if (l.options.icon?.options.className === 'obra-label') return;
-            const ll = l.getLatLng();  if (!view.contains(ll)) return;
-            const p = map.latLngToContainerPoint(ll);
-            pinRects.push({ left: p.x - pinTotalRadius, top: p.y - pinTotalRadius, right: p.x + pinTotalRadius, bottom: p.y + pinTotalRadius });
-        });
-
-        const cand = [];
-        const winW = window.innerWidth;
-        const winH = window.innerHeight;
-        const cx = winW / 2;
-        const cy = winH / 2;
-
-        // OPTIMIZACIÓN 2: Recolectar datos y medir etiquetas 1 sola vez en su vida
-        pins.eachLayer(l=>{
-            if (!(l instanceof L.Marker)) return;
-            if (l.options.icon?.options.className !== 'obra-label') return;
-            const ll = l.getLatLng(); if (!view.contains(ll)) return;
-            const inner = l.getElement()?.querySelector('.obra-label__inner'); if (!inner) return;
-            
-            let w = inner.getAttribute('data-w');
-            let h = inner.getAttribute('data-h');
-            if (!w || !h) {
-                const wasHidden = inner.classList.contains('is-hidden');
-                if (wasHidden) inner.classList.remove('is-hidden');
-                const rect = inner.getBoundingClientRect();
-                w = rect.width || 120; // Fallback
-                h = rect.height || 30; // Fallback
-                inner.setAttribute('data-w', w);
-                inner.setAttribute('data-h', h);
-                if (wasHidden) inner.classList.add('is-hidden');
-            } else {
-                w = parseFloat(w); h = parseFloat(h);
-            }
-
-            inner.classList.add('is-hidden');
-            const p  = map.latLngToContainerPoint(ll);
-            const key = l._leaflet_id;
-            cand.push({ key, inner, marker: l, p, w, h, score: l._obra ? obraScore(l._obra) : 0, distCentro: Math.hypot(p.x - cx, p.y - cy), wasPlaced: !!LAST_LABEL_POS.get(key) });
-        });
-
-        cand.sort((a,b)=> (b.wasPlaced - a.wasPlaced) || (b.score - a.score) || (a.distCentro - b.distCentro));
-        const baseTry = [ {x:+offNear,y:BASE_Y-yBias,ax:'left'}, {x:+offNear,y:-offFarY-yBias,ax:'left'}, {x:+offNear,y:+offFarY-yBias,ax:'left'}, {x:-offNear-4,y:BASE_Y-yBias,ax:'right'}, {x:-offNear-4,y:-offFarY-yBias,ax:'right'}, {x:-offNear-4,y:+offFarY-yBias,ax:'right'}, {x:+longX,y:BASE_Y-yBias,ax:'left'}, {x:+longX,y:-longY-yBias,ax:'left'}, {x:+longX,y:+longY-yBias,ax:'left'}, {x:-longX-4,y:BASE_Y-yBias,ax:'right'}, {x:-longX-4,y:-longY-yBias,ax:'right'}, {x:-longX-4,y:+longY-yBias,ax:'right'} ];
-        
-        const rectsLabels = [];
-        let placed = 0;
-
-        // OPTIMIZACIÓN 3: Calcular colisiones en memoria virtual (0 llamadas al DOM interlazadas)
-        for (const it of cand){
-            if (placed >= N) break;
-            const { inner, key, p, w, h } = it;
-            const remembered = LAST_LABEL_POS.get(key);
-            const tries = remembered ? [remembered, ...baseTry.filter(t => !(t.x===remembered.x && t.y===remembered.y && t.ax===remembered.ax))] : baseTry;
-            
-            let finalT = null;
-
-            for (const t of tries){
-                let l, r_edge, top, bot;
-                if (t.ax === 'left') { l = p.x + t.x; r_edge = l + w; } 
-                else if (t.ax === 'right') { r_edge = p.x + t.x; l = r_edge - w; } 
-                else { l = p.x + t.x - w/2; r_edge = p.x + t.x + w/2; }
-                
-                top = p.y + t.y;
-                bot = top + h;
-
-                if (r_edge < 0 || l > winW || bot < 0 || top > winH) continue;
-
-                let choca = false;
-                for (const rr of rectsLabels){
-                    if (!(r_edge < rr.left-PAD_LABEL || l > rr.right+PAD_LABEL || bot < rr.top-PAD_LABEL || top > rr.bottom+PAD_LABEL)){ choca = true; break; }
-                }
-                if (choca) continue;
-
-                for (const rp of pinRects){
-                    if (!(r_edge < rp.left || l > rp.right || bot < rp.top || top > rp.bottom)){ choca = true; break; }
-                }
-                if (choca) continue;
-
-                rectsLabels.push({ left: l, right: r_edge, top: top, bottom: bot });
-                LAST_LABEL_POS.set(key, { x:t.x, y:t.y, ax:t.ax }); 
-                finalT = t;
-                placed++; 
-                break;
-            }
-
-            if (!finalT){
-                const jx = (Math.random() < 0.5 ? -1 : 1) * 8, jy = (Math.random() < 0.5 ? -1 : 1) * 6;
-                const tx = offNear + jx, ty = BASE_Y - yBias + jy, ax = 'left';
-                let l = p.x + tx, r_edge = l + w, top = p.y + ty, bot = top + h;
-
-                let chocaJ = false;
-                for (const rr of rectsLabels){
-                    if (!(r_edge < rr.left-PAD_LABEL || l > rr.right+PAD_LABEL || bot < rr.top-PAD_LABEL || top > rr.bottom+PAD_LABEL)){ chocaJ = true; break; }
-                }
-                if (!chocaJ){
-                    for (const rp of pinRects){
-                        if (!(r_edge < rp.left || l > rp.right || bot < rp.top || top > rp.bottom)){ chocaJ = true; break; }
-                    }
-                }
-
-                if (!chocaJ){ 
-                    rectsLabels.push({ left: l, right: r_edge, top: top, bottom: bot });
-                    LAST_LABEL_POS.set(key, { x: tx, y: ty, ax: ax }); 
-                    finalT = { x: tx, y: ty, ax: ax };
-                    placed++; 
-                } else {
-                    LAST_LABEL_POS.delete(key);
-                }
-            }
-
-            // Escritura Batch al final
-            if (finalT) {
-                // FIX VISUAL: Ajustar el anclaje real en pantalla para las etiquetas ubicadas a la izquierda
-                let computedX = finalT.x;
-                if (finalT.ax === 'right') computedX = finalT.x - w;
-                else if (finalT.ax === 'center') computedX = finalT.x - w / 2;
-
-                inner.style.setProperty('--lx', computedX+'px'); 
-                inner.style.setProperty('--ly', finalT.y+'px'); 
-                inner.style.setProperty('--ax', finalT.ax);
-                inner.classList.remove('is-hidden');
-            }
-        }
-        } catch (err) {
-            console.error("Error en layoutEtiquetas:", err);
-        }
-    }
-
-    async function cargarPinesDesdeSheet(segmento, h, w){
+    async function cargarPinesDesdeSheet(segmento, mapLat, mapLon){
         if (PINS_LOADING.has(segmento)) return;
         PINS_LOADING.add(segmento);
-
-        // Limpieza de estados de pines previos para este segmento
-        const clearPinsInternal = () => {
-            pins.clearLayers();
-            window.__OBRA_MARKERS.clear();
-            window.__OBRA_DATA.clear();
-            window.__OBRA_LABELS.clear();
-            LAST_LABEL_POS.clear(); // Limpiar memoria de etiquetas al cambiar de mapa
-        };
 
         const TAB = window.SHEETS[segmento];
         if (!TAB){ PINS_LOADING.delete(segmento); return; }
 
         try{
-            // Utilizamos una promesa centralizada para evitar race conditions con mapa-filtros.js
             window.SHEET_FETCH_PROMISES = window.SHEET_FETCH_PROMISES || {};
             if (!window.SHEET_CACHE[segmento] && !window.SHEET_FETCH_PROMISES[segmento]){
-                // Usamos reqId y headers=1 para destruir la caché y forzar las columnas
                 const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:J&headers=1`;
                 window.SHEET_FETCH_PROMISES[segmento] = fetch(url).then(r => r.text()).then(txt => {
                     const match = txt.match(/setResponse\(([\s\S]+)\);?/);
@@ -489,7 +215,6 @@ window.initLeafletMap = function(container) {
             return;
         }
 
-        // ABORTAR si el usuario ya cambió a otro segmento mientras esperábamos la descarga
         if (currentKey !== segmento) {
             PINS_LOADING.delete(segmento);
             return;
@@ -498,8 +223,9 @@ window.initLeafletMap = function(container) {
         const obras = window.SHEET_CACHE[segmento] || [];
         const toNum = v => { if (v == null) return NaN; const n = parseFloat(String(v).trim().replace(',', '.').replace('%','')); return Number.isFinite(n) ? n : NaN; };
         
-        clearPinsInternal();
+        window.__OBRA_DATA.clear();
         const validas = [];
+        
         for (const o of obras){
             const nombre = (o.nombre || '').trim();
             const x = toNum(o.x), y = toNum(o.y);
@@ -508,121 +234,108 @@ window.initLeafletMap = function(container) {
             validas.push({ ...o, x, y, carpeta: (rawCarp && rawCarp.toLowerCase() !== 'null' && rawCarp !== '-') ? rawCarp : null });
         }
 
-        const IS_TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const dirFotos = window.FOTOS_DIR[segmento] || segmento;
-
-        // FIX INFALIBLE: Clusterización por radio (Distance-based clustering) O(N^2)
-        // Elimina el "bug de la cuadrícula" donde 2 pines pegados caían en celdas distintas y no se separaban.
+        // FASE 2: Proyección Inversa para la clusterización
+        // Usamos la resolución original para preservar el algoritmo matemático exacto de Leaflet
+        const imgH = mapLat / 0.005;
+        const imgW = mapLon / 0.005;
         const clusters = [];
-        const CLUSTER_DIST = 85; // Distancia ampliada para capturar grupos dispersos
+        const CLUSTER_DIST = 85; 
 
         validas.forEach((o) => {
-            const lat = o.y * h;
-            const lng = o.x * w;
+            const pxY = o.y * imgH;
+            const pxX = o.x * imgW;
             let found = false;
 
             for (const cluster of clusters) {
-                const dist = Math.hypot(cluster.lat - lat, cluster.lng - lng);
+                const dist = Math.hypot(cluster.pxY - pxY, cluster.pxX - pxX);
                 if (dist < CLUSTER_DIST) {
-                    cluster.points.push({ o, lat, lng });
-                    // Actualizar el Centro de Masa (Centroide) para agrupar orgánicamente
-                    cluster.lat = ((cluster.lat * (cluster.points.length - 1)) + lat) / cluster.points.length;
-                    cluster.lng = ((cluster.lng * (cluster.points.length - 1)) + lng) / cluster.points.length;
+                    cluster.points.push({ o, pxY, pxX });
+                    cluster.pxY = ((cluster.pxY * (cluster.points.length - 1)) + pxY) / cluster.points.length;
+                    cluster.pxX = ((cluster.pxX * (cluster.points.length - 1)) + pxX) / cluster.points.length;
                     found = true;
                     break;
                 }
             }
-
-            if (!found) {
-                clusters.push({ lat, lng, points: [{ o, lat, lng }] });
-            }
+            if (!found) clusters.push({ pxY, pxX, points: [{ o, pxY, pxX }] });
         });
+
+        const geojsonFeatures = [];
 
         clusters.forEach((cluster) => {
             const total = cluster.points.length;
             
             cluster.points.forEach((pt, index) => {
-                let { o, lat, lng } = pt;
+                let { o, pxY, pxX } = pt;
                 
                 if (total > 1) {
-                    // Distribución circular perfecta de 360 grados
                     const angle = index * ((Math.PI * 2) / total); 
                     const radius = 35 + (total * 7); 
-                    // FIX MATEMÁTICO: El círculo debe dibujarse alrededor del CENTRO del cluster.
-                    // Sumarlo a las coordenadas individuales causaba que los pines se empujaran unos contra otros y se fusionaran.
-                    lat = cluster.lat + Math.sin(angle) * radius;
-                    lng = cluster.lng + Math.cos(angle) * radius;
+                    pxY = cluster.pxY + Math.sin(angle) * radius;
+                    pxX = cluster.pxX + Math.cos(angle) * radius;
                 }
+
+                // Convertir de vuelta a las coordenadas 3D de MapLibre
+                const finalLng = (pxX / imgW) * mapLon;
+                const finalLat = mapLat * (1 - (pxY / imgH)); 
 
                 const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
-                const rawMonto = (o.monto || '').trim();
-                const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
+                const color = typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039';
+                const k = typeof _obraKey === 'function' ? _obraKey(o) : `${o.x}_${o.y}`;
                 
-                const color = colorPinPorEstado(estado);
-                
-                const icon = L.divIcon({ className: 'obra-pin', html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>`, iconSize: [16,16], iconAnchor: [8,8] });
-                const marker = L.marker([lat, lng], { icon, riseOnHover: true, riseOffset: 3000 }).addTo(pins);
-                const k = _obraKey(o);
-                window.__OBRA_MARKERS.set(k, marker);
-                window.__OBRA_DATA.set(k, { o, lat, lng });
+                window.__OBRA_DATA.set(k, { o, lat: finalLat, lng: finalLng });
 
-            marker.on('click', () => {
-                // Cierra la tarjeta fantasma para que no se buguee al abrir el panel de detalle
-                if (typeof marker.closeTooltip === 'function' && marker.isTooltipOpen && marker.isTooltipOpen()) {
-                    marker.closeTooltip();
-                }
-                
-                const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
-                // Timestamp dinámico que se actualiza CADA VEZ que haces clic para evitar caché de imágenes borradas o nuevas
-                const dinBuster = "?v=" + new Date().getTime();
-                // Pasamos las rutas directamente; el PanelObra se encarga de limpiar las que no existan
-                window.PanelObra.open({
-                    key: o.carpeta || `${o.nombre}|${o.x}|${o.y}`,
-                    nombre, estado, monto, distrito: o.distrito, provincia: o.provincia, descripcion: o.descripcion || '',
-                    portada: base ? `${base}/1.thumb.webp${dinBuster}` : null,
-                    fotos: base ? Array.from({length:6}, (_,i)=> `${base}/${i+1}.webp${dinBuster}`) : [],
-                    onCenter: () => map.flyTo([lat, lng], Math.max(map.getZoom(), RESULT_ZOOM), { duration: 0.6, easeLinearity: 0.25 })
+                // Empaquetar el punto para la Tarjeta de Video
+                geojsonFeatures.push({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [finalLng, finalLat] },
+                    properties: { id: k, nombre, estado, color }
                 });
-
-                // REGISTRO DE HISTORIAL (Paso 1 de la limpieza)
-                if (typeof window.recordVisit === 'function') window.recordVisit(k, segmento);
             });
+        });
 
-            const labelIcon = L.divIcon({ className: 'obra-label', html: `<div class="obra-label__inner is-hidden" style="--pin:${color}">${twoLineName(nombre)}</div>`, iconSize: [1,1], iconAnchor: [0,0] });
-            const labelMarker = L.marker([lat, lng], { icon: labelIcon, interactive:false, keyboard:false }).addTo(pins);
-            window.__OBRA_LABELS.set(k, labelMarker);
-            labelMarker._obra = o;
-            marker.on('mouseover', () => labelMarker.getElement()?.querySelector('.obra-label__inner')?.classList.add('is-hover'));
-            marker.on('mouseout', () => labelMarker.getElement()?.querySelector('.obra-label__inner')?.classList.remove('is-hover'));
+        const sourceId = 'obras-source';
+        
+        // Siempre removemos las capas visuales antes de actualizar,
+        // garantizando que los pines siempre se dibujen ENCIMA del plano base.
+        if (map.getLayer('obras-layer')) map.removeLayer('obras-layer');
+        if (map.getLayer('obras-shadow-layer')) map.removeLayer('obras-shadow-layer');
 
-            if (!IS_TOUCH){
-                const initTs = new Date().getTime();
-                marker._thumbSrc = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}/1.thumb.webp?v=${initTs}` : null;
-                const pill = estadoToPill(estado);
-                
-                let fragHTML = imgFragmentFor(segmento, o.carpeta, nombre);
-                if (fragHTML && fragHTML.includes('1.thumb.webp')) {
-                    fragHTML = fragHTML.replace(/1\.thumb\.webp/g, `1.thumb.webp?v=${initTs}`);
-                }
-                const ghostHTML = `<div class="ghost-card">${fragHTML}<div class="ghost-card__body"><div class="ghost-card__kicker">Obra <span class="pill ${pill.cls}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg> ${pill.txt}</span></div><div class="ghost-card__title">${nombre}</div><div class="ghost-card__meta">${monto}</div><div class="ghost-card__divider"></div><div class="meta-row">${(o.distrito||'-')} · ${(o.provincia||'-')}</div></div></div>`;
-                marker.bindTooltip(ghostHTML, { direction: 'top', sticky: false, className: 'ghost-tip ghost-card-tip', offset: L.point(0, -12), opacity: 1 });
-                marker.on('tooltipopen', (e) => {
-                    const tooltipEl = e.tooltip.getElement();
-                    if (tooltipEl) {
-                        const imgEl = tooltipEl.querySelector('.ghost-card__img img, img');
-                        if (imgEl && imgEl.src && imgEl.src.includes('1.thumb.webp')) {
-                            const freshUrl = imgEl.src.split('?')[0] + '?v=' + new Date().getTime();
-                            if (imgEl.src !== freshUrl) imgEl.src = freshUrl;
-                        }
-                    }
-                });
+        if (map.getSource(sourceId)) {
+            map.getSource(sourceId).setData({ type: 'FeatureCollection', features: geojsonFeatures });
+        } else {
+            map.addSource(sourceId, {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: geojsonFeatures }
+            });
+        }
+
+        // DIBUJADO GPU 1: Sombras Gaussianas Nativas
+        map.addLayer({
+            id: 'obras-shadow-layer',
+            type: 'circle',
+            source: sourceId,
+            paint: {
+                'circle-radius': 8,
+                'circle-color': '#000000',
+                'circle-opacity': 0.4,
+                'circle-translate': [0, 4],
+                'circle-blur': 0.8
             }
         });
+
+        // DIBUJADO GPU 2: Pines de Color Vectoriales
+        map.addLayer({
+            id: 'obras-layer',
+            type: 'circle',
+            source: sourceId,
+            paint: {
+                'circle-radius': 8,
+                'circle-color': ['get', 'color'],
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#ffffff'
+            }
         });
 
-        __LABELS_UNLOCKED = false;
-        LABEL_MIN_ZOOM = (window.BASE_ZOOM ?? map.getZoom()) + 0.20;
-        hideAllLabels(); updateLabelsVisibility();
         PINS_LOADING.delete(segmento);
     }
 
@@ -949,9 +662,9 @@ window.initLeafletMap = function(container) {
 
     // Función de limpieza obligatoria para Barba.js
     window.obrasCleanup = () => {
-        if (window.mapInstance) {
-            window.mapInstance.remove();
-            window.mapInstance = null;
+        if (window.leafletMapInstance) {
+            window.leafletMapInstance.remove();
+            window.leafletMapInstance = null;
         }
         document.querySelector('.app-bg')?.classList.remove('show');
     };
