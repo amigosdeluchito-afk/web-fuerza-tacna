@@ -145,31 +145,23 @@ window.initMapEngine = async function(container) {
         animate();
     };
 
-    // --- NUEVO: Función para revelar la interfaz (Chips y Sidebar) ---
     const revealUI = () => {
         const chips = target.querySelector('.chips') || document.querySelector('.chips');
-        const kpiGrid = getEl('intro-kpi-grid');
+        const kpiGrid = target.querySelector('#intro-kpi-grid') || document.getElementById('intro-kpi-grid');
         
         if (chips) { 
             chips.style.opacity = '1'; 
             chips.style.visibility = 'visible'; 
-            if (currentKey === 'base' || !currentKey) {
-                chips.classList.add('is-glass');
-            }
+            chips.classList.add('is-glass');
         }
 
         if (kpiGrid) {
             kpiGrid.classList.add('is-visible');
         }
         
-        console.log("UI Revelada de forma natural");
+        console.log("UI Revelada con máxima prioridad absoluta");
     };
 
-    // =================================================================================
-    // FIX SUPREMO: ARRANQUE INDESTRUCTIBLE DE INTERFAZ
-    // Mostramos la interfaz de inmediato. Si MapLibre tarda en descargar o falla,
-    // el usuario igual verá el video, los botones y el texto sin quedarse congelado.
-    // =================================================================================
     setTimeout(() => {
         const videoIntro = document.getElementById('video-intro-container');
         if (videoIntro) {
@@ -181,25 +173,14 @@ window.initMapEngine = async function(container) {
                 v.loop = true; 
                 v.setAttribute('playsinline', '');
                 v.setAttribute('webkit-playsinline', '');
+                v.play().catch(() => {});
             }
         }
         
-        const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
-        const dock = getEl('filtersDock');
-        if (chipsEl) { chipsEl.style.opacity = '0'; chipsEl.style.visibility = 'hidden'; }
-        if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
-        
-        setTimeout(initGooeyText, 1200); 
-        setTimeout(() => {
-            revealUI();
-            // Dejamos que el navegador dibuje la interfaz primero, 
-            // y luego le damos la orden pesada de reproducir el video.
-            setTimeout(() => {
-                const v = document.querySelector('#video-intro-container video');
-                if (v) v.play().catch(() => {});
-            }, 150);
-        }, 2000);
-    }, 100);
+        // Forzamos la aparición de la UI en medio segundo, prohibiendo al navegador fallar
+        setTimeout(revealUI, 500);
+        setTimeout(initGooeyText, 800);
+    }, 50);
 
     // Configuraciones
     const stepsBack = () => (window.innerWidth <= 900 ? 4 : 3);
@@ -463,8 +444,8 @@ window.initMapEngine = async function(container) {
             const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
             if (chipsEl) { chipsEl.style.opacity = '0'; chipsEl.style.visibility = 'hidden'; }
             if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
-            setTimeout(initGooeyText, 1200); 
-            setTimeout(revealUI, 2000);
+            setTimeout(initGooeyText, 800); 
+            setTimeout(revealUI, 1200);
             return;
         }
 
