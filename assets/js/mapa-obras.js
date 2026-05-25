@@ -183,6 +183,32 @@ window.initLeafletMap = function(container) {
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
     
+    // =========================================================================
+    // FIX ARQUITECTÓNICO DEFINITIVO: Escudo Anti-SmoothScroll y Auto-Sanación
+    // Erradica de raíz los conflictos de eventos y las "zonas muertas" del mapa.
+    // =========================================================================
+    let __lastWheelTime = 0;
+    mapEl.addEventListener('wheel', (e) => {
+        // 1. ESCUDO: Detenemos la propagación para que smoothscroll.js u otros 
+        // plugins globales en el documento NO roben el evento ni lo cancelen.
+        e.stopPropagation();
+
+        // 2. AUTO-SANACIÓN: Si pasaron más de 400ms desde el último giro, el mapa DEBE 
+        // estar en reposo. Si Leaflet indica que sigue "animando", significa que 
+        // el navegador perdió un evento y el mapa se trabó. Lo reiniciamos al instante.
+        const now = Date.now();
+        if (now - __lastWheelTime > 400) {
+            if (map._animatingZoom) {
+                map._animatingZoom = false;
+                if (map._mapPane) map._mapPane.classList.remove('leaflet-zoom-anim');
+            }
+            if (map.scrollWheelZoom && map.scrollWheelZoom._isWheeling) {
+                map.scrollWheelZoom._isWheeling = false;
+            }
+        }
+        __lastWheelTime = now;
+    }, { passive: false });
+
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) L.control.zoom({ position: 'bottomright' }).addTo(map);
     const RESULT_ZOOM = IS_MOBILE ? 0 : 0.1;
@@ -209,17 +235,6 @@ window.initLeafletMap = function(container) {
             __LAST_ZOOM = map.getZoom(); 
             clearTimeout(updateLabelsTimer); // PREVIENE LAG: Cancela el dibujado si el usuario sigue haciendo zoom
             hideAllLabels();
-            
-            // FIX INFALIBLE: Cerramos manualmente cualquier tarjeta abierta apenas inicia el zoom.
-            // Al haber apagado las animaciones CSS, esto toma 0 milisegundos y Leaflet 
-            // limpia su memoria al instante, garantizando que el hover siempre funcione.
-            if (window.__OBRA_MARKERS) {
-                for (const m of window.__OBRA_MARKERS.values()) {
-                    if (typeof m.closeTooltip === 'function' && m.isTooltipOpen && m.isTooltipOpen()) {
-                        m.closeTooltip();
-                    }
-                }
-            }
         } catch(e){}
     });
     map.on('zoomend', () => {
