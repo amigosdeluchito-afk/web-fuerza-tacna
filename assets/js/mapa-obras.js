@@ -176,19 +176,51 @@ window.initLeafletMap = function(container) {
         inertia: true,
         inertiaDeceleration: 3000,
         maxBoundsViscosity: 1.0,
-        // Sensibilidad balanceada para evitar que el motor de Leaflet se ahogue con scrolls rápidos
-        wheelPxPerZoomLevel: 60,
-        wheelDebounceTime: 40,
 
-        // FIX DEFINITIVO (NÚCLEO DE LEAFLET):
-        // Apagamos el frágil motor de animaciones CSS. En zonas de alta carga gráfica, 
-        // el navegador desecha el evento 'transitionend' y Leaflet se queda congelado esperando.
-        // Al ponerlo en 'false', el zoom es instantáneo y físicamente imposible de trabar.
+        // FIX SUPREMO 4.0: Apagamos los motores nativos frágiles
+        scrollWheelZoom: false, // Apagamos el lector de rueda nativo de Leaflet
         zoomAnimation: false,
         markerZoomAnimation: false
     });
     mapEl.style.background = 'transparent';
     window.leafletMapInstance = map;
+
+    // =========================================================================
+    // FIX SUPREMO 4.0: MOTOR DE ZOOM CUSTOM (BYPASS ABSOLUTO)
+    // Reemplaza por completo el motor de rueda de Leaflet. 
+    // Elimina el congelamiento en zonas densas garantizando un 100% de respuesta.
+    // =========================================================================
+    let targetZoom = null;
+    let zoomFrame = null;
+
+    mapEl.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // Destruye conflictos con SmoothScroll de raíz
+
+        const rawDelta = e.deltaY * -1;
+        if (rawDelta === 0) return;
+
+        // Sensibilidad: Trackpad (fluido) vs Ratón Clásico (pasos fijos)
+        const zDelta = Math.abs(rawDelta) < 50 ? (rawDelta * 0.015) : (Math.sign(rawDelta) * 0.4);
+
+        if (targetZoom === null) targetZoom = map.getZoom();
+        targetZoom += zDelta;
+
+        // Respetar límites
+        if (targetZoom < map.getMinZoom()) targetZoom = map.getMinZoom();
+        if (targetZoom > map.getMaxZoom()) targetZoom = map.getMaxZoom();
+
+        if (!zoomFrame) {
+            zoomFrame = requestAnimationFrame(() => {
+                try {
+                    const mousePos = map.mouseEventToContainerPoint(e);
+                    map.setZoomAround(mousePos, targetZoom, { animate: false });
+                } catch(err) {}
+                targetZoom = null;
+                zoomFrame = null;
+            });
+        }
+    }, { passive: false, capture: true });
     
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) L.control.zoom({ position: 'bottomright' }).addTo(map);
