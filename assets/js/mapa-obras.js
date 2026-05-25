@@ -949,9 +949,9 @@ window.initLeafletMap = function(container) {
 
     // Función de limpieza obligatoria para Barba.js
     window.obrasCleanup = () => {
-        if (window.leafletMapInstance) {
-            window.leafletMapInstance.remove();
-            window.leafletMapInstance = null;
+        if (window.mapInstance) {
+            window.mapInstance.remove();
+            window.mapInstance = null;
         }
         document.querySelector('.app-bg')?.classList.remove('show');
     };

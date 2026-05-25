@@ -1840,8 +1840,8 @@ function inits(container) {
                 initMapaTacna(container);
                 initVideoScrollFix(container);
                 initCircularTimeline(container);
-                // Paso 2: Despertar el mapa de Leaflet cuando entramos a la página del mapa
-                if (typeof initLeafletMap === 'function') initLeafletMap(container);
+                // Paso 2: Despertar el nuevo motor MapLibre cuando entramos a la página del mapa
+                if (typeof initMapEngine === 'function') initMapEngine(container);
                 // Paso 1: Despertar la lógica de los filtros que ahora vive en mapa-filtros.js
                 if (typeof initFilters === 'function') initFilters();
                 // Inicializador del cómic interactivo de la página de contacto
