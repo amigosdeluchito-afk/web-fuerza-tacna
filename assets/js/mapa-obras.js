@@ -27,8 +27,8 @@ window.initMapEngine = async function(container) {
         window.mapInstance = null;
     }
 
-    // Función auxiliar para buscar elementos solo dentro del nuevo contenedor
-    const getEl = (id) => target.querySelector('#' + id);
+    // Función auxiliar para buscar elementos de manera natural (soporta DOM global)
+    const getEl = (id) => target.querySelector('#' + id) || document.getElementById(id);
 
     // --- NUEVO: Lógica Gooey Text (Opción 1) ---
     const initGooeyText = () => {
@@ -136,7 +136,8 @@ window.initMapEngine = async function(container) {
 
     // --- NUEVO: Función para revelar la interfaz (Chips y Sidebar) ---
     const revealUI = () => {
-        const chips = target.querySelector('.chips');
+        const chips = target.querySelector('.chips') || document.querySelector('.chips');
+        const kpiGrid = getEl('intro-kpi-grid');
         
         if (chips) { 
             chips.style.opacity = '1'; 
@@ -145,8 +146,12 @@ window.initMapEngine = async function(container) {
                 chips.classList.add('is-glass');
             }
         }
+
+        if (kpiGrid) {
+            kpiGrid.classList.add('is-visible');
+        }
         
-        console.log("UI Revelada sobre el video");
+        console.log("UI Revelada de forma natural");
     };
 
     // Configuraciones
@@ -406,7 +411,8 @@ window.initMapEngine = async function(container) {
 
             // Simular "recarga" ocultando y volviendo a mostrar la UI con su delay
             const dock = getEl('filtersDock');
-            if (chips) { chips.style.opacity = '0'; chips.style.visibility = 'hidden'; }
+            const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
+            if (chipsEl) { chipsEl.style.opacity = '0'; chipsEl.style.visibility = 'hidden'; }
             if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
             setTimeout(initGooeyText, 1200); 
             setTimeout(revealUI, 2000);
@@ -640,19 +646,10 @@ window.initMapEngine = async function(container) {
         }
 
         map.resize();
-        // Ya no arrancamos swapSegment('base') de inmediato
 
-        // Inicializar menús de filtros inmediatamente aunque estemos en base
-        if (typeof buildFilterOptions === 'function') buildFilterOptions();
-        if (typeof attachFilterEvents === 'function') attachFilterEvents();
-
-        // Sincronización de entrada: Menú -> Texto
-        setTimeout(() => {
-            revealUI(); // El menú aparece primero
-            
-            // El texto central inicia 1.2 segundos después del menú
-            setTimeout(initGooeyText, 1200); 
-        }, 2000); 
+        // FORMA NATURAL: Arrancamos el mapa en su estado base (El video inicial).
+        // Esto encadena orgánicamente los temporizadores que revelan la interfaz completa.
+        swapSegment('base');
     }, 500);
 
     // Función de limpieza obligatoria para Barba.js
