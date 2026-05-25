@@ -48,101 +48,15 @@ window.initMapEngine = async function(container) {
         const el2 = getEl('gooey-text-2');
         if (!el1 || !el2 || !container) return;
         
-        if (container._gooeyActive) return; // Evitar múltiples bucles
-        container._gooeyActive = true;
-
-        const texts = [
-            "BIENVENIDO A TACNA",
-            "EL FUTURO SE CONSTRUYE HOY",
-            "OBRAS FUERZA TACNA"
-        ];
-
-        // Aparecemos el contenedor suavemente al iniciar
-        container.style.display = 'flex';
+        el1.textContent = "UNIVERSO";
+        el2.textContent = "OBRAS";
+        
         container.style.opacity = '1';
-        container.style.filter = 'url(#threshold)';
-
-        let textIndex = 0; // Empezamos desde el primer texto
-        let textsDone = 0; // Contador para finalizar la animación
-        let time = new Date();
-        let morph = 0;
-        const morphTime = 2.5; 
-        const cooldownTime = 2; 
-        let cooldown = cooldownTime;
-
-
-        const setMorph = (fraction) => {
-            // Incoming text (el2)
-            const blurIn = Math.min(8 / fraction - 8, 100);
-            el2.style.filter = `blur(${blurIn}px)`;
-            el2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-
-            // Outgoing text (el1)
-            const f1 = 1 - fraction;
-            const blurOut = Math.min(8 / f1 - 8, 100);
-            el1.style.filter = `blur(${blurOut}px)`;
-            el1.style.opacity = `${Math.pow(f1, 0.4) * 100}%`;
-        };
-
-        function animate() {
-            // Si el contenedor ya no está en el DOM (navegación Barba), detenemos el bucle
-            if (!document.body.contains(container)) return;
-
-            const newTime = new Date();
-            const dt = (newTime.getTime() - time.getTime()) / 1000;
-            time = newTime;
-
-            // Pausar lógica si el video está oculto, pero seguir actualizando el 'time' para evitar saltos
-            if (container.style.opacity === '0') {
-                requestAnimationFrame(animate);
-                return;
-            }
-
-            const shouldIncrementIndex = cooldown > 0;
-
-            cooldown -= dt;
-
-            if (cooldown <= 0) {
-                if (shouldIncrementIndex) {
-                    // Si ya terminamos el cooldown del último texto, disparamos evento
-                    if (textIndex >= texts.length - 1) {
-                        container.style.opacity = '0';
-                        container._gooeyActive = false;
-                        setTimeout(() => { container.style.display = 'none'; }, 1000);
-                        
-                        console.log("Gooey: Enviando evento de finalización...");
-                        window.dispatchEvent(new CustomEvent('gooeyTextFinished'));
-                        return;
-                    }
-
-                    textIndex++;
-                    el1.textContent = texts[textIndex - 1];
-                    el2.textContent = texts[textIndex];
-                }
-
-                morph -= cooldown;
-                cooldown = 0;
-                let fraction = morph / morphTime;
-                if (fraction > 1) {
-                    cooldown = cooldownTime;
-                    fraction = 1;
-                }
-                setMorph(fraction);
-            } else {
-                morph = 0;
-                // Aseguramos que durante el cooldown el texto actual esté nítido y visible
-                // Si es el primer texto, forzamos que se vea el1, si no, el2
-                if (textIndex === 0 && textsDone === 0) {
-                    el1.textContent = texts[0];
-                    setMorph(0); 
-                } else {
-                    setMorph(1);
-                }
-            }
-
-            requestAnimationFrame(animate);
-        }
-        animate();
+        container.style.visibility = 'visible';
+        container.style.filter = 'none';
+        
+        console.log("Texto central listo, enviando evento de finalización para KPIs...");
+        window.dispatchEvent(new CustomEvent('gooeyTextFinished'));
     };
 
     const revealUI = () => {

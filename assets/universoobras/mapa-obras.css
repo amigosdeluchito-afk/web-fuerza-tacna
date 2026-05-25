@@ -46,24 +46,26 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 12;
-  filter: url(#threshold);
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 2s ease; /* Fade-in del contenedor completo */
+  opacity: 1;
+  visibility: visible;
 }
 
 #gooey-text-container span {
-  position: absolute;
+  position: relative;
   color: #ffc300;
-  font: 900 clamp(1.2rem, 3.5vw, 35pt) 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  font: 900 clamp(3.5rem, 8vw, 7rem) 'Arial Black Web', "Arial Black", Arial, sans-serif;
   text-transform: uppercase;
   text-align: center;
   width: 100%;
   padding: 0 10%;
   user-select: none;
+  line-height: 1;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 /* --- GRID DE TARJETAS KPI (ESTILO REACT PORT) --- */
