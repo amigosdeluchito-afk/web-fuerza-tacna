@@ -672,3 +672,17 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 #ft-chat-container.ft-chat-closed #ft-chat-fab {
   pointer-events: auto !important;
 }
+
+/* =========================================================================
+   FASE 3: ADAPTACIÓN DE TARJETAS FANTASMA A MAPLIBRE
+   ========================================================================= */
+.ghost-card-popup .maplibregl-popup-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+.ghost-card-popup .maplibregl-popup-tip {
+  display: none !important;
+}
