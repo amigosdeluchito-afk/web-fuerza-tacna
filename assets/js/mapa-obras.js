@@ -176,7 +176,12 @@ window.initMapEngine = async function(container) {
             videoIntro.style.visibility = 'visible';
             videoIntro.style.opacity = '1';
             const v = videoIntro.querySelector('video');
-            if (v) { v.muted = true; v.loop = true; v.play().catch(() => {}); }
+            if (v) { 
+                v.muted = true; 
+                v.loop = true; 
+                v.setAttribute('playsinline', '');
+                v.setAttribute('webkit-playsinline', '');
+            }
         }
         
         const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
@@ -185,7 +190,15 @@ window.initMapEngine = async function(container) {
         if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
         
         setTimeout(initGooeyText, 1200); 
-        setTimeout(revealUI, 2000);
+        setTimeout(() => {
+            revealUI();
+            // Dejamos que el navegador dibuje la interfaz primero, 
+            // y luego le damos la orden pesada de reproducir el video.
+            setTimeout(() => {
+                const v = document.querySelector('#video-intro-container video');
+                if (v) v.play().catch(() => {});
+            }, 150);
+        }, 2000);
     }, 100);
 
     // Configuraciones
