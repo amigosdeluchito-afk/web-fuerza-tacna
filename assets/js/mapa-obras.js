@@ -519,36 +519,31 @@ window.initLeafletMap = function(container) {
             isAutoCenterBlocked = true; // Bloqueo preventivo
             const chip = target.querySelector(`.chip[data-map="${seg}"]`);
             chip ? chip.click() : swapSegment(seg);
-            // Esperamos con un polling más rápido y chequeo de isSwapping
             await new Promise(res=>{ const t = setInterval(()=>{ if (!isSwapping && !PINS_LOADING.has(seg) && currentKey === seg){ clearInterval(t); res(); } }, 50); });
         }
-        let m = window.__OBRA_MARKERS.get(key), d = window.__OBRA_DATA.get(key);
-        if (!m && !d){
+        let d = window.__OBRA_DATA.get(key);
+        if (!d){
             for (const s of Object.keys(window.SHEETS)){
-                if ((window.SHEET_CACHE[s] || []).some(o => _obraKey(o) === key)){ seg = s; break; }
+                if ((window.SHEET_CACHE[s] || []).some(o => (typeof _obraKey === 'function' ? _obraKey(o) : `${o.x}_${o.y}`) === key)){ seg = s; break; }
             }
             if (seg && currentKey !== seg){
                 isAutoCenterBlocked = true;
                 const chip = target.querySelector(`.chip[data-map="${seg}"]`);
                 chip ? chip.click() : swapSegment(seg);
                 await new Promise(res=>{ const t = setInterval(()=>{ if (!isSwapping && !PINS_LOADING.has(seg) && currentKey === seg){ clearInterval(t); res(); } }, 50); });
-                m = window.__OBRA_MARKERS.get(key); d = window.__OBRA_DATA.get(key);
+                d = window.__OBRA_DATA.get(key);
             }
         }
 
-        // Transición de cámara fluida
-        const flyOptions = { duration: 1.2, easeLinearity: 0.25 };
-        if (m || d) {
-            const targetLoc = m ? m.getLatLng() : [d.lat, d.lng];
-            // Iniciamos el vuelo de cámara
-            map.flyTo(targetLoc, Math.max(map.getZoom(), RESULT_ZOOM), flyOptions);
-            
-            // Solo liberamos el centrado automático cuando el vuelo termina
-            map.once('moveend', () => {
-                if (m) m.fire('click');
-                isAutoCenterBlocked = false;
+        if (d) {
+            // Transición de cámara acelerada por hardware (Vuelo 3D)
+            map.flyTo({
+                center: [d.lng, d.lat],
+                zoom: Math.max(map.getZoom(), 2),
+                speed: 1.2,
+                curve: 1.42
             });
-            // Seguridad: Si por algún motivo moveend no dispara, liberamos en 2s
+            map.once('moveend', () => { isAutoCenterBlocked = false; });
             setTimeout(() => { isAutoCenterBlocked = false; }, 2000);
         } else {
             isAutoCenterBlocked = false;
@@ -585,7 +580,7 @@ window.initLeafletMap = function(container) {
     if (window._mapResizeHandler) {
         window.removeEventListener('resize', window._mapResizeHandler);
     }
-    window._mapResizeHandler = () => { if (map) map.invalidateSize(); };
+    window._mapResizeHandler = () => { if (map) map.resize(); };
     window.addEventListener('resize', window._mapResizeHandler);
     
     // Auto-arranque de Obras
@@ -627,7 +622,7 @@ window.initLeafletMap = function(container) {
             v.play().catch(e => console.log("Esperando interacción..."));
         }
 
-        map.invalidateSize();
+        map.resize();
         // Ya no arrancamos swapSegment('base') de inmediato
 
         // Inicializar menús de filtros inmediatamente aunque estemos en base
