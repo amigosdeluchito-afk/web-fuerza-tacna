@@ -511,8 +511,8 @@ window.initMapEngine = async function(container) {
                 kpiGrid.classList.remove('is-visible', 'is-centered');
             }
 
-            setTimeout(initGooeyText, 500);  // El texto inicia a los 0.5s
             setTimeout(revealUI, 2000);      // Los chips y el footer aparecen a los 2s
+            setTimeout(initGooeyText, 2000); // El texto inicia JUNTO con el menú a los 2s
             return;
         }
 
