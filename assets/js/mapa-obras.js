@@ -157,8 +157,13 @@ window.initMapEngine = async function(container) {
             chips.classList.add('is-glass');
         }
         if (dock) {
-            dock.style.opacity = '1';
-            dock.style.visibility = 'visible';
+            if (currentKey === 'base') {
+                dock.style.opacity = '0';
+                dock.style.visibility = 'hidden';
+            } else {
+                dock.style.opacity = '1';
+                dock.style.visibility = 'visible';
+            }
         }
         if (mapEl) {
             mapEl.style.opacity = '1';
@@ -502,7 +507,7 @@ window.initMapEngine = async function(container) {
             const dock = getEl('filtersDock');
             const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
             if (chipsEl) { chipsEl.style.opacity = '1'; chipsEl.style.visibility = 'visible'; }
-            if (dock) { dock.style.opacity = '1'; dock.style.visibility = 'visible'; }
+            if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
         setTimeout(initGooeyText, 500); 
         setTimeout(revealUI, 800);
             return;
