@@ -607,7 +607,7 @@ window.initMapEngine = async function(container) {
                 map.setCenter([cx, cy]);
             }
 
-            target.querySelectorAll('.chips, .fp, #resultsDock').forEach(el => {
+            target.querySelectorAll('.chips, .fp').forEach(el => {
                 el.style.visibility = 'visible';
                 el.style.opacity = '1';
             });

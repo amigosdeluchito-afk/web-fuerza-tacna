@@ -102,8 +102,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 0 16px 0 0;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.15);
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: none;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
   transform: translateX(-110%); /* Oculto por defecto para que no tape el mapa al cargar */
   box-sizing: border-box;
 }
@@ -246,7 +246,8 @@
 }
 #resultsDock.is-hidden {
   transform: translateX(-100%); /* Al esconderse viaja 320px a la izquierda, ocultándose tras el drawer */
-  opacity: 0;
+  opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none;
 }
 #resultsDock .rd-head {
