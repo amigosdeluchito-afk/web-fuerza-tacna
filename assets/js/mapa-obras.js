@@ -512,7 +512,7 @@ window.initMapEngine = async function(container) {
             }
 
             setTimeout(revealUI, 2000);      // Los chips y el footer aparecen a los 2s
-            setTimeout(initGooeyText, 2000); // El texto inicia JUNTO con el menú a los 2s
+            setTimeout(initGooeyText, 3500); // El texto inicia DESPUÉS del menú a los 3.5s
             return;
         }
 
