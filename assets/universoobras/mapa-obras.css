@@ -79,20 +79,20 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     display: flex;
     gap: 12px; /* Espacio reducido entre tarjetas para una vista más compacta */
     z-index: 15;
-    opacity: 1 !important;
-    visibility: visible !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
     /* Añadimos 'top' a la transición con un Bezier que le dé un efecto de "empuje" orgánico */
     transition: opacity 1s ease, visibility 1s ease, top 1.8s cubic-bezier(0.19, 1, 0.22, 1);
     width: max-content;
     max-width: 95vw;
-    pointer-events: auto !important; 
+    pointer-events: none !important; 
 }
 
 /* Cuando se activa la clase, el contenedor se vuelve interactivo */
 #intro-kpi-grid.is-visible { 
-    opacity: 1; 
-    visibility: visible;
-    pointer-events: auto; 
+    opacity: 1 !important; 
+    visibility: visible !important;
+    pointer-events: auto !important; 
 }
 
 /* Nueva clase para elevar las tarjetas al centro de la pantalla */
@@ -348,8 +348,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   display:flex; justify-content: center;
   pointer-events: none; /* Deja pasar clics al mapa excepto en los botones */
   /* Empiezan ocultos para que el video sea el protagonista */
-  opacity: 1;
-  visibility: visible;
+  opacity: 0;
+  visibility: hidden;
   transition: opacity 1s ease, visibility 1s ease;
 }
 .chips-group{

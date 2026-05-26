@@ -147,14 +147,17 @@ window.initMapEngine = async function(container) {
 
     const revealUI = () => {
         const chips = target.querySelector('.chips') || document.querySelector('.chips');
-        const kpiGrid = target.querySelector('#intro-kpi-grid') || document.getElementById('intro-kpi-grid');
         const dock = getEl('filtersDock');
         const mapEl = getEl('map');
+        const footer = getEl('home-footer');
         
         if (chips) { 
             chips.style.opacity = '1'; 
             chips.style.visibility = 'visible'; 
             chips.classList.add('is-glass');
+        }
+        if (footer && currentKey === 'base') {
+            footer.classList.add('is-visible');
         }
         if (dock) {
             if (currentKey === 'base') {
@@ -171,10 +174,6 @@ window.initMapEngine = async function(container) {
             mapEl.style.pointerEvents = 'auto';
         }
 
-        if (kpiGrid) {
-            kpiGrid.classList.add('is-visible');
-        }
-        
         console.log("UI Revelada con máxima prioridad absoluta");
     };
 
@@ -505,11 +504,15 @@ window.initMapEngine = async function(container) {
 
             // Simular "recarga" ocultando y volviendo a mostrar la UI con su delay
             const dock = getEl('filtersDock');
-            const chipsEl = target.querySelector('.chips') || document.querySelector('.chips');
-            if (chipsEl) { chipsEl.style.opacity = '1'; chipsEl.style.visibility = 'visible'; }
             if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
-        setTimeout(initGooeyText, 500); 
-        setTimeout(revealUI, 800);
+
+            const kpiGrid = target.querySelector('#intro-kpi-grid') || document.getElementById('intro-kpi-grid');
+            if (kpiGrid) {
+                kpiGrid.classList.remove('is-visible', 'is-centered');
+            }
+
+            setTimeout(initGooeyText, 500);  // El texto inicia a los 0.5s
+            setTimeout(revealUI, 2000);      // Los chips y el footer aparecen a los 2s
             return;
         }
 
