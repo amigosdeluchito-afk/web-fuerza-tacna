@@ -374,7 +374,7 @@ window.initMapEngine = async function(container) {
 
                 // Convertir de vuelta a las coordenadas 3D de MapLibre
                 const finalLng = (pxX / imgW) * mapLon;
-                const finalLat = mapLat * (1 - (pxY / imgH)); 
+                const finalLat = mapLat * (pxY / imgH); 
 
                 const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
                 const color = typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039';
@@ -599,7 +599,7 @@ window.initMapEngine = async function(container) {
 
             const [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
             const cx = lon * gFx;
-            const cy = lat * (1 - gFy); // Invertimos Y porque MapLibre sube al norte
+            const cy = lat * gFy; 
 
             if (isFromBase || !isAutoCenterBlocked) {
                 map.fitBounds(bounds, { padding: 50, duration: 0 });
