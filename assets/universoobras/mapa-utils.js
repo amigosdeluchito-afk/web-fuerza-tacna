@@ -156,6 +156,8 @@ window.estadoToPill = function(estado) {
 window.imgFragmentFor = function(segmento, carpeta, alt) {
     if (!carpeta) return `<div class="ghost-card__img is-blank"></div>`;
     const src = thumbPath(segmento, carpeta);
+    if (!window.__THUMB_STATUS) window.__THUMB_STATUS = new Map();
+    if (!window.__MISSING_THUMBS) window.__MISSING_THUMBS = new Set();
     const known = window.__THUMB_STATUS.get(src);
     if (known === 'missing' || window.__MISSING_THUMBS.has(src)) return `<div class="ghost-card__img is-blank"></div>`;
     return `<img class="ghost-card__img" src="${src}" alt="${alt}" width="1280" height="720" decoding="async" loading="lazy" fetchpriority="low" onload="window.__THUMB_STATUS.set('${src}','ok')" onerror="this.onerror=null; window.__MISSING_THUMBS.add('${src}'); window.__THUMB_STATUS.set('${src}','missing'); this.outerHTML='<div class=\\'ghost-card__img is-blank\\'></div>';">`;
