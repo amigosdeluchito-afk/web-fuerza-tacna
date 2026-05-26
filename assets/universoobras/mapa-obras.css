@@ -103,11 +103,12 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .kpi-card-wrap {
     perspective: 1000px;
     /* Animación de entrada: las tarjetas vendrán desde abajo */
-    opacity: 1 !important;
-    visibility: visible !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
     transform: translateY(25px); /* Reducimos el salto inicial para que sea más sutil */
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease;
     cursor: pointer;
+    will-change: transform, opacity;
 }
 
 .kpi-card, .card-content {
@@ -117,7 +118,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
 /* Activación de la animación de entrada para cada tarjeta */
 #intro-kpi-grid.is-visible .kpi-card-wrap {
-    opacity: 1;
+    opacity: 1 !important;
+    visibility: visible !important;
     transform: translateY(0);
 }
 
@@ -139,9 +141,12 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(20, 20, 20, 0.1), rgba(0, 0, 0, 0.3));
     border: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     transition: border-color 0.5s, box-shadow 0.5s;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .kpi-card:hover {
