@@ -103,30 +103,22 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .kpi-card-wrap {
     perspective: 1000px;
     /* Animación de entrada: las tarjetas vendrán desde abajo */
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transform: translateY(25px); /* Reducimos el salto inicial para que sea más sutil */
-    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease;
     cursor: pointer;
-}
-
-.kpi-card, .card-content {
-    opacity: 1 !important;
-    visibility: visible !important;
+    transition: transform 0.3s ease; /* Transición fluida para el hover */
 }
 
 /* Activación de la animación de entrada para cada tarjeta */
-#intro-kpi-grid.is-visible .kpi-card-wrap {
+#intro-kpi-grid.is-visible .kpi-card {
     opacity: 1 !important;
     visibility: visible !important;
     transform: translateY(0);
 }
 
 /* Efecto escalonado (Stagger): Cada tarjeta espera un poco más que la anterior */
-#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(1) { transition-delay: 0.1s; }
-#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(2) { transition-delay: 0.3s; }
-#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(3) { transition-delay: 0.5s; }
-#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(4) { transition-delay: 0.7s; }
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(1) .kpi-card { transition-delay: 0.1s, 0.1s, 0s, 0s; }
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(2) .kpi-card { transition-delay: 0.3s, 0.3s, 0s, 0s; }
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(3) .kpi-card { transition-delay: 0.5s, 0.5s, 0s, 0s; }
+#intro-kpi-grid.is-visible .kpi-card-wrap:nth-child(4) .kpi-card { transition-delay: 0.7s, 0.7s, 0s, 0s; }
 
 .kpi-card-wrap:hover {
     transform: scale(1.05) rotate(-1deg); /* Rotación exacta del código original */
@@ -143,7 +135,11 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     -webkit-backdrop-filter: blur(12px);
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    transition: border-color 0.5s, box-shadow 0.5s;
+    
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(25px);
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease, border-color 0.5s, box-shadow 0.5s;
 }
 
 .kpi-card:hover {
