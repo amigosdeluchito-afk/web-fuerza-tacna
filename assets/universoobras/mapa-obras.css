@@ -108,7 +108,6 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     transform: translateY(25px); /* Reducimos el salto inicial para que sea más sutil */
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease;
     cursor: pointer;
-    will-change: transform, opacity;
 }
 
 .kpi-card, .card-content {
@@ -145,8 +144,6 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     transition: border-color 0.5s, box-shadow 0.5s;
-    transform: translateZ(0);
-    backface-visibility: hidden;
 }
 
 .kpi-card:hover {
