@@ -457,10 +457,10 @@ window.initMapEngine = async function(container) {
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
-                'text-variable-anchor': ['left', 'right', 'top', 'bottom'],
-                'text-radial-offset': 0.7,
+                'text-variable-anchor': ['right', 'left', 'bottom', 'top'],
+                'text-radial-offset': 1,
                 'text-justify': 'auto',
-                'text-padding': 15 
+                'text-padding': 20 
             },
             paint: {
                 'text-color': '#111111',
