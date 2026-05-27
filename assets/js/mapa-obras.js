@@ -471,7 +471,7 @@ window.initMapEngine = async function(container) {
                     'interpolate', ['linear'], ['zoom'],
                     4, 6.5,   // En zoom 4 (lejos), letra pequeñita (6.5px)
                     5, 10,    // En zoom 5 (distancia media), letra visible (10px)
-                    6, 15     // En zoom 6 (acercamiento), alcanza el tamaño máximo (15px)
+                    6, 12     // En zoom 6 (acercamiento), alcanza el tamaño máximo (12px)
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
@@ -479,7 +479,7 @@ window.initMapEngine = async function(container) {
                 'text-radial-offset': -0.1,
                 'text-justify': 'center',
                 'text-max-width': 12,
-                'text-padding': 15 
+                'text-padding': 2 
             },
             paint: {
                 'text-color': '#111111',
