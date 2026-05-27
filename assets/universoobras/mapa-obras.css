@@ -18,6 +18,14 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   transition:opacity 800ms ease;
 }
 
+/* Refuerzo para que el mapa reciba siempre el ratón y el scroll */
+#map,
+#map .maplibregl-canvas,
+#map .maplibregl-canvas-container,
+#map .maplibregl-control-container {
+  pointer-events: auto !important;
+}
+
 /* --- NUEVO: Contenedor del Video Intro --- */
 #video-intro-container {
   position: fixed;
@@ -91,7 +99,14 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 /* Cuando se activa la clase, el contenedor se vuelve interactivo */
 #intro-kpi-grid.is-visible { 
     visibility: visible !important;
-    pointer-events: auto !important; 
+}
+
+/* FIX DE ZOOM: Las tarjetas KPI se vuelven "traspasables" para no atrapar la rueda del ratón */
+#intro-kpi-grid,
+#intro-kpi-grid .kpi-card-wrap,
+#intro-kpi-grid .kpi-card,
+#intro-kpi-grid .card-content {
+    pointer-events: none !important;
 }
 
 /* Nueva clase para elevar las tarjetas al centro de la pantalla */
