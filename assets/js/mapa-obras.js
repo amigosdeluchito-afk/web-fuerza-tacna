@@ -228,19 +228,32 @@ window.initMapEngine = async function(container) {
     // Usamos el motor GPU de MapLibre para atrapar eventos sin lag
     // =================================================================================
     const ghostTooltip = new maplibregl.Popup({
-        closeButton: false, closeOnClick: false, className: 'ghost-card-popup', offset: [0, -10], maxWidth: '300px'
+        closeButton: false, closeOnClick: false, className: 'ghost-card-popup', offset: [0, -10], maxWidth: '300px', anchor: 'bottom'
     });
 
     // Generamos un único timestamp por sesión para no asfixiar la red al pasar el ratón
     const sessionTs = new Date().getTime();
+    let currentHoverKey = null; // Memoria para no redibujar la misma tarjeta inútilmente
+
+    // ESCUDO DE RENDIMIENTO 1: Ocultar tarjetas de inmediato si el usuario hace zoom o arrastra
+    map.on('zoomstart', () => { ghostTooltip.remove(); currentHoverKey = null; });
+    map.on('dragstart', () => { ghostTooltip.remove(); currentHoverKey = null; });
 
     map.on('mouseenter', 'obras-layer', (e) => {
+        // ESCUDO DE RENDIMIENTO 2: Corta de raíz la creación de tarjetas si la cámara está volando
+        if (map.isZooming() || map.isMoving() || map.isRotating()) return;
+
         map.getCanvas().style.cursor = 'pointer';
         if (window.matchMedia('(max-width: 600px)').matches) return; // En móvil no hay hover
         
         if (!e.features.length) return;
         const feature = e.features[0];
         const key = feature.properties.id;
+
+        // ESCUDO DE RENDIMIENTO 3: Bloqueo estricto para no recrear el HTML si seguimos en la misma obra
+        if (currentHoverKey === key) return; 
+        currentHoverKey = key;
+
         const data = window.__OBRA_DATA.get(key);
         
         if (data && data.o) {
@@ -261,7 +274,11 @@ window.initMapEngine = async function(container) {
         }
     });
 
-    map.on('mouseleave', 'obras-layer', () => { map.getCanvas().style.cursor = ''; ghostTooltip.remove(); });
+    map.on('mouseleave', 'obras-layer', () => { 
+        currentHoverKey = null;
+        map.getCanvas().style.cursor = ''; 
+        ghostTooltip.remove(); 
+    });
 
     map.on('click', 'obras-layer', (e) => {
         if (!e.features.length) return;
