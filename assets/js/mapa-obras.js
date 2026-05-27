@@ -214,8 +214,11 @@ window.initMapEngine = async function(container) {
         maxZoom: 12, /* Bloquea el colapso de precisión de WebGL en acercamientos extremos */
         maxPitch: 0,
         dragRotate: false,
-        attributionControl: false
+        attributionControl: false,
+        scrollZoom: false
     });
+    
+    map.scrollZoom.disable();
     
     mapEl.style.background = 'transparent';
     window.mapInstance = map;
