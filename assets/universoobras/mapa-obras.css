@@ -673,6 +673,12 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 /* =========================================================================
    FASE 3: ADAPTACIÓN DE TARJETAS FANTASMA A MAPLIBRE
    ========================================================================= */
+
+/* FIX DEFINITIVO DE ZOOM: Evita que la caja invisible atrape la rueda del ratón */
+.ghost-card-popup {
+  pointer-events: none !important;
+}
+
 .ghost-card-popup .maplibregl-popup-content {
   background: transparent !important;
   border: none !important;
