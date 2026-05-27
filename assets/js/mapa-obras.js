@@ -450,12 +450,17 @@ window.initMapEngine = async function(container) {
             source: sourceId,
             layout: {
                 'text-field': ['get', 'nombre'],
-                'text-size': 10,
+                'text-size': [
+                    'interpolate', ['linear'], ['zoom'],
+                    10, 9,   // En zoom 10 (lejos), texto de 9px
+                    15, 12   // En zoom 15 (cerca), texto de 12px
+                ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
                 'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
                 'text-radial-offset': 1.2,
-                'text-justify': 'auto'
+                'text-justify': 'auto',
+                'text-padding': 30 // TRUCO GOOGLE MAPS: Crea una "caja de fuerza" enorme alrededor del texto para evitar que se apiñen
             },
             paint: {
                 'text-color': '#111111',
