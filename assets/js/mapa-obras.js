@@ -329,6 +329,23 @@ window.initMapEngine = async function(container) {
         }
     });
 
+    // EVENTOS PARA CLUSTERS (Agrupaciones nativas)
+    map.on('click', 'clusters', (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+        const clusterId = features[0].properties.cluster_id;
+        map.getSource('obras-source').getClusterExpansionZoom(clusterId, (err, zoom) => {
+            if (err) return;
+            map.flyTo({
+                center: features[0].geometry.coordinates,
+                zoom: zoom,
+                speed: 1.2
+            });
+        });
+    });
+
+    map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
+
     window.__OBRA_MARKERS = new Map();
     window.__OBRA_DATA    = new Map();
     window.SHEET_CACHE = window.SHEET_CACHE || Object.create(null);
@@ -379,69 +396,30 @@ window.initMapEngine = async function(container) {
             validas.push({ ...o, x, y, carpeta: (rawCarp && rawCarp.toLowerCase() !== 'null' && rawCarp !== '-') ? rawCarp : null });
         }
 
-        // FASE 2: Proyección Inversa para la clusterización
-        // Usamos la resolución original para preservar el algoritmo matemático exacto de Leaflet
-        const imgH = mapLat / 0.005;
-        const imgW = mapLon / 0.005;
-        const clusters = [];
-        const CLUSTER_DIST = 85; 
+        // FASE 2: Empaquetado puro de datos, sin distorsionar coordenadas (Modo Google Maps)
+        const geojsonFeatures = validas.map((o) => {
+            const finalLng = o.x * mapLon;
+            const finalLat = o.y * mapLat; 
 
-        validas.forEach((o) => {
-            const pxY = o.y * imgH;
-            const pxX = o.x * imgW;
-            let found = false;
-
-            for (const cluster of clusters) {
-                const dist = Math.hypot(cluster.pxY - pxY, cluster.pxX - pxX);
-                if (dist < CLUSTER_DIST) {
-                    cluster.points.push({ o, pxY, pxX });
-                    cluster.pxY = ((cluster.pxY * (cluster.points.length - 1)) + pxY) / cluster.points.length;
-                    cluster.pxX = ((cluster.pxX * (cluster.points.length - 1)) + pxX) / cluster.points.length;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) clusters.push({ pxY, pxX, points: [{ o, pxY, pxX }] });
-        });
-
-        const geojsonFeatures = [];
-
-        clusters.forEach((cluster) => {
-            const total = cluster.points.length;
+            const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
+            const color = typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039';
+            const k = typeof _obraKey === 'function' ? _obraKey(o) : `${o.x}_${o.y}`;
             
-            cluster.points.forEach((pt, index) => {
-                let { o, pxY, pxX } = pt;
-                
-                if (total > 1) {
-                    const angle = index * ((Math.PI * 2) / total); 
-                    const radius = 35 + (total * 7); 
-                    pxY = cluster.pxY + Math.sin(angle) * radius;
-                    pxX = cluster.pxX + Math.cos(angle) * radius;
-                }
+            window.__OBRA_DATA.set(k, { o, lat: finalLat, lng: finalLng });
 
-                // Convertir de vuelta a las coordenadas 3D de MapLibre
-                const finalLng = (pxX / imgW) * mapLon;
-                const finalLat = mapLat * (pxY / imgH); 
-
-                const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
-                const color = typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039';
-                const k = typeof _obraKey === 'function' ? _obraKey(o) : `${o.x}_${o.y}`;
-                
-                window.__OBRA_DATA.set(k, { o, lat: finalLat, lng: finalLng });
-
-                // Empaquetar el punto para la Tarjeta de Video
-                geojsonFeatures.push({
-                    type: 'Feature',
-                    geometry: { type: 'Point', coordinates: [finalLng, finalLat] },
-                    properties: { id: k, nombre, estado, color }
-                });
-            });
+            return {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [finalLng, finalLat] },
+                properties: { id: k, nombre, estado, color }
+            };
         });
 
         const sourceId = 'obras-source';
         
         // Siempre removemos las capas visuales antes de actualizar,
         // garantizando que los pines siempre se dibujen ENCIMA del plano base.
+        if (map.getLayer('clusters')) map.removeLayer('clusters');
+        if (map.getLayer('cluster-count')) map.removeLayer('cluster-count');
         if (map.getLayer('obras-labels-layer')) map.removeLayer('obras-labels-layer');
         if (map.getLayer('obras-layer')) map.removeLayer('obras-layer');
         if (map.getLayer('obras-shadow-layer')) map.removeLayer('obras-shadow-layer');
@@ -451,15 +429,56 @@ window.initMapEngine = async function(container) {
         } else {
             map.addSource(sourceId, {
                 type: 'geojson',
-                data: { type: 'FeatureCollection', features: geojsonFeatures }
+                data: { type: 'FeatureCollection', features: geojsonFeatures },
+                cluster: true,
+                clusterMaxZoom: 11, // El zoom máximo antes de mostrar todo suelto
+                clusterRadius: 40   // Distancia en píxeles para agrupar pines cercanos
             });
         }
+
+        // DIBUJADO GPU 0: CLUSTERS (Agrupaciones nativas estilo Google Maps)
+        map.addLayer({
+            id: 'clusters',
+            type: 'circle',
+            source: sourceId,
+            filter: ['has', 'point_count'],
+            paint: {
+                'circle-color': [
+                    'step',
+                    ['get', 'point_count'],
+                    '#ffc300', // Amarillo Fuerza Tacna para grupos pequeños
+                    10,
+                    '#e6b000', // Ligeramente más oscuro si son más de 10
+                    30,
+                    '#cc9c00'  // Más oscuro si son más de 30
+                ],
+                'circle-radius': [ 'step', ['get', 'point_count'], 16, 10, 20, 30, 24 ],
+                'circle-stroke-width': 3,
+                'circle-stroke-color': '#801039'
+            }
+        });
+
+        // NUMERADOR DE CLUSTERS
+        map.addLayer({
+            id: 'cluster-count',
+            type: 'symbol',
+            source: sourceId,
+            filter: ['has', 'point_count'],
+            layout: {
+                'text-field': '{point_count_abbreviated}',
+                'text-size': 13
+            },
+            paint: {
+                'text-color': '#801039'
+            }
+        });
 
         // DIBUJADO GPU 1: Sombras Gaussianas Nativas
         map.addLayer({
             id: 'obras-shadow-layer',
             type: 'circle',
             source: sourceId,
+            filter: ['!', ['has', 'point_count']],
             paint: {
                 'circle-radius': 8,
                 'circle-color': '#000000',
@@ -474,6 +493,7 @@ window.initMapEngine = async function(container) {
             id: 'obras-layer',
             type: 'circle',
             source: sourceId,
+            filter: ['!', ['has', 'point_count']],
             paint: {
                 'circle-radius': 8,
                 'circle-color': ['get', 'color'],
@@ -487,6 +507,7 @@ window.initMapEngine = async function(container) {
             id: 'obras-labels-layer',
             type: 'symbol',
             source: sourceId,
+            filter: ['!', ['has', 'point_count']],
             layout: {
                 'text-field': ['get', 'nombre'],
                 'text-size': 10,
