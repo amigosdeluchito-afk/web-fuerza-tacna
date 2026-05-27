@@ -470,9 +470,9 @@ window.initMapEngine = async function(container) {
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
-                'text-variable-anchor': ['right', 'left'],
-                'text-radial-offset': 0.1,
-                'text-justify': 'auto',
+                'text-variable-anchor': ['bottom'],
+                'text-radial-offset': -0.1,
+                'text-justify': 'center',
                 'text-max-width': 12,
                 'text-padding': 15 
             },
