@@ -457,10 +457,10 @@ window.initMapEngine = async function(container) {
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
-                'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-                'text-radial-offset': 1.2,
+                'text-variable-anchor': ['left', 'right', 'top', 'bottom'],
+                'text-radial-offset': 0.7,
                 'text-justify': 'auto',
-                'text-padding': 30 // TRUCO GOOGLE MAPS: Crea una "caja de fuerza" enorme alrededor del texto para evitar que se apiñen
+                'text-padding': 15 
             },
             paint: {
                 'text-color': '#111111',
