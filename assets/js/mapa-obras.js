@@ -198,9 +198,11 @@ window.initMapEngine = async function(container) {
         if (bg) bg.classList.add("show");
     }
 
+    let lastHudLabel = 'Inicio';
     function updateHud(label){
+        if (label) lastHudLabel = label;
         const hud = getEl('zoomHud');
-        if (hud) hud.textContent = `${label} | zoom: ${map.getZoom().toFixed(2)}`;
+        if (hud) hud.textContent = `${lastHudLabel} | zoom: ${map.getZoom().toFixed(2)}`;
     }
 
     await loadMapLibre();
@@ -227,6 +229,9 @@ window.initMapEngine = async function(container) {
     
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+
+    // NUEVO: Actualizar el contador en tiempo real al hacer scroll
+    map.on('zoom', () => updateHud());
 
     // =================================================================================
     // FASE 3: INTERACTIVIDAD DE LOS PINES (CLICS Y TARJETAS FANTASMA)
