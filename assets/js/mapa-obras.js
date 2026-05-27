@@ -207,7 +207,12 @@ window.initMapEngine = async function(container) {
 
     const map = new maplibregl.Map({
         container: mapEl,
-        style: { version: 8, sources: {}, layers: [] },
+        style: { 
+            version: 8, 
+            sources: {}, 
+            layers: [],
+            glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf" 
+        },
         center: [0, 0],
         zoom: 0,
         minZoom: 2,
@@ -437,6 +442,7 @@ window.initMapEngine = async function(container) {
         
         // Siempre removemos las capas visuales antes de actualizar,
         // garantizando que los pines siempre se dibujen ENCIMA del plano base.
+        if (map.getLayer('obras-labels-layer')) map.removeLayer('obras-labels-layer');
         if (map.getLayer('obras-layer')) map.removeLayer('obras-layer');
         if (map.getLayer('obras-shadow-layer')) map.removeLayer('obras-shadow-layer');
 
@@ -473,6 +479,29 @@ window.initMapEngine = async function(container) {
                 'circle-color': ['get', 'color'],
                 'circle-stroke-width': 2,
                 'circle-stroke-color': '#ffffff'
+            }
+        });
+
+        // DIBUJADO GPU 3: Etiquetas Inteligentes Vectoriales (Anti-colisiones y Halo)
+        map.addLayer({
+            id: 'obras-labels-layer',
+            type: 'symbol',
+            source: sourceId,
+            layout: {
+                'text-field': ['get', 'nombre'],
+                'text-font': ['Open Sans Bold'],
+                'text-size': 10,
+                'text-transform': 'uppercase',
+                'text-letter-spacing': 0.05,
+                'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+                'text-radial-offset': 1.2,
+                'text-justify': 'auto'
+            },
+            paint: {
+                'text-color': '#111111',
+                'text-halo-color': '#ffffff',
+                'text-halo-width': 2,
+                'text-halo-blur': 0.5
             }
         });
 
