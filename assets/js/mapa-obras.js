@@ -464,8 +464,9 @@ window.initMapEngine = async function(container) {
                 'text-field': ['get', 'nombre'],
                 'text-size': [
                     'interpolate', ['linear'], ['zoom'],
-                    10, 7,   // En zoom 10 (lejos), texto de 7px
-                    15, 10   // En zoom 15 (cerca), texto de 10px
+                    8, 6.5,  // En zoom 8 (muy lejos), letra pequeñita (6.5px)
+                    10, 8.5, // En zoom 10 (medio), letra normal (8.5px)
+                    12, 13   // En zoom 12 (zoom máximo de tu mapa), letra grande (13px)
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
