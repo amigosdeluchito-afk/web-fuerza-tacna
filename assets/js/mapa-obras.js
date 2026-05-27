@@ -329,23 +329,6 @@ window.initMapEngine = async function(container) {
         }
     });
 
-    // EVENTOS PARA CLUSTERS (Agrupaciones nativas)
-    map.on('click', 'clusters', (e) => {
-        const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-        const clusterId = features[0].properties.cluster_id;
-        map.getSource('obras-source').getClusterExpansionZoom(clusterId, (err, zoom) => {
-            if (err) return;
-            map.flyTo({
-                center: features[0].geometry.coordinates,
-                zoom: zoom,
-                speed: 1.2
-            });
-        });
-    });
-
-    map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
-    map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
-
     window.__OBRA_MARKERS = new Map();
     window.__OBRA_DATA    = new Map();
     window.SHEET_CACHE = window.SHEET_CACHE || Object.create(null);
@@ -429,56 +412,15 @@ window.initMapEngine = async function(container) {
         } else {
             map.addSource(sourceId, {
                 type: 'geojson',
-                data: { type: 'FeatureCollection', features: geojsonFeatures },
-                cluster: true,
-                clusterMaxZoom: 11, // El zoom máximo antes de mostrar todo suelto
-                clusterRadius: 40   // Distancia en píxeles para agrupar pines cercanos
+                data: { type: 'FeatureCollection', features: geojsonFeatures }
             });
         }
-
-        // DIBUJADO GPU 0: CLUSTERS (Agrupaciones nativas estilo Google Maps)
-        map.addLayer({
-            id: 'clusters',
-            type: 'circle',
-            source: sourceId,
-            filter: ['has', 'point_count'],
-            paint: {
-                'circle-color': [
-                    'step',
-                    ['get', 'point_count'],
-                    '#ffc300', // Amarillo Fuerza Tacna para grupos pequeños
-                    10,
-                    '#e6b000', // Ligeramente más oscuro si son más de 10
-                    30,
-                    '#cc9c00'  // Más oscuro si son más de 30
-                ],
-                'circle-radius': [ 'step', ['get', 'point_count'], 16, 10, 20, 30, 24 ],
-                'circle-stroke-width': 3,
-                'circle-stroke-color': '#801039'
-            }
-        });
-
-        // NUMERADOR DE CLUSTERS
-        map.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: sourceId,
-            filter: ['has', 'point_count'],
-            layout: {
-                'text-field': '{point_count_abbreviated}',
-                'text-size': 13
-            },
-            paint: {
-                'text-color': '#801039'
-            }
-        });
 
         // DIBUJADO GPU 1: Sombras Gaussianas Nativas
         map.addLayer({
             id: 'obras-shadow-layer',
             type: 'circle',
             source: sourceId,
-            filter: ['!', ['has', 'point_count']],
             paint: {
                 'circle-radius': 8,
                 'circle-color': '#000000',
@@ -493,7 +435,6 @@ window.initMapEngine = async function(container) {
             id: 'obras-layer',
             type: 'circle',
             source: sourceId,
-            filter: ['!', ['has', 'point_count']],
             paint: {
                 'circle-radius': 8,
                 'circle-color': ['get', 'color'],
@@ -507,7 +448,6 @@ window.initMapEngine = async function(container) {
             id: 'obras-labels-layer',
             type: 'symbol',
             source: sourceId,
-            filter: ['!', ['has', 'point_count']],
             layout: {
                 'text-field': ['get', 'nombre'],
                 'text-size': 10,
