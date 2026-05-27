@@ -470,8 +470,8 @@ window.initMapEngine = async function(container) {
                 'text-size': [
                     'interpolate', ['linear'], ['zoom'],
                     4, 6.5,   // En zoom 4 (lejos), letra pequeñita (6.5px)
-                    5, 10,    // En zoom 5 (distancia media), letra visible (10px)
-                    6, 12     // En zoom 6 (acercamiento), alcanza el tamaño máximo (12px)
+                    5, 8.5,   // En zoom 5 (distancia media), letra visible (8.5px)
+                    6, 10     // En zoom 6 (acercamiento), alcanza el tamaño máximo (10px)
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
@@ -482,9 +482,9 @@ window.initMapEngine = async function(container) {
                 'text-padding': 2 
             },
             paint: {
-                'text-color': '#111111',
+                'text-color': '#000000',
                 'text-halo-color': '#ffffff',
-                'text-halo-width': 2,
+                'text-halo-width': 3,
                 'text-halo-blur': 0.5
             }
         });
