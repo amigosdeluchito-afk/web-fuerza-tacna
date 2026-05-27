@@ -259,6 +259,18 @@ window.initMapEngine = async function(container) {
         hoverRAF = requestAnimationFrame(() => {
             hoverRAF = null;
             
+            // EVITA ERROR EN CONSOLA: Verificamos que la capa de obras exista antes de intentar leerla.
+            // Esto es crucial porque en la vista "Inicio" (base) esta capa es eliminada del mapa.
+            if (!map.getLayer('obras-layer')) {
+                if (currentHoverKey !== null) {
+                    clearTimeout(hoverIntentTimer);
+                    currentHoverKey = null;
+                    map.getCanvas().style.cursor = '';
+                    ghostTooltip.remove();
+                }
+                return;
+            }
+
             // Realizamos la consulta solo 1 vez por frame, y limitada solo a los pines
             const features = map.queryRenderedFeatures(lastMouseEvent.point, { layers: ['obras-layer'] });
             
