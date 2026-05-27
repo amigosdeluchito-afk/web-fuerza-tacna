@@ -473,7 +473,7 @@ window.initMapEngine = async function(container) {
                 'text-radial-offset': -0.2,
                 'text-justify': 'auto',
                 'text-max-width': 12,
-                'text-padding': 15 
+                'text-padding': 45 
             },
             paint: {
                 'text-color': '#111111',
