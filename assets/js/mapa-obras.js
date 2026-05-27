@@ -234,50 +234,71 @@ window.initMapEngine = async function(container) {
     // Generamos un único timestamp por sesión para no asfixiar la red al pasar el ratón
     const sessionTs = new Date().getTime();
     let currentHoverKey = null; // Memoria para no redibujar la misma tarjeta inútilmente
+    let hoverIntentTimer = null; // NUEVO: Temporizador anti-colapso
+    let hoverRAF = null;
+    let lastMouseEvent = null;
 
     // ESCUDO DE RENDIMIENTO 1: Ocultar tarjetas de inmediato si el usuario hace zoom o arrastra
-    map.on('zoomstart', () => { ghostTooltip.remove(); currentHoverKey = null; });
-    map.on('dragstart', () => { ghostTooltip.remove(); currentHoverKey = null; });
+    map.on('zoomstart', () => { clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
+    map.on('dragstart', () => { clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
 
-    map.on('mouseenter', 'obras-layer', (e) => {
-        // ESCUDO DE RENDIMIENTO 2: Corta de raíz la creación de tarjetas si la cámara está volando
+    // SOLUCIÓN DEFINITIVA DE RENDIMIENTO (Reemplazo de mouseenter/mouseleave)
+    // Evita que MapLibre ejecute queryRenderedFeatures miles de veces de forma interna
+    map.on('mousemove', (e) => {
         if (map.isZooming() || map.isMoving() || map.isRotating()) return;
-
-        map.getCanvas().style.cursor = 'pointer';
         if (window.matchMedia('(max-width: 600px)').matches) return; // En móvil no hay hover
         
-        if (!e.features.length) return;
-        const feature = e.features[0];
-        const key = feature.properties.id;
-
-        // ESCUDO DE RENDIMIENTO 3: Bloqueo estricto para no recrear el HTML si seguimos en la misma obra
-        if (currentHoverKey === key) return; 
-        currentHoverKey = key;
-
-        const data = window.__OBRA_DATA.get(key);
+        lastMouseEvent = e;
+        if (hoverRAF) return;
         
-        if (data && data.o) {
-            const o = data.o;
-            const nombre = o.nombre || '';
-            const estado = o.estado || '';
-            const rawMonto = (o.monto || '').trim();
-            const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
+        hoverRAF = requestAnimationFrame(() => {
+            hoverRAF = null;
             
-            const pill = typeof estadoToPill === 'function' ? estadoToPill(estado) : {cls:'', txt:estado};
+            // Realizamos la consulta solo 1 vez por frame, y limitada solo a los pines
+            const features = map.queryRenderedFeatures(lastMouseEvent.point, { layers: ['obras-layer'] });
             
-            let fragHTML = typeof imgFragmentFor === 'function' ? imgFragmentFor(currentKey, o.carpeta, nombre) : '';
-            if (fragHTML && fragHTML.includes('1.thumb.webp')) fragHTML = fragHTML.replace(/1\.thumb\.webp/g, `1.thumb.webp?v=${sessionTs}`);
+            if (!features.length) {
+                // Reemplazo del antiguo "mouseleave"
+                if (currentHoverKey !== null) {
+                    clearTimeout(hoverIntentTimer);
+                    currentHoverKey = null;
+                    map.getCanvas().style.cursor = '';
+                    ghostTooltip.remove();
+                }
+                return;
+            }
             
-            const ghostHTML = `<div class="ghost-card" style="margin: 0;">${fragHTML}<div class="ghost-card__body"><div class="ghost-card__kicker">Obra <span class="pill ${pill.cls}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg> ${pill.txt}</span></div><div class="ghost-card__title">${nombre}</div><div class="ghost-card__meta">${monto}</div><div class="ghost-card__divider"></div><div class="meta-row">${(o.distrito||'-')} · ${(o.provincia||'-')}</div></div></div>`;
+            map.getCanvas().style.cursor = 'pointer';
             
-            ghostTooltip.setLngLat([data.lng, data.lat]).setHTML(ghostHTML).addTo(map);
-        }
-    });
-
-    map.on('mouseleave', 'obras-layer', () => { 
-        currentHoverKey = null;
-        map.getCanvas().style.cursor = ''; 
-        ghostTooltip.remove(); 
+            const feature = features[0];
+            const key = feature.properties.id;
+            
+            if (currentHoverKey === key) return;
+            
+            clearTimeout(hoverIntentTimer);
+            
+            hoverIntentTimer = setTimeout(() => {
+                currentHoverKey = key;
+                const data = window.__OBRA_DATA.get(key);
+                
+                if (data && data.o) {
+                    const o = data.o;
+                    const nombre = o.nombre || '';
+                    const estado = o.estado || '';
+                    const rawMonto = (o.monto || '').trim();
+                    const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
+                    
+                    const pill = typeof estadoToPill === 'function' ? estadoToPill(estado) : {cls:'', txt:estado};
+                    
+                    let fragHTML = typeof imgFragmentFor === 'function' ? imgFragmentFor(currentKey, o.carpeta, nombre) : '';
+                    if (fragHTML && fragHTML.includes('1.thumb.webp')) fragHTML = fragHTML.replace(/1\.thumb\.webp/g, `1.thumb.webp?v=${sessionTs}`);
+                    
+                    const ghostHTML = `<div class="ghost-card" style="margin: 0;">${fragHTML}<div class="ghost-card__body"><div class="ghost-card__kicker">Obra <span class="pill ${pill.cls}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg> ${pill.txt}</span></div><div class="ghost-card__title">${nombre}</div><div class="ghost-card__meta">${monto}</div><div class="ghost-card__divider"></div><div class="meta-row">${(o.distrito||'-')} · ${(o.provincia||'-')}</div></div></div>`;
+                    
+                    ghostTooltip.setLngLat([data.lng, data.lat]).setHTML(ghostHTML).addTo(map);
+                }
+            }, 50);
+        });
     });
 
     map.on('click', 'obras-layer', (e) => {
