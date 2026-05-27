@@ -457,8 +457,8 @@ window.initMapEngine = async function(container) {
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
-                'text-variable-anchor': ['right', 'left'],
-                'text-radial-offset': 1.1,
+                'text-variable-anchor': ['right', 'bottom', 'left', 'top', 'top-right', 'bottom-right', 'bottom-left', 'top-left'],
+                'text-radial-offset': 1.3,
                 'text-justify': 'auto',
                 'text-max-width': 12,
                 'text-padding': 10 
