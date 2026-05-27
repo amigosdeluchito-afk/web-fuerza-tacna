@@ -211,7 +211,7 @@ window.initMapEngine = async function(container) {
             version: 8, 
             sources: {}, 
             layers: [],
-            glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf" 
+            glyphs: "https://basemaps.cartocdn.com/gl/v1/fonts/{fontstack}/{range}.pbf" 
         },
         center: [0, 0],
         zoom: 0,
@@ -489,7 +489,7 @@ window.initMapEngine = async function(container) {
             source: sourceId,
             layout: {
                 'text-field': ['get', 'nombre'],
-                'text-font': ['Open Sans Bold'],
+                'text-font': ['Open Sans Bold', 'Open Sans Regular'],
                 'text-size': 10,
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
