@@ -466,7 +466,7 @@ window.initMapEngine = async function(container) {
                     'interpolate', ['linear'], ['zoom'],
                     8, 6.5,  // En zoom 8 (muy lejos), letra pequeñita (6.5px)
                     10, 8.5, // En zoom 10 (medio), letra normal (8.5px)
-                    12, 13   // En zoom 12 (zoom máximo de tu mapa), letra grande (13px)
+                    12, 20   // En zoom 12 (zoom máximo de tu mapa), letra extra grande (20px)
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
