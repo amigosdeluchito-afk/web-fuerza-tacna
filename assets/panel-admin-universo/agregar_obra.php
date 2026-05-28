@@ -99,6 +99,7 @@ if (isset($_GET['success'])) {
       <nav>
         <a href="agregar_obra.php" class="active">➕ Agregar Obra</a>
         <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
+        <a href="segmentos.php">🗂️ Segmentos</a>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
         <a href="ver_accesos.php">🕵️ Accesos IP</a>

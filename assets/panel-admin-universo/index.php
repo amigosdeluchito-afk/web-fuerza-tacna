@@ -336,6 +336,7 @@ require_login();
         <a href="index.php" class="active">📷 Fotos</a>
         <a href="agregar_obra.php">➕ Agregar Obra</a>
         <a href="editar_obra.php">✏️ Editar Obra</a>
+        <a href="segmentos.php">🗂️ Segmentos</a>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
         <a href="ver_accesos.php">🕵️ Accesos IP</a>

@@ -136,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <nav>
         <a href="agregar_obra.php">➕ Agregar Obra</a>
         <a href="editar_obra.php" class="active">✏️ Editar Obra y Fotos</a>
+        <a href="segmentos.php">🗂️ Segmentos</a>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
         <a href="ver_accesos.php">🕵️ Accesos IP</a>
