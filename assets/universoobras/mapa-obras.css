@@ -718,9 +718,9 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 }
 
 /* Magia Automática: Colores según el filtro seleccionado */
-#synced-svg-container.active-segment-educacion svg path { fill: #1a73e8; } /* Azul */
-#synced-svg-container.active-segment-agua svg path { fill: #00acc1; }      /* Celeste */
-#synced-svg-container.active-segment-transporte svg path { fill: #f57c00; } /* Naranja */
-#synced-svg-container.active-segment-agricultura svg path { fill: #43a047; }/* Verde */
-#synced-svg-container.active-segment-social svg path { fill: #e53935; }     /* Rojo */
-#synced-svg-container.active-segment-vias svg path { fill: #8e24aa; }       /* Morado */
+#synced-svg-container.active-segment-educacion svg path { fill: #1a73e8 !important; } /* Azul */
+#synced-svg-container.active-segment-salud svg path { fill: #00acc1 !important; }     /* Celeste (Salud) */
+#synced-svg-container.active-segment-transporte svg path { fill: #f57c00 !important; } /* Naranja */
+#synced-svg-container.active-segment-agricultura svg path { fill: #43a047 !important; }/* Verde */
+#synced-svg-container.active-segment-social svg path { fill: #e53935 !important; }     /* Rojo */
+#synced-svg-container.active-segment-vias svg path { fill: #8e24aa !important; }       /* Morado */

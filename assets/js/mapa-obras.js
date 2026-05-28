@@ -234,6 +234,48 @@ window.initMapEngine = async function(container) {
     map.on('zoom', () => updateHud());
 
     // =================================================================================
+    // FASE 2: INYECCIÓN DEL MAPA SVG VECTORIAL (HACKER SHORTCUT)
+    // =================================================================================
+    const canvasContainer = map.getCanvasContainer();
+    const svgContainer = document.createElement('div');
+    svgContainer.id = 'synced-svg-container';
+    svgContainer.style.position = 'absolute';
+    svgContainer.style.top = '0';
+    svgContainer.style.left = '0';
+    svgContainer.style.transformOrigin = 'top left';
+    svgContainer.style.pointerEvents = 'none'; // Deja pasar el scroll y clics hacia el mapa
+    canvasContainer.insertBefore(svgContainer, canvasContainer.firstChild);
+
+    // Cargamos tu archivo SVG original con la ruta relativa correcta
+    fetch('../img/MAPA%20TACNA.svg')
+        .then(response => response.text())
+        .then(svgText => {
+            svgContainer.innerHTML = svgText;
+            const svg = svgContainer.querySelector('svg');
+            if(svg) {
+                // AUTO-REPARADOR: Aseguramos que la computadora sepa la matemática del archivo
+                if(!svg.getAttribute('viewBox')) svg.setAttribute('viewBox', '0 0 1093.78 1035.32');
+                svg.style.width = '1093.78px';
+                svg.style.height = '1035.32px';
+                svg.style.display = 'block';
+            }
+        }).catch(e => console.error("Error al cargar el archivo SVG:", e));
+
+    // El motor que sincroniza el DOM con la cámara 3D a 60FPS
+    function syncSVG() {
+        if(!svgContainer.querySelector('svg')) return;
+        const lon = 1093.78 * 0.005; 
+        const lat = 1035.32 * 0.005;
+        const topLeft = map.project([0, lat]);
+        const bottomRight = map.project([lon, 0]);
+        const w = bottomRight.x - topLeft.x;
+        const h = bottomRight.y - topLeft.y;
+        svgContainer.style.transform = `translate(${topLeft.x}px, ${topLeft.y}px) scale(${w / 1093.78}, ${h / 1035.32})`;
+    }
+    map.on('render', syncSVG);
+    // =================================================================================
+
+    // =================================================================================
     // FASE 3: INTERACTIVIDAD DE LOS PINES (CLICS Y TARJETAS FANTASMA)
     // Usamos el motor GPU de MapLibre para atrapar eventos sin lag
     // =================================================================================
