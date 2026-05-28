@@ -712,22 +712,14 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     transition: opacity 0.8s ease;
 }
 #synced-svg-container svg path {
-    transition: fill 0.8s cubic-bezier(0.25, 1, 0.5, 1), stroke 0.8s ease;
+    fill: #FFFFF0 !important; /* Color Marfil unificado para todos los mapas */
+    stroke: #801039 !important; /* Borde Granate institucional */
     stroke-width: 2.5px;
-    stroke: rgba(255, 255, 255, 0.15); /* Bordes sutiles para separar distritos */
+    transition: filter 0.3s ease, stroke-width 0.3s ease;
 }
 
 /* Efecto de Iluminación (Hover Interactividad) - FASE 3 */
 #synced-svg-container svg path.is-hovered {
-    filter: brightness(1.25) saturate(1.2);
-    stroke: #ffffff !important;
-    stroke-width: 3.5px !important;
+    filter: brightness(0.95); /* Ligero oscurecimiento para dar volumen */
+    stroke-width: 4.5px !important; /* Borde granate más grueso al tocar */
 }
-
-/* Magia Automática: Colores según el filtro seleccionado */
-#synced-svg-container.active-segment-educacion svg path { fill: #1a73e8 !important; } /* Azul */
-#synced-svg-container.active-segment-salud svg path { fill: #00acc1 !important; }     /* Celeste (Salud) */
-#synced-svg-container.active-segment-transporte svg path { fill: #f57c00 !important; } /* Naranja */
-#synced-svg-container.active-segment-agricultura svg path { fill: #43a047 !important; }/* Verde */
-#synced-svg-container.active-segment-social svg path { fill: #e53935 !important; }     /* Rojo */
-#synced-svg-container.active-segment-vias svg path { fill: #8e24aa !important; }       /* Morado */
