@@ -118,6 +118,7 @@ if (isset($_GET['success'])) {
                 <label>Segmento (Hoja de Excel destino):</label>
                 <select name="segmento" id="selectSegmento" required>
                     <option value="EDUCACION">Educación</option>
+                    <option value="AGUA">Agua y Saneamiento</option>
                     <option value="VIAS">Vías y Caminos</option>
                 </select>
 

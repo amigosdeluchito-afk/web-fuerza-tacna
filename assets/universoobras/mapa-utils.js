@@ -5,14 +5,16 @@ window.SHEET_ID = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
 window.MAPS = {
     base:        "IMG/mapa-base.png",
     educacion:   "IMG/mapa-educacion.png",
-    vias:        "IMG/mapa-vias.png"  
+    vias:        "IMG/mapa-vias.png",
+    agua:        "IMG/mapa-agua.png"
 };
 window.SHEETS = { 
     base: null, 
     educacion: 'EDUCACION', 
-    vias: 'VIAS'
+    vias: 'VIAS',
+    agua: 'AGUA'
 };
-window.FOTOS_DIR = { educacion: 'educacion', vias: 'vias' };
+window.FOTOS_DIR = { educacion: 'educacion', vias: 'vias', agua: 'agua' };
 
 // --- FIN CONSTANTES GLOBALES ---
 
