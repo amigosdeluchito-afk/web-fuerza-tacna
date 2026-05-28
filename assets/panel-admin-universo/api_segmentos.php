@@ -122,6 +122,70 @@ try {
     }
 
     // ==========================================================
+    // ACCIÓN: REORDENAR
+    // ==========================================================
+    if ($action === 'reordenar') {
+        $orden_ids = json_decode($_POST['orden_ids'] ?? '[]', true);
+        if (empty($orden_ids) || !is_array($orden_ids)) {
+            throw new Exception('No se recibió un orden válido.');
+        }
+
+        // 1. Leer la hoja SEGMENTOS completa para mapear IDs a sus filas
+        $response = $service->spreadsheets_values->get($spreadsheetId, 'SEGMENTOS!A:E');
+        $rows = $response->getValues() ?? [];
+        
+        if (count($rows) <= 1) {
+            echo json_encode(['ok' => true, 'mensaje' => 'Nada que reordenar.']);
+            exit;
+        }
+
+        array_shift($rows); // Quitar cabecera
+        $id_map = [];
+        foreach ($rows as $i => $row) {
+            if (!empty($row[0])) $id_map[$row[0]] = ['rowIndex' => $i + 2, 'currentOrden' => (int)($row[4] ?? 0)];
+        }
+
+        // 2. Obtener el ID numérico de la hoja "SEGMENTOS"
+        $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+        $sheets = $spreadsheet->getSheets();
+        $segmentosSheetId = null;
+        foreach ($sheets as $sheet) {
+            if (strtoupper($sheet->getProperties()->getTitle()) === 'SEGMENTOS') {
+                $segmentosSheetId = $sheet->getProperties()->getSheetId();
+                break;
+            }
+        }
+        if ($segmentosSheetId === null) throw new Exception('No se encontró la hoja "SEGMENTOS".');
+
+        // 3. Preparar el batch update para cambiar solo la columna 'orden'
+        $updateRequests = [];
+        foreach ($orden_ids as $new_order_index => $id_segmento) {
+            if (isset($id_map[$id_segmento])) {
+                $rowIndex = $id_map[$id_segmento]['rowIndex'];
+                $new_orden_value = $new_order_index + 1;
+
+                if ($id_map[$id_segmento]['currentOrden'] !== $new_orden_value) {
+                    $updateRequests[] = new \Google_Service_Sheets_Request([
+                        'updateCells' => [
+                            'rows' => [['values' => [['userEnteredValue' => ['numberValue' => $new_orden_value]]]]],
+                            'start' => ['sheetId' => $segmentosSheetId, 'rowIndex' => $rowIndex - 1, 'columnIndex' => 4],
+                            'fields' => 'userEnteredValue'
+                        ]
+                    ]);
+                }
+            }
+        }
+
+        if (!empty($updateRequests)) {
+            $batchUpdateRequest = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest(['requests' => [$updateRequests]]);
+            $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
+        }
+
+        echo json_encode(['ok' => true, 'mensaje' => 'Orden de segmentos actualizado con éxito.']);
+        exit;
+    }
+
+    // ==========================================================
     // ACCIÓN: EDITAR
     // ==========================================================
     if ($action === 'editar') {

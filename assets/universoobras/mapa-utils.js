@@ -16,18 +16,28 @@ window.initGlobalConfig = async function() {
         const jsonText = raw.match(/setResponse\(([\s\S]+)\);?/)[1];
         const data = JSON.parse(jsonText);
 
+        const segmentosTemp = [];
         (data.table.rows || []).forEach(r => {
             if (!r.c) return;
             const id = r.c[0]?.v;             // id_segmento
             const nombre = r.c[1]?.v;         // nombre_visible
             const tab = r.c[2]?.v;            // nombre_pestana
             const activo = String(r.c[3]?.v || '').toUpperCase(); // activo
+            const orden = r.c[4]?.v || 999;   // orden
             
             if (id && tab && (activo === 'SI' || activo === '1' || activo === 'TRUE')) {
-                window.SHEETS[id] = tab;
-                window.FOTOS_DIR[id] = id;
-                window.SEGMENTOS_DATA.push({ id, nombre, tab });
+                segmentosTemp.push({ id, nombre, tab, orden });
             }
+        });
+
+        // Ordenar por la columna 'orden'
+        segmentosTemp.sort((a, b) => a.orden - b.orden);
+
+        // Poblar las variables globales con los datos ordenados
+        segmentosTemp.forEach(seg => {
+            window.SHEETS[seg.id] = seg.tab;
+            window.FOTOS_DIR[seg.id] = seg.id;
+            window.SEGMENTOS_DATA.push({ id: seg.id, nombre: seg.nombre, tab: seg.tab });
         });
     } catch(e) { console.error("Error cargando configuración desde Excel:", e); }
 };

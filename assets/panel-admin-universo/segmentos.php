@@ -22,6 +22,9 @@ require_admin();
     th, td { padding: 12px 15px; border-bottom: 1px solid #1f2937; text-align: left; }
     th { background: #1e293b; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 12px; }
     tr:hover { background: #0f172a; }
+    tr[draggable="true"] { cursor: grab; }
+    tr.dragging { opacity: 0.5; background: #1e293b; }
+    tr.drag-over-target { box-shadow: inset 0 2px 0 #2563eb; }
     .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; transition: background 0.2s; }
     .btn-primary { background: #2563eb; color: white; }
     .btn-primary:hover { background: #1d4ed8; }
@@ -57,7 +60,10 @@ require_admin();
         <div class="card">
             <h1>
                 Gestión de Segmentos
-                <button class="btn btn-primary" onclick="abrirModalCrear()">+ Nuevo Segmento</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" id="btnGuardarOrden" style="display:none; background: #10b981; color: white;">💾 Guardar Orden</button>
+                    <button class="btn btn-primary" onclick="abrirModalCrear()">+ Nuevo Segmento</button>
+                </div>
             </h1>
             <p style="color: #94a3b8; font-size: 13.5px;">Aquí administras las categorías del mapa. Al crear o editar, el sistema se encargará automáticamente de duplicar y renombrar las pestañas en tu archivo de Excel base.</p>
             
@@ -112,10 +118,12 @@ require_admin();
                 const data = await resp.json();
                 
                 if (data.ok && data.segmentos) {
+                    // Ordenar por la columna 'orden' antes de renderizar
+                    data.segmentos.sort((a, b) => (a.orden || 999) - (b.orden || 999));
                     tbody.innerHTML = '';
                     data.segmentos.forEach(seg => {
                         tbody.innerHTML += `
-                            <tr>
+                            <tr draggable="true" data-id="${seg.id_segmento}">
                                 <td><span class="tag">${seg.id_segmento}</span></td>
                                 <td style="font-weight: bold; color: #fff;">${seg.nombre_visible}</td>
                                 <td><span class="tag" style="color:#10b981;">${seg.nombre_pestana}</span></td>
@@ -126,12 +134,85 @@ require_admin();
                             </tr>
                         `;
                     });
+                    initDragAndDrop(); // Activar drag & drop después de renderizar
                 } else {
                     tbody.innerHTML = '<tr><td colspan="5">No se encontraron segmentos.</td></tr>';
                 }
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="5" style="color:#ef4444;">Error de conexión.</td></tr>`;
             }
+        }
+
+        function initDragAndDrop() {
+            const tbody = document.querySelector('#tablaSegmentos tbody');
+            const rows = tbody.querySelectorAll('tr[draggable="true"]');
+            const btnGuardarOrden = document.getElementById('btnGuardarOrden');
+            let draggingElement = null;
+
+            rows.forEach(row => {
+                row.addEventListener('dragstart', () => {
+                    draggingElement = row;
+                    setTimeout(() => row.classList.add('dragging'), 0);
+                });
+
+                row.addEventListener('dragend', () => {
+                    if (draggingElement) draggingElement.classList.remove('dragging');
+                    draggingElement = null;
+                    document.querySelectorAll('.drag-over-target').forEach(el => el.classList.remove('drag-over-target'));
+                });
+
+                row.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    const target = e.target.closest('tr');
+                    if (target && target !== draggingElement) {
+                        document.querySelectorAll('.drag-over-target').forEach(el => el.classList.remove('drag-over-target'));
+                        target.classList.add('drag-over-target');
+                    }
+                });
+
+                row.addEventListener('dragleave', e => {
+                    e.target.closest('tr')?.classList.remove('drag-over-target');
+                });
+
+                row.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const target = e.target.closest('tr');
+                    if (target && target !== draggingElement) {
+                        const allRows = [...tbody.querySelectorAll('tr')];
+                        const fromIndex = allRows.indexOf(draggingElement);
+                        const toIndex = allRows.indexOf(target);
+
+                        if (fromIndex < toIndex) target.parentNode.insertBefore(draggingElement, target.nextSibling);
+                        else target.parentNode.insertBefore(draggingElement, target);
+                        
+                        btnGuardarOrden.style.display = 'inline-block';
+                    }
+                    document.querySelectorAll('.drag-over-target').forEach(el => el.classList.remove('drag-over-target'));
+                });
+            });
+
+            btnGuardarOrden.addEventListener('click', async () => {
+                const orderedIds = [...tbody.querySelectorAll('tr')].map(row => row.dataset.id);
+                const btn = btnGuardarOrden;
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = '⏳ Guardando...';
+
+                const fd = new FormData();
+                fd.append('action', 'reordenar');
+                fd.append('orden_ids', JSON.stringify(orderedIds));
+
+                try {
+                    const resp = await fetch('api_segmentos.php', { method: 'POST', body: fd });
+                    const data = await resp.json();
+                    if (data.ok) {
+                        btn.style.display = 'none';
+                        await cargarTabla(); 
+                    } else { alert('Error: ' + data.error); }
+                } catch (err) {
+                    alert('Error de conexión al guardar el orden.');
+                } finally { btn.disabled = false; btn.textContent = originalText; }
+            });
         }
 
         function abrirModalCrear() {
