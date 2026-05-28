@@ -714,12 +714,12 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 #synced-svg-container svg path {
     fill: #FFFFF0 !important; /* Color Marfil unificado para todos los mapas */
     stroke: #801039 !important; /* Borde Granate institucional */
-    stroke-width: 2.5px;
+    stroke-width: 4.5px !important; /* Borde más grueso por defecto */
     transition: filter 0.3s ease, stroke-width 0.3s ease;
 }
 
 /* Efecto de Iluminación (Hover Interactividad) - FASE 3 */
 #synced-svg-container svg path.is-hovered {
-    filter: brightness(0.95); /* Ligero oscurecimiento para dar volumen */
-    stroke-width: 4.5px !important; /* Borde granate más grueso al tocar */
+    filter: brightness(0.85); /* Oscurecimiento más notorio al pasar el ratón */
+    stroke-width: 7px !important; /* Resalte de borde aún más grueso al tocar */
 }
