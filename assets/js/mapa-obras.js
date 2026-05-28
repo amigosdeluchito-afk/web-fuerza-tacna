@@ -556,9 +556,9 @@ window.initMapEngine = async function(container) {
             },
             paint: {
                 'text-color': '#000000',
-                'text-halo-color': '#ffffff',
-                'text-halo-width': 3,
-                'text-halo-blur': 0.5
+                'text-halo-color': '#FFFFF0',
+                'text-halo-width': 3.5,
+                'text-halo-blur': 1
             }
         });
 
