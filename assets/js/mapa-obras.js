@@ -546,6 +546,9 @@ window.initMapEngine = async function(container) {
             }
             
             try {
+                const svgContainer = document.getElementById('synced-svg-container');
+                if (svgContainer) svgContainer.style.opacity = '0';
+
                 if (map && map.style && map.getSource('plano-base')) {
                     if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
                     map.removeSource('plano-base');
@@ -571,15 +574,13 @@ window.initMapEngine = async function(container) {
             return;
         }
 
-        const rawUrl = window.MAPS[key];
-        if (!rawUrl || isSwapping){ pendingKey = key; return; }
+        if (isSwapping){ pendingKey = key; return; }
         
         // BUGFIX: Capturamos el estado anterior antes de actualizar currentKey
         const prevKey = currentKey;
         isSwapping = true; 
         currentKey = key; // Definimos el intento de navegación inmediatamente
         setBackgroundFor(key);
-        const url = encodeURI(rawUrl);
 
         // Quitar efecto glass al entrar a cualquier mapa
         if (chips) chips.classList.remove('is-glass');
@@ -609,48 +610,29 @@ window.initMapEngine = async function(container) {
             }
         }
         
-        const probe = new Image();
-        let probeTimer = setTimeout(() => { 
-            isSwapping = false; 
-            const k = pendingKey; pendingKey = null; if (k) swapSegment(k); 
-        }, 8000);
-        probe.onerror = () => { 
-            clearTimeout(probeTimer); isSwapping = false; 
-            const k = pendingKey; pendingKey = null; if (k) swapSegment(k); 
-        };
-        probe.onload = () => {
-            clearTimeout(probeTimer);
-            
-            if (currentKey !== key || currentKey === 'base') {
-                isSwapping = false;
-                return;
-            }
+        // --- CIRUGÍA DE FASE 2: Eliminamos la dependencia de imágenes PNG ---
+        if (currentKey !== key || currentKey === 'base') {
+            isSwapping = false;
+            return;
+        }
 
-            const w = probe.naturalWidth, h = probe.naturalHeight;
-            // Mapear el PNG a coordenadas geográficas en MapLibre (escala 0.005)
-            const lon = w * 0.005; 
-            const lat = h * 0.005;
-            const bounds = [ [0, 0], [lon, lat] ];
-            
-            map.resize();
+        // Medidas exactas de tu archivo SVG original
+        const lon = 1093.78 * 0.005; 
+        const lat = 1035.32 * 0.005;
+        const bounds = [ [0, 0], [lon, lat] ];
+        
+        map.resize();
 
-            if (map.getSource('plano-base')) {
-                if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
-                map.removeSource('plano-base');
-            }
+        // Le avisamos al SVG qué botón se presionó y lo hacemos visible
+        const svgContainer = document.getElementById('synced-svg-container');
+        if (svgContainer) {
+            svgContainer.style.opacity = '1';
+            svgContainer.className = `active-segment-${key}`;
+        }
 
-            map.addSource('plano-base', {
-                type: 'image',
-                url: url,
-                coordinates: [ [0, lat], [lon, lat], [lon, 0], [0, 0] ]
-            });
-
-            map.addLayer({
-                id: 'plano-layer',
-                type: 'raster',
-                source: 'plano-base',
-                paint: { 'raster-fade-duration': 600 } 
-            });
+        // Limpieza de emergencia por si quedó alguna capa vieja de imagen
+        if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
+        if (map.getSource('plano-base')) map.removeSource('plano-base');
 
             const [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
             const cx = lon * gFx;
@@ -676,15 +658,13 @@ window.initMapEngine = async function(container) {
                 try{ 
                     if (currentKey !== key) return; // Cancelar si el usuario navegó a otro lado
                     await cargarPinesDesdeSheet(key, lat, lon);
-                if (window.SHEETS[key]) { 
+                if (window.SHEETS && window.SHEETS[key]) { 
                     // Llamamos a las funciones que ahora viven en mapa-filtros.js
                     if (typeof buildFilterOptions === 'function') buildFilterOptions();
                     if (typeof attachFilterEvents === 'function') attachFilterEvents();
                 }
                 }catch(err){ console.error(err); }
             })();
-        };
-        probe.src = url;
     };
 
     // BUSCADOR, DOCKS Y FILTROS

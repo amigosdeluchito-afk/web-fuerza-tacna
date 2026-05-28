@@ -704,3 +704,23 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .ghost-card-popup .maplibregl-popup-tip {
   display: none !important;
 }
+
+/* =========================================================================
+   ESTILOS DEL MAPA SVG VECTORIAL (FASE 3 PREVIEW)
+   ========================================================================= */
+#synced-svg-container {
+    transition: opacity 0.8s ease;
+}
+#synced-svg-container svg path {
+    transition: fill 0.8s cubic-bezier(0.25, 1, 0.5, 1), stroke 0.8s ease;
+    stroke-width: 2.5px;
+    stroke: rgba(255, 255, 255, 0.15); /* Bordes sutiles para separar distritos */
+}
+
+/* Magia Automática: Colores según el filtro seleccionado */
+#synced-svg-container.active-segment-educacion svg path { fill: #1a73e8; } /* Azul */
+#synced-svg-container.active-segment-agua svg path { fill: #00acc1; }      /* Celeste */
+#synced-svg-container.active-segment-transporte svg path { fill: #f57c00; } /* Naranja */
+#synced-svg-container.active-segment-agricultura svg path { fill: #43a047; }/* Verde */
+#synced-svg-container.active-segment-social svg path { fill: #e53935; }     /* Rojo */
+#synced-svg-container.active-segment-vias svg path { fill: #8e24aa; }       /* Morado */
