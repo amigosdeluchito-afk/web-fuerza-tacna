@@ -269,11 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
         const SEGMENTOS = [
             { key: "EDUCACION", nombre: "Educación" },
-            { key: "VIAS",      nombre: "Vías y Caminos" },
-            { key: "AGUA Y SANEAMIENTO", nombre: "Agua y Saneamiento" },
-            { key: "TRANSPORTE", nombre: "Transporte" },
-            { key: "AGRICULTURA", nombre: "Agricultura" },
-            { key: "SOCIAL",      nombre: "Social" }
+            { key: "VIAS",      nombre: "Vías y Caminos" }
         ];
         const DISTRITOS_POR_PROVINCIA = {
             "Tacna": ["Tacna", "Alto de la Alianza", "Calana", "Ciudad Nueva", "Coronel Gregorio Albarracín Lanchipa", "Inclán", "Pachía", "Palca", "Pocollay", "Sama", "La Yarada-Los Palos"],
