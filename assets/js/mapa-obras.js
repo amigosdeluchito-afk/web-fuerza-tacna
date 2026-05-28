@@ -407,8 +407,14 @@ window.initMapEngine = async function(container) {
                     const o = data.o;
                     const nombre = o.nombre || '';
                     const estado = o.estado || '';
-                    const rawMonto = (o.monto || '').trim();
-                    const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
+                    
+                    let monto = '';
+                    if (window.PO_Utils && typeof window.PO_Utils.formatMoney === 'function') {
+                        monto = window.PO_Utils.formatMoney(o.monto);
+                    } else {
+                        const rawMonto = (o.monto || '').trim();
+                        monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
+                    }
                     
                     const pill = typeof estadoToPill === 'function' ? estadoToPill(estado) : {cls:'', txt:estado};
                     

@@ -403,10 +403,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Traductor inteligente para obras antiguas o nuevas
-            let rawMonto = String(item.monto || '').replace(/[^\d.-]/g, '');
-            let numMonto = parseFloat(rawMonto) || 0;
+            let rawStr = String(item.monto || '');
+            let numMonto = parseFloat(rawStr.replace(/[^\d.-]/g, '')) || 0;
             let mag = 1;
-            if (numMonto > 0) {
+            
+            if (/mill[oó]n/i.test(rawStr)) {
+                mag = 1000000;
+            } else if (/mil/i.test(rawStr) && !/mill[oó]n/i.test(rawStr)) {
+                mag = 1000;
+            } else if (numMonto > 0) {
                 if (numMonto >= 1000000 && numMonto % 100000 === 0) {
                     mag = 1000000; numMonto = numMonto / 1000000;
                 } else if (numMonto >= 1000 && numMonto % 100 === 0) {
