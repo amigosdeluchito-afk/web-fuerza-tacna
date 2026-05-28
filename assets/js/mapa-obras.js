@@ -290,9 +290,16 @@ window.initMapEngine = async function(container) {
     let hoverRAF = null;
     let lastMouseEvent = null;
 
-    // ESCUDO DE RENDIMIENTO 1: Ocultar tarjetas de inmediato si el usuario hace zoom o arrastra
-    map.on('zoomstart', () => { clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
-    map.on('dragstart', () => { clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
+    // FASE 3: Limpiador automático del brillo del SVG
+    const clearSVGHover = () => {
+        const svg = document.querySelector('#synced-svg-container svg');
+        if(svg) svg.querySelectorAll('.is-hovered').forEach(p => p.classList.remove('is-hovered'));
+    };
+
+    // ESCUDO DE RENDIMIENTO 1: Ocultar tarjetas y limpiar hover si el usuario hace zoom o arrastra
+    map.on('zoomstart', () => { clearSVGHover(); clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
+    map.on('dragstart', () => { clearSVGHover(); clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
+    map.on('mouseout', () => { clearSVGHover(); });
 
     // SOLUCIÓN DEFINITIVA DE RENDIMIENTO (Reemplazo de mouseenter/mouseleave)
     // Evita que MapLibre ejecute queryRenderedFeatures miles de veces de forma interna
@@ -306,6 +313,30 @@ window.initMapEngine = async function(container) {
         hoverRAF = requestAnimationFrame(() => {
             hoverRAF = null;
             
+            // =====================================================================
+            // FASE 3: RAYCASTING - ILUMINACIÓN DE PROVINCIAS (HOVER)
+            // =====================================================================
+            const svgContainer = document.getElementById('synced-svg-container');
+            if (svgContainer && svgContainer.style.opacity === '1') {
+                const svg = svgContainer.querySelector('svg');
+                if (svg) {
+                    const pt = svg.createSVGPoint();
+                    pt.x = lastMouseEvent.originalEvent.clientX;
+                    pt.y = lastMouseEvent.originalEvent.clientY;
+                    const matrix = svg.getScreenCTM();
+                    if (matrix) {
+                        const svgPt = pt.matrixTransform(matrix.inverse());
+                        let foundPath = null;
+                        svg.querySelectorAll('path, polygon, g').forEach(p => {
+                            p.classList.remove('is-hovered');
+                            if (p.isPointInFill && p.isPointInFill(svgPt)) foundPath = p;
+                        });
+                        if (foundPath) foundPath.classList.add('is-hovered');
+                    }
+                }
+            }
+            // =====================================================================
+
             // EVITA ERROR EN CONSOLA: Verificamos que la capa de obras exista antes de intentar leerla.
             // Esto es crucial porque en la vista "Inicio" (base) esta capa es eliminada del mapa.
             if (!map.getLayer('obras-layer')) {

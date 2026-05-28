@@ -717,6 +717,13 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     stroke: rgba(255, 255, 255, 0.15); /* Bordes sutiles para separar distritos */
 }
 
+/* Efecto de Iluminación (Hover Interactividad) - FASE 3 */
+#synced-svg-container svg path.is-hovered {
+    filter: brightness(1.25) saturate(1.2);
+    stroke: #ffffff !important;
+    stroke-width: 3.5px !important;
+}
+
 /* Magia Automática: Colores según el filtro seleccionado */
 #synced-svg-container.active-segment-educacion svg path { fill: #1a73e8 !important; } /* Azul */
 #synced-svg-container.active-segment-salud svg path { fill: #00acc1 !important; }     /* Celeste (Salud) */
