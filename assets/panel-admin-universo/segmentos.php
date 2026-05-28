@@ -1,0 +1,195 @@
+<?php
+require_once __DIR__ . '/config.php';
+require_login();
+require_admin();
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestor de Segmentos – Panel</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #020617; color: #e5e7eb; min-height: 100vh; margin: 0; padding-bottom: 40px; }
+    .app-header { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #020617; border-bottom: 1px solid #111827; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 20; }
+    .app-header nav a { color: #9ca3af; margin-right: 16px; text-decoration: none; font-size: 14px; }
+    .app-header nav a.active { color: #ffffff; font-weight: 600; }
+    .app-header nav a:hover { color: #e5e7eb; }
+    .app-header .user { font-size: 13px; color: #9ca3af; }
+    .app-main { margin-top: 72px; display: flex; justify-content: center; padding: 20px; }
+    .card { width: 100%; max-width: 900px; background: #0b1020; border-radius: 18px; padding: 24px 28px 28px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.7); border: 1px solid rgba(148, 163, 184, 0.15); }
+    h1 { margin-top: 0; font-size: 22px; color: #f9fafb; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; background: #020617; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px 15px; border-bottom: 1px solid #1f2937; text-align: left; }
+    th { background: #1e293b; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+    tr:hover { background: #0f172a; }
+    .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; transition: background 0.2s; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-warning { background: #d97706; color: white; }
+    .btn-warning:hover { background: #b45309; }
+    
+    /* Modal Estilos */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+    .modal-overlay.active { display: flex; }
+    .modal-content { background: #0f172a; width: 400px; border-radius: 12px; padding: 24px; border: 1px solid #1f2937; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+    .modal-content h3 { margin-top: 0; color: #f8fafc; }
+    .modal-content label { display: block; margin-top: 15px; margin-bottom: 5px; color: #94a3b8; font-size: 13px; }
+    .modal-content input { width: 100%; padding: 10px; background: #020617; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+    .tag { background: #1e293b; padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #93c5fd; font-size: 12px; }
+  </style>
+</head>
+<body>
+    <header class="app-header">
+      <nav>
+        <a href="index.php">📷 Fotos</a>
+        <a href="agregar_obra.php">➕ Agregar Obra</a>
+        <a href="editar_obra.php">✏️ Editar Obra</a>
+        <a href="segmentos.php" class="active">🗂️ Segmentos</a>
+        <a href="usuarios.php">👤 Usuarios</a>
+      </nav>
+      <div class="user">
+        <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php" style="color:#9ca3af;">Salir</a>
+      </div>
+    </header>
+
+    <main class="app-main">
+        <div class="card">
+            <h1>
+                Gestión de Segmentos
+                <button class="btn btn-primary" onclick="abrirModalCrear()">+ Nuevo Segmento</button>
+            </h1>
+            <p style="color: #94a3b8; font-size: 13.5px;">Aquí administras las categorías del mapa. Al crear o editar, el sistema se encargará automáticamente de duplicar y renombrar las pestañas en tu archivo de Excel base.</p>
+            
+            <table id="tablaSegmentos">
+                <thead>
+                    <tr>
+                        <th>ID Interno</th>
+                        <th>Nombre Visible (Público)</th>
+                        <th>Pestaña Excel Real</th>
+                        <th>Activo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" style="text-align: center;">Cargando segmentos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalSegmento">
+        <div class="modal-content">
+            <h3 id="modalTitle">Nuevo Segmento</h3>
+            <form id="formSegmento">
+                <input type="hidden" id="inputIdSegmento">
+                
+                <label>Nombre Visible (El que ve el público en los botones):</label>
+                <input type="text" id="inputNombreVisible" required placeholder="Ej. Seguridad Ciudadana">
+                
+                <p style="font-size: 11.5px; color: #64748b; margin-top: 10px; background: rgba(59, 130, 246, 0.1); padding: 8px; border-radius: 6px;">
+                    💡 <strong>Nota Técnica:</strong> El nombre de la pestaña de Excel se generará automáticamente (Ej. SEGURIDAD_CIUDADANA).
+                </p>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn" style="background: #334155; color: white;" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar Segmento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let isEditMode = false;
+
+        async function cargarTabla() {
+            const tbody = document.querySelector('#tablaSegmentos tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
+            
+            try {
+                const resp = await fetch('api_segmentos.php?action=listar');
+                const data = await resp.json();
+                
+                if (data.ok && data.segmentos) {
+                    tbody.innerHTML = '';
+                    data.segmentos.forEach(seg => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><span class="tag">${seg.id_segmento}</span></td>
+                                <td style="font-weight: bold; color: #fff;">${seg.nombre_visible}</td>
+                                <td><span class="tag" style="color:#10b981;">${seg.nombre_pestana}</span></td>
+                                <td>${seg.activo === 'SI' ? '✅ Sí' : '❌ No'}</td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="abrirModalEditar('${seg.id_segmento}', '${seg.nombre_visible}')">✏️ Editar Nombre</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5">No se encontraron segmentos.</td></tr>';
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" style="color:#ef4444;">Error de conexión.</td></tr>`;
+            }
+        }
+
+        function abrirModalCrear() {
+            isEditMode = false;
+            document.getElementById('modalTitle').textContent = 'Crear Nuevo Segmento';
+            document.getElementById('inputIdSegmento').value = '';
+            document.getElementById('inputNombreVisible').value = '';
+            document.getElementById('modalSegmento').classList.add('active');
+        }
+
+        function abrirModalEditar(id, nombre) {
+            isEditMode = true;
+            document.getElementById('modalTitle').textContent = 'Editar Segmento (' + id + ')';
+            document.getElementById('inputIdSegmento').value = id;
+            document.getElementById('inputNombreVisible').value = nombre;
+            document.getElementById('modalSegmento').classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalSegmento').classList.remove('active');
+        }
+
+        document.getElementById('formSegmento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnGuardar');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳ Procesando en Google Sheets...';
+
+            const fd = new FormData();
+            fd.append('action', isEditMode ? 'editar' : 'crear');
+            fd.append('nombre_visible', document.getElementById('inputNombreVisible').value);
+            
+            if (isEditMode) {
+                fd.append('id_segmento', document.getElementById('inputIdSegmento').value);
+            }
+
+            try {
+                const resp = await fetch('api_segmentos.php', { method: 'POST', body: fd });
+                const text = await resp.text(); // Capturamos texto por si Google tira un error HTML Fatal
+                const data = JSON.parse(text);
+                
+                if (data.ok) {
+                    cerrarModal();
+                    cargarTabla();
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Ocurrió un error de red o interno. Revisa la consola.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+
+        // Iniciar
+        cargarTabla();
+    </script>
+</body>
+</html>
