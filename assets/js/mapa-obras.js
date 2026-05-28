@@ -51,18 +51,20 @@ window.initMapEngine = async function(container) {
     // =================================================================================
     // AUTO-GENERACIÓN DE BOTONES (Dinámico desde Excel)
     // =================================================================================
-    const chipsGroup = target.querySelector('.chips-group');
-    if (chipsGroup) {
-        const label = chipsGroup.querySelector('.chip--label');
-        chipsGroup.innerHTML = '';
-        if (label) chipsGroup.appendChild(label);
+    const chipsContainer = target.querySelector('.chips-group') || target.querySelector('.chips');
+    if (chipsContainer) {
+        // 1. Limpiamos SOLO los botones de segmentos viejos (respetando Inicio y el Buscador)
+        chipsContainer.querySelectorAll('.chip[data-map]').forEach(chip => {
+            if (chip.getAttribute('data-map') !== 'base') chip.remove();
+        });
         
+        // 2. Insertamos los botones dinámicos que vienen desde Excel
         (window.SEGMENTOS_DATA || []).forEach(seg => {
             const btn = document.createElement('button');
             btn.className = 'chip';
             btn.setAttribute('data-map', seg.id);
             btn.innerHTML = `<span>${seg.nombre}</span>`;
-            chipsGroup.appendChild(btn);
+            chipsContainer.appendChild(btn);
         });
     }
 
