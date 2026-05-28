@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
 require_login();
-require_admin();
 require_once __DIR__ . '/vendor/autoload.php';
 
 header('Content-Type: application/json; charset=utf-8');

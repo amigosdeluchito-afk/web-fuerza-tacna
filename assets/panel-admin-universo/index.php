@@ -337,9 +337,11 @@ require_login();
         <a href="agregar_obra.php">➕ Agregar Obra</a>
         <a href="editar_obra.php">✏️ Editar Obra</a>
         <a href="segmentos.php">🗂️ Segmentos</a>
+        <?php if (is_admin()): ?>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
         <a href="ver_accesos.php">🕵️ Accesos IP</a>
+        <?php endif; ?>
       </nav>
       <div class="user">
         <?= htmlspecialchars(current_user() ?? '') ?> ·

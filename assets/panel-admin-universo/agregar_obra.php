@@ -97,12 +97,15 @@ if (isset($_GET['success'])) {
 <body>
     <header class="app-header">
       <nav>
+        <a href="index.php">📷 Fotos</a>
         <a href="agregar_obra.php" class="active">➕ Agregar Obra</a>
         <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
         <a href="segmentos.php">🗂️ Segmentos</a>
+        <?php if (is_admin()): ?>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
         <a href="ver_accesos.php">🕵️ Accesos IP</a>
+        <?php endif; ?>
       </nav>
       <div class="user">
         <?= htmlspecialchars(current_user() ?? '') ?> ·
