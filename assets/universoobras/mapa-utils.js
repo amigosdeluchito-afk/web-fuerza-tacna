@@ -5,22 +5,14 @@ window.SHEET_ID = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
 window.MAPS = {
     base:        "IMG/mapa-base.png",
     educacion:   "IMG/mapa-educacion.png",
-    agua:        "IMG/mapa-agua.png",
-    transporte:  "IMG/mapa-transporte.png",
-    agricultura: "IMG/mapa-agricultura.png",
-    social:      "IMG/mapa-social.png",
     vias:        "IMG/mapa-vias.png"  
 };
 window.SHEETS = { 
     base: null, 
     educacion: 'EDUCACION', 
-    vias: 'VIAS', 
-    agua: 'AGUA', 
-    transporte: 'TRANSPORTE', 
-    agricultura: 'AGRICULTURA', 
-    social: 'SOCIAL' 
+    vias: 'VIAS'
 };
-window.FOTOS_DIR = { educacion: 'educacion', vias: 'vias', agua: 'agua', transporte: 'transporte', agricultura: 'agricultura', social: 'social' };
+window.FOTOS_DIR = { educacion: 'educacion', vias: 'vias' };
 
 // --- FIN CONSTANTES GLOBALES ---
 

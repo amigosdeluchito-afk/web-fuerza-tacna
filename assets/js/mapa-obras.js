@@ -41,6 +41,14 @@ window.initMapEngine = async function(container) {
     // Función auxiliar para buscar elementos solo dentro del nuevo contenedor
     const getEl = (id) => target.querySelector('#' + id) || document.getElementById(id);
 
+    // =================================================================================
+    // AUTO-LIMPIEZA DE BOTONES FANTASMA (No necesitas editar el HTML a mano)
+    // =================================================================================
+    target.querySelectorAll('.chip[data-map]').forEach(chip => {
+        const key = chip.getAttribute('data-map');
+        if (key !== 'base' && !window.SHEETS[key]) chip.remove();
+    });
+
     // --- NUEVO: Lógica Gooey Text (Opción 1) ---
     const initGooeyText = () => {
         // FIX SUPREMO: Usamos querySelectorAll y tomamos siempre el último elemento.
