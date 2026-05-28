@@ -267,11 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
         const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
-        const SEGMENTOS = [
-            { key: "EDUCACION", nombre: "Educación" },
-            { key: "VIAS",      nombre: "Vías y Caminos" },
-            { key: "AGUA",      nombre: "Agua y Saneamiento" }
-        ];
+        let SEGMENTOS = [];
         const DISTRITOS_POR_PROVINCIA = {
             "Tacna": ["Tacna", "Alto de la Alianza", "Calana", "Ciudad Nueva", "Coronel Gregorio Albarracín Lanchipa", "Inclán", "Pachía", "Palca", "Pocollay", "Sama", "La Yarada-Los Palos"],
             "Tarata": ["Tarata", "Chucatamani", "Estique", "Estique-Pampa", "Sitajara", "Susapaya", "Tarucachi", "Ticaco"],
@@ -290,6 +286,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         async function cargarDataInicial() {
             const segmentoEl = document.getElementById('selectSegmento');
             
+            try {
+                const respSeg = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=SEGMENTOS&range=A:D&headers=1`);
+                const jsonSeg = parseGviz(await respSeg.text());
+                SEGMENTOS = (jsonSeg.table.rows || [])
+                    .map(r => ({ id: r.c[0]?.v, nombre: r.c[1]?.v, key: r.c[2]?.v, activo: String(r.c[3]?.v||'').toUpperCase() }))
+                    .filter(s => s.key && (s.activo === 'SI' || s.activo === '1' || s.activo === 'TRUE'));
+            } catch(e) { console.error("Error al cargar SEGMENTOS", e); }
+
             for (const seg of SEGMENTOS) {
                 try {
                     const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(seg.key)}&range=A:J&headers=1`;

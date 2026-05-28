@@ -117,9 +117,7 @@ if (isset($_GET['success'])) {
             <form action="guardar_obra.php" method="POST" enctype="multipart/form-data">
                 <label>Segmento (Hoja de Excel destino):</label>
                 <select name="segmento" id="selectSegmento" required>
-                    <option value="EDUCACION">Educación</option>
-                    <option value="AGUA">Agua y Saneamiento</option>
-                    <option value="VIAS">Vías y Caminos</option>
+                    <option value="">Cargando segmentos activos...</option>
                 </select>
 
                 <label>Nombre de la Obra:</label>
@@ -508,6 +506,24 @@ if (isset($_GET['success'])) {
             });
             selectProvincia.dispatchEvent(new Event('change'));
         });
+        
+        // Carga dinámica de segmentos
+        async function cargarSegmentosAdmin() {
+            try {
+                const resp = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=SEGMENTOS&range=A:D&headers=1`);
+                const json = parseGviz(await resp.text());
+                const sel = document.getElementById('selectSegmento');
+                sel.innerHTML = '';
+                (json.table.rows || []).forEach(r => {
+                    if (!r.c) return;
+                    const nom = r.c[1]?.v, tab = r.c[2]?.v, act = String(r.c[3]?.v||'').toUpperCase();
+                    if (tab && (act === 'SI' || act === '1' || act === 'TRUE')) {
+                        sel.innerHTML += `<option value="${tab}">${nom}</option>`;
+                    }
+                });
+            } catch(e) { document.getElementById('selectSegmento').innerHTML = '<option value="">Error al cargar</option>'; }
+        }
+        cargarSegmentosAdmin();
     </script>
 </body>
 </html>

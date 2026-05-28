@@ -42,12 +42,29 @@ window.initMapEngine = async function(container) {
     const getEl = (id) => target.querySelector('#' + id) || document.getElementById(id);
 
     // =================================================================================
-    // AUTO-LIMPIEZA DE BOTONES FANTASMA (No necesitas editar el HTML a mano)
+    // INICIALIZADOR DINÁMICO DE SEGMENTOS
     // =================================================================================
-    target.querySelectorAll('.chip[data-map]').forEach(chip => {
-        const key = chip.getAttribute('data-map');
-        if (key !== 'base' && !window.SHEETS[key]) chip.remove();
-    });
+    if (typeof window.initGlobalConfig === 'function') {
+        await window.initGlobalConfig();
+    }
+
+    // =================================================================================
+    // AUTO-GENERACIÓN DE BOTONES (Dinámico desde Excel)
+    // =================================================================================
+    const chipsGroup = target.querySelector('.chips-group');
+    if (chipsGroup) {
+        const label = chipsGroup.querySelector('.chip--label');
+        chipsGroup.innerHTML = '';
+        if (label) chipsGroup.appendChild(label);
+        
+        (window.SEGMENTOS_DATA || []).forEach(seg => {
+            const btn = document.createElement('button');
+            btn.className = 'chip';
+            btn.setAttribute('data-map', seg.id);
+            btn.innerHTML = `<span>${seg.nombre}</span>`;
+            chipsGroup.appendChild(btn);
+        });
+    }
 
     // --- NUEVO: Lógica Gooey Text (Opción 1) ---
     const initGooeyText = () => {

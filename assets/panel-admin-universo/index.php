@@ -425,11 +425,7 @@ const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
 // URL base del GViz
 const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=`;
 
-// Segmentos (hojas) que vamos a usar
-const SEGMENTOS = [
-  { key: "EDUCACION", nombre: "Educacion" },
-  { key: "VIAS",      nombre: "Vias" }
-];
+let SEGMENTOS = [];
 
 // Aquí guardamos las obras leídas desde el Sheet
 // ejemplo: obrasPorSegmento["EDUCACION"] = [ { nombre, estado, carpeta, ... }, ... ]
@@ -460,6 +456,14 @@ async function cargarSegmentos() {
 
   // Limpiamos cache
   for (const k in obrasPorSegmento) delete obrasPorSegmento[k];
+
+  try {
+    const respSeg = await fetch(`${SHEET_BASE_URL}SEGMENTOS`);
+    const jsonSeg = parseGviz(await respSeg.text());
+    SEGMENTOS = (jsonSeg.table.rows || [])
+        .map(r => ({ key: r.c[2]?.v, nombre: r.c[1]?.v, activo: String(r.c[3]?.v||'').toUpperCase() }))
+        .filter(s => s.key && (s.activo === 'SI' || s.activo === '1' || s.activo === 'TRUE'));
+  } catch(e) { console.error("Error cargando SEGMENTOS", e); }
 
   // Cargar cada hoja del Sheet
   for (const seg of SEGMENTOS) {

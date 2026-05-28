@@ -2,19 +2,35 @@
 
 // --- CONSTANTES GLOBALES DEL MAPA (Centralizadas aquí para asegurar disponibilidad temprana) ---
 window.SHEET_ID = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
-window.MAPS = {
-    base:        "IMG/mapa-base.png",
-    educacion:   "IMG/mapa-educacion.png",
-    vias:        "IMG/mapa-vias.png",
-    agua:        "IMG/mapa-agua.png"
-};
 window.SHEETS = { 
-    base: null, 
-    educacion: 'EDUCACION', 
-    vias: 'VIAS',
-    agua: 'AGUA'
+    base: null
 };
-window.FOTOS_DIR = { educacion: 'educacion', vias: 'vias', agua: 'agua' };
+window.FOTOS_DIR = {};
+window.SEGMENTOS_DATA = [];
+
+window.initGlobalConfig = async function() {
+    try {
+        const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json&sheet=SEGMENTOS`;
+        const res = await fetch(url, { cache: 'no-store' });
+        const raw = await res.text();
+        const jsonText = raw.match(/setResponse\(([\s\S]+)\);?/)[1];
+        const data = JSON.parse(jsonText);
+
+        (data.table.rows || []).forEach(r => {
+            if (!r.c) return;
+            const id = r.c[0]?.v;             // id_segmento
+            const nombre = r.c[1]?.v;         // nombre_visible
+            const tab = r.c[2]?.v;            // nombre_pestana
+            const activo = String(r.c[3]?.v || '').toUpperCase(); // activo
+            
+            if (id && tab && (activo === 'SI' || activo === '1' || activo === 'TRUE')) {
+                window.SHEETS[id] = tab;
+                window.FOTOS_DIR[id] = id;
+                window.SEGMENTOS_DATA.push({ id, nombre, tab });
+            }
+        });
+    } catch(e) { console.error("Error cargando configuración desde Excel:", e); }
+};
 
 // --- FIN CONSTANTES GLOBALES ---
 
