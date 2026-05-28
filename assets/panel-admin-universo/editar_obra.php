@@ -11,6 +11,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rutaCredenciales = __DIR__ . '/data/credenciales.json';
     $spreadsheetId = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
 
+    // --- INICIO: BOTÓN MÁGICO DE LIMPIEZA DE MONTOS (SOLO ADMIN) ---
+    if (isset($_POST['action']) && $_POST['action'] === 'limpiar_montos') {
+        header('Content-Type: application/json');
+        if (!is_admin()) {
+            echo json_encode(['ok' => false, 'mensaje' => 'Acceso denegado. Solo administradores.']);
+            exit;
+        }
+        try {
+            $client = new \Google_Client();
+            $client->setApplicationName('Panel de Obras Fuerza Tacna');
+            $client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);
+            $client->setAuthConfig($rutaCredenciales);
+            $service = new \Google_Service_Sheets($client);
+            
+            // 1. Obtener todas las pestañas activas
+            $responseSeg = $service->spreadsheets_values->get($spreadsheetId, 'SEGMENTOS!A:D');
+            $rowsSeg = $responseSeg->getValues() ?? [];
+            $dataUpdates = [];
+            $obrasLimpiadas = 0;
+
+            // 2. Escanear y corregir cada hoja
+            foreach ($rowsSeg as $i => $row) {
+                if ($i === 0) continue;
+                if (($row[2] ?? '') && strtoupper($row[3] ?? '') === 'SI') {
+                    $seg = $row[2];
+                    $response = $service->spreadsheets_values->get($spreadsheetId, $seg . '!A2:J');
+                    $rows = $response->getValues() ?? [];
+                    
+                    foreach ($rows as $j => $obraRow) {
+                        $montoRaw = $obraRow[2] ?? '';
+                        if (trim($montoRaw) === '') continue;
+                        
+                        $str = strtolower(trim($montoRaw));
+                        $has_millon = preg_match('/mill[oó]n/i', $str);
+                        $has_mil = preg_match('/mil\b/i', $str) && !$has_millon;
+                        $is_clean = is_numeric($montoRaw) && strpos($montoRaw, ' ') === false && strpos($montoRaw, ',') === false && stripos($montoRaw, 's') === false;
+                        
+                        // Si el monto no está 100% puro (tiene texto, comas o símbolos), lo procesamos
+                        if (!$is_clean || $has_millon || $has_mil) {
+                            $numStr = preg_replace('/[^\d.,]/', '', $str);
+                            $numStr = str_replace(',', '', $numStr); // Asumimos que la coma es de miles (formato PE/US)
+                            $val = (float)$numStr;
+                            if ($has_millon) $val *= 1000000;
+                            elseif ($has_mil) $val *= 1000;
+                            
+                            if ($val > 0) {
+                                $dataUpdates[] = new \Google_Service_Sheets_ValueRange(['range' => $seg . '!C' . ($j + 2), 'values' => [[$val]]]);
+                                $obrasLimpiadas++;
+                            }
+                        }
+                    }
+                }
+            }
+            // 3. Inyectar todo en un solo golpe a Excel
+            if (count($dataUpdates) > 0) {
+                $batchUpdateRequest = new \Google_Service_Sheets_BatchUpdateValuesRequest(['valueInputOption' => 'RAW', 'data' => $dataUpdates]);
+                $service->spreadsheets_values->batchUpdate($spreadsheetId, $batchUpdateRequest);
+                log_action('monto_limpieza', "Se limpiaron y estandarizaron $obrasLimpiadas montos en Excel.");
+            }
+            echo json_encode(['ok' => true, 'mensaje' => "¡Mantenimiento exitoso! Se han limpiado y estandarizado $obrasLimpiadas montos en todas tus pestañas."]);
+        } catch (Throwable $e) { echo json_encode(['ok' => false, 'mensaje' => "Error API: " . $e->getMessage()]); }
+        exit;
+    }
+    // --- FIN: BOTÓN MÁGICO ---
+
     try {
         $client = new \Google_Client();
         $client->setApplicationName('Panel de Obras Fuerza Tacna');
@@ -258,6 +323,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div id="formMsg"></div>
                 <button type="button" id="btnGuardarGlobal" class="btn-submit" style="background: #10b981; font-size: 16px; padding: 16px; margin-top: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">💾 Guardar Todos los Cambios</button>
             </div>
+            
+            <?php if (is_admin()): ?>
+            <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); padding: 15px; border-radius: 10px; margin-top: 30px;">
+                <h3 style="margin-top: 0; color: #fcd34d; font-size: 15px; display: flex; align-items: center; gap: 8px;">🛠️ Herramienta de Administrador</h3>
+                <p style="font-size: 12px; color: #9ca3af; margin-bottom: 12px; line-height: 1.5;">Limpia todos los montos escritos como texto en tu Excel (ej. <em>"15 Millones"</em> o <em>"S/ 200,000"</em>) y los convierte en números puros (ej. <em>15000000</em>) para que tu base de datos esté estandarizada. Esta acción escaneará <strong>todas tus pestañas</strong>.</p>
+                <button type="button" id="btnLimpiarMontos" class="btn-submit" style="background: #d97706; padding: 10px 15px; font-size: 12px; width: auto; margin-top: 0; display: inline-block;">✨ Estandarizar todos los Montos en Excel</button>
+            </div>
+            <?php endif; ?>
         </div>
     </main>
 
@@ -697,6 +770,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 btn.disabled = false;
             }
         });
+
+        // ==========================
+        //  BOTÓN MÁGICO ADMIN (LIMPIEZA DE MONTOS)
+        // ==========================
+        const btnLimpiar = document.getElementById('btnLimpiarMontos');
+        if (btnLimpiar) {
+            btnLimpiar.addEventListener('click', async function() {
+                if (!confirm("Esto escaneará todas tus pestañas de Excel y convertirá los textos como '15 Millones' a números puros. ¿Deseas continuar?")) return;
+                
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '⏳ Procesando Excel... (Puede tardar unos segundos)';
+                btn.disabled = true;
+
+                const fd = new FormData();
+                fd.append('action', 'limpiar_montos');
+
+                try {
+                    const resp = await fetch('editar_obra.php', { method: 'POST', body: fd });
+                    const data = await resp.json();
+                    alert(data.mensaje);
+                    if (data.ok) cargarDataInicial(); // Refrescar los datos locales si funcionó
+                } catch (err) {
+                    alert("Error de red al intentar limpiar los montos.");
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
+        }
 
         // Auto-inicializar y lógica de Provincias/Distritos
         document.addEventListener("DOMContentLoaded", () => {
