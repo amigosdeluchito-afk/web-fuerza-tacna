@@ -65,11 +65,13 @@ require_admin();
                     <button class="btn btn-primary" onclick="abrirModalCrear()">+ Nuevo Segmento</button>
                 </div>
             </h1>
-            <p style="color: #94a3b8; font-size: 13.5px;">Aquí administras las categorías del mapa. Al crear o editar, el sistema se encargará automáticamente de duplicar y renombrar las pestañas en tu archivo de Excel base.</p>
+            <p style="color: #94a3b8; font-size: 13.5px;">Aquí administras las categorías del mapa. Al crear o editar, el sistema se encargará automáticamente de duplicar y renombrar las pestañas en tu archivo de Excel base. <br>
+            <span style="color: #60a5fa; display: inline-block; margin-top: 5px;">💡 <strong>Tip:</strong> Puedes reordenar los segmentos haciendo clic y arrastrando el icono <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="4" y1="8" x2="20" y2="8"></line><line x1="4" y1="16" x2="20" y2="16"></line></svg> de cualquier fila.</span></p>
             
             <table id="tablaSegmentos">
                 <thead>
                     <tr>
+                        <th style="width: 40px; text-align: center;">Orden</th>
                         <th>ID Interno</th>
                         <th>Nombre Visible (Público)</th>
                         <th>Pestaña Excel Real</th>
@@ -78,7 +80,7 @@ require_admin();
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td colspan="5" style="text-align: center;">Cargando segmentos...</td></tr>
+                    <tr><td colspan="6" style="text-align: center;">Cargando segmentos...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -111,7 +113,7 @@ require_admin();
 
         async function cargarTabla() {
             const tbody = document.querySelector('#tablaSegmentos tbody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando...</td></tr>';
             
             try {
                 const resp = await fetch('api_segmentos.php?action=listar');
@@ -124,6 +126,9 @@ require_admin();
                     data.segmentos.forEach(seg => {
                         tbody.innerHTML += `
                             <tr draggable="true" data-id="${seg.id_segmento}">
+                                <td style="cursor: grab; text-align: center; color: #64748b;" title="Arrastrar para reordenar">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="8" x2="20" y2="8"></line><line x1="4" y1="16" x2="20" y2="16"></line></svg>
+                                </td>
                                 <td><span class="tag">${seg.id_segmento}</span></td>
                                 <td style="font-weight: bold; color: #fff;">${seg.nombre_visible}</td>
                                 <td><span class="tag" style="color:#10b981;">${seg.nombre_pestana}</span></td>
@@ -136,10 +141,10 @@ require_admin();
                     });
                     initDragAndDrop(); // Activar drag & drop después de renderizar
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5">No se encontraron segmentos.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6">No se encontraron segmentos.</td></tr>';
                 }
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="5" style="color:#ef4444;">Error de conexión.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="color:#ef4444;">Error de conexión.</td></tr>`;
             }
         }
 
