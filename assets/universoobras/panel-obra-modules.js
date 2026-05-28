@@ -18,7 +18,8 @@
 
             const num = typeof v === 'number' ? v : Number(str.replace(/[^\d.-]/g, ''));
             if (!isFinite(num)) return str;
-            if (Math.abs(num) >= 1_000_000) return `S/ ${(num / 1_000_000).toFixed(2)} M`;
+            if (Math.abs(num) >= 1_000_000) return `S/ ${parseFloat((num / 1_000_000).toFixed(2))} Millones`;
+            if (Math.abs(num) >= 1_000) return `S/ ${parseFloat((num / 1_000).toFixed(2))} Mil`;
             return 'S/ ' + num.toLocaleString('es-PE');
         },
 

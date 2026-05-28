@@ -189,8 +189,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="En estudios">En estudios</option>
                 </select>
 
-                <label>Monto Referencial (S/):</label>
-                <input type="text" name="monto" id="inputMonto">
+                <div class="row">
+                    <div style="flex: 2;">
+                        <label>Monto Referencial:</label>
+                        <input type="number" step="any" id="inputMontoBase" placeholder="Ej. 1.5 o 500">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Magnitud:</label>
+                        <select id="inputMontoMagnitud">
+                            <option value="1000000" selected>Millones</option>
+                            <option value="1000">Mil</option>
+                            <option value="1">Soles (S/)</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" name="monto" id="hidden_monto">
 
                 <div class="row">
                     <div>
@@ -389,7 +402,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 estadoSel.appendChild(opt); estadoSel.value = item.estado;
             }
 
-            document.getElementById('inputMonto').value = item.monto;
+            // Traductor inteligente para obras antiguas o nuevas
+            let rawMonto = String(item.monto || '').replace(/[^\d.-]/g, '');
+            let numMonto = parseFloat(rawMonto) || 0;
+            let mag = 1;
+            if (numMonto > 0) {
+                if (numMonto >= 1000000 && numMonto % 100000 === 0) {
+                    mag = 1000000; numMonto = numMonto / 1000000;
+                } else if (numMonto >= 1000 && numMonto % 100 === 0) {
+                    mag = 1000; numMonto = numMonto / 1000;
+                }
+            }
+            document.getElementById('inputMontoBase').value = numMonto || '';
+            document.getElementById('inputMontoMagnitud').value = mag;
+            document.getElementById('hidden_monto').value = item.monto;
             
             const provinciaSel = document.getElementById('inputProvincia');
             const distritoSel = document.getElementById('inputDistrito');
@@ -638,6 +664,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         document.getElementById('formEditar').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const base = parseFloat(document.getElementById('inputMontoBase').value) || 0;
+            const mag = parseFloat(document.getElementById('inputMontoMagnitud').value) || 1;
+            document.getElementById('hidden_monto').value = base > 0 ? (base * mag) : '';
+            
             const form = e.target;
             const btn = document.getElementById('btnGuardarGlobal');
             const originalText = btn.innerHTML;

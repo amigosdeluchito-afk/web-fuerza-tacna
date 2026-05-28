@@ -137,8 +137,21 @@ if (isset($_GET['success'])) {
                     <option value="En estudios">En estudios</option>
                 </select>
 
-                <label>Monto Referencial (S/):</label>
-                <input type="text" name="monto" placeholder="Ej. 1,500,000.00">
+                <div class="row">
+                    <div style="flex: 2;">
+                        <label>Monto Referencial:</label>
+                        <input type="number" step="any" id="monto_base" placeholder="Ej. 1.5 o 500">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Magnitud:</label>
+                        <select id="monto_magnitud">
+                            <option value="1000000" selected>Millones</option>
+                            <option value="1000">Mil</option>
+                            <option value="1">Soles (S/)</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" name="monto" id="hidden_monto">
 
                 <div class="row">
                     <div>
@@ -203,6 +216,13 @@ if (isset($_GET['success'])) {
     <script>
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
         const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
+        
+        // Multiplicar el monto antes de enviar el formulario a Excel
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const base = parseFloat(document.getElementById('monto_base').value) || 0;
+            const mag = parseFloat(document.getElementById('monto_magnitud').value) || 1;
+            document.getElementById('hidden_monto').value = base > 0 ? (base * mag) : '';
+        });
 
         function parseGviz(text) {
             const m = text.match(/setResponse\(([\s\S]+)\);?/);
