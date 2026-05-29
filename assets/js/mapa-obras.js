@@ -668,11 +668,34 @@ window.initMapEngine = async function(container) {
             type: 'circle',
             source: sourceId,
             paint: {
-                'circle-radius': 8,
+                'circle-radius': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    12, // Crece magnéticamente a 12px
+                    8   // Tamaño normal de 8px
+                ],
                 'circle-radius-transition': { duration: 350 }, // Crecimiento magnético mucho más lento
                 'circle-color': ['get', 'color'],
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#ffffff'
+                'circle-stroke-width': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    6, // El borde se ensancha para crear el halo
+                    2  // Borde blanco estándar
+                ],
+                'circle-stroke-width-transition': { duration: 350 },
+                'circle-stroke-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    ['get', 'color'], // El halo adquiere dinámicamente el color del pin
+                    '#ffffff'         // Color normal del borde
+                ],
+                'circle-stroke-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    0.4, // Halo translúcido e iluminado
+                    1.0  // Borde blanco sólido 
+                ],
+                'circle-stroke-opacity-transition': { duration: 350 }
             }
         });
 
