@@ -898,6 +898,36 @@ window.initMapEngine = async function(container) {
             
             updateHud(key); 
             updateLegendVisibility(key);
+            
+            // --- NUEVO: Mostrar hint de Onboarding con scroll (Solo una vez por sesión) ---
+            if (key !== 'base' && !window._mapHintShown) {
+                window._mapHintShown = true;
+                setTimeout(() => {
+                    let hint = document.getElementById('map-onboarding-hint');
+                    if (!hint) {
+                        hint = document.createElement('div');
+                        hint.id = 'map-onboarding-hint';
+                        hint.className = 'map-onboarding-hint';
+                        
+                        // Textos adaptados para móvil o PC
+                        const isMobileHint = window.innerWidth <= 768;
+                        const hintText = isMobileHint ? '¡Desliza para<br>explorar el mapa!' : '¡Navega con el scroll<br>para explorar las obras!';
+                        const hintIcon = isMobileHint ? '👆' : '🖱️';
+
+                        hint.innerHTML = `<span class="icon-mouse">${hintIcon}</span> ${hintText}`;
+                        document.body.appendChild(hint);
+                    }
+                    
+                    requestAnimationFrame(() => {
+                        hint.classList.add('is-visible');
+                        setTimeout(() => {
+                            hint.classList.remove('is-visible');
+                            setTimeout(() => { if(hint) hint.remove(); }, 1000);
+                        }, 5000);
+                    });
+                }, 1800);
+            }
+
             isSwapping = false; 
             if (pendingKey){ const k = pendingKey; pendingKey = null; swapSegment(k); }
 
