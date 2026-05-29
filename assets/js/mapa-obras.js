@@ -361,23 +361,31 @@ window.initMapEngine = async function(container) {
         const easedPhase = 1 - Math.pow(1 - pulsePhase, 3);
         
         map.setPaintProperty('obras-pulse-layer', 'circle-radius', [
-            'case', ['boolean', ['feature-state', 'hover'], false],
-            8 + (easedPhase * 25), // El radio viaja de 8 a 33 píxeles
+            'case', ['==', ['get', 'id'], currentHoverKey],
+            12 + (easedPhase * 25), // El radio viaja hacia afuera exactamente desde el borde del pin grande
             0
         ]);
         map.setPaintProperty('obras-pulse-layer', 'circle-opacity', [
-            'case', ['boolean', ['feature-state', 'hover'], false],
+            'case', ['==', ['get', 'id'], currentHoverKey],
             (1 - pulsePhase) * 0.7, // Se difumina de 70% de opacidad a 0%
             0
         ]);
+        
+        map.triggerRepaint(); // Forzar el renderizado a 60 FPS
 
         if (isPulsing) requestAnimationFrame(renderPulse);
     }
 
     const clearHoverState = () => {
         if (currentHoverKey !== null) {
-            if (map.getSource('obras-source')) map.setFeatureState({ source: 'obras-source', id: currentHoverKey }, { hover: false });
             currentHoverKey = null;
+            if (map.getLayer('obras-layer')) {
+                map.setPaintProperty('obras-layer', 'circle-radius', 8); // Restaura tamaño original
+            }
+            if (map.getLayer('obras-pulse-layer')) {
+                map.setPaintProperty('obras-pulse-layer', 'circle-radius', 0);
+                map.setPaintProperty('obras-pulse-layer', 'circle-opacity', 0);
+            }
         }
         map.getCanvas().style.cursor = '';
     };
@@ -461,16 +469,12 @@ window.initMapEngine = async function(container) {
             
             clearTimeout(hoverIntentTimer);
             
-            clearHoverState(); // Apagar la animación del pin anterior
+            if (currentHoverKey !== null) {
+                map.setFeatureState({ source: 'obras-source', id: currentHoverKey }, { hover: false });
+            }
             
             currentHoverKey = key;
-            
-            // EFECTO MAGNÉTICO: Agrandar el pin que estamos tocando
-            map.setPaintProperty('obras-layer', 'circle-radius', [
-                'case', ['==', ['get', 'id'], currentHoverKey],
-                12, // Crece a 12px
-                8   // Regresa a su tamaño normal de 8px
-            ]);
+            map.setFeatureState({ source: 'obras-source', id: key }, { hover: true });
 
             if (!isPulsing) {
                 isPulsing = true;
@@ -650,8 +654,10 @@ window.initMapEngine = async function(container) {
             source: sourceId,
             paint: {
                 'circle-radius': 0, // Inicia en 0, lo anima Javascript
+                'circle-radius-transition': { duration: 0 }, // ¡CLAVE! Desactiva el lag del motor interno para permitir los 60fps
                 'circle-color': ['get', 'color'], // Hereda dinámicamente el mismo color del pin
                 'circle-opacity': 0,
+                'circle-opacity-transition': { duration: 0 },
                 'circle-stroke-width': 0
             }
         });
@@ -663,6 +669,7 @@ window.initMapEngine = async function(container) {
             source: sourceId,
             paint: {
                 'circle-radius': 8,
+                'circle-radius-transition': { duration: 200 }, // Hace que el pin crezca suavemente y no de golpe
                 'circle-color': ['get', 'color'],
                 'circle-stroke-width': 2,
                 'circle-stroke-color': '#ffffff'
