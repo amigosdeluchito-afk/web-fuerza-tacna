@@ -62,6 +62,12 @@ window.initMapEngine = async function(container) {
         (window.SEGMENTOS_DATA || []).forEach(seg => {
             const btn = document.createElement('button');
             btn.className = 'chip';
+            
+            // --- NUEVO: Dar look distinto al segmento histórico ---
+            if (seg.nombre && seg.nombre.toUpperCase() === 'ALCALDE PROVINCIAL') {
+                btn.classList.add('chip-especial-historico');
+            }
+            
             btn.setAttribute('data-map', seg.id);
             btn.innerHTML = `<span>${seg.nombre}</span>`;
             chipsContainer.appendChild(btn);

@@ -431,6 +431,32 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .chip:hover{ color: #fff; transform: translateY(-2px); }
 .chip.is-active{ background: #801039; color: #ffc300; }
 .chip.is-active span{ color: #ffc300; }
+
+/* === NUEVO: PÍLDORA ESPECIAL HISTÓRICA (Alcalde Provincial) === */
+.chip.chip-especial-historico {
+  background: linear-gradient(135deg, #1f1f1f, #0a0a0a) !important;
+  border: 1px solid #d4af37 !important; /* Dorado envejecido */
+  color: #d4af37 !important;
+  font-family: 'Georgia', 'Times New Roman', serif !important; /* Tipografía más clásica */
+  letter-spacing: 1px;
+}
+.chip.chip-especial-historico span {
+  color: #d4af37 !important;
+}
+.chip.chip-especial-historico:hover {
+  background: rgba(212, 175, 55, 0.1) !important;
+  border-color: #fceea7 !important;
+  color: #fceea7 !important;
+}
+.chip.chip-especial-historico.is-active {
+  background: linear-gradient(135deg, #d4af37, #b5952f) !important;
+  color: #111 !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4) !important;
+}
+.chip.chip-especial-historico.is-active span {
+  color: #111 !important;
+}
+
 .divider-v { width: 1px; height: 18px; background: rgba(128, 16, 57, 0.2); margin: 0 4px; flex-shrink: 0; }
 
 /* ===== Píldora de búsqueda (entre "Inicio" y el grupo de chips) ===== */
