@@ -284,7 +284,7 @@ window.initMapEngine = async function(container) {
     window.mapInstance = map;
     
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
-    if (!IS_MOBILE) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+    // if (!IS_MOBILE) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
     // NUEVO: Actualizar el contador en tiempo real al hacer scroll
     map.on('zoom', () => updateHud());
