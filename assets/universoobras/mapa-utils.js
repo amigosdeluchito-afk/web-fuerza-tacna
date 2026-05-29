@@ -160,7 +160,7 @@ window.colorPinPorEstado = function(estado) {
 };
 
 window.thumbPath = function(segmento, carpetaObra) {
-    const dirFotos = window.FOTOS_DIR[segmento] || segmento;
+    const dirFotos = String(window.FOTOS_DIR[segmento] || segmento).toLowerCase();
     return `IMG/fotos-obras/${dirFotos}/${carpetaObra}/1.thumb.webp`;
 };
 

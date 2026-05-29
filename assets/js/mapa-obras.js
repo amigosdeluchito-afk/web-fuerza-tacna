@@ -526,7 +526,7 @@ window.initMapEngine = async function(container) {
         
         if (data && data.o) {
             const o = data.o;
-            const dirFotos = window.FOTOS_DIR[currentKey] || currentKey;
+            const dirFotos = String(window.FOTOS_DIR[currentKey] || currentKey).toLowerCase();
             const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
             const dinBuster = "?v=" + new Date().getTime();
             const rawMonto = (o.monto || '').trim();
