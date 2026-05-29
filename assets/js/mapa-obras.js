@@ -32,6 +32,15 @@ window.initMapEngine = async function(container) {
     let pendingKey = null;
     let isAutoCenterBlocked = false;
 
+    // --- NUEVO: Detector universal del segmento histórico ---
+    // Puedes poner el ID interno (ej: seg_004) para que sea a prueba de balas
+    const checkIsHistorico = (seg) => {
+        if (!seg) return false;
+        const esIdExacto = seg.id === 'seg_00X'; // <-- REEMPLAZA 'seg_00X' por tu ID real del panel (ej: 'seg_004')
+        const esNombreValido = seg.nombre && seg.nombre.toUpperCase().includes('ALCALDE PROVINCIAL');
+        return esIdExacto || esNombreValido;
+    };
+
     // Limpieza de mapa previo para que no choque con Barba.js
     if (window.mapInstance) {
         window.mapInstance.remove();
@@ -63,8 +72,8 @@ window.initMapEngine = async function(container) {
             const btn = document.createElement('button');
             btn.className = 'chip';
             
-            // --- NUEVO: Dar look distinto al segmento histórico (A prueba de espacios) ---
-            if (seg.nombre && seg.nombre.toUpperCase().includes('ALCALDE PROVINCIAL')) {
+            // --- NUEVO: Dar look distinto al segmento histórico usando el detector seguro ---
+            if (checkIsHistorico(seg)) {
                 btn.classList.add('chip-especial-historico');
             }
             
@@ -836,8 +845,8 @@ window.initMapEngine = async function(container) {
         currentKey = key; // Definimos el intento de navegación inmediatamente
         
         // --- NUEVO: Activar Tema Histórico en todo el mapa ---
-        const isHistorico = (window.SEGMENTOS_DATA || []).some(s => s.id === key && s.nombre && s.nombre.toUpperCase().includes('ALCALDE PROVINCIAL'));
-        if (isHistorico) {
+        const segDataObj = (window.SEGMENTOS_DATA || []).find(s => s.id === key);
+        if (checkIsHistorico(segDataObj)) {
             document.body.classList.add('tema-historico');
         } else {
             document.body.classList.remove('tema-historico');
