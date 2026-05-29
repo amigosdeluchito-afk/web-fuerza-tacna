@@ -489,16 +489,14 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
 /* HUD de zoom (opcional) */
 #zoomHud{
-  position:fixed; bottom:12px; left:12px; z-index:1000;
-  background:rgba(0,0,0,.6); color:#fff; padding:6px 10px; border-radius:8px;
-  font:600 12px/1.2 system-ui, Segoe UI, Roboto, Arial; pointer-events:none;
+  display: none !important; /* Oculto permanentemente */
 }
 
 /* === Leyenda de estados === */
 #legend {
   position: fixed;
   left: calc(var(--sidebar-collapsed, 60px) + 12px);
-  bottom: 100px; /* justo encima de los botones + y - */
+  bottom: 25px; /* Esquinado en la parte inferior */
   z-index: 2000; /* Lo subimos para que flote sobre el mapa y los paneles laterales */
   background-color: rgba(128, 16, 57, 0.85);
   backdrop-filter: blur(8px);
