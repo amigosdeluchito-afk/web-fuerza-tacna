@@ -474,6 +474,16 @@ window.initMapEngine = async function(container) {
             const rawMonto = (o.monto || '').trim();
             const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
 
+            // =====================================================================
+            // AUTO-CENTRAR EL MAPA AL HACER CLIC EN EL PIN
+            // =====================================================================
+            map.flyTo({ 
+                center: [data.lng, data.lat], 
+                zoom: Math.max(map.getZoom(), 4), // Mantiene tu zoom actual (o te acerca un poquito si estabas muy lejos)
+                speed: 1.2, 
+                curve: 1.42 
+            });
+
             if (window.PanelObra && typeof window.PanelObra.open === 'function') {
                 window.PanelObra.open({ key: o.carpeta || `${o.nombre}|${o.x}|${o.y}`, nombre: o.nombre, estado: o.estado, monto: monto, distrito: o.distrito, provincia: o.provincia, descripcion: o.descripcion || '', portada: base ? `${base}/1.thumb.webp${dinBuster}` : null, fotos: base ? Array.from({length:6}, (_,i)=> `${base}/${i+1}.webp${dinBuster}`) : [], onCenter: () => { map.flyTo({ center: [data.lng, data.lat], zoom: Math.max(map.getZoom(), 2), speed: 1.2, curve: 1.42 }); } });
                 if (typeof window.recordVisit === 'function') window.recordVisit(key, currentKey);
