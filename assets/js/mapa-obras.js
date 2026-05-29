@@ -355,19 +355,19 @@ window.initMapEngine = async function(container) {
             isPulsing = false;
             return; // Detenemos la animación si no hay hover para ahorrar batería
         }
-        pulsePhase = (pulsePhase + 0.02) % 1; // Velocidad del latido
+        pulsePhase = (pulsePhase + 0.008) % 1; // Latido extremadamente lento (antes 0.02)
         
         // Efecto "ease-out" para que la onda empiece fuerte y frene al desaparecer
         const easedPhase = 1 - Math.pow(1 - pulsePhase, 3);
         
         map.setPaintProperty('obras-pulse-layer', 'circle-radius', [
             'case', ['==', ['get', 'id'], currentHoverKey],
-            12 + (easedPhase * 25), // El radio viaja hacia afuera exactamente desde el borde del pin grande
+            12 + (easedPhase * 8), // Expansión súper cortita y pegada al pin (solo 8px extra)
             0
         ]);
         map.setPaintProperty('obras-pulse-layer', 'circle-opacity', [
             'case', ['==', ['get', 'id'], currentHoverKey],
-            (1 - pulsePhase) * 0.7, // Se difumina de 70% de opacidad a 0%
+            (1 - pulsePhase) * 0.8, // Inicia un poco más visible (80%) para notar la onda pequeña
             0
         ]);
         
