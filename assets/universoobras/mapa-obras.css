@@ -827,3 +827,68 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     font-size: 1.1rem;
   }
 }
+
+/* =========================================================
+   TEMA HISTÓRICO (OBRAS ANTERIORES / ALCALDE PROVINCIAL)
+   ========================================================= */
+body.tema-historico,
+body.tema-historico .app-bg {
+  background-color: #e6d7c3 !important; /* Color papel antiguo / sepia claro */
+}
+
+/* Forzar tipografía clásica en elementos clave */
+body.tema-historico button,
+body.tema-historico input,
+body.tema-historico .chip,
+body.tema-historico .obra-label__inner,
+body.tema-historico .ghost-card__title,
+body.tema-historico .ghost-card__meta,
+body.tema-historico .ghost-card__kicker {
+  font-family: 'Georgia', 'Times New Roman', serif !important;
+}
+
+/* Textura de fondo con mezcla más dura para parecer papel */
+body.tema-historico .app-bg .map-pattern-layer {
+  opacity: 0.15 !important;
+  mix-blend-mode: color-burn !important;
+}
+
+/* Cambiar colores del mapa SVG vectorizado a estilo "Plano Antiguo" */
+body.tema-historico #synced-svg-container svg path {
+  fill: #f4ecdf !important; /* Marfil más viejo */
+  stroke: #8b7355 !important; /* Marrón sepia en vez de guinda */
+  stroke-dasharray: none !important; /* Desactiva el trazo moderno */
+}
+body.tema-historico #synced-svg-container svg path.is-hovered {
+  fill: #ffffff !important;
+  stroke: #d4af37 !important; /* Dorado clásico en hover */
+  filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
+}
+
+/* Interfaz adaptada al tema vintage */
+body.tema-historico #legend {
+  background-color: rgba(60, 45, 30, 0.85) !important;
+  border-color: #d4af37 !important;
+  color: #fceea7 !important;
+}
+body.tema-historico .search-pill {
+  background: rgba(139, 115, 85, 0.2) !important;
+}
+body.tema-historico .search-pill input,
+body.tema-historico .search-pill svg {
+  color: #4a3b2c !important;
+}
+body.tema-historico .chips-group {
+  background-color: rgba(60, 45, 30, 0.6) !important;
+  border-color: rgba(212, 175, 55, 0.4) !important;
+}
+body.tema-historico .chip {
+  color: #fceea7 !important;
+}
+body.tema-historico .chip.is-active {
+  background: #d4af37 !important;
+  color: #111 !important;
+}
+body.tema-historico .divider-v {
+  background: rgba(212, 175, 55, 0.3) !important;
+}

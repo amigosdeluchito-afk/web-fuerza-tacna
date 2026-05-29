@@ -63,8 +63,8 @@ window.initMapEngine = async function(container) {
             const btn = document.createElement('button');
             btn.className = 'chip';
             
-            // --- NUEVO: Dar look distinto al segmento histórico ---
-            if (seg.nombre && seg.nombre.toUpperCase() === 'ALCALDE PROVINCIAL') {
+            // --- NUEVO: Dar look distinto al segmento histórico (A prueba de espacios) ---
+            if (seg.nombre && seg.nombre.toUpperCase().includes('ALCALDE PROVINCIAL')) {
                 btn.classList.add('chip-especial-historico');
             }
             
@@ -612,7 +612,8 @@ window.initMapEngine = async function(container) {
             const finalLat = o.y * mapLat; 
 
             const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
-            const color = typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039';
+            const isHistoricoMode = document.body.classList.contains('tema-historico');
+            const color = isHistoricoMode ? '#8b7355' : (typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039');
             const k = typeof _obraKey === 'function' ? _obraKey(o) : `${o.x}_${o.y}`;
             const numId = featureNumId++;
             
@@ -833,6 +834,15 @@ window.initMapEngine = async function(container) {
         const prevKey = currentKey;
         isSwapping = true; 
         currentKey = key; // Definimos el intento de navegación inmediatamente
+        
+        // --- NUEVO: Activar Tema Histórico en todo el mapa ---
+        const isHistorico = (window.SEGMENTOS_DATA || []).some(s => s.id === key && s.nombre && s.nombre.toUpperCase().includes('ALCALDE PROVINCIAL'));
+        if (isHistorico) {
+            document.body.classList.add('tema-historico');
+        } else {
+            document.body.classList.remove('tema-historico');
+        }
+        
         setBackgroundFor(key);
 
         // Quitar efecto glass al entrar a cualquier mapa
