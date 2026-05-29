@@ -617,7 +617,7 @@ window.initMapEngine = async function(container) {
                     4, 6.5,   // En zoom 4 (lejos), letra pequeñita (6.5px)
                     5, 8.5,   // En zoom 5 (distancia media), letra visible (8.5px)
                 6, 8,     // En zoom 6 (acercamiento), tamaño base (8px)
-                8, 13     // En zoom 8 (máximo acercamiento), letra grande (13px)
+                8, 11     // En zoom 8 (máximo acercamiento), letra grande (11px)
                 ],
                 'text-transform': 'uppercase',
                 'text-letter-spacing': 0.05,
