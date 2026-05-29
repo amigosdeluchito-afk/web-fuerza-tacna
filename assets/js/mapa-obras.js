@@ -739,6 +739,58 @@ window.initMapEngine = async function(container) {
         PINS_LOADING.delete(segmento);
     }
 
+    // =================================================================================
+    // MODO CENTINELA (AUTOPILOTO CINEMATOGRÁFICO)
+    // =================================================================================
+    let sentinelTimer = null;
+    let isSentinelActive = false;
+
+    function flyToRandomPin() {
+        if (!isSentinelActive || currentKey === 'base') return;
+        
+        const obras = Array.from(window.__OBRA_DATA.values());
+        if (obras.length === 0) return;
+        
+        const randomObra = obras[Math.floor(Math.random() * obras.length)];
+        
+        // Volamos súper lento hacia una obra aleatoria
+        map.flyTo({
+            center: [randomObra.lng, randomObra.lat],
+            zoom: 6.5 + Math.random() * 2, // Zoom orgánico aleatorio
+            speed: 0.15, // Velocidad cinematográfica hiper-lenta
+            curve: 1.2
+        });
+
+        map.once('moveend', () => {
+            if (isSentinelActive) setTimeout(flyToRandomPin, 2000);
+        });
+    }
+
+    function startSentinel() {
+        if (currentKey === 'base' || map.isDragPan() || map.isZooming()) return;
+        isSentinelActive = true;
+        flyToRandomPin();
+    }
+
+    function resetSentinel() {
+        if (isSentinelActive) {
+            isSentinelActive = false;
+            map.stop(); // Frena el vuelo del dron al instante
+        }
+        clearTimeout(sentinelTimer);
+        if (currentKey !== 'base') {
+            sentinelTimer = setTimeout(startSentinel, 8000); // Se activa a los 8 segundos
+        }
+    }
+
+    // Escuchamos cualquier interacción para devolverle el control al usuario
+    map.on('mousemove', resetSentinel);
+    map.on('mousedown', resetSentinel);
+    map.on('touchstart', resetSentinel);
+    map.on('wheel', resetSentinel);
+    map.on('dragstart', resetSentinel);
+    // =================================================================================
+
     window.swapSegment = function(key, revealAfter = false){
         const videoIntro = document.getElementById('video-intro-container');
         const chips = target.querySelector('.chips');
@@ -763,6 +815,7 @@ window.initMapEngine = async function(container) {
             isSwapping = false; // Detenemos cualquier swap en curso
             pendingKey = null;
             isAutoCenterBlocked = false; // Resetear bandera al volver a inicio
+            resetSentinel(); // Apagamos el modo centinela al regresar a Inicio
 
             const allGooey = document.querySelectorAll('#gooey-text-container');
             if (allGooey.length > 0) allGooey[allGooey.length - 1]._gooeyActive = false; // Reset real del texto
@@ -828,6 +881,7 @@ window.initMapEngine = async function(container) {
         isSwapping = true; 
         currentKey = key; // Definimos el intento de navegación inmediatamente
         setBackgroundFor(key);
+        resetSentinel(); // Reiniciar el contador del centinela al abrir un mapa nuevo
 
         // Quitar efecto glass al entrar a cualquier mapa
         if (chips) chips.classList.remove('is-glass');
