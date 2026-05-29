@@ -23,34 +23,6 @@ window.initMapEngine = async function(container) {
     if (!mapEl) return;
 
     // =================================================================================
-    // INYECCIÓN DEL PATRÓN DE FONDO MATRIZ (FUERZA TACNA)
-    // =================================================================================
-    if (!document.getElementById('mapa-pattern-style')) {
-        const patternStyle = document.createElement('style');
-        patternStyle.id = 'mapa-pattern-style';
-        patternStyle.innerHTML = `
-            .app-bg::after {
-                content: "";
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background-image: url('assets/img/pattern.svg'); /* Misma ruta que la matriz */
-                background-repeat: no-repeat;
-                background-size: cover;
-                background-position: center;
-                pointer-events: none; /* Crucial: Evita alterar los clics del mapa y pines */
-                z-index: 1; /* Sobre el fondo oscuro base (.app-bg), pero detrás del mapa (.map-wrap) */
-                opacity: 1; /* Mantiene la misma visibilidad original */
-                transform: translateZ(0);
-                will-change: transform;
-            }
-        `;
-        document.head.appendChild(patternStyle);
-    }
-
-    // =================================================================================
     // FIX CRÍTICO: RESTAURACIÓN DE VARIABLES DE ENTORNO
     // Al faltar estas variables, la función revealUI lanzaba un error fatal invisible 
     // y el menú jamás llegaba a aparecer.
@@ -282,6 +254,17 @@ window.initMapEngine = async function(container) {
     mapEl.style.background = 'transparent';
     window.mapInstance = map;
     
+    // =================================================================================
+    // INYECCIÓN DEL PATRÓN (GARANTÍA ABSOLUTA DE VISIBILIDAD)
+    // Lo aplicamos directamente a la base del contenedor de MapLibre.
+    // Esto asegura que ninguna capa oscura de la web lo tape.
+    // =================================================================================
+    const canvasContainer = map.getCanvasContainer();
+    canvasContainer.style.backgroundImage = "url('assets/img/pattern.svg')";
+    canvasContainer.style.backgroundRepeat = "no-repeat";
+    canvasContainer.style.backgroundSize = "cover";
+    canvasContainer.style.backgroundPosition = "center";
+
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
