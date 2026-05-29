@@ -222,7 +222,36 @@ window.initMapEngine = async function(container) {
 
     function setBackgroundFor(key){
         const bg = target.querySelector('.app-bg');
-        if (bg) bg.classList.add("show");
+        if (bg) {
+            bg.classList.add("show");
+            
+            // INYECCIÓN FÍSICA DEL PATRÓN
+            if (!bg.querySelector('.map-pattern-layer')) {
+                const pattern = document.createElement('div');
+                pattern.className = 'map-pattern-layer';
+                
+                // 3 rutas de respaldo por seguridad
+                const paths = "url('assets/img/pattern.svg'), url('../img/pattern.svg'), url('/fuerza_tacna/assets/img/pattern.svg')";
+                
+                pattern.style.cssText = `
+                    position: absolute;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    background-image: ${paths};
+                    background-size: cover;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    opacity: 0.35; /* <-- Bájalo a 0.15 si lo ves muy fuerte */
+                    mix-blend-mode: multiply; /* <-- CRUCIAL: Fuerza a que el naranja contraste con el amarillo */
+                    pointer-events: none; /* No bloquea los clics del mapa */
+                    z-index: 1;
+                `;
+                
+                if (window.getComputedStyle(bg).position === 'static') {
+                    bg.style.position = 'relative';
+                }
+                bg.appendChild(pattern);
+            }
+        }
     }
 
     let lastHudLabel = 'Inicio';
