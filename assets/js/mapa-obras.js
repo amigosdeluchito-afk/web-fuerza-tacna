@@ -461,12 +461,16 @@ window.initMapEngine = async function(container) {
             
             clearTimeout(hoverIntentTimer);
             
-            if (currentHoverKey !== null) {
-                map.setFeatureState({ source: 'obras-source', id: currentHoverKey }, { hover: false });
-            }
+            clearHoverState(); // Apagar la animación del pin anterior
             
             currentHoverKey = key;
-            map.setFeatureState({ source: 'obras-source', id: key }, { hover: true });
+            
+            // EFECTO MAGNÉTICO: Agrandar el pin que estamos tocando
+            map.setPaintProperty('obras-layer', 'circle-radius', [
+                'case', ['==', ['get', 'id'], currentHoverKey],
+                12, // Crece a 12px
+                8   // Regresa a su tamaño normal de 8px
+            ]);
 
             if (!isPulsing) {
                 isPulsing = true;
