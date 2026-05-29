@@ -342,6 +342,7 @@ window.initMapEngine = async function(container) {
     // Generamos un único timestamp por sesión para no asfixiar la red al pasar el ratón
     const sessionTs = new Date().getTime();
     let currentHoverKey = null; // Memoria para no redibujar la misma tarjeta inútilmente
+    let currentHoverId = null;  // ID numérico estricto para WebGL feature-state
     let hoverIntentTimer = null; // NUEVO: Temporizador anti-colapso
     let hoverRAF = null;
     let lastMouseEvent = null;
@@ -377,11 +378,12 @@ window.initMapEngine = async function(container) {
     }
 
     const clearHoverState = () => {
+        if (currentHoverId !== null && map.getSource('obras-source')) {
+            map.setFeatureState({ source: 'obras-source', id: currentHoverId }, { hover: false });
+        }
         if (currentHoverKey !== null) {
             currentHoverKey = null;
-            if (map.getLayer('obras-layer')) {
-                map.setPaintProperty('obras-layer', 'circle-radius', 8); // Restaura tamaño original
-            }
+            currentHoverId = null;
             if (map.getLayer('obras-pulse-layer')) {
                 map.setPaintProperty('obras-pulse-layer', 'circle-radius', 0);
                 map.setPaintProperty('obras-pulse-layer', 'circle-opacity', 0);
@@ -464,17 +466,20 @@ window.initMapEngine = async function(container) {
             
             const feature = features[0];
             const key = feature.properties.id;
+            const numId = feature.id; // El ID número entero exigido por WebGL
             
             if (currentHoverKey === key) return;
             
             clearTimeout(hoverIntentTimer);
             
-            if (currentHoverKey !== null) {
-                map.setFeatureState({ source: 'obras-source', id: currentHoverKey }, { hover: false });
-            }
+            clearHoverState(); // Apagamos el pin anterior correctamente
             
             currentHoverKey = key;
-            map.setFeatureState({ source: 'obras-source', id: key }, { hover: true });
+            currentHoverId = numId;
+            
+            if (map.getSource('obras-source')) {
+                map.setFeatureState({ source: 'obras-source', id: numId }, { hover: true });
+            }
 
             if (!isPulsing) {
                 isPulsing = true;
@@ -595,6 +600,7 @@ window.initMapEngine = async function(container) {
         }
 
         // FASE 2: Empaquetado puro de datos, sin distorsionar coordenadas (Modo Google Maps)
+        let featureNumId = 1; // Generador de IDs puros para WebGL
         const geojsonFeatures = validas.map((o) => {
             const finalLng = o.x * mapLon;
             const finalLat = o.y * mapLat; 
@@ -602,12 +608,13 @@ window.initMapEngine = async function(container) {
             const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
             const color = typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039';
             const k = typeof _obraKey === 'function' ? _obraKey(o) : `${o.x}_${o.y}`;
+            const numId = featureNumId++;
             
             window.__OBRA_DATA.set(k, { o, lat: finalLat, lng: finalLng });
 
             return {
                 type: 'Feature',
-                id: k, // FIX: Obligatorio para utilizar el Motor "Feature-State"
+                id: numId, // FIX: ID numérico obligatorio para Feature-State en MapLibre
                 geometry: { type: 'Point', coordinates: [finalLng, finalLat] },
                 properties: { id: k, nombre, estado, color }
             };
