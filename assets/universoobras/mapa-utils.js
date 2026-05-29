@@ -36,7 +36,7 @@ window.initGlobalConfig = async function() {
         // Poblar las variables globales con los datos ordenados
         segmentosTemp.forEach(seg => {
             window.SHEETS[seg.id] = seg.tab;
-            window.FOTOS_DIR[seg.id] = seg.id;
+            window.FOTOS_DIR[seg.id] = seg.tab; // Usamos el nombre de la pestaña (ej: 'educacion') para las carpetas
             window.SEGMENTOS_DATA.push({ id: seg.id, nombre: seg.nombre, tab: seg.tab });
         });
     } catch(e) { console.error("Error cargando configuración desde Excel:", e); }
@@ -160,7 +160,8 @@ window.colorPinPorEstado = function(estado) {
 };
 
 window.thumbPath = function(segmento, carpetaObra) {
-    return `IMG/fotos-obras/${segmento}/${carpetaObra}/1.thumb.webp`;
+    const dirFotos = window.FOTOS_DIR[segmento] || segmento;
+    return `IMG/fotos-obras/${dirFotos}/${carpetaObra}/1.thumb.webp`;
 };
 
 window.estadoToPill = function(estado) {
