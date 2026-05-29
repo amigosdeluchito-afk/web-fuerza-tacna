@@ -345,6 +345,42 @@ window.initMapEngine = async function(container) {
     let hoverIntentTimer = null; // NUEVO: Temporizador anti-colapso
     let hoverRAF = null;
     let lastMouseEvent = null;
+    
+    // VARIABLES PARA EL EFECTO RADAR (LATIDO EN GPU)
+    let isPulsing = false;
+    let pulsePhase = 0;
+
+    function renderPulse() {
+        if (!currentHoverKey || !map.getLayer('obras-pulse-layer')) {
+            isPulsing = false;
+            return; // Detenemos la animación si no hay hover para ahorrar batería
+        }
+        pulsePhase = (pulsePhase + 0.02) % 1; // Velocidad del latido
+        
+        // Efecto "ease-out" para que la onda empiece fuerte y frene al desaparecer
+        const easedPhase = 1 - Math.pow(1 - pulsePhase, 3);
+        
+        map.setPaintProperty('obras-pulse-layer', 'circle-radius', [
+            'case', ['boolean', ['feature-state', 'hover'], false],
+            8 + (easedPhase * 25), // El radio viaja de 8 a 33 píxeles
+            0
+        ]);
+        map.setPaintProperty('obras-pulse-layer', 'circle-opacity', [
+            'case', ['boolean', ['feature-state', 'hover'], false],
+            (1 - pulsePhase) * 0.7, // Se difumina de 70% de opacidad a 0%
+            0
+        ]);
+
+        if (isPulsing) requestAnimationFrame(renderPulse);
+    }
+
+    const clearHoverState = () => {
+        if (currentHoverKey !== null) {
+            if (map.getSource('obras-source')) map.setFeatureState({ source: 'obras-source', id: currentHoverKey }, { hover: false });
+            currentHoverKey = null;
+        }
+        map.getCanvas().style.cursor = '';
+    };
 
     // FASE 3: Limpiador automático del brillo del SVG
     const clearSVGHover = () => {
@@ -353,9 +389,9 @@ window.initMapEngine = async function(container) {
     };
 
     // ESCUDO DE RENDIMIENTO 1: Ocultar tarjetas y limpiar hover si el usuario hace zoom o arrastra
-    map.on('zoomstart', () => { clearSVGHover(); clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
-    map.on('dragstart', () => { clearSVGHover(); clearTimeout(hoverIntentTimer); ghostTooltip.remove(); currentHoverKey = null; });
-    map.on('mouseout', () => { clearSVGHover(); });
+    map.on('zoomstart', () => { clearSVGHover(); clearTimeout(hoverIntentTimer); ghostTooltip.remove(); clearHoverState(); });
+    map.on('dragstart', () => { clearSVGHover(); clearTimeout(hoverIntentTimer); ghostTooltip.remove(); clearHoverState(); });
+    map.on('mouseout', () => { clearSVGHover(); clearTimeout(hoverIntentTimer); ghostTooltip.remove(); clearHoverState(); });
 
     // SOLUCIÓN DEFINITIVA DE RENDIMIENTO (Reemplazo de mouseenter/mouseleave)
     // Evita que MapLibre ejecute queryRenderedFeatures miles de veces de forma interna
@@ -398,8 +434,7 @@ window.initMapEngine = async function(container) {
             if (!map.getLayer('obras-layer')) {
                 if (currentHoverKey !== null) {
                     clearTimeout(hoverIntentTimer);
-                    currentHoverKey = null;
-                    map.getCanvas().style.cursor = '';
+                    clearHoverState();
                     ghostTooltip.remove();
                 }
                 return;
@@ -409,11 +444,9 @@ window.initMapEngine = async function(container) {
             const features = map.queryRenderedFeatures(lastMouseEvent.point, { layers: ['obras-layer'] });
             
             if (!features.length) {
-                // Reemplazo del antiguo "mouseleave"
                 if (currentHoverKey !== null) {
                     clearTimeout(hoverIntentTimer);
-                    currentHoverKey = null;
-                    map.getCanvas().style.cursor = '';
+                    clearHoverState();
                     ghostTooltip.remove();
                 }
                 return;
@@ -428,8 +461,20 @@ window.initMapEngine = async function(container) {
             
             clearTimeout(hoverIntentTimer);
             
+            if (currentHoverKey !== null) {
+                map.setFeatureState({ source: 'obras-source', id: currentHoverKey }, { hover: false });
+            }
+            
+            currentHoverKey = key;
+            map.setFeatureState({ source: 'obras-source', id: key }, { hover: true });
+
+            if (!isPulsing) {
+                isPulsing = true;
+                pulsePhase = 0;
+                renderPulse();
+            }
+
             hoverIntentTimer = setTimeout(() => {
-                currentHoverKey = key;
                 const data = window.__OBRA_DATA.get(key);
                 
                 if (data && data.o) {
@@ -554,6 +599,7 @@ window.initMapEngine = async function(container) {
 
             return {
                 type: 'Feature',
+                id: k, // FIX: Obligatorio para utilizar el Motor "Feature-State"
                 geometry: { type: 'Point', coordinates: [finalLng, finalLat] },
                 properties: { id: k, nombre, estado, color }
             };
@@ -567,6 +613,7 @@ window.initMapEngine = async function(container) {
         if (map.getLayer('cluster-count')) map.removeLayer('cluster-count');
         if (map.getLayer('obras-labels-layer')) map.removeLayer('obras-labels-layer');
         if (map.getLayer('obras-layer')) map.removeLayer('obras-layer');
+        if (map.getLayer('obras-pulse-layer')) map.removeLayer('obras-pulse-layer');
         if (map.getLayer('obras-shadow-layer')) map.removeLayer('obras-shadow-layer');
 
         if (map.getSource(sourceId)) {
@@ -589,6 +636,19 @@ window.initMapEngine = async function(container) {
                 'circle-opacity': 0.4,
                 'circle-translate': [0, 4],
                 'circle-blur': 0.8
+            }
+        });
+
+        // DIBUJADO GPU 1.5: Capa Fantasma del Latido (Radar)
+        map.addLayer({
+            id: 'obras-pulse-layer',
+            type: 'circle',
+            source: sourceId,
+            paint: {
+                'circle-radius': 0, // Inicia en 0, lo anima Javascript
+                'circle-color': ['get', 'color'], // Hereda dinámicamente el mismo color del pin
+                'circle-opacity': 0,
+                'circle-stroke-width': 0
             }
         });
 
