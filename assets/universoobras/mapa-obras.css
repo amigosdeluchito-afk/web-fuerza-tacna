@@ -715,7 +715,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     fill: #FFFFF0 !important; /* Color Marfil unificado para todos los mapas */
     stroke: #801039 !important; /* Borde Granate institucional */
     stroke-width: 3.5px !important; /* Borde más grueso por defecto */
-    transition: filter 0.3s ease, stroke-width 0.3s ease;
+    transition: filter 0.3s ease, stroke-width 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
     /* NUEVO: Efecto Dibujo de Autocad (Holograma) */
     stroke-dasharray: 200 30 !important; /* Crea trazos de 200px con cortes vacíos de 30px */
     animation: hologram-draw 6s linear infinite; /* Movimiento lento y continuo */
@@ -728,6 +728,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
 /* Efecto de Iluminación (Hover Interactividad) - FASE 3 */
 #synced-svg-container svg path.is-hovered {
-    filter: brightness(0.85); /* Oscurecimiento más notorio al pasar el ratón */
-    stroke-width: 6px !important; /* Resalte de borde aún más grueso al tocar */
+    fill: #ffffff !important; /* Se vuelve blanco puro para "iluminarse" */
+    stroke: #ffc300 !important; /* El borde cambia al color dorado */
+    stroke-width: 5px !important; /* Borde ligeramente más grueso */
+    filter: drop-shadow(0 0 12px rgba(255, 195, 0, 0.8)); /* Resplandor (Glow) dorado de la provincia */
 }
