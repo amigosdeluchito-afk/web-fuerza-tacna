@@ -254,17 +254,6 @@ window.initMapEngine = async function(container) {
     mapEl.style.background = 'transparent';
     window.mapInstance = map;
     
-    // =================================================================================
-    // INYECCIÓN DEL PATRÓN (GARANTÍA ABSOLUTA DE VISIBILIDAD)
-    // Lo aplicamos directamente a la base del contenedor de MapLibre.
-    // Esto asegura que ninguna capa oscura de la web lo tape.
-    // =================================================================================
-    const canvasContainer = map.getCanvasContainer();
-    canvasContainer.style.backgroundImage = "url('assets/img/pattern.svg')";
-    canvasContainer.style.backgroundRepeat = "no-repeat";
-    canvasContainer.style.backgroundSize = "cover";
-    canvasContainer.style.backgroundPosition = "center";
-
     const IS_MOBILE = window.matchMedia('(max-width: 600px)').matches;
     if (!IS_MOBILE) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
