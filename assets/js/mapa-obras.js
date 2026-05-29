@@ -922,8 +922,9 @@ window.initMapEngine = async function(container) {
                         hint.classList.add('is-visible');
                         setTimeout(() => {
                             hint.classList.remove('is-visible');
+                            hint.classList.add('is-hiding');
                             setTimeout(() => { if(hint) hint.remove(); }, 1000);
-                        }, 5000);
+                        }, 6000);
                     });
                 }, 1800);
             }

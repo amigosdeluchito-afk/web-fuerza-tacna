@@ -737,13 +737,13 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
    ========================================================================= */
 .map-onboarding-hint {
   position: fixed;
-  top: 45%;
+  top: 55%;
   right: 15%;
   transform: translateY(-50%) rotate(-10deg) scale(0.5);
   z-index: 8000; 
   pointer-events: none;
   font-family: 'Segoe Print', 'Bradley Hand', 'Chalkboard SE', 'Comic Sans MS', sans-serif;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-weight: 700;
   line-height: 1.2;
   color: #111;
@@ -759,10 +759,16 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   transform: translateY(-50%) rotate(-5deg) scale(1);
   animation: map-hint-float 2s ease-in-out infinite alternate;
 }
+.map-onboarding-hint.is-hiding {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-20%) rotate(15deg) scale(0.4);
+  transition: all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+}
 .map-onboarding-hint .icon-mouse {
   display: block;
-  font-size: 1.5rem;
-  margin-bottom: 3px;
+  font-size: 1.2rem;
+  margin-bottom: 2px;
   animation: mouse-scroll-hint 1.5s infinite;
 }
 @keyframes map-hint-float {
@@ -775,20 +781,23 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 }
 @media (max-width: 900px) {
   .map-onboarding-hint {
-    top: 65%;
+    top: 75%;
     right: 50%;
     transform: translate(50%, -50%) rotate(-5deg) scale(0.5);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     width: 100%;
   }
   .map-onboarding-hint.is-visible {
     transform: translate(50%, -50%) rotate(-2deg) scale(1);
+  }
+  .map-onboarding-hint.is-hiding {
+    transform: translate(50%, -20%) rotate(15deg) scale(0.4);
   }
   @keyframes map-hint-float {
     from { transform: translate(50%, -50%) rotate(-2deg) scale(1); }
     to { transform: translate(50%, -45%) rotate(0deg) scale(1.05); }
   }
   .map-onboarding-hint .icon-mouse {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
 }
