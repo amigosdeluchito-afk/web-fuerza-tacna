@@ -42,9 +42,9 @@ const LOG_FILE   = __DIR__ . '/data/historial.log';
 //  BASE DE DATOS (MYSQL)
 // =======================
 const DB_HOST = 'localhost';
-const DB_USER = 'root';       // Cambiar en tu hosting
-const DB_PASS = '';           // Cambiar en tu hosting
-const DB_NAME = 'fuerza_tacna'; 
+const DB_USER = 'tacnwddf_adminfreddy';
+const DB_PASS = 'TU_CONTRASEÑA_REAL_AQUI';
+const DB_NAME = 'tacnwddf_EL_NOMBRE_DE_TU_BD'; 
 
 function get_db_connection() {
     try {
