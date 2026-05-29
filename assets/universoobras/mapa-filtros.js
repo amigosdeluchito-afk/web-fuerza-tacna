@@ -174,16 +174,18 @@ function renderResults(items) {
     const count = document.getElementById('rdCount');
     const dock = document.getElementById('resultsDock');
 
-    const itemHTML = items.map(it => `
+    const itemHTML = items.map(it => {
+        const segName = typeof window.getSegmentName === 'function' ? window.getSegmentName(it.seg) : it.seg;
+        return `
         <li onclick="gotoObra('${it.key}', '${it.seg}')">
             <div class="title">${safe(it.nombre)}</div>
             <div class="meta">${safe(it.meta)}</div>
             <div class="footer">
                 ${estadoPillHTML(it)}
-                <span class="pill pill--tag">${it.seg.toUpperCase()}</span>
+                <span class="pill pill--tag">${segName.toUpperCase()}</span>
             </div>
         </li>
-    `).join('');
+    `}).join('');
 
     if (ul) {
         ul.innerHTML = itemHTML;
@@ -227,16 +229,18 @@ function renderHistoryList() {
         return;
     }
 
-    list.innerHTML = history.map(it => `
+    list.innerHTML = history.map(it => {
+        const segName = typeof window.getSegmentName === 'function' ? window.getSegmentName(it.seg) : it.seg;
+        return `
         <li onclick="gotoObra('${it.key}', '${it.seg}')">
             <div class="title">${safe(it.nombre)}</div>
             <div class="meta">${safe([it.distrito, it.provincia].filter(Boolean).join(' · '))}</div>
             <div class="footer">
                 ${estadoPillHTML(it)}
-                <span class="pill pill--tag">${it.seg.toUpperCase()}</span>
+                <span class="pill pill--tag">${segName.toUpperCase()}</span>
             </div>
         </li>
-    `).join('');
+    `}).join('');
 }
 
 function clearHistory() {

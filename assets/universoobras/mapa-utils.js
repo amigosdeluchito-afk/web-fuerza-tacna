@@ -42,6 +42,14 @@ window.initGlobalConfig = async function() {
     } catch(e) { console.error("Error cargando configuración desde Excel:", e); }
 };
 
+window.getSegmentName = function(segId) {
+    if (window.SEGMENTOS_DATA) {
+        const seg = window.SEGMENTOS_DATA.find(s => s.id === segId || s.tab === segId);
+        if (seg) return seg.nombre;
+    }
+    return segId;
+};
+
 // --- FIN CONSTANTES GLOBALES ---
 
 window.safe = s => String(s || '').replace(/[&<>"']/g, m => ({

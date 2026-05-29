@@ -4,15 +4,17 @@ const elList  = document.getElementById('obraSearchList');
 function renderList(items) {
     if (!items.length) { elList.hidden = true; elList.innerHTML = ''; return; }
     elList.hidden = false;
-    elList.innerHTML = items.map(it => `
+    elList.innerHTML = items.map(it => {
+        const segName = typeof window.getSegmentName === 'function' ? window.getSegmentName(it.seg) : it.seg;
+        return `
         <li data-key="${it._k}" data-seg="${it.seg}" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <div>${it.nombre}</div>
                 <small>${[it.distrito, it.provincia].filter(Boolean).join(' · ') || '&nbsp;'}</small>
             </div>
-            <span class="seg-tag">${it.seg.toUpperCase()}</span>
+            <span class="seg-tag">${segName.toUpperCase()}</span>
         </li>
-    `).join('');
+    `}).join('');
 
     elList.querySelectorAll('li').forEach(li => {
         li.onclick = async () => {

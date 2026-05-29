@@ -941,12 +941,30 @@ window.initMapEngine = async function(container) {
             // Transición de cámara acelerada por hardware (Vuelo 3D)
             map.flyTo({
                 center: [d.lng, d.lat],
-                zoom: Math.max(map.getZoom(), 2),
+                zoom: Math.max(map.getZoom(), 8),
                 speed: 1.2,
                 curve: 1.42
             });
             map.once('moveend', () => { isAutoCenterBlocked = false; });
             setTimeout(() => { isAutoCenterBlocked = false; }, 2000);
+
+            // Abrir el Panel de Obra
+            const o = d.o;
+            const dirFotos = String(window.FOTOS_DIR[currentKey] || currentKey).toLowerCase();
+            const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
+            const dinBuster = "?v=" + new Date().getTime();
+            const rawMonto = (o.monto || '').trim();
+            const monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
+
+            if (window.PanelObra && typeof window.PanelObra.open === 'function') {
+                window.PanelObra.open({ 
+                    key: o.carpeta || `${o.nombre}|${o.x}|${o.y}`, nombre: o.nombre, estado: o.estado, monto: monto, 
+                    distrito: o.distrito, provincia: o.provincia, descripcion: o.descripcion || '', 
+                    portada: base ? `${base}/1.thumb.webp${dinBuster}` : null, fotos: base ? Array.from({length:6}, (_,i)=> `${base}/${i+1}.webp${dinBuster}`) : [], 
+                    onCenter: () => { map.flyTo({ center: [d.lng, d.lat], zoom: Math.max(map.getZoom(), 8), speed: 1.2, curve: 1.42 }); } 
+                });
+                if (typeof window.recordVisit === 'function') window.recordVisit(key, currentKey);
+            }
         } else {
             isAutoCenterBlocked = false;
         }
