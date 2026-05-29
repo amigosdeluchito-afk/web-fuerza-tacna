@@ -742,9 +742,9 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   transform: translateY(-50%) rotate(-10deg) scale(0.5);
   z-index: 8000; 
   pointer-events: none;
-  font-family: 'Marker Felt', 'Chalkboard SE', 'Comic Sans MS', 'Arial Black', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 900;
+  font-family: 'Segoe Print', 'Bradley Hand', 'Chalkboard SE', 'Comic Sans MS', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
   line-height: 1.2;
   color: #111;
   text-align: center;
@@ -761,8 +761,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 }
 .map-onboarding-hint .icon-mouse {
   display: block;
-  font-size: 2rem;
-  margin-bottom: 5px;
+  font-size: 1.5rem;
+  margin-bottom: 3px;
   animation: mouse-scroll-hint 1.5s infinite;
 }
 @keyframes map-hint-float {
@@ -778,7 +778,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     top: 65%;
     right: 50%;
     transform: translate(50%, -50%) rotate(-5deg) scale(0.5);
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     width: 100%;
   }
   .map-onboarding-hint.is-visible {
@@ -789,6 +789,6 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     to { transform: translate(50%, -45%) rotate(0deg) scale(1.05); }
   }
   .map-onboarding-hint .icon-mouse {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
   }
 }
