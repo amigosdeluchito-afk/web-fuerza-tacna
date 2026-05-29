@@ -183,23 +183,25 @@ function require_admin() {
  * $extra   = array opcional con datos adicionales (segmento, carpeta, etc.)
  */
 function log_action($tipo, $detalle, $extra = []) {
-    if (!is_dir(dirname(LOG_FILE))) {
-        mkdir(dirname(LOG_FILE), 0777, true);
-    }
+    $db = get_db_connection();
+    
+    $db->exec("CREATE TABLE IF NOT EXISTS panel_historial (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        time DATETIME NOT NULL,
+        user VARCHAR(50) NULL,
+        tipo VARCHAR(50) NULL,
+        detalle TEXT NULL,
+        extra TEXT NULL
+    )");
 
-    $entry = [
-        'time'    => date('Y-m-d H:i:s'),
-        'user'    => current_user(),
-        'tipo'    => $tipo,
-        'detalle' => $detalle,
-        'extra'   => $extra,
-    ];
-
-    file_put_contents(
-        LOG_FILE,
-        json_encode($entry, JSON_UNESCAPED_UNICODE) . PHP_EOL,
-        FILE_APPEND
-    );
+    $stmt = $db->prepare("INSERT INTO panel_historial (time, user, tipo, detalle, extra) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([
+        date('Y-m-d H:i:s'),
+        current_user(),
+        $tipo,
+        $detalle,
+        json_encode($extra, JSON_UNESCAPED_UNICODE)
+    ]);
 }
 
 // =======================

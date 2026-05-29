@@ -1,13 +1,6 @@
 <?php
 // log_access.php - Registra quién ingresa exitosamente mediante el escudo temporal
-
-// Asegurar que la carpeta 'data' existe
-$logDir = __DIR__ . '/data';
-if (!is_dir($logDir)) {
-    mkdir($logDir, 0777, true);
-}
-
-$logFile = $logDir . '/accesos_escudo.log';
+require_once __DIR__ . '/config.php';
 
 // Obtener la IP real (incluso si pasas por proxies)
 $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
@@ -16,8 +9,19 @@ $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconocid
 $date = date('Y-m-d H:i:s');
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
 
-// Escribir en el archivo
-$entry = "[$date] IP: $ip - Navegador: $userAgent" . PHP_EOL;
-file_put_contents($logFile, $entry, FILE_APPEND);
-
-echo json_encode(['ok' => true]);
+try {
+    $db = get_db_connection();
+    $db->exec("CREATE TABLE IF NOT EXISTS panel_accesos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        time DATETIME NOT NULL,
+        ip VARCHAR(100) NULL,
+        user_agent TEXT NULL
+    )");
+    
+    $stmt = $db->prepare("INSERT INTO panel_accesos (time, ip, user_agent) VALUES (?, ?, ?)");
+    $stmt->execute([$date, $ip, $userAgent]);
+    
+    echo json_encode(['ok' => true]);
+} catch (Exception $e) {
+    echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+}

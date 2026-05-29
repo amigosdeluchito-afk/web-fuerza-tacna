@@ -5,10 +5,16 @@ require_once 'config.php';
 require_login();
 require_admin();
 
-// Leer el archivo de registros
-$logFile = __DIR__ . '/data/accesos_escudo.log';
-$logs = file_exists($logFile) ? file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
-$logs = array_reverse($logs); // Mostrar los más recientes primero
+$db = get_db_connection();
+$db->exec("CREATE TABLE IF NOT EXISTS panel_accesos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    time DATETIME NOT NULL,
+    ip VARCHAR(100) NULL,
+    user_agent TEXT NULL
+)");
+
+$stmt = $db->query("SELECT * FROM panel_accesos ORDER BY time DESC LIMIT 500");
+$logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -68,16 +74,13 @@ $logs = array_reverse($logs); // Mostrar los más recientes primero
       <?php if (empty($logs)): ?>
         <tr><td colspan="3" class="empty">No hay accesos registrados todavía.</td></tr>
       <?php else: ?>
-        <?php foreach ($logs as $line): 
-          // Extraemos los datos con un patrón regex básico
-          if (preg_match('/^\[(.*?)\] IP: (.*?) - Navegador: (.*)$/', $line, $matches)):
-        ?>
+        <?php foreach ($logs as $log): ?>
           <tr>
-            <td><?= htmlspecialchars($matches[1]) ?></td>
-            <td><?= htmlspecialchars($matches[2]) ?></td>
-            <td style="font-size: 0.85em; color: #cbd5e1;"><?= htmlspecialchars($matches[3]) ?></td>
+            <td><?= htmlspecialchars($log['time']) ?></td>
+            <td><?= htmlspecialchars($log['ip']) ?></td>
+            <td style="font-size: 0.85em; color: #cbd5e1;"><?= htmlspecialchars($log['user_agent']) ?></td>
           </tr>
-        <?php endif; endforeach; ?>
+        <?php endforeach; ?>
       <?php endif; ?>
     </tbody>
   </table>
