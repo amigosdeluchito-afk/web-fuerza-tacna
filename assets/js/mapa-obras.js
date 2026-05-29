@@ -669,7 +669,7 @@ window.initMapEngine = async function(container) {
             source: sourceId,
             paint: {
                 'circle-radius': 8,
-                'circle-radius-transition': { duration: 200 }, // Hace que el pin crezca suavemente y no de golpe
+                'circle-radius-transition': { duration: 350 }, // Crecimiento magnético mucho más lento
                 'circle-color': ['get', 'color'],
                 'circle-stroke-width': 2,
                 'circle-stroke-color': '#ffffff'
