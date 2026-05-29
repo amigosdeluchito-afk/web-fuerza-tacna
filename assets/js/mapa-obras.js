@@ -767,8 +767,9 @@ window.initMapEngine = async function(container) {
     }
 
     function startSentinel() {
-        if (currentKey === 'base' || map.isDragPan() || map.isZooming()) return;
+        if (currentKey === 'base' || map.isMoving() || map.isZooming()) return;
         isSentinelActive = true;
+        console.log("🛸 Modo Autopiloto (Centinela) Activado");
         flyToRandomPin();
     }
 
@@ -776,10 +777,11 @@ window.initMapEngine = async function(container) {
         if (isSentinelActive) {
             isSentinelActive = false;
             map.stop(); // Frena el vuelo del dron al instante
+            console.log("🛑 Autopiloto Desactivado por el usuario");
         }
         clearTimeout(sentinelTimer);
         if (currentKey !== 'base') {
-            sentinelTimer = setTimeout(startSentinel, 8000); // Se activa a los 8 segundos
+            sentinelTimer = setTimeout(startSentinel, 5000); // Bajamos a 5 segundos para que sea más rápido
         }
     }
 
