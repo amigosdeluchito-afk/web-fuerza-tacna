@@ -43,8 +43,8 @@ const LOG_FILE   = __DIR__ . '/data/historial.log';
 // =======================
 const DB_HOST = 'localhost';
 const DB_USER = 'tacnwddf_adminfreddy';
-const DB_PASS = 'TU_CONTRASEÑA_REAL_AQUI';
-const DB_NAME = 'tacnwddf_EL_NOMBRE_DE_TU_BD'; 
+const DB_PASS = 'adminfreddy14021993';
+const DB_NAME = 'tacnwddf_fuerza'; 
 
 function get_db_connection() {
     try {
