@@ -329,6 +329,30 @@ window.initMapEngine = async function(container) {
                 svg.style.width = '1093.78px';
                 svg.style.height = '1035.32px';
                 svg.style.display = 'block';
+                
+                // --- NUEVO: Etiquetar las provincias en el SVG sincronizado para el efecto Cine ---
+                const getProvinciaName = (id) => {
+                    if (!id) return null;
+                    id = id.toLowerCase();
+                    if (id.includes('tarata')) return 'tarata';
+                    if (id.includes('candarave')) return 'candarave';
+                    if (id.includes('basadre') || id.includes('jorge')) return 'jorge-basadre';
+                    if (id.includes('tacna')) return 'tacna';
+                    return null;
+                };
+                const fallbackProvs = ['tacna', 'tarata', 'candarave', 'jorge-basadre'];
+                let idxFallback = 0;
+                svg.querySelectorAll('path, polygon').forEach(el => {
+                    let curr = el;
+                    let id = '';
+                    while (curr && curr.tagName.toLowerCase() !== 'svg') {
+                        id = curr.id || curr.getAttribute('data-name') || curr.getAttribute('name') || '';
+                        if (id) break;
+                        curr = curr.parentElement;
+                    }
+                    let pName = getProvinciaName(id) || fallbackProvs[idxFallback++ % fallbackProvs.length];
+                    el.classList.add('provincia-' + pName);
+                });
             }
         }).catch(e => console.error("Error al cargar el archivo SVG:", e));
 
@@ -926,7 +950,7 @@ window.initMapEngine = async function(container) {
                 
                 // --- NUEVO: Acercar la cámara para destacar la provincia del sur ---
                 if (isHistoricoMode) {
-                    map.setZoom(map.getZoom() + 1.4); // Un poquito más de zoom para que se vea mejor
+                    map.setZoom(map.getZoom() + 0.6); // Ajustado para que no quede gigante
                 }
             }
 
