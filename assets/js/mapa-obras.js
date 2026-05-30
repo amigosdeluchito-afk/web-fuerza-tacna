@@ -934,8 +934,8 @@ window.initMapEngine = async function(container) {
             let isHistoricoMode = checkIsHistorico(segDataObj);
             if (isHistoricoMode) {
                 gFx = 0.50; // Mantenemos el centro horizontal
-                // OJO: En este mapa Y=0 es el Sur. Al usar 0.22 la cámara baja hasta la provincia.
-                gFy = 0.22; 
+                // OJO: En este mapa Y=0 es el Sur. Al usar 0.28 la cámara sube un poco y el mapa baja visualmente.
+                gFy = 0.28; 
             }
             
             const cx = lon * gFx;
@@ -948,7 +948,7 @@ window.initMapEngine = async function(container) {
                 
                 // --- NUEVO: Acercar la cámara para destacar la provincia del sur ---
                 if (isHistoricoMode) {
-                    map.setZoom(map.getZoom() + 0.6); // Ajustado para que no quede gigante
+                    map.setZoom(map.getZoom() + 0.3); // Menos zoom para que se vea más pequeño
                 }
             }
 
