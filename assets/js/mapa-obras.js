@@ -906,7 +906,14 @@ window.initMapEngine = async function(container) {
         if (map.getLayer('plano-layer')) map.removeLayer('plano-layer');
         if (map.getSource('plano-base')) map.removeSource('plano-base');
 
-            const [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
+            let [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
+            
+            // --- NUEVO: Centrar en el cuadrante inferior (Provincia Tacna) en modo histórico ---
+            if (checkIsHistorico(segDataObj)) {
+                gFx = 0.50; // Mantenemos el centro horizontal
+                gFy = 0.72; // Desplazamos la cámara hacia abajo (Sur)
+            }
+            
             const cx = lon * gFx;
             const cy = lat * gFy; 
 
@@ -914,6 +921,11 @@ window.initMapEngine = async function(container) {
                 map.fitBounds(bounds, { padding: 50, duration: 0 });
                 map.setMaxBounds([ [-lon*0.5, -lat*0.5], [lon*1.5, lat*1.5] ]);
                 map.setCenter([cx, cy]);
+                
+                // --- NUEVO: Acercar la cámara para destacar la provincia del sur ---
+                if (checkIsHistorico(segDataObj)) {
+                    map.setZoom(map.getZoom() + 1.2);
+                }
             }
 
             target.querySelectorAll('.chips, .fp').forEach(el => {

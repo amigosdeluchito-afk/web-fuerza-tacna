@@ -1789,6 +1789,12 @@ function initMapaTacna(container) {
                         indexFallback++;
                     }
 
+                    // NUEVO: Agregamos una clase CSS basada en el nombre de la provincia
+                    // Ejemplo: "Tacna" -> "provincia-tacna", "Jorge Basadre" -> "provincia-jorge-basadre"
+                    if (provName) {
+                        el.classList.add('provincia-' + provName.toLowerCase().replace(/\s+/g, '-'));
+                    }
+
                     el.addEventListener('mouseenter', (e) => {
 
                         let obrasCount = 25; // Valor estático a 25 como lo pediste

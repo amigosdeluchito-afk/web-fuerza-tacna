@@ -859,11 +859,25 @@ body.tema-historico #synced-svg-container svg path {
   fill: #f4ecdf !important; /* Marfil más viejo */
   stroke: #8b7355 !important; /* Marrón sepia en vez de guinda */
   stroke-dasharray: none !important; /* Desactiva el trazo moderno */
+  opacity: 0.15 !important; /* NUEVO: Oculta casi por completo las provincias secundarias */
+  stroke-width: 1.5px !important; /* Borde más sutil para el fondo */
 }
+
+/* NUEVO: Destacar en primer plano SOLO la provincia de Tacna (Cuadrante inferior) */
+body.tema-historico #synced-svg-container svg path.provincia-tacna {
+  opacity: 1 !important;
+  stroke-width: 3.5px !important; /* Borde grueso normal */
+}
+
 body.tema-historico #synced-svg-container svg path.is-hovered {
   fill: #ffffff !important;
   stroke: #d4af37 !important; /* Dorado clásico en hover */
   filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
+}
+
+/* NUEVO: Las provincias apagadas se iluminan apenitas al pasar el mouse, sin quitarle protagonismo a Tacna */
+body.tema-historico #synced-svg-container svg path.is-hovered:not(.provincia-tacna) {
+  opacity: 0.4 !important;
 }
 
 /* Interfaz adaptada al tema vintage */
