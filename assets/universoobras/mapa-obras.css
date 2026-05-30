@@ -847,10 +847,11 @@ body.tema-historico .ghost-card__kicker {
   font-family: 'Georgia', 'Times New Roman', serif !important;
 }
 
-/* Textura de fondo con mezcla más dura para parecer papel */
+/* Textura de fondo adaptada sutilmente más oscura que el papel */
 body.tema-historico .app-bg .map-pattern-layer {
-  opacity: 0.15 !important;
-  mix-blend-mode: color-burn !important;
+  opacity: 0.12 !important; /* Si quieres que se note más el patrón, súbelo a 0.20 */
+  mix-blend-mode: multiply !important;
+  filter: brightness(0) !important; /* Convierte el patrón a sombra pura */
 }
 
 /* Cambiar colores del mapa SVG vectorizado a estilo "Plano Antiguo" */
