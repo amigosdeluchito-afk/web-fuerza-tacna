@@ -859,7 +859,7 @@ body.tema-historico #synced-svg-container svg path {
   fill: #f4ecdf !important; /* Marfil más viejo */
   stroke: #8b7355 !important; /* Marrón sepia en vez de guinda */
   stroke-dasharray: none !important; /* Desactiva el trazo moderno */
-  opacity: 0.15 !important; /* NUEVO: Oculta casi por completo las provincias secundarias */
+  opacity: 0.30 !important; /* Aumentada la transparencia (+10 puntos) de las provincias secundarias */
   stroke-width: 1.5px !important; /* Borde más sutil para el fondo */
 }
 
