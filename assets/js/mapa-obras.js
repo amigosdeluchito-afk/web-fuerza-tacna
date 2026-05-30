@@ -909,9 +909,11 @@ window.initMapEngine = async function(container) {
             let [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
             
             // --- NUEVO: Centrar en el cuadrante inferior (Provincia Tacna) en modo histórico ---
-            if (checkIsHistorico(segDataObj)) {
+            let isHistoricoMode = checkIsHistorico(segDataObj);
+            if (isHistoricoMode) {
                 gFx = 0.50; // Mantenemos el centro horizontal
-                gFy = 0.72; // Desplazamos la cámara hacia abajo (Sur)
+                // OJO: En este mapa Y=0 es el Sur. Al usar 0.22 la cámara baja hasta la provincia.
+                gFy = 0.22; 
             }
             
             const cx = lon * gFx;
@@ -923,8 +925,8 @@ window.initMapEngine = async function(container) {
                 map.setCenter([cx, cy]);
                 
                 // --- NUEVO: Acercar la cámara para destacar la provincia del sur ---
-                if (checkIsHistorico(segDataObj)) {
-                    map.setZoom(map.getZoom() + 1.2);
+                if (isHistoricoMode) {
+                    map.setZoom(map.getZoom() + 1.4); // Un poquito más de zoom para que se vea mejor
                 }
             }
 
