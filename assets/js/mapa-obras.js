@@ -330,29 +330,27 @@ window.initMapEngine = async function(container) {
                 svg.style.height = '1035.32px';
                 svg.style.display = 'block';
                 
-                // --- NUEVO: Etiquetar las provincias en el SVG sincronizado para el efecto Cine ---
-                const getProvinciaName = (id) => {
-                    if (!id) return null;
-                    id = id.toLowerCase();
-                    if (id.includes('tarata')) return 'tarata';
-                    if (id.includes('candarave')) return 'candarave';
-                    if (id.includes('basadre') || id.includes('jorge')) return 'jorge-basadre';
-                    if (id.includes('tacna')) return 'tacna';
-                    return null;
-                };
-                const fallbackProvs = ['tacna', 'tarata', 'candarave', 'jorge-basadre'];
-                let idxFallback = 0;
-                svg.querySelectorAll('path, polygon').forEach(el => {
-                    let curr = el;
-                    let id = '';
-                    while (curr && curr.tagName.toLowerCase() !== 'svg') {
-                        id = curr.id || curr.getAttribute('data-name') || curr.getAttribute('name') || '';
-                        if (id) break;
-                        curr = curr.parentElement;
-                    }
-                    let pName = getProvinciaName(id) || fallbackProvs[idxFallback++ % fallbackProvs.length];
-                    el.classList.add('provincia-' + pName);
-                });
+                // --- NUEVO: Etiquetado espacial inteligente (Geometría) ---
+                // Detectamos matemáticamente cuál es la provincia más al sur (abajo) 
+                // sin depender de los IDs ocultos del SVG, que pueden estar desordenados.
+                setTimeout(() => {
+                    let maxCenterY = -1;
+                    let bottomElement = null;
+                    const elements = svg.querySelectorAll('path, polygon');
+                    
+                    elements.forEach(el => {
+                        try {
+                            const bbox = el.getBBox();
+                            const centerY = bbox.y + (bbox.height / 2);
+                            if (centerY > maxCenterY) { maxCenterY = centerY; bottomElement = el; }
+                        } catch(e) {}
+                    });
+                    
+                    elements.forEach(el => {
+                        if (el === bottomElement) el.classList.add('provincia-tacna');
+                        else el.classList.add('provincia-secundaria');
+                    });
+                }, 100);
             }
         }).catch(e => console.error("Error al cargar el archivo SVG:", e));
 
