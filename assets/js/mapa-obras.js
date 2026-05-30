@@ -36,7 +36,7 @@ window.initMapEngine = async function(container) {
     // Puedes poner el ID interno (ej: seg_004) para que sea a prueba de balas
     const checkIsHistorico = (seg) => {
         if (!seg) return false;
-        const esIdExacto = seg.id === 'seg_00X'; // <-- REEMPLAZA 'seg_00X' por tu ID real del panel (ej: 'seg_004')
+        const esIdExacto = seg.id === 'seg_007'; // <-- REEMPLAZA 'seg_00X' por tu ID real del panel (ej: 'seg_004')
         const esNombreValido = seg.nombre && seg.nombre.toUpperCase().includes('ALCALDE PROVINCIAL');
         return esIdExacto || esNombreValido;
     };
