@@ -1118,18 +1118,19 @@
                 .title-mobile .t-line3 { font-size: 12.5vw !important; letter-spacing: 0; }
 
                 .luchito-img {
-                    max-width: 65vw !important; /* Escala perfecta para el ancho del celular */
-                    max-height: 38vh !important; /* Límite de altura para encajar en 100vh */
+                    max-width: 55vw !important; /* Un poco más chico para no estorbar verticalmente */
+                    max-height: 30vh !important; /* Límite de altura reducido */
                     object-fit: contain;
-                    margin-top: 0 !important; /* Pegar la imagen más al texto */
+                    margin-top: -2vh !important; /* Pegar la imagen más al texto superior */
+                    margin-bottom: -10vh !important; /* Absorbe totalmente el espacio por debajo de la foto */
                     order: 2; /* Fuerza a que la imagen se coloque debajo del texto */
                 }
 
                 .values-container {
                     order: 3; /* Fuerza a que se coloquen debajo de la foto */
-                    margin-top: -62vw !important; /* Subido aún más para eliminar cualquier separación con el texto */
-                    margin-bottom: 0 !important; /* Sin espacio inferior para pegar el botón */
-                    gap: 1vw; /* Compactar aún más las cajas entre sí */
+                    margin-top: -10vh !important; /* Usamos VH (alto de pantalla) para ser más exactos */
+                    margin-bottom: -2vh !important; /* Empuja el botón 'Ver más' hacia arriba */
+                    gap: 1.5vh !important; /* Reducir la separación entre las cajas mismas */
                     z-index: 10;
                 }
                 .value-box {
@@ -1140,7 +1141,7 @@
                 .intro-btn-container {
                     order: 4; /* Fuerza a que se coloque debajo de los valores */
                     justify-content: center !important;
-                    margin-top: -2.2rem !important; /* Margen negativo extremo para pegar completamente el botón a las cajas */
+                    margin-top: -3vh !important; /* Absorbe el espacio entre cajas y botón usando altura dinámica */
                 }
 
                 /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
@@ -1178,6 +1179,7 @@
                 .candidatos-intro-text {
                     width: 100%;
                     text-align: center;
+                    gap: 0 !important; /* Anula cualquier hueco fantasma interno */
                 }
                 .circular-testimonial-container {
                     display: none !important; /* Oculta el carrusel completamente en celulares */
