@@ -705,6 +705,15 @@ $(function () {
                     if (typeof window.obrasCleanup === 'function') {
                         window.obrasCleanup();
                     }
+
+                        // --- LIMPIEZA DE TARJETAS FANTASMAS (TOOLTIPS) ---
+                        // Evita que el cuadrito negro del mapa SVG se quede pegado al cambiar de menú
+                        const svgTooltip = document.getElementById('map-tooltip');
+                        if (svgTooltip) svgTooltip.classList.remove('visible');
+                        
+                        // Limpieza de seguridad para los pines del mapa de Universo de Obras
+                        document.querySelectorAll('.maplibregl-popup, .ghost-card-popup').forEach(el => el.remove());
+
                     pageTransition();
                     await delay(1000);
                     done();
