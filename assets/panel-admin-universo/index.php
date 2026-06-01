@@ -668,7 +668,7 @@ async function cargarFotosObra() {
     carpetaEl.value = "";
     zonaObra.textContent = `${segmento} → ${item.nombre}\nEsta obra aún no tiene carpeta configurada.`;
     galeriaEmpty.style.display = "block";
-    galeriaEmpty.textContent = "Esta obra aún no tiene fotos.";
+    galeriaEmpty.innerHTML = "Esta obra no tiene carpeta configurada. <br>Ve a la pestaña <b>✏️ Editar Obra</b> y dale a <b>Guardar Todos los Cambios</b> para generarla automáticamente.";
     actualizarInfoObra(null);
     return;
   }

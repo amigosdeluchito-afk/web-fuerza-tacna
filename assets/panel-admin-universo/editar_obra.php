@@ -93,8 +93,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $provincia= $_POST['provincia'] ?? '';
         $x        = (float) str_replace(',', '.', $_POST['x'] ?? '0');
         $y        = (float) str_replace(',', '.', $_POST['y'] ?? '0');
-        $carpeta  = $_POST['carpeta'] ?? '';
+        $carpeta  = trim($_POST['carpeta'] ?? '');
         $descripcion = $_POST['descripcion'] ?? '';
+
+        if ($carpeta === '' || $carpeta === '-') {
+            $carpeta = slugify($nombre);
+        }
 
         if ($fila >= 2 && $segmento !== '') {
             $values = [
@@ -111,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (!empty($_POST['ajax'])) {
                 header('Content-Type: application/json');
-                echo json_encode(['ok' => true, 'mensaje' => '¡Textos y mapa actualizados con éxito en tu Excel!']);
+                echo json_encode(['ok' => true, 'mensaje' => '¡Textos y mapa actualizados con éxito en tu Excel!', 'carpeta' => $carpeta]);
                 exit;
             }
             $mensaje = '<div class="msg-success">¡Obra actualizada con éxito en Google Sheets! Puedes seguir editando otras o ir a la pestaña de Fotos.</div>';
@@ -637,19 +641,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('progressBar').style.width = '0%'; document.getElementById('status').textContent = '';
 
             if (!carpeta || carpeta === '-') {
-                galeriaEmpty.style.display = 'block'; galeriaEmpty.textContent = "Esta obra aún no tiene carpeta configurada en el servidor.";
+                galeriaEmpty.style.display = 'block'; galeriaEmpty.innerHTML = "Esta obra no tiene carpeta configurada. <br><br> 👇 Haz clic en el botón verde <b>Guardar Todos los Cambios</b> aquí abajo para que el sistema le cree su carpeta automáticamente y puedas subir fotos.";
                 btnZip.disabled = true; btnSubir.disabled = true; btnEliminarTodo.disabled = true; return;
             }
 
             const fd = new FormData(); fd.append("action", "listar"); fd.append("segmento", segmento.toLowerCase()); fd.append("carpeta", carpeta);
             const resp = await fetch("fotos_api.php?_t=" + Date.now(), { method: "POST", body: fd });
             const data = await resp.json();
-
-            // --- DEBUG VISUAL ---
-            if (data.debug) {
-                console.log("🔍 [DIAGNÓSTICO BACKEND]", data.debug);
-                document.getElementById('status').innerHTML = `🔍 <b>Buscando en:</b> ${data.debug.dir} <br> 📂 <b>¿Existe carpeta?:</b> ${data.debug.is_dir ? 'SÍ' : 'NO'} <br> 📄 <b>Archivos vistos por PHP:</b> ${data.debug.files ? data.debug.files.join(', ') : 'Ninguno'}`;
-            }
 
             if (!data.ok) { galeriaEmpty.style.display = "block"; galeriaEmpty.textContent = data.error || "Error al cargar la galería."; return; }
 
@@ -736,8 +734,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const text = await new Promise((res, rej) => { const xhr = new XMLHttpRequest(); xhr.open("POST", "upload.php?_t=" + Date.now(), true); xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) { const pct = (e.loaded/e.total)*100; document.getElementById("progressBar").style.width = pct + "%"; statusEl.textContent = `Subiendo (${Math.round(pct)}%)...`; }}); xhr.onload = () => res(xhr.responseText); xhr.onerror = () => rej(new Error("Error de red")); xhr.send(fd); });
                 document.getElementById("progressContainer").style.display = "none";
                 const data = JSON.parse(text); 
-                if (data.debug) console.log("🔍 [SUBIDA DEBUG]", data.debug);
-                if (data.ok) { statusEl.innerHTML = `✅ ¡Fotos subidas! <br> <b>Guardadas en:</b> ${data.debug?.destDir || 'Desconocido'}`; cargarFotosObra(); } 
+                if (data.ok) { statusEl.innerHTML = `✅ ¡Fotos subidas!`; cargarFotosObra(); } 
                 else { statusEl.textContent = data.error; btnSubir.disabled = false; }
             } catch (err) { statusEl.textContent = "Error: " + err.message; btnSubir.disabled = false; }
         });
@@ -771,6 +768,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 const msgDiv = document.getElementById('formMsg');
                 msgDiv.innerHTML = `<div class="${data.ok ? 'msg-success' : 'msg-error'}" style="margin-top:15px; margin-bottom:0;">${data.mensaje}</div>`;
+                if (data.ok && data.carpeta) {
+                    document.getElementById('formCarpeta').value = data.carpeta;
+                    const seg = document.getElementById('formSegmento').value;
+                    const idx = document.getElementById('selectObra').value;
+                    if (obrasPorSegmento[seg] && obrasPorSegmento[seg][idx]) {
+                        obrasPorSegmento[seg][idx].carpeta = data.carpeta;
+                    }
+                    cargarFotosObra();
+                }
                 setTimeout(() => msgDiv.innerHTML = '', 4000);
             } catch (err) {
                 alert('Error de conexión al guardar.');
