@@ -1162,6 +1162,8 @@
                 }
                 #video-section {
                     margin-top: 0vh !important;
+                    padding-top: 15vh !important; /* Iguala la separación superior de la Sección 2 */
+                    padding-bottom: 8vh !important; /* Iguala la separación inferior */
                 }
             #drone-section {
                     margin-top: 0vh !important; /* Devolvemos el espacio al mapa en celulares */
@@ -1175,6 +1177,18 @@
                 }
                 #video-section .text-column > div {
                     margin-top: 4vh !important; /* Elimina el margen negativo de PC y separa el texto del video en celulares */
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    white-space: normal !important;
+                }
+                #video-section .text-column > div > div {
+                    display: block !important;
+                    width: 100% !important;
+                }
+                #video-section .text-column h2,
+                #video-section .text-column p {
+                    text-align: center !important;
                 }
                 .candidatos-intro-split {
                     display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%;
