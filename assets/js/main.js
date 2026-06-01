@@ -1480,7 +1480,7 @@ function initSafeMagneticScroll() {
                     let centerShift = 0;
                     // Corrección visual para que la Sección 3 (Video) no quede abajo por culpa de sus márgenes internos
                     if (secData.id === 'video-section') {
-                        centerShift = viewportHeight * 0.08; // Empuja la cámara 8vh hacia abajo, subiendo el video visualmente
+                        centerShift = viewportHeight * 0.01; // Reducido casi a cero porque los márgenes del HTML ya están balanceados
                     }
                     targetY = absoluteElTop - (viewportHeight / 2) + (rect.height / 2) + centerShift;
                 } else {
