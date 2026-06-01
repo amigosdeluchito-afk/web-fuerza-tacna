@@ -141,7 +141,15 @@ $errs  = $FILES['error'];
 $seenHashes = [];
     foreach ($names as $k => $originalName) {
         if (($errs[$k] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            $errores[] = "$originalName: error de subida";
+            $code = $errs[$k] ?? UPLOAD_ERR_NO_FILE;
+            $msgErr = match($code) {
+                UPLOAD_ERR_INI_SIZE => 'La foto es demasiado pesada (supera límite del servidor).',
+                UPLOAD_ERR_FORM_SIZE => 'La foto es demasiado pesada.',
+                UPLOAD_ERR_PARTIAL => 'La foto se subió a medias por un corte de internet.',
+                UPLOAD_ERR_NO_FILE => 'No se recibió el archivo correctamente.',
+                default => "Error interno de servidor (Código: $code)."
+            };
+            $errores[] = "$originalName: $msgErr";
             continue;
         }
 

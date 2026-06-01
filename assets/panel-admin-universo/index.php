@@ -669,9 +669,11 @@ async function cargarFotosObra() {
     zonaObra.textContent = `${segmento} → ${item.nombre}\nEsta obra aún no tiene carpeta configurada.`;
     galeriaEmpty.style.display = "block";
     galeriaEmpty.innerHTML = "Esta obra no tiene carpeta configurada. <br>Ve a la pestaña <b>✏️ Editar Obra</b> y dale a <b>Guardar Todos los Cambios</b> para generarla automáticamente.";
+    document.getElementById('uploadForm').style.display = 'none';
     actualizarInfoObra(null);
     return;
   }
+  document.getElementById('uploadForm').style.display = 'block';
 
   carpetaEl.value = item.carpeta;
   zonaObra.textContent = `${segmento} → ${item.nombre}\nCarpeta: ${item.carpeta}`;
@@ -1036,12 +1038,12 @@ async function subirFotos(e) {
       document.getElementById("previewContainer").innerHTML = "";
       await cargarFotosObra();
     } else {
-      statusEl.textContent = data.error || "Error al subir fotos.";
+      statusEl.innerHTML = `<span style="color:#ef4444">❌ Error: ${data.error || (data.errores ? data.errores.join('<br>') : 'Error desconocido')}</span>`;
       btnSubir.disabled = false;
     }
   } catch (err) {
     console.error(err);
-    statusEl.textContent = "Error de red / PHP: " + err.message;
+    statusEl.innerHTML = `<span style="color:#ef4444">❌ Error al procesar respuesta del servidor. ¿Quizás la foto es demasiado pesada? (${err.message})</span>`;
     btnSubir.disabled = false;
   }
 }

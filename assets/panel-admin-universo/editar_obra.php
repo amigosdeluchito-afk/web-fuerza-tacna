@@ -641,9 +641,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('progressBar').style.width = '0%'; document.getElementById('status').textContent = '';
 
             if (!carpeta || carpeta === '-') {
-                galeriaEmpty.style.display = 'block'; galeriaEmpty.innerHTML = "Esta obra no tiene carpeta configurada. <br><br> 👇 Haz clic en el botón verde <b>Guardar Todos los Cambios</b> aquí abajo para que el sistema le cree su carpeta automáticamente y puedas subir fotos.";
-                btnZip.disabled = true; btnSubir.disabled = true; btnEliminarTodo.disabled = true; return;
+                galeriaEmpty.style.display = 'block'; galeriaEmpty.innerHTML = "Esta obra no tiene carpeta configurada. <br><br> 👇 Haz clic en el botón verde <b>Guardar Todos los Cambios</b> aquí abajo para que el sistema le cree su carpeta automáticamente.<br><br><i>Una vez guardado, aparecerá aquí el botón para subir fotos.</i>";
+                btnZip.disabled = true; btnSubir.disabled = true; btnEliminarTodo.disabled = true; 
+                document.getElementById('uploadForm').style.display = 'none'; return;
             }
+            document.getElementById('uploadForm').style.display = 'block';
 
             const fd = new FormData(); fd.append("action", "listar"); fd.append("segmento", segmento.toLowerCase()); fd.append("carpeta", carpeta);
             const resp = await fetch("fotos_api.php?_t=" + Date.now(), { method: "POST", body: fd });
@@ -735,8 +737,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById("progressContainer").style.display = "none";
                 const data = JSON.parse(text); 
                 if (data.ok) { statusEl.innerHTML = `✅ ¡Fotos subidas!`; cargarFotosObra(); } 
-                else { statusEl.textContent = data.error; btnSubir.disabled = false; }
-            } catch (err) { statusEl.textContent = "Error: " + err.message; btnSubir.disabled = false; }
+                else { statusEl.innerHTML = `<span style="color:#ef4444">❌ Error: ${data.error || (data.errores ? data.errores.join('<br>') : 'Error desconocido')}</span>`; btnSubir.disabled = false; }
+            } catch (err) { statusEl.innerHTML = `<span style="color:#ef4444">❌ Error al procesar respuesta del servidor. ¿Quizás la foto es demasiado pesada? (${err.message})</span>`; btnSubir.disabled = false; }
         });
 
         // ==========================
@@ -775,8 +777,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (obrasPorSegmento[seg] && obrasPorSegmento[seg][idx]) {
                         obrasPorSegmento[seg][idx].carpeta = data.carpeta;
                     }
-                    cargarFotosObra();
                 }
+                
+                // Si el usuario seleccionó fotos, las subimos automáticamente
+                const filesInput = document.getElementById("files");
+                if (data.ok && filesInput && filesInput.files.length > 0) {
+                    document.getElementById('status').innerHTML = '⏳ Creó carpeta... Subiendo fotos ahora...';
+                    document.getElementById('uploadForm').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                } else if (data.ok) { cargarFotosObra(); }
+                
                 setTimeout(() => msgDiv.innerHTML = '', 4000);
             } catch (err) {
                 alert('Error de conexión al guardar.');
