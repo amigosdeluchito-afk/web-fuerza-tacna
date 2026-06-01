@@ -411,15 +411,15 @@ function injectGlobalAssets() {
             .info-block { margin-bottom: 2rem; }
             .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.1rem; color: #ffc300; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem; }
             
-            .proposals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-            .proposal-card { background: rgba(255,255,255,0.02); padding: 1.2rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+            .proposals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+            .proposal-card { background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 0.8rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
             .proposal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ffc300; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
             .proposal-card:hover { transform: translateY(-6px); border-color: rgba(255,195,0,0.5); background: rgba(255,195,0,0.06); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
             .proposal-card:hover::before { transform: scaleX(1); }
-            .proposal-icon { font-size: 2.2rem; margin-bottom: 0.8rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center bottom; }
+            .proposal-icon { font-size: 1.8rem; margin-bottom: 0.5rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center bottom; }
             .proposal-card:hover .proposal-icon { transform: scale(1.1) translateY(-2px); }
-            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
-            .proposal-card p { font-size: 0.85rem !important; margin: 0; line-height: 1.4 !important; color: #bbb !important; font-weight: 300; flex-grow: 1; }
+            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.9rem; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
+            .proposal-card p { font-size: 0.8rem !important; margin: 0; line-height: 1.3 !important; color: #bbb !important; font-weight: 300; flex-grow: 1; }
             
             .timeline { border-left: 2px solid rgba(255,195,0,0.2); padding-left: 1.5rem; margin-left: 0.5rem; display: flex; flex-direction: column; }
             .timeline-item { position: relative; padding-bottom: 1.5rem; }
@@ -508,8 +508,11 @@ function injectGlobalAssets() {
                 .facebook-text { align-items: center; gap: 0.6rem; }
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
                 .fb-widget-container { width: 100%; margin: 0 auto; }
-                .proposals-grid { gap: 0.8rem; }
-                .proposal-card { padding: 1rem; border-radius: 0.8rem; }
+                .proposals-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+                .proposal-card { padding: 0.8rem; border-radius: 0.6rem; }
+                .proposal-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+                .proposal-card h6 { font-size: 0.75rem; margin-bottom: 0.2rem; }
+                .proposal-card p { font-size: 0.65rem !important; line-height: 1.2 !important; }
                 .candidate-quote { margin: 1rem 0; padding: 0.8rem 0.8rem 0.8rem 2rem; font-size: 0.95rem; }
                 .candidate-quote::before { font-size: 3rem; left: 0.3rem; }
             }
