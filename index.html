@@ -1140,9 +1140,9 @@
 
                 /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
                 #intro, #video-section, #drone-section, #votar-section {
-                    height: 100vh !important; /* Fuerza 1 pantalla exacta */
-                    min-height: 100vh !important;
-                    padding: 10vh 0 15vh 0 !important; /* Quitamos colchón arriba para que suban */
+                    height: 100dvh !important; /* Usar dvh para evitar saltos con la barra de navegación del celular */
+                    min-height: 100dvh !important;
+                    padding: 10vh 0 12vh 0 !important; /* Quitamos colchón arriba para que suban */
                     margin-top: 0 !important; /* SIN MARGEN NEGATIVO para que el imán centre perfecto */
                     display: flex !important;
                     flex-direction: column !important;
@@ -1151,9 +1151,7 @@
                     box-sizing: border-box;
                 }
                 #intro {
-                    height: auto !important;
-                    min-height: 85vh !important;
-                    padding-top: 26vh !important; /* Aumentamos el peso superior para separarlo un poco de la Sección 1 */
+                    padding-top: 12vh !important; /* Reducido drásticamente para eliminar el espacio enorme arriba */
                     padding-bottom: 5vh !important; /* Le quitamos el colchón de espacio vacío abajo */
                 }
                 #video-section {
