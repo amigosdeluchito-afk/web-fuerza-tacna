@@ -133,7 +133,7 @@ function injectGlobalAssets() {
             .candidate-info { position: absolute; bottom: 0; width: 100%; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 1.5rem 1rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); transform: translateZ(40px); }
             .candidate-info h3 { margin: 0 0 0.4rem 0; font-size: 1.3rem; font-weight: 900; color: #fff; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; text-transform: uppercase; }
             .candidate-info p { margin: 0; font-size: 0.95rem; color: #ffc300; font-weight: bold; text-transform: uppercase; }
-            @media (max-width: 768px) { .candidate-card { width: 280px; height: 400px; } #candidatos-section { min-height: 85vh; padding-top: 10vh; } }
+            @media (max-width: 768px) { .candidate-card { width: 230px; height: 340px; border-radius: 1.2rem; } .candidate-info { padding: 1rem 0.5rem; } .candidate-info h3 { font-size: 1.1rem; margin-bottom: 0.2rem; } .candidate-info p { font-size: 0.75rem; } #candidatos-section { min-height: 85vh; padding-top: 10vh; } }
 
             /* --- Ajuste de Altura Sección Intro --- */
             #intro {
