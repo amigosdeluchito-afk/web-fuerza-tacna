@@ -300,9 +300,9 @@
                 </header>
                 
                 <!-- Nuevas Flechas Flotantes -->
-                <a href="#quienes-somos-timeline" class="mobile-arrows arr-left arr-dark" style="top: 92vh !important; bottom: auto !important;"><span></span><span></span><span></span></a>
-                <a href="#quienes-somos-timeline" class="mobile-arrows arr-center arr-dark" style="top: 92vh !important; bottom: auto !important;"><span></span><span></span><span></span></a>
-                <a href="#quienes-somos-timeline" class="mobile-arrows arr-right arr-dark" style="top: 92vh !important; bottom: auto !important;"><span></span><span></span><span></span></a>
+                <a href="#quienes-somos-timeline" class="mobile-arrows arr-left arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
+                <a href="#quienes-somos-timeline" class="mobile-arrows arr-center arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
+                <a href="#quienes-somos-timeline" class="mobile-arrows arr-right arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
                 
                 <style>
                     @keyframes popInUpText {
@@ -758,7 +758,8 @@
                             .timeline-modal-right { align-items: center !important; }
                             .timeline-modal-left img { max-height: 40vh; }
                             .timeline-title-container { margin-top: 6rem !important; margin-bottom: 1rem !important; } /* Aumentado para separar Sección 1 y 2 */
-                            .timeline-title { font-size: 9.5vw !important; letter-spacing: -1px; }
+                            .timeline-title { font-size: 15vw !important; letter-spacing: -1px; line-height: 0.95; }
+                            .timeline-title span { display: block; }
                             .timeline-desc-text { font-size: 1.15rem !important; line-height: 1.5 !important; } /* Texto más grande para la Sección 2 */
                         }
                     </style>
@@ -766,7 +767,9 @@
                     <!-- ENVOLTURA PARA EL IMÁN (Calcula el alto total exacto incluyendo los 10px) -->
                     <div id="quienes-somos-timeline" style="width: 100%; position: relative; padding: 10px 0;">
                         <div class="timeline-title-container" data-aos="fade-up" data-aos-duration="1200">
-                            <h2 class="timeline-title">Una historia con fuerza</h2>
+                            <h2 class="timeline-title">
+                                <span>UNA</span> <span>HISTORIA</span> <span>CON</span> <span>FUERZA</span>
+                            </h2>
                         </div>
 
                         <div class="timeline-section" data-aos="zoom-in-up" data-aos-duration="1500" data-aos-delay="200">
@@ -952,13 +955,13 @@
                 @media (max-width: 992px) {
                     #motor-norte-section { height: auto; min-height: 100vh; padding: 6rem 0 6rem 0; margin-top: 2rem; scroll-snap-align: none !important; }
                     .mn-container { gap: 1.5rem; width: 90%; }
-                    .mn-glass-card { padding: 2rem 1.5rem; flex: 1 1 100%; border-radius: 20px; }
-                    .mn-watermark { font-size: 8rem; right: -5px; bottom: -15px; }
-                    .mn-title { font-size: 1.8rem; }
-                    .mn-subtitle { font-size: 1rem; margin-bottom: 0.8rem; }
-                    .mn-desc { font-size: 1.15rem; line-height: 1.6; }
-                    .mn-icon-wrapper { width: 50px; height: 50px; margin-bottom: 1.2rem; }
-                    .mn-icon-wrapper svg { width: 26px; height: 26px; }
+                    .mn-glass-card { padding: 1.5rem 1.2rem; flex: 1 1 100%; border-radius: 15px; }
+                    .mn-watermark { font-size: 6rem; right: -5px; bottom: -10px; }
+                    .mn-title { font-size: 1.5rem; }
+                    .mn-subtitle { font-size: 0.9rem; margin-bottom: 0.6rem; }
+                    .mn-desc { font-size: 1rem; line-height: 1.4; }
+                    .mn-icon-wrapper { width: 45px; height: 45px; margin-bottom: 1rem; }
+                    .mn-icon-wrapper svg { width: 22px; height: 22px; }
                 }
             </style>
 
