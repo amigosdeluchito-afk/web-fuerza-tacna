@@ -457,8 +457,8 @@ function injectGlobalAssets() {
             .facebook-text { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
             .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.5rem; margin: 0; text-transform: uppercase; line-height: 1.1; }
             .facebook-text p { color: #bbb; font-size: 0.95rem; line-height: 1.4; margin: 0; max-width: 40ch; font-weight: 300; }
-            .fb-widget-container { display: flex; justify-content: center; background: transparent; padding: 0; border: none; overflow: hidden; width: 500px; max-width: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-            .fb-widget-container iframe { width: 100%; background: #fff; border-radius: 8px; display: block; }
+            .fb-widget-container { display: flex; justify-content: center; background: transparent; padding: 0; border: none; overflow: hidden; width: 100%; max-width: 500px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+            .fb-widget-container iframe { width: 100%; max-width: 100%; background: #fff; border-radius: 8px; display: block; }
 
             /* --- Estilos del Popup / Lightbox --- */
             .fuerza-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
@@ -507,10 +507,11 @@ function injectGlobalAssets() {
                 .next-candidate-module { flex-direction: column; text-align: center; gap: 0.8rem; padding: 0.8rem; margin-top: 1rem; }
                 .next-candidate-arrow { transform: rotate(90deg); }
                 .next-candidate-module:hover .next-candidate-arrow { transform: rotate(90deg) translateY(6px); }
-                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; text-align: center; margin-top: 0.5rem; }
-                .facebook-text { align-items: center; gap: 0.6rem; }
+                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem 0; text-align: center; margin-top: 0.5rem; overflow: hidden; }
+                .facebook-text { align-items: center; gap: 0.6rem; padding: 0 1rem; }
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
-                .fb-widget-container { width: 100%; margin: 0 auto; }
+                .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 0; }
+                .fb-widget-container iframe { border-radius: 0; width: 100% !important; }
                 .proposals-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
                 .proposal-card { padding: 0.8rem; border-radius: 0.6rem; }
                 .proposal-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
@@ -1188,7 +1189,7 @@ window.showCandidateDetail = function(selectedName) {
                             <a href="https://www.facebook.com/lilianabustinza.sa" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Perfil Completo</a>
                         </div>
                         <div class="fb-widget-container">
-                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Flilianabustinza.sa&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Flilianabustinza.sa&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="100%" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
                         </div>
                     </div>
                 </div>
