@@ -1267,7 +1267,7 @@ window.showCandidateDetail = function(selectedName) {
     if(isFirstTime || window.scrollY < wrapper.offsetTop - 300) {
         // CLAVE: Usar setTimeout permite que el navegador dibuje la sección antes de calcular hacia dónde bajar
         setTimeout(() => {
-            const targetPos = wrapper.offsetTop - (window.innerHeight * 0.05); // Centrado ajustado a la nueva altura
+            const targetPos = wrapper.offsetTop + (window.innerHeight * 0.03); // Ajuste: fuerza la cámara a bajar más para que el panel suba y quede pegado al techo
             
             // Obligamos físicamente al navegador a bajar la pantalla
             if (window.scroller && typeof window.scroller.setPostion === 'function') window.scroller.setPostion(targetPos);
