@@ -1428,6 +1428,9 @@ function initSafeMagneticScroll() {
 
     const handleInputEnd = () => {
         if (isAutoScrolling) return;
+        
+        // --- APAGAR IMÁN EN CELULARES Y TABLETS (Navegación 100% libre y natural) ---
+        if (window.innerWidth <= 991) return;
 
         // ¿Hacia dónde se dirige la inercia del scroll suave? Si no hay smoothscroll, usamos la posición actual
         const projectedY = (window.scroller && typeof window.scroller.getDestination === 'function') 
