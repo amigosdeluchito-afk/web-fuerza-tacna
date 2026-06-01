@@ -1201,6 +1201,40 @@
                 #video-section .text-column h2 span {
                     white-space: nowrap !important; /* Evita que "LA FUERZA" se parta en dos líneas */
                 }
+
+                /* --- Correcciones Sección 4 (Obras / Mapa) Móvil --- */
+                #drone-section .text-column {
+                    width: 100% !important;
+                    padding: 0 5vw !important;
+                    align-items: center !important;
+                    text-align: center !important;
+                }
+                #drone-section .text-column h2 {
+                    font-size: 15vw !important; /* OBRAS e HISTORIA grandes (Líneas 1 y 3) */
+                    text-align: center !important;
+                    margin-bottom: 1rem !important;
+                }
+                #drone-section .text-column h2 span {
+                    display: block !important;
+                    white-space: nowrap !important; /* Fuerza a mantener siempre 3 líneas exactas */
+                    line-height: 0.95 !important;
+                }
+                #drone-section .text-column h2 span:nth-child(2) {
+                    font-size: 10.5vw !important; /* "QUE HACEN" más chico para encajar perfectamente */
+                }
+                #drone-section .col-md-6:last-child {
+                    padding: 0 !important; /* Quita el relleno enorme de PC que rompe el imán */
+                    margin-top: 3vh !important;
+                }
+                #mapa-tacna-container {
+                    right: 0 !important; /* Centra el mapa anulando el offset lateral de PC */
+                    max-width: 80vw !important;
+                }
+                #mapa-tacna-container svg {
+                    max-height: 30vh !important; /* Límite estricto para que la caja no desborde y el imán funcione perfecto */
+                    width: auto !important;
+                }
+
                 .candidatos-intro-split {
                     display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%;
                 }
