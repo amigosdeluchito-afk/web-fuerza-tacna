@@ -1477,7 +1477,12 @@ function initSafeMagneticScroll() {
                 
                 let targetY;
                 if (secData.align === 'center') {
-                    targetY = absoluteElTop - (viewportHeight / 2) + (rect.height / 2);
+                    let centerShift = 0;
+                    // Corrección visual para que la Sección 3 (Video) no quede abajo por culpa de sus márgenes internos
+                    if (secData.id === 'video-section') {
+                        centerShift = viewportHeight * 0.08; // Empuja la cámara 8vh hacia abajo, subiendo el video visualmente
+                    }
+                    targetY = absoluteElTop - (viewportHeight / 2) + (rect.height / 2) + centerShift;
                 } else {
                     targetY = absoluteElTop - (secData.offset !== undefined ? secData.offset : 60);
                 }
