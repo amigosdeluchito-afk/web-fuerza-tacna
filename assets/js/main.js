@@ -365,18 +365,18 @@ function injectGlobalAssets() {
             .glass-button-wrap:active { transform: translateY(0) scale(0.98); }
 
             /* --- Estilos Dinámicos de la Sección de Detalle de Candidatos --- */
-            #detalle-candidato-wrapper { display: none; width: 100%; flex-shrink: 0; clear: both; box-sizing: border-box; padding: 3rem 5%; min-height: 100vh; background: transparent; position: relative; z-index: 40; margin-top: -10vh; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+            #detalle-candidato-wrapper { display: none; width: 100%; flex-shrink: 0; clear: both; box-sizing: border-box; padding: 5rem 5%; min-height: 100vh; background: transparent; position: relative; z-index: 40; margin-top: -10vh; border-top: 1px solid rgba(255, 255, 255, 0.1); }
             .candidato-detalle-container { display: flex; gap: 2.5rem; max-width: 90rem; margin: 0 auto; align-items: flex-start; }
             .candidato-sidebar { display: flex; flex-direction: column; gap: 1rem; width: 95px; flex-shrink: 0; position: sticky; top: 120px; }
             .mini-card { width: 100%; height: 120px; border-radius: 1rem; cursor: pointer; overflow: hidden; opacity: 0.5; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); border: 2px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
             .mini-card.active, .mini-card:hover { opacity: 1; border-color: #ffc300; transform: scale(1.05) translateX(10px); }
             .mini-card img { width: 100%; height: 100%; object-fit: cover; }
-            .candidato-content { flex-grow: 1; display: flex; flex-direction: column; background: #801039; border-radius: 1.5rem; padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
-            .candidato-content p.stagger-el { margin-bottom: 1.5rem !important; font-size: 0.95rem !important; line-height: 1.5 !important; }
+            .candidato-content { flex-grow: 1; display: flex; flex-direction: column; background: #801039; border-radius: 2rem; padding: 3.5rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+            .candidato-content p.stagger-el { margin-bottom: 2.5rem !important; font-size: 1.1rem !important; line-height: 1.8 !important; }
             
             /* --- Diseño de Ficha Profesional (Bloques Visuales) --- */
-            .candidate-top-row { display: flex; gap: 2rem; width: 100%; align-items: flex-start; }
-            .candidate-bottom-row { width: 100%; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+            .candidate-top-row { display: flex; gap: 3.5rem; width: 100%; align-items: flex-start; }
+            .candidate-bottom-row { width: 100%; margin-top: 3.5rem; padding-top: 3.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 
             /* --- Animación de Borde Giratorio (React Port) --- */
             @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
@@ -395,70 +395,70 @@ function injectGlobalAssets() {
                 animation: border-rotate 4s linear infinite;
             }
             .candidato-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; border-radius: calc(1.5rem - 4px); }
-            .photo-badge { position: absolute; top: 1rem; left: -1rem; background: #ffc300; color: #801039; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 8px; z-index: 3; box-shadow: 0 6px 20px rgba(0,0,0,0.4); text-transform: uppercase; transform: rotate(-4deg); border: 2px solid #fff; }
+            .photo-badge { position: absolute; top: 1.5rem; left: -1rem; background: #ffc300; color: #801039; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 8px; z-index: 3; box-shadow: 0 6px 20px rgba(0,0,0,0.4); text-transform: uppercase; transform: rotate(-4deg); border: 2px solid #fff; }
             
             .candidate-top-info { flex: 1; color: #fff; display: flex; flex-direction: column; justify-content: flex-start; }
-            .candidate-top-info h2 { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: clamp(2rem, 4vw, 3.5rem); color: #ffc300; text-transform: uppercase; margin: 0 0 0.8rem 0; line-height: 1.1; }
+            .candidate-top-info h2 { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: clamp(2.5rem, 4vw, 4rem); color: #ffc300; text-transform: uppercase; margin: 0 0 1rem 0; line-height: 1.1; }
             
-            .candidate-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
-            .badge { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,195,0,0.4); color: #ffc300; padding: 0.4rem 0.8rem; border-radius: 50px; font-size: 0.75rem; text-transform: uppercase; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; letter-spacing: 1px; backdrop-filter: blur(5px); }
+            .candidate-badges { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+            .badge { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,195,0,0.4); color: #ffc300; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; text-transform: uppercase; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; letter-spacing: 1px; backdrop-filter: blur(5px); }
             
-            .candidate-quote { position: relative; border-left: 2px solid #ffc300; padding: 1rem 1rem 1rem 3rem; color: #fff; margin: 1.5rem 0 1.5rem 0; font-size: 1.1rem; line-height: 1.4; background: linear-gradient(90deg, rgba(255,195,0,0.15), transparent); border-radius: 0 1rem 1rem 0; }
-            .candidate-quote::before { content: '"'; position: absolute; left: 0.5rem; top: -0.2rem; font-family: Georgia, serif; font-size: 4rem; color: rgba(255, 195, 0, 0.4); line-height: 1; }
-            .candidate-quote p { font-style: italic; margin: 0 0 0.5rem 0; font-weight: 300; }
-            .quote-author { display: block; font-size: 0.8rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; color: #ffc300; text-transform: uppercase; letter-spacing: 1px; opacity: 0.95; }
+            .candidate-quote { position: relative; border-left: 2px solid #ffc300; padding: 2rem 2.5rem 2rem 4rem; color: #fff; margin: 2.5rem 0 3.5rem 0; font-size: 1.4rem; line-height: 1.6; background: linear-gradient(90deg, rgba(255,195,0,0.15), transparent); border-radius: 0 1.5rem 1.5rem 0; }
+            .candidate-quote::before { content: '"'; position: absolute; left: 1rem; top: -0.5rem; font-family: Georgia, serif; font-size: 6rem; color: rgba(255, 195, 0, 0.4); line-height: 1; }
+            .candidate-quote p { font-style: italic; margin: 0 0 1rem 0; font-weight: 300; }
+            .quote-author { display: block; font-size: 0.9rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; color: #ffc300; text-transform: uppercase; letter-spacing: 1px; opacity: 0.95; }
             
-            .info-block { margin-bottom: 2rem; }
-            .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.1rem; color: #ffc300; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem; }
+            .info-block { margin-bottom: 4rem; }
+            .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.2rem; color: #ffc300; margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
             
-            .proposals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-            .proposal-card { background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 0.8rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+            .proposals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+            .proposal-card { background: rgba(255,255,255,0.02); padding: 2rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
             .proposal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ffc300; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
             .proposal-card:hover { transform: translateY(-6px); border-color: rgba(255,195,0,0.5); background: rgba(255,195,0,0.06); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
             .proposal-card:hover::before { transform: scaleX(1); }
-            .proposal-icon { font-size: 1.8rem; margin-bottom: 0.5rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center bottom; }
+            .proposal-icon { font-size: 2.8rem; margin-bottom: 1.5rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center bottom; }
             .proposal-card:hover .proposal-icon { transform: scale(1.1) translateY(-2px); }
-            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.9rem; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
-            .proposal-card p { font-size: 0.8rem !important; margin: 0; line-height: 1.3 !important; color: #bbb !important; font-weight: 300; flex-grow: 1; }
+            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.1rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+            .proposal-card p { font-size: 0.95rem !important; margin: 0; line-height: 1.7 !important; color: #bbb !important; font-weight: 300; flex-grow: 1; }
             
-            .timeline { border-left: 2px solid rgba(255,195,0,0.2); padding-left: 1.5rem; margin-left: 0.5rem; display: flex; flex-direction: column; }
-            .timeline-item { position: relative; padding-bottom: 1.5rem; }
+            .timeline { border-left: 2px solid rgba(255,195,0,0.2); padding-left: 2.5rem; margin-left: 1rem; display: flex; flex-direction: column; }
+            .timeline-item { position: relative; padding-bottom: 2.5rem; }
             .timeline-item:last-child { padding-bottom: 0; }
-            .timeline-item::before { content: ''; position: absolute; left: -1.95rem; top: 0.2rem; width: 16px; height: 16px; background: #801039; border: 3px solid #ffc300; border-radius: 50%; box-shadow: 0 0 15px rgba(255,195,0,0.4); transition: all 0.3s; }
+            .timeline-item::before { content: ''; position: absolute; left: -3.05rem; top: 0.2rem; width: 18px; height: 18px; background: #801039; border: 4px solid #ffc300; border-radius: 50%; box-shadow: 0 0 15px rgba(255,195,0,0.4); transition: all 0.3s; }
             .timeline-item:hover::before { transform: scale(1.3); background: #ffc300; box-shadow: 0 0 20px rgba(255,195,0,0.8); }
-            .timeline-year { color: #ffc300; font-weight: 900; font-size: 1.1rem; margin-bottom: 0.4rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; letter-spacing: 1px; }
+            .timeline-year { color: #ffc300; font-weight: 900; font-size: 1.25rem; margin-bottom: 0.6rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; letter-spacing: 1px; }
             
             /* --- Diseño Fijo de Galería (Lado Derecho) --- */
-            .timeline-item { position: relative; padding-bottom: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .timeline-item { position: relative; padding-bottom: 2.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
             .timeline-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-            .timeline-body { position: relative; display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 1.5rem; width: 100%; }
+            .timeline-body { position: relative; display: flex; flex-direction: row; justify-content: flex-start; align-items: center; gap: 2rem; width: 100%; }
             .timeline-content-left { display: flex; flex-direction: column; align-items: flex-start; gap: 0.8rem; }
-            .timeline-text { color: #bbb; line-height: 1.5; font-size: 0.95rem; margin: 0; font-weight: 300; max-width: 50ch; }
+            .timeline-text { color: #bbb; line-height: 1.8; font-size: 1.05rem; margin: 0; font-weight: 300; max-width: 50ch; }
             
             .mobile-gallery-btn { display: none; margin-top: 0.4rem; background: rgba(255,195,0,0.1); border: 1px solid rgba(255,195,0,0.4); color: #ffc300; padding: 0.5rem 1.2rem; border-radius: 50px; font-size: 0.75rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; text-transform: uppercase; cursor: pointer; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
             .mobile-gallery-btn:hover { background: #ffc300; color: #801039; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255,195,0,0.2); }
-            .btn-ver-galeria { background: rgba(255,195,0,0.08); border: 1px solid rgba(255,195,0,0.3); color: #ffc300; padding: 0.6rem 1.4rem; border-radius: 50px; font-size: 0.8rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.6rem; z-index: 2; }
+            .btn-ver-galeria { background: rgba(255,195,0,0.08); border: 1px solid rgba(255,195,0,0.3); color: #ffc300; padding: 0.6rem 1.4rem; border-radius: 50px; font-size: 0.85rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.6rem; z-index: 2; }
             .btn-ver-galeria:hover { background: #ffc300; color: #801039; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,195,0,0.3); }
             
             /* --- Estilos del Carrusel de la Línea de Tiempo --- */
-            .timeline-carousel-wrapper { width: 340px; height: 180px; flex-shrink: 0; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); margin: 0 auto; }
+            .timeline-carousel-wrapper { width: 340px; height: 200px; flex-shrink: 0; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.4); margin: 0 auto; }
             .timeline-carousel-content { display: flex; height: 100%; width: 100%; }
             .timeline-carousel-item { width: 100%; height: 100%; flex-shrink: 0; position: relative; cursor: zoom-in; }
             .timeline-carousel-item img { width: 100%; height: 100%; object-fit: cover; }
-            .timeline-carousel-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); }
+            .timeline-carousel-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); }
             .timeline-carousel-nav:hover { background: #ffc300; transform: translateY(-50%) scale(1.1); }
-            .timeline-carousel-nav svg { stroke: #fff; width: 20px; height: 20px; transition: stroke 0.3s; }
+            .timeline-carousel-nav svg { stroke: #fff; width: 24px; height: 24px; transition: stroke 0.3s; }
             .timeline-carousel-nav:hover svg { stroke: #801039; }
-            .timeline-carousel-nav.prev { left: 8px; }
-            .timeline-carousel-nav.next { right: 8px; }
+            .timeline-carousel-nav.prev { left: 12px; }
+            .timeline-carousel-nav.next { right: 12px; }
 
             /* --- Contenedor de Facebook (Widget 2 Columnas) --- */
-            .facebook-layout-grid { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05); margin-top: 0.5rem; }
-            .facebook-text { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
-            .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.5rem; margin: 0; text-transform: uppercase; line-height: 1.1; }
-            .facebook-text p { color: #bbb; font-size: 0.95rem; line-height: 1.4; margin: 0; max-width: 40ch; font-weight: 300; }
-            .fb-widget-container { display: flex; justify-content: center; background: transparent; padding: 0; border: none; overflow: hidden; width: 100%; max-width: 500px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-            .fb-widget-container iframe { width: 100%; max-width: 100%; background: #fff; border-radius: 8px; display: block; }
+            .facebook-layout-grid { display: grid; grid-template-columns: 1fr auto; gap: 3rem; align-items: center; background: rgba(255,255,255,0.02); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); margin-top: 1rem; overflow: hidden; }
+            .facebook-text { display: flex; flex-direction: column; gap: 1.2rem; align-items: flex-start; padding: 0; }
+            .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.8rem; margin: 0; text-transform: uppercase; line-height: 1.1; }
+            .facebook-text p { color: #bbb; font-size: 1.05rem; line-height: 1.6; margin: 0 0 1rem 0; max-width: 40ch; font-weight: 300; }
+            .fb-widget-container { display: flex; justify-content: center; background: transparent; padding: 0; border: none; overflow: hidden; width: 500px; max-width: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+            .fb-widget-container iframe { width: 100% !important; max-width: 100%; background: #fff; border-radius: 8px; display: block; }
 
             /* --- Estilos del Popup / Lightbox --- */
             .fuerza-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
@@ -507,11 +507,10 @@ function injectGlobalAssets() {
                 .next-candidate-module { flex-direction: column; text-align: center; gap: 0.8rem; padding: 0.8rem; margin-top: 1rem; }
                 .next-candidate-arrow { transform: rotate(90deg); }
                 .next-candidate-module:hover .next-candidate-arrow { transform: rotate(90deg) translateY(6px); }
-                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem 0; text-align: center; margin-top: 0.5rem; overflow: hidden; }
-                .facebook-text { align-items: center; gap: 0.6rem; padding: 0 1rem; }
+                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; text-align: center; margin-top: 0.5rem; }
+                .facebook-text { align-items: center; gap: 0.6rem; }
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
-                .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 0; }
-                .fb-widget-container iframe { border-radius: 0; width: 100% !important; }
+                .fb-widget-container { width: 100%; margin: 0 auto; }
                 .proposals-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
                 .proposal-card { padding: 0.8rem; border-radius: 0.6rem; }
                 .proposal-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
@@ -1189,7 +1188,7 @@ window.showCandidateDetail = function(selectedName) {
                             <a href="https://www.facebook.com/lilianabustinza.sa" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Perfil Completo</a>
                         </div>
                         <div class="fb-widget-container">
-                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Flilianabustinza.sa&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="100%" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Flilianabustinza.sa&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
                         </div>
                     </div>
                 </div>
@@ -1267,7 +1266,7 @@ window.showCandidateDetail = function(selectedName) {
     if(isFirstTime || window.scrollY < wrapper.offsetTop - 300) {
         // CLAVE: Usar setTimeout permite que el navegador dibuje la sección antes de calcular hacia dónde bajar
         setTimeout(() => {
-            const targetPos = wrapper.offsetTop + (window.innerHeight * 0.03); // Ajuste: fuerza la cámara a bajar más para que el panel suba y quede pegado al techo
+            const targetPos = wrapper.offsetTop - (window.innerHeight * 0.05); // Centrado ajustado a la nueva altura
             
             // Obligamos físicamente al navegador a bajar la pantalla
             if (window.scroller && typeof window.scroller.setPostion === 'function') window.scroller.setPostion(targetPos);
