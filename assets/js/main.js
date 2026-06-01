@@ -156,6 +156,9 @@ function injectGlobalAssets() {
                 .candidatos-page-title { margin-bottom: 1.5rem; }
                 .candidatos-page-title h2 { font-size: clamp(1.8rem, 8vw, 2.5rem); line-height: 1; }
             }
+            @media (min-width: 769px) {
+                .candidatos-page-title, .lucho-candidatos-container { display: none !important; }
+            }
 
             /* --- Ajuste de Altura Sección Intro --- */
             #intro {
@@ -1204,6 +1207,12 @@ window.showCandidateDetail = function(selectedName) {
         }
     });
 
+    // Ocultar a Lucho en la versión celular al abrir el detalle
+    const luchoContainer = document.querySelector('.lucho-candidatos-container');
+    if (luchoContainer) {
+        luchoContainer.style.display = 'none';
+    }
+
     // 3. Animación de Entrada Fluida y en Cascada (Stagger)
     
     TweenMax.fromTo(wrapper.querySelector('.candidato-detalle-container'), 
@@ -1248,6 +1257,12 @@ window.closeCandidateDetail = function() {
                     child.style.visibility = child.getAttribute('data-original-visibility') || '';
                     child.classList.remove('hidden-by-detail');
                 });
+
+                // Reaparecer a Lucho al cerrar el detalle
+                const luchoContainer = document.querySelector('.lucho-candidatos-container');
+                if (luchoContainer) {
+                    luchoContainer.style.display = '';
+                }
 
                 // 3. Hacemos scroll de regreso al carrusel principal
                 const carruselSection = document.getElementById('candidatos-section') || document.querySelector('.marquee-container').closest('section');
