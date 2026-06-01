@@ -299,11 +299,6 @@
                     </div>
                 </header>
                 
-                <!-- Nuevas Flechas Flotantes -->
-                <a href="#quienes-somos-timeline" class="mobile-arrows arr-left arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
-                <a href="#quienes-somos-timeline" class="mobile-arrows arr-center arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
-                <a href="#quienes-somos-timeline" class="mobile-arrows arr-right arr-dark" style="top: auto !important; bottom: 2vh !important;"><span></span><span></span><span></span></a>
-                
                 <style>
                     @keyframes popInUpText {
                         0% { opacity: 0; transform: translateY(150px) scale(0.7); filter: blur(12px); }
@@ -538,6 +533,13 @@
                         </div>
                     </div>
                     
+                    <!-- Flechas Flotantes para bajar a la Sección 2 -->
+                    <div style="position: relative; width: 100%; height: 80px; margin-top: 3rem; margin-bottom: 2rem;">
+                        <a href="#quienes-somos-timeline" class="mobile-arrows arr-left arr-dark" style="top: auto !important; bottom: 0 !important;"><span></span><span></span><span></span></a>
+                        <a href="#quienes-somos-timeline" class="mobile-arrows arr-center arr-dark" style="top: auto !important; bottom: 0 !important;"><span></span><span></span><span></span></a>
+                        <a href="#quienes-somos-timeline" class="mobile-arrows arr-right arr-dark" style="top: auto !important; bottom: 0 !important;"><span></span><span></span><span></span></a>
+                    </div>
+
                     <!-- ========================================== -->
                     <!-- INICIO DE LA LÍNEA DE TIEMPO (TIMELINE)    -->
                     <!-- ========================================== -->
@@ -757,7 +759,7 @@
                             .timeline-modal-layout { flex-direction: column; gap: 1.5rem; text-align: center !important; }
                             .timeline-modal-right { align-items: center !important; }
                             .timeline-modal-left img { max-height: 40vh; }
-                            .timeline-title-container { margin-top: 6rem !important; margin-bottom: 1rem !important; } /* Aumentado para separar Sección 1 y 2 */
+                            .timeline-title-container { margin-top: 10rem !important; margin-bottom: 2rem !important; } /* Aumentado para separar Sección 1 y 2 */
                             .timeline-title { font-size: 15vw !important; letter-spacing: -1px; line-height: 0.95; }
                             .timeline-title span { display: block; }
                             .timeline-desc-text { font-size: 1.15rem !important; line-height: 1.5 !important; } /* Texto más grande para la Sección 2 */
@@ -954,8 +956,8 @@
 
                 @media (max-width: 992px) {
                     #motor-norte-section { height: auto; min-height: 100vh; padding: 6rem 0 6rem 0; margin-top: 2rem; scroll-snap-align: none !important; }
-                    .mn-container { gap: 1.5rem; width: 90%; }
-                    .mn-glass-card { padding: 1.5rem 1.2rem; flex: 1 1 100%; border-radius: 15px; }
+                    .mn-container { gap: 1.5rem; width: 100%; }
+                    .mn-glass-card { padding: 1.5rem 1.2rem; flex: 1 1 100%; border-radius: 15px; max-width: 82%; margin: 0 auto; }
                     .mn-watermark { font-size: 6rem; right: -5px; bottom: -10px; }
                     .mn-title { font-size: 1.5rem; }
                     .mn-subtitle { font-size: 0.9rem; margin-bottom: 0.6rem; }
