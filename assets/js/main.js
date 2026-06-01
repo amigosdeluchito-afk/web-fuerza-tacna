@@ -1430,7 +1430,7 @@ function initSafeMagneticScroll() {
         if (isAutoScrolling) return;
         
         // --- APAGAR IMÁN EN CELULARES Y TABLETS (Navegación 100% libre y natural) ---
-        if (window.innerWidth <= 991) return;
+        if (window.innerWidth <= 1024) return;
 
         // ¿Hacia dónde se dirige la inercia del scroll suave? Si no hay smoothscroll, usamos la posición actual
         const projectedY = (window.scroller && typeof window.scroller.getDestination === 'function') 
@@ -1566,6 +1566,9 @@ function initSafeMagneticScroll() {
 
     const handleScrollFallback = () => {
         if (isAutoScrolling) return;
+        
+        if (window.innerWidth <= 1024) return;
+
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             // Si el scroller NO se está moviendo, significa que el scroll fue por barra de desplazamiento
@@ -1576,6 +1579,9 @@ function initSafeMagneticScroll() {
     };
 
     const markUserInput = () => {
+        // Apagado total del magnetismo en móviles
+        if (window.innerWidth <= 1024) return;
+
         if (window.currentScrollAnim) {
             cancelAnimationFrame(window.currentScrollAnim);
             window.currentScrollAnim = null;

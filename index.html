@@ -1046,10 +1046,11 @@
             }
 
             /* --- Unificación del Imán: Apagamos el CSS nativo globalmente para que actúe el JS magnético --- */
-            html { scroll-snap-type: none !important; scroll-behavior: auto !important; }
-            #hero-section, #intro, #video-section, #drone-section, #votar-section, .references-section {
-                scroll-snap-align: none !important;
-            }
+                html, body, main, .container-fluid, div { scroll-snap-type: none !important; scroll-behavior: auto !important; }
+                * {
+                    scroll-snap-align: none !important;
+                    scroll-snap-stop: normal !important;
+                }
 
             /* --- Ocultar flechas móviles en PC --- */
             @media (min-width: 769px) {
