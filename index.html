@@ -1119,18 +1119,18 @@
 
                 .luchito-img {
                     max-width: 55vw !important; /* Un poco más chico para no estorbar verticalmente */
-                    max-height: 26vh !important; /* Altura reducida aún más para liberar espacio vertical */
+                    max-height: 28vh !important; /* Recuperamos un poco de tamaño */
                     object-fit: contain;
-                    margin-top: -10vh !important; /* Acerca con fuerza la imagen y cajas al Título (Elemento 1 y 2) */
-                    margin-bottom: -16vh !important; /* Absorción extrema del espacio debajo de la foto */
+                    margin-top: -3vh !important; /* Despegamos un poco del texto superior */
+                    margin-bottom: -10vh !important; /* Reducimos la absorción para que no se superpongan */
                     order: 2; /* Fuerza a que la imagen se coloque debajo del texto */
                 }
 
                 .values-container {
                     order: 3; /* Fuerza a que se coloquen debajo de la foto */
-                    margin-top: -16vh !important; /* Compensa la subida de la foto para mantenerlas juntas */
-                    margin-bottom: -8vh !important; /* Elimina el espacio vacío debajo de las cajas */
-                    gap: 1vh !important; /* Reducción máxima de separación entre cajas */
+                    margin-top: -8vh !important; /* Bajamos las cajas para que respiren respecto a la foto */
+                    margin-bottom: -2vh !important; /* Damos un pequeñísimo margen antes del botón */
+                    gap: 1.5vh !important; /* Un poco más de aire entre las cajas */
                     z-index: 10;
                 }
                 .value-box {
@@ -1141,7 +1141,7 @@
                 .intro-btn-container {
                     order: 4; /* Fuerza a que se coloque debajo de los valores */
                     justify-content: center !important;
-                    margin-top: -8vh !important; /* Sube y pega definitivamente el Botón (Elemento 3) a las Cajas */
+                    margin-top: 0 !important; /* Separamos el botón devolviéndolo a un flujo más natural */
                 }
 
                 /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
