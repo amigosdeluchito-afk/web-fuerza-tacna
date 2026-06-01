@@ -1128,7 +1128,7 @@
                 .values-container {
                     order: 3; /* Fuerza a que se coloquen debajo de la foto */
                     margin-top: -35vw !important; /* Bajado 5 puntos más */
-                    margin-bottom: 2rem;
+                    margin-bottom: 0.5rem; /* Reducido para pegar el botón a las cajas */
                     gap: 2.5vw;
                     z-index: 10;
                 }
@@ -1136,6 +1136,11 @@
                     font-size: 4.5vw; /* Escala tipográfica fluida */
                     padding: 2.5vw 0;
                     width: 65vw;
+                }
+                .intro-btn-container {
+                    order: 4; /* Fuerza a que se coloque debajo de los valores */
+                    justify-content: center !important;
+                    margin-top: 0.5rem !important; /* Mínima separación superior */
                 }
 
                 /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
@@ -1151,8 +1156,8 @@
                     box-sizing: border-box;
                 }
                 #intro {
-                    padding-top: 12vh !important; /* Reducido drásticamente para eliminar el espacio enorme arriba */
-                    padding-bottom: 5vh !important; /* Le quitamos el colchón de espacio vacío abajo */
+                    padding-top: 4vh !important; /* Disminuido para que no empuje el contenido hacia abajo */
+                    padding-bottom: 14vh !important; /* Aumentado para empujar todo el bloque hacia arriba y evitar que quede muy bajo */
                 }
                 #video-section {
                     margin-top: 0vh !important;
