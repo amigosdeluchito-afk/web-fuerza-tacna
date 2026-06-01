@@ -1037,7 +1037,7 @@ window.showCandidateDetail = function(selectedName) {
                         <span class="quote-author">— ${selectedCandidate.name} | ${selectedCandidate.role}</span>
                     </div>
                     
-                    <p class="stagger-el" style="margin-bottom: 2.5rem; font-size: 1.1rem; line-height: 1.8; color: #ddd; max-width: 85ch;">
+                    <p class="stagger-el" style="margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5; color: #ddd; max-width: 85ch;">
                         ${selectedCandidate.bio}
                     </p>
                 </div>
