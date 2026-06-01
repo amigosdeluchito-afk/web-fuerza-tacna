@@ -146,15 +146,11 @@ function injectGlobalAssets() {
                 font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
                 font-weight: 900 !important;
                 font-size: clamp(2.5rem, 5vw, 4.5rem);
-                color: #ffc300; /* Color base amarillo para "CONOCE A TU" */
+                color: #801039; /* Color granate para todo el título */
                 text-transform: uppercase;
                 line-height: 1.1;
                 margin: 0;
                 letter-spacing: -1px;
-            }
-            .candidatos-page-title h2 span:last-child {
-                color: #801039; /* Color granate para "CANDIDATO GANADOR" */
-                text-shadow: none; /* El texto oscuro no necesita sombra */
             }
             @media (max-width: 768px) {
                 .candidatos-page-title { margin-bottom: 1.5rem; }
