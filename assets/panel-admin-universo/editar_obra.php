@@ -642,7 +642,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             const fd = new FormData(); fd.append("action", "listar"); fd.append("segmento", segmento.toLowerCase()); fd.append("carpeta", carpeta);
-            const resp = await fetch("fotos_api.php", { method: "POST", body: fd });
+            const resp = await fetch("fotos_api.php?_t=" + Date.now(), { method: "POST", body: fd });
             const data = await resp.json();
 
             if (!data.ok) { galeriaEmpty.style.display = "block"; galeriaEmpty.textContent = data.error || "Error al cargar la galería."; return; }

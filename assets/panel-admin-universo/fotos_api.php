@@ -25,6 +25,24 @@ function get_obra_dir($segmento, $carpeta) {
 }
 
 /**
+ * Helper para obtener todas las imágenes de un directorio (cross-platform, sin GLOB_BRACE)
+ */
+function get_obra_images($dir) {
+    $images = [];
+    if (is_dir($dir)) {
+        $items = scandir($dir);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+                $images[] = $dir . '/' . $item;
+            }
+        }
+    }
+    return $images;
+}
+
+/**
  * Lista las imágenes de una obra
  */
 function handle_listar($segmento, $carpeta) {
@@ -39,8 +57,7 @@ function handle_listar($segmento, $carpeta) {
         return;
     }
 
-    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
-    $files = glob($patron, GLOB_BRACE);
+    $files = get_obra_images($dir);
 
     if (!$files) {
         echo json_encode([
@@ -72,8 +89,8 @@ function handle_listar($segmento, $carpeta) {
         // Principal: el que tiene nombre que empieza con "1."
         $es_principal = preg_match('/^1\./', $basename) === 1;
 
-        // URL pública (ajustada a la raíz de tu dominio en Internet)
-        $url = "/assets/universoobras/IMG/fotos-obras/" .
+        // URL pública (relativa para funcionar en localhost y producción)
+        $url = "../universoobras/IMG/fotos-obras/" .
             rawurlencode($segmento) . "/" .
             rawurlencode($carpeta) . "/" .
             rawurlencode($basename) . "?v=" . time();
@@ -82,7 +99,7 @@ function handle_listar($segmento, $carpeta) {
         $thumb_basename = preg_replace('/\.([a-zA-Z0-9]+)$/', '.thumb.$1', $basename);
         $thumb_url = $url; // Por defecto usamos la original como respaldo
         if (file_exists($dir . '/' . $thumb_basename)) {
-            $thumb_url = "/assets/universoobras/IMG/fotos-obras/" .
+            $thumb_url = "../universoobras/IMG/fotos-obras/" .
                 rawurlencode($segmento) . "/" .
                 rawurlencode($carpeta) . "/" .
                 rawurlencode($thumb_basename) . "?v=" . time();
@@ -114,8 +131,7 @@ function handle_eliminar($segmento, $carpeta, $numero) {
         return;
     }
 
-    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
-    $files  = glob($patron, GLOB_BRACE);
+    $files = get_obra_images($dir);
     if (!$files) {
         echo json_encode(['ok' => false, 'error' => 'No hay fotos en la obra']);
         return;
@@ -140,7 +156,7 @@ function handle_eliminar($segmento, $carpeta, $numero) {
     }
 
     // Renumerar archivos restantes como 1,2,3,... manteniendo orden
-    $restantes = glob($patron, GLOB_BRACE);
+    $restantes = get_obra_images($dir);
     $restantes = array_filter($restantes, fn($f) => strpos($f, '.thumb.') === false);
     natsort($restantes);
     $restantes = array_values($restantes);
@@ -217,8 +233,7 @@ function handle_principal($segmento, $carpeta, $numero) {
         return;
     }
 
-    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
-    $files  = glob($patron, GLOB_BRACE);
+    $files = get_obra_images($dir);
     if (!$files) {
         echo json_encode(['ok' => false, 'error' => 'No hay fotos']);
         return;
@@ -290,8 +305,7 @@ function handle_reordenar($segmento, $carpeta, $orden) {
         return;
     }
 
-    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
-    $files  = glob($patron, GLOB_BRACE);
+    $files = get_obra_images($dir);
     if (!$files) {
         echo json_encode(['ok' => false, 'error' => 'No hay fotos']);
         return;
@@ -368,8 +382,7 @@ function handle_contar_segmento($segmento) {
             if ($item === '.' || $item === '..') continue;
             $obraDir = $dir . '/' . $item;
             if (is_dir($obraDir)) {
-                $patron = $obraDir . '/*.{jpg,jpeg,png,webp,gif}';
-                $files = glob($patron, GLOB_BRACE);
+                $files = get_obra_images($obraDir);
                 if ($files) {
                     // Excluir miniaturas del conteo
                     $files = array_filter($files, fn($f) => strpos($f, '.thumb.') === false);
@@ -396,8 +409,7 @@ function handle_download_zip($segmento, $carpeta) {
         return;
     }
 
-    $patron = $dir . '/*.{jpg,jpeg,png,webp,gif}';
-    $files  = glob($patron, GLOB_BRACE);
+    $files = get_obra_images($dir);
     if (!$files) {
         http_response_code(404);
         echo "No hay fotos para descargar";
