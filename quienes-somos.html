@@ -101,6 +101,12 @@
                 margin: 0 15px !important; /* Reduce la separación entre los textos para hacerla más compacta */
             }
 
+            /* --- APAGAR IMÁN (SCROLL SNAP) EN MÓVILES --- */
+            @media (max-width: 991px) {
+                html, body, main, .container-fluid, div, section { scroll-snap-type: none !important; scroll-behavior: auto !important; }
+                * { scroll-snap-align: none !important; scroll-snap-stop: normal !important; }
+            }
+
             /* --- Efecto Star Wars para "Súmate" --- */
             #sumate-menu-item {
                 position: relative; /* Contexto para el posicionamiento de la imagen */
@@ -508,17 +514,17 @@
                         }
                     }
                 </style>
-                <div style="width: 100%; text-align: center; padding: 0 2vw; z-index: 10; margin-top: 12vh;">
-                    <h3 class="anim-text-1" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-size: clamp(3rem, 6.5vw, 6rem); margin-bottom: -0.5rem; color: #801039;">SOMOS</h3>
-                    <h2 class="anim-text-2" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: clamp(2.8rem, 10vw, 11rem); line-height: 0.9; text-transform: uppercase; color: #801039; letter-spacing: -3px; margin: 0; width: 100%; white-space: nowrap;">FUERZA TACNA</h2>
-                    <div class="anim-text-3" style="margin-top: 3rem; max-width: 900px; margin-left: auto; margin-right: auto;">
-                        <p style="font-family: Arial, sans-serif; font-size: clamp(1.2rem, 1.8vw, 1.8rem); font-weight: 600; color: #000; line-height: 1.6; margin: 0;">
-                            <span style="color: #801039; font-size: 2.5em; font-family: Georgia, serif; line-height: 0; position: relative; top: 12px; margin-right: 5px;">&ldquo;</span>Somos una fuerza que representa a la Tacna de todos los días: la de los mercados, los barrios, los jóvenes, los emprendedores, las familias y quienes trabajan por salir adelante.<span style="color: #801039; font-size: 2.5em; font-family: Georgia, serif; line-height: 0; position: relative; top: 12px; margin-left: 5px;">&rdquo;</span>
+                <div style="width: 100%; text-align: center; padding: 0 5vw; z-index: 10; margin-top: 14vh;">
+                    <h3 class="anim-text-1" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-size: clamp(1.8rem, 5vw, 6rem); margin-bottom: -0.5rem; color: #801039;">SOMOS</h3>
+                    <h2 class="anim-text-2" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: clamp(2.5rem, 11vw, 11rem); line-height: 0.95; text-transform: uppercase; color: #801039; letter-spacing: -1px; margin: 0; width: 100%; white-space: normal; word-break: break-word;">FUERZA TACNA</h2>
+                    <div class="anim-text-3" style="margin-top: 1.5rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+                        <p style="font-family: Arial, sans-serif; font-size: clamp(1rem, 4vw, 1.8rem); font-weight: 600; color: #000; line-height: 1.5; margin: 0;">
+                            <span style="color: #801039; font-size: 2em; font-family: Georgia, serif; line-height: 0; position: relative; top: 8px; margin-right: 2px;">&ldquo;</span>Somos una fuerza que representa a la Tacna de todos los días: la de los mercados, los barrios, los jóvenes, los emprendedores, las familias y quienes trabajan por salir adelante.<span style="color: #801039; font-size: 2em; font-family: Georgia, serif; line-height: 0; position: relative; top: 8px; margin-left: 2px;">&rdquo;</span>
                         </p>
                     </div>
-                    <div class="anim-text-4" style="margin-top: 1.5rem; width: 100%;">
-                        <h4 style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; color: #801039; font-size: clamp(1.2rem, 2vw, 2rem); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem;">NUESTROS PILARES</h4>
-                        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5vw 2vw;">
+                    <div class="anim-text-4" style="margin-top: 2rem; width: 100%;">
+                        <h4 style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; color: #801039; font-size: clamp(1rem, 3.5vw, 2rem); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem;">NUESTROS PILARES</h4>
+                        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
                             <div class="shiny-pillar"><span>Unidad</span></div>
                             <div class="shiny-pillar"><span>Compromiso</span></div>
                             <div class="shiny-pillar"><span>Trabajo</span></div>
@@ -745,6 +751,8 @@
                             .timeline-modal-layout { flex-direction: column; gap: 1.5rem; text-align: center !important; }
                             .timeline-modal-right { align-items: center !important; }
                             .timeline-modal-left img { max-height: 40vh; }
+                            .timeline-title-container { margin-top: 2rem !important; margin-bottom: 1rem !important; }
+                            .timeline-title { font-size: 9.5vw !important; letter-spacing: -1px; }
                         }
                     </style>
 
@@ -935,11 +943,15 @@
                 }
 
                 @media (max-width: 992px) {
-                    #motor-norte-section { height: auto; min-height: 100vh; padding: 6rem 0; scroll-snap-align: start; }
-                    .mn-container { gap: 2.5rem; }
-                    .mn-glass-card { padding: 3.5rem 2.5rem; }
-                    .mn-watermark { font-size: 12rem; right: -10px; bottom: -20px; }
-                    .mn-title { font-size: 2.1rem; }
+                    #motor-norte-section { height: auto; min-height: 100vh; padding: 4rem 0 6rem 0; scroll-snap-align: none !important; }
+                    .mn-container { gap: 1.5rem; width: 90%; }
+                    .mn-glass-card { padding: 2rem 1.5rem; flex: 1 1 100%; border-radius: 20px; }
+                    .mn-watermark { font-size: 8rem; right: -5px; bottom: -15px; }
+                    .mn-title { font-size: 1.8rem; }
+                    .mn-subtitle { font-size: 1rem; margin-bottom: 0.8rem; }
+                    .mn-desc { font-size: 1rem; line-height: 1.5; }
+                    .mn-icon-wrapper { width: 50px; height: 50px; margin-bottom: 1.2rem; }
+                    .mn-icon-wrapper svg { width: 26px; height: 26px; }
                 }
             </style>
 
