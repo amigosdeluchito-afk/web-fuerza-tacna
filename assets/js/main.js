@@ -488,7 +488,7 @@ function injectGlobalAssets() {
             .next-candidate-module:hover .next-candidate-arrow { transform: translateX(10px); }
             
             @media (max-width: 991px) {
-                #detalle-candidato-wrapper { margin-top: -26vh !important; padding-top: 4.5rem !important; padding-bottom: 2rem !important; }
+                #detalle-candidato-wrapper { margin-top: -5vh !important; padding-top: 3.5rem !important; padding-bottom: 2rem !important; }
                 .candidato-detalle-container { flex-direction: column; }
                 .candidato-sidebar { flex-direction: row; width: 100%; overflow-x: auto; padding-bottom: 1rem; position: static; gap: 0.8rem; }
                 .mini-card { width: 70px; height: 90px; flex-shrink: 0; }
@@ -510,7 +510,8 @@ function injectGlobalAssets() {
                 .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; text-align: center; margin-top: 0.5rem; }
                 .facebook-text { align-items: center; gap: 0.6rem; }
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
-                .fb-widget-container { width: 100%; margin: 0 auto; }
+                .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 8px; overflow: hidden; }
+                .fb-widget-container iframe { width: 100% !important; max-width: 100%; }
                 .proposals-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
                 .proposal-card { padding: 0.8rem; border-radius: 0.6rem; }
                 .proposal-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
@@ -1188,7 +1189,7 @@ window.showCandidateDetail = function(selectedName) {
                             <a href="https://www.facebook.com/lilianabustinza.sa" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Perfil Completo</a>
                         </div>
                         <div class="fb-widget-container">
-                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Flilianabustinza.sa&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Flilianabustinza.sa&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="100%" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
                         </div>
                     </div>
                 </div>
@@ -1266,7 +1267,7 @@ window.showCandidateDetail = function(selectedName) {
     if(isFirstTime || window.scrollY < wrapper.offsetTop - 300) {
         // CLAVE: Usar setTimeout permite que el navegador dibuje la sección antes de calcular hacia dónde bajar
         setTimeout(() => {
-            const targetPos = wrapper.offsetTop - (window.innerHeight * 0.05); // Centrado ajustado a la nueva altura
+            const targetPos = wrapper.offsetTop - (window.innerHeight * 0.02); // Dejamos un respiro sutil arriba sin sobreponer
             
             // Obligamos físicamente al navegador a bajar la pantalla
             if (window.scroller && typeof window.scroller.setPostion === 'function') window.scroller.setPostion(targetPos);
