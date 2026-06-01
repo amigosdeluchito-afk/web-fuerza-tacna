@@ -1121,15 +1121,15 @@
                     max-width: 55vw !important; /* Un poco más chico para no estorbar verticalmente */
                     max-height: 28vh !important; /* Recuperamos un poco de tamaño */
                     object-fit: contain;
-                    margin-top: -3vh !important; /* Despegamos un poco del texto superior */
-                    margin-bottom: -10vh !important; /* Reducimos la absorción para que no se superpongan */
+                    margin-top: -6vh !important; /* Acercamos un poco más al texto superior */
+                    margin-bottom: -12vh !important; /* Aumentamos la absorción inferior sin aplastar */
                     order: 2; /* Fuerza a que la imagen se coloque debajo del texto */
                 }
 
                 .values-container {
                     order: 3; /* Fuerza a que se coloquen debajo de la foto */
-                    margin-top: -8vh !important; /* Bajamos las cajas para que respiren respecto a la foto */
-                    margin-bottom: -2vh !important; /* Damos un pequeñísimo margen antes del botón */
+                    margin-top: -12vh !important; /* Subimos las cajas un poco más hacia la foto */
+                    margin-bottom: -4vh !important; /* Acercamos un poco más el botón inferior */
                     gap: 1.5vh !important; /* Un poco más de aire entre las cajas */
                     z-index: 10;
                 }
@@ -1141,7 +1141,7 @@
                 .intro-btn-container {
                     order: 4; /* Fuerza a que se coloque debajo de los valores */
                     justify-content: center !important;
-                    margin-top: 0 !important; /* Separamos el botón devolviéndolo a un flujo más natural */
+                    margin-top: -3vh !important; /* Acercamos el botón a la última caja */
                 }
 
                 /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
