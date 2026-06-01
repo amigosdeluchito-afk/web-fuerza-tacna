@@ -226,7 +226,11 @@ if ($slot === 1) {
         'ok'      => ($subidas > 0),
         'subidas' => $subidas,
         'errores' => $errores,
-        'destino' => $destDir
+        'destino' => $destDir,
+        'debug'   => [
+            'destDir'  => $destDir,
+            'archivos' => is_dir($destDir) ? @scandir($destDir) : []
+        ]
     ], JSON_UNESCAPED_UNICODE);
     exit;
 

@@ -645,6 +645,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const resp = await fetch("fotos_api.php?_t=" + Date.now(), { method: "POST", body: fd });
             const data = await resp.json();
 
+            // --- DEBUG VISUAL ---
+            if (data.debug) {
+                console.log("🔍 [DIAGNÓSTICO BACKEND]", data.debug);
+                document.getElementById('status').innerHTML = `🔍 <b>Buscando en:</b> ${data.debug.dir} <br> 📂 <b>¿Existe carpeta?:</b> ${data.debug.is_dir ? 'SÍ' : 'NO'} <br> 📄 <b>Archivos vistos por PHP:</b> ${data.debug.files ? data.debug.files.join(', ') : 'Ninguno'}`;
+            }
+
             if (!data.ok) { galeriaEmpty.style.display = "block"; galeriaEmpty.textContent = data.error || "Error al cargar la galería."; return; }
 
             btnEliminarTodo.disabled = !(data.fotos && data.fotos.length);
@@ -729,7 +735,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 const text = await new Promise((res, rej) => { const xhr = new XMLHttpRequest(); xhr.open("POST", "upload.php?_t=" + Date.now(), true); xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) { const pct = (e.loaded/e.total)*100; document.getElementById("progressBar").style.width = pct + "%"; statusEl.textContent = `Subiendo (${Math.round(pct)}%)...`; }}); xhr.onload = () => res(xhr.responseText); xhr.onerror = () => rej(new Error("Error de red")); xhr.send(fd); });
                 document.getElementById("progressContainer").style.display = "none";
-                const data = JSON.parse(text); if (data.ok) { statusEl.textContent = "¡Fotos subidas!"; cargarFotosObra(); } else { statusEl.textContent = data.error; btnSubir.disabled = false; }
+                const data = JSON.parse(text); 
+                if (data.debug) console.log("🔍 [SUBIDA DEBUG]", data.debug);
+                if (data.ok) { statusEl.innerHTML = `✅ ¡Fotos subidas! <br> <b>Guardadas en:</b> ${data.debug?.destDir || 'Desconocido'}`; cargarFotosObra(); } 
+                else { statusEl.textContent = data.error; btnSubir.disabled = false; }
             } catch (err) { statusEl.textContent = "Error: " + err.message; btnSubir.disabled = false; }
         });
 
