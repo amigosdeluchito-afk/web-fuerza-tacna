@@ -513,8 +513,14 @@
                           scale: 1.2;
                         }
                     }
+
+                    /* --- Ajuste de espacio superior en Móvil --- */
+                    @media (max-width: 991px) {
+                        #hero-drone-section { padding-top: 8vh !important; }
+                        .qs-intro-container { margin-top: 4vh !important; }
+                    }
                 </style>
-                <div style="width: 100%; text-align: center; padding: 0 5vw; z-index: 10; margin-top: 14vh;">
+                <div class="qs-intro-container" style="width: 100%; text-align: center; padding: 0 5vw; z-index: 10; margin-top: 14vh;">
                     <h3 class="anim-text-1" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-size: clamp(1.8rem, 5vw, 6rem); margin-bottom: -0.5rem; color: #801039;">SOMOS</h3>
                     <h2 class="anim-text-2" style="font-family: 'Arial Black Web', 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: clamp(2.5rem, 11vw, 11rem); line-height: 0.95; text-transform: uppercase; color: #801039; letter-spacing: -1px; margin: 0; width: 100%; white-space: normal; word-break: break-word;">FUERZA TACNA</h2>
                     <div class="anim-text-3" style="margin-top: 1.5rem; max-width: 900px; margin-left: auto; margin-right: auto;">
@@ -751,8 +757,9 @@
                             .timeline-modal-layout { flex-direction: column; gap: 1.5rem; text-align: center !important; }
                             .timeline-modal-right { align-items: center !important; }
                             .timeline-modal-left img { max-height: 40vh; }
-                            .timeline-title-container { margin-top: 2rem !important; margin-bottom: 1rem !important; }
+                            .timeline-title-container { margin-top: 6rem !important; margin-bottom: 1rem !important; } /* Aumentado para separar Sección 1 y 2 */
                             .timeline-title { font-size: 9.5vw !important; letter-spacing: -1px; }
+                            .timeline-desc-text { font-size: 1.15rem !important; line-height: 1.5 !important; } /* Texto más grande para la Sección 2 */
                         }
                     </style>
 
@@ -943,13 +950,13 @@
                 }
 
                 @media (max-width: 992px) {
-                    #motor-norte-section { height: auto; min-height: 100vh; padding: 4rem 0 6rem 0; scroll-snap-align: none !important; }
+                    #motor-norte-section { height: auto; min-height: 100vh; padding: 6rem 0 6rem 0; margin-top: 2rem; scroll-snap-align: none !important; }
                     .mn-container { gap: 1.5rem; width: 90%; }
                     .mn-glass-card { padding: 2rem 1.5rem; flex: 1 1 100%; border-radius: 20px; }
                     .mn-watermark { font-size: 8rem; right: -5px; bottom: -15px; }
                     .mn-title { font-size: 1.8rem; }
                     .mn-subtitle { font-size: 1rem; margin-bottom: 0.8rem; }
-                    .mn-desc { font-size: 1rem; line-height: 1.5; }
+                    .mn-desc { font-size: 1.15rem; line-height: 1.6; }
                     .mn-icon-wrapper { width: 50px; height: 50px; margin-bottom: 1.2rem; }
                     .mn-icon-wrapper svg { width: 26px; height: 26px; }
                 }
