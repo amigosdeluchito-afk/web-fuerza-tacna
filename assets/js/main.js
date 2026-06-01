@@ -1476,13 +1476,20 @@ function initSafeMagneticScroll() {
                 const absoluteElTop = rect.top + currentY;
                 
                 let targetY;
+                const isMobileView = window.innerWidth <= 991;
+                const fullScreenSections = ['intro', 'video-section', 'drone-section', 'votar-section'];
+
                 if (secData.align === 'center') {
-                    let centerShift = 0;
-                    // Corrección visual para que la Sección 3 (Video) no quede abajo por culpa de sus márgenes internos
-                    if (secData.id === 'video-section') {
-                        centerShift = viewportHeight * 0.01; // Reducido casi a cero porque los márgenes del HTML ya están balanceados
+                    if (isMobileView && fullScreenSections.includes(secData.id)) {
+                        // Soluciona el efecto de "doble imán" en móviles debido al conflicto matemático entre 100dvh y viewportHeight
+                        targetY = absoluteElTop;
+                    } else {
+                        let centerShift = 0;
+                        if (secData.id === 'video-section') {
+                            centerShift = viewportHeight * 0.01; 
+                        }
+                        targetY = absoluteElTop - (viewportHeight / 2) + (rect.height / 2) + centerShift;
                     }
-                    targetY = absoluteElTop - (viewportHeight / 2) + (rect.height / 2) + centerShift;
                 } else {
                     targetY = absoluteElTop - (secData.offset !== undefined ? secData.offset : 60);
                 }
