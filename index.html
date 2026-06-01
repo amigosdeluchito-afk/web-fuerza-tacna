@@ -1111,7 +1111,7 @@
 
                 /* --- Responsive Mobile: Título apilado al mismo ancho --- */
                 .title-desktop { display: none !important; }
-                .title-mobile { display: flex !important; flex-direction: column; width: 100%; text-align: center; margin-bottom: 1.5rem; }
+                .title-mobile { display: flex !important; flex-direction: column; width: 100%; text-align: center; margin-bottom: 0.5rem !important; }
                 .title-mobile span { display: block; line-height: 0.98; white-space: nowrap; }
                 .title-mobile .t-line1 { font-size: 19.5vw !important; letter-spacing: 0; }
                 .title-mobile .t-line2 { font-size: 13vw !important; letter-spacing: 0; }
@@ -1121,15 +1121,15 @@
                     max-width: 65vw !important; /* Escala perfecta para el ancho del celular */
                     max-height: 38vh !important; /* Límite de altura para encajar en 100vh */
                     object-fit: contain;
-                    margin-top: 0.5rem !important; /* Espacio ideal bajo el texto en móvil */
+                    margin-top: 0 !important; /* Pegar la imagen más al texto */
                     order: 2; /* Fuerza a que la imagen se coloque debajo del texto */
                 }
 
                 .values-container {
                     order: 3; /* Fuerza a que se coloquen debajo de la foto */
-                    margin-top: -35vw !important; /* Bajado 5 puntos más */
-                    margin-bottom: 0.5rem; /* Reducido para pegar el botón a las cajas */
-                    gap: 2.5vw;
+                    margin-top: -44vw !important; /* Subido drásticamente para reducir la separación con el texto */
+                    margin-bottom: 0 !important; /* Sin espacio inferior para pegar el botón */
+                    gap: 2vw; /* Reducido ligeramente para compactar las cajas */
                     z-index: 10;
                 }
                 .value-box {
@@ -1140,7 +1140,7 @@
                 .intro-btn-container {
                     order: 4; /* Fuerza a que se coloque debajo de los valores */
                     justify-content: center !important;
-                    margin-top: 0.5rem !important; /* Mínima separación superior */
+                    margin-top: 0 !important; /* Pegado directamente a las cajas */
                 }
 
                 /* --- Responsive Mobile: Unificación de Todas las Secciones --- */
@@ -1156,8 +1156,8 @@
                     box-sizing: border-box;
                 }
                 #intro {
-                    padding-top: 4vh !important; /* Disminuido para que no empuje el contenido hacia abajo */
-                    padding-bottom: 14vh !important; /* Aumentado para empujar todo el bloque hacia arriba y evitar que quede muy bajo */
+                    padding-top: 15vh !important; /* Aumentado para separar el texto del límite superior / Sección 1 */
+                    padding-bottom: 8vh !important; /* Balanceado con el espacio superior */
                 }
                 #video-section {
                     margin-top: 0vh !important;
