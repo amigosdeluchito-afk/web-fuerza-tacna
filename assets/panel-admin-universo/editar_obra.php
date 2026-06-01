@@ -727,7 +727,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             for (const file of filesInput.files) fd.append("files[]", file);
             const statusEl = document.getElementById("status"); const btnSubir = document.getElementById("btnSubirFotos"); document.getElementById("progressContainer").style.display = "block"; btnSubir.disabled = true;
             try {
-                const text = await new Promise((res, rej) => { const xhr = new XMLHttpRequest(); xhr.open("POST", "upload.php", true); xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) { const pct = (e.loaded/e.total)*100; document.getElementById("progressBar").style.width = pct + "%"; statusEl.textContent = `Subiendo (${Math.round(pct)}%)...`; }}); xhr.onload = () => res(xhr.responseText); xhr.onerror = () => rej(new Error("Error de red")); xhr.send(fd); });
+                const text = await new Promise((res, rej) => { const xhr = new XMLHttpRequest(); xhr.open("POST", "upload.php?_t=" + Date.now(), true); xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) { const pct = (e.loaded/e.total)*100; document.getElementById("progressBar").style.width = pct + "%"; statusEl.textContent = `Subiendo (${Math.round(pct)}%)...`; }}); xhr.onload = () => res(xhr.responseText); xhr.onerror = () => rej(new Error("Error de red")); xhr.send(fd); });
                 document.getElementById("progressContainer").style.display = "none";
                 const data = JSON.parse(text); if (data.ok) { statusEl.textContent = "¡Fotos subidas!"; cargarFotosObra(); } else { statusEl.textContent = data.error; btnSubir.disabled = false; }
             } catch (err) { statusEl.textContent = "Error: " + err.message; btnSubir.disabled = false; }

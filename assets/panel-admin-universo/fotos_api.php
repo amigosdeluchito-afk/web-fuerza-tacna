@@ -4,6 +4,10 @@ require_once __DIR__ . '/config.php';
 require_login();
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: 0');
 
 // Usamos la ruta base de fotos definida en config.php
 global $FOTOS_BASE;
@@ -28,14 +32,17 @@ function get_obra_dir($segmento, $carpeta) {
  * Helper para obtener todas las imágenes de un directorio (cross-platform, sin GLOB_BRACE)
  */
 function get_obra_images($dir) {
+    clearstatcache(true, $dir);
     $images = [];
     if (is_dir($dir)) {
-        $items = scandir($dir);
-        foreach ($items as $item) {
-            if ($item === '.' || $item === '..') continue;
-            $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
-                $images[] = $dir . '/' . $item;
+        $items = @scandir($dir);
+        if ($items) {
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..') continue;
+                $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+                    $images[] = $dir . '/' . $item;
+                }
             }
         }
     }
@@ -47,6 +54,11 @@ function get_obra_images($dir) {
  */
 function handle_listar($segmento, $carpeta) {
     $dir = get_obra_dir($segmento, $carpeta);
+    
+    if ($dir) {
+        clearstatcache(true, $dir);
+    }
+
     if (!$dir || !is_dir($dir)) {
         echo json_encode([
             'ok'        => true,

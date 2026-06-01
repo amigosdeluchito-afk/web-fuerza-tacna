@@ -682,7 +682,7 @@ async function cargarFotosObra() {
  // "educacion", "vias"
   fd.append("carpeta", item.carpeta);
 
-  const resp = await fetch("fotos_api.php", { method: "POST", body: fd });
+  const resp = await fetch("fotos_api.php?_t=" + Date.now(), { method: "POST", body: fd });
   const data = await resp.json();
 
   if (!data.ok) {
@@ -934,7 +934,7 @@ async function eliminarTodasFotos() {
   fd.append("segmento", segmento.toLowerCase());
   fd.append("carpeta", item.carpeta);
 
-  const resp = await fetch("fotos_api.php", { method: "POST", body: fd });
+  const resp = await fetch("fotos_api.php?_t=" + Date.now(), { method: "POST", body: fd });
   const data = await resp.json();
 
   if (data.ok) {
@@ -1064,7 +1064,7 @@ function descargarZip() {
 });
 
 
-  window.location.href = "fotos_api.php?download_zip=1&" + params.toString();
+  window.location.href = "fotos_api.php?download_zip=1&_t=" + Date.now() + "&" + params.toString();
 }
 
 // =============================
