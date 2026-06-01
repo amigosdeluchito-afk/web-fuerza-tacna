@@ -135,6 +135,32 @@ function injectGlobalAssets() {
             .candidate-info p { margin: 0; font-size: 0.95rem; color: #ffc300; font-weight: bold; text-transform: uppercase; }
             @media (max-width: 768px) { .candidate-card { width: 200px !important; height: 300px !important; border-radius: 1.2rem; } .candidate-info { padding: 0.6rem 0.5rem !important; } .candidate-info h3 { font-size: 1rem !important; margin-bottom: 0.2rem; } .candidate-info p { font-size: 0.7rem !important; } #candidatos-section { min-height: 85vh; padding-top: 10vh; } }
 
+            /* --- Título de la Página de Candidatos --- */
+            .candidatos-page-title {
+                text-align: center;
+                margin-bottom: 2rem;
+                width: 100%;
+                padding: 0 1rem;
+            }
+            .candidatos-page-title h2 {
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
+                font-weight: 900 !important;
+                font-size: clamp(2.5rem, 5vw, 4.5rem);
+                color: #801039;
+                text-transform: uppercase;
+                line-height: 1.1;
+                margin: 0;
+                letter-spacing: -1px;
+            }
+            .candidatos-page-title h2 span:last-child {
+                color: #ffc300;
+                text-shadow: 0 2px 10px rgba(0,0,0,0.5); /* Le da un resalte 3D al texto amarillo */
+            }
+            @media (max-width: 768px) {
+                .candidatos-page-title { margin-bottom: 1.5rem; }
+                .candidatos-page-title h2 { font-size: clamp(1.8rem, 8vw, 2.5rem); line-height: 1; }
+            }
+
             /* --- Ajuste de Altura Sección Intro --- */
             #intro {
                 min-height: 95vh;
