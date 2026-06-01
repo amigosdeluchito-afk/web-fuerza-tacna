@@ -501,17 +501,23 @@ function injectGlobalAssets() {
                 .candidate-top-info h2 { font-size: 1.8rem; text-align: center; margin-bottom: 0.5rem; }
                 .candidate-badges { justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
                 .candidate-top-info { width: 100%; text-align: left; }
-                .timeline-body { flex-direction: column; align-items: flex-start; gap: 1rem; }
+                .timeline { padding-left: 1.5rem; margin-left: 0.2rem; }
+                .timeline-item { padding-bottom: 1.2rem; margin-bottom: 1rem; }
+                .timeline-item::before { width: 14px; height: 14px; left: -1.95rem; top: 0.1rem; border-width: 2px; }
+                .timeline-year { font-size: 1.1rem; margin-bottom: 0.3rem; }
+                .timeline-text { font-size: 0.85rem; line-height: 1.4; max-width: 100%; }
+                .timeline-body { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+                .mobile-gallery-btn { margin-top: 0; padding: 0.4rem 1rem; font-size: 0.7rem; }
                 .timeline-carousel-wrapper { display: none !important; /* Ocultamos los pesados carruseles en móvil */ }
                 .mobile-gallery-btn { display: inline-flex !important; /* Activamos los botones rápidos en móvil */ }
                 .next-candidate-module { flex-direction: column; text-align: center; gap: 0.8rem; padding: 0.8rem; margin-top: 1rem; }
                 .next-candidate-arrow { transform: rotate(90deg); }
                 .next-candidate-module:hover .next-candidate-arrow { transform: rotate(90deg) translateY(6px); }
-                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; text-align: center; margin-top: 0.5rem; }
+                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1.5rem 0 0 0; text-align: center; margin-top: 0.5rem; overflow: hidden; border-radius: 1rem; }
                 .facebook-text { align-items: center; gap: 0.6rem; }
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
-                .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 8px; overflow: hidden; }
-                .fb-widget-container iframe { width: 100% !important; max-width: 100%; }
+                .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 0; overflow: hidden; }
+                .fb-widget-container iframe { width: 100% !important; max-width: 100%; border-radius: 0; }
                 .proposals-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
                 .proposal-card { padding: 0.8rem; border-radius: 0.6rem; }
                 .proposal-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
