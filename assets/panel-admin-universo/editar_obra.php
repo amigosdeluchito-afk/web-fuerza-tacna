@@ -91,8 +91,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $monto    = $_POST['monto'] ?? '';
         $distrito = $_POST['distrito'] ?? '';
         $provincia= $_POST['provincia'] ?? '';
-        $x        = (float) str_replace(',', '.', $_POST['x'] ?? '0');
-        $y        = (float) str_replace(',', '.', $_POST['y'] ?? '0');
+        
+        // Guardamos como string estricto para evitar que Google Sheets los redondee a 0 por el idioma
+        $x        = str_replace(',', '.', $_POST['x'] ?? '0');
+        $y        = str_replace(',', '.', $_POST['y'] ?? '0');
         $carpeta  = trim($_POST['carpeta'] ?? '');
         $descripcion = $_POST['descripcion'] ?? '';
 

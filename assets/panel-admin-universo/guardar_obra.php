@@ -38,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $distrito = $_POST['distrito'] ?? '';
         $provincia= $_POST['provincia'] ?? '';
         
-        // Forzar a decimal estricto para evitar que Google Sheets confunda el punto con separador de miles
-        $x        = (float) str_replace(',', '.', $_POST['x'] ?? '0');
-        $y        = (float) str_replace(',', '.', $_POST['y'] ?? '0');
+        // Guardamos como string estricto para evitar que Google Sheets los redondee a 0 por el idioma
+        $x        = str_replace(',', '.', $_POST['x'] ?? '0');
+        $y        = str_replace(',', '.', $_POST['y'] ?? '0');
         
         // ¡MAGIA DE AUTOMATIZACIÓN! Crea el nombre de la carpeta de forma limpia.
         // Ej: "Creación de Colegio" -> "creacion-de-colegio"
