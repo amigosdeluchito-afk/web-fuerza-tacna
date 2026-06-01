@@ -435,6 +435,8 @@ function injectGlobalAssets() {
             .timeline-content-left { display: flex; flex-direction: column; align-items: flex-start; gap: 0.8rem; }
             .timeline-text { color: #bbb; line-height: 1.5; font-size: 0.95rem; margin: 0; font-weight: 300; max-width: 50ch; }
             
+            .mobile-gallery-btn { display: none; margin-top: 0.4rem; background: rgba(255,195,0,0.1); border: 1px solid rgba(255,195,0,0.4); color: #ffc300; padding: 0.5rem 1.2rem; border-radius: 50px; font-size: 0.75rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; text-transform: uppercase; cursor: pointer; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
+            .mobile-gallery-btn:hover { background: #ffc300; color: #801039; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255,195,0,0.2); }
             .btn-ver-galeria { background: rgba(255,195,0,0.08); border: 1px solid rgba(255,195,0,0.3); color: #ffc300; padding: 0.6rem 1.4rem; border-radius: 50px; font-size: 0.8rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.6rem; z-index: 2; }
             .btn-ver-galeria:hover { background: #ffc300; color: #801039; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,195,0,0.3); }
             
@@ -500,7 +502,8 @@ function injectGlobalAssets() {
                 .candidate-badges { justify-content: center; gap: 0.5rem; margin-bottom: 1rem; }
                 .candidate-top-info { width: 100%; text-align: left; }
                 .timeline-body { flex-direction: column; align-items: flex-start; gap: 1rem; }
-                .timeline-carousel-wrapper { width: 100%; height: 160px; }
+                .timeline-carousel-wrapper { display: none !important; /* Ocultamos los pesados carruseles en móvil */ }
+                .mobile-gallery-btn { display: inline-flex !important; /* Activamos los botones rápidos en móvil */ }
                 .next-candidate-module { flex-direction: column; text-align: center; gap: 0.8rem; padding: 0.8rem; margin-top: 1rem; }
                 .next-candidate-arrow { transform: rotate(90deg); }
                 .next-candidate-module:hover .next-candidate-arrow { transform: rotate(90deg) translateY(6px); }
@@ -1079,6 +1082,7 @@ window.showCandidateDetail = function(selectedName) {
                             <div class="timeline-body">
                                 <div class="timeline-content-left">
                                     <p class="timeline-text">Líder en proyectos de desarrollo social comunitario y apoyo directo a familias vulnerables en distintos sectores. Implementación de ollas comunes y asistencia básica.</p>
+                                    <button class="mobile-gallery-btn" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Ver Galería (3)</button>
                                 </div>
                                 <div class="timeline-carousel-wrapper">
                                     <div class="timeline-carousel-content">
@@ -1102,6 +1106,7 @@ window.showCandidateDetail = function(selectedName) {
                             <div class="timeline-body">
                                 <div class="timeline-content-left">
                                     <p class="timeline-text">Gestión estratégica en iniciativas vecinales orientadas a la recuperación de espacios urbanos abandonados, creando nuevas áreas de recreación seguras para la juventud.</p>
+                                    <button class="mobile-gallery-btn" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Ver Galería (2)</button>
                                 </div>
                                 <div class="timeline-carousel-wrapper">
                                     <div class="timeline-carousel-content">
@@ -1122,6 +1127,7 @@ window.showCandidateDetail = function(selectedName) {
                             <div class="timeline-body">
                                 <div class="timeline-content-left">
                                     <p class="timeline-text">Candidatura oficial impulsando planes de modernización tecnológica e infraestructura pública regional, promoviendo el emprendimiento formal.</p>
+                                    <button class="mobile-gallery-btn" onclick="window.openCandidateGallery(['assets/img/photo-service-3.jpg'])"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Ver Foto (1)</button>
                                 </div>
                                 <div class="timeline-carousel-wrapper">
                                     <div class="timeline-carousel-content">
