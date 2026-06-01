@@ -120,7 +120,7 @@ function injectGlobalAssets() {
             #map-tooltip p { margin: 0; font-size: 0.75rem; font-weight: 600; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
 
             /* --- Estilos Globales de Candidatos y Carrusel --- */
-            #candidatos-section { background-color: transparent; position: relative !important; top: 0 !important; transform: none !important; min-height: 100vh; display: flex; align-items: center; width: 100%; overflow: hidden; z-index: 10; }
+            #candidatos-section { background-color: transparent; position: relative !important; top: 0 !important; transform: none !important; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; overflow: hidden; z-index: 10; padding-top: 15vh; }
             .marquee-container { overflow: hidden; width: 100vw; left: 50%; transform: translateX(-50%); position: relative; display: flex; cursor: grab; }
             .marquee-container:active { cursor: grabbing; }
             .marquee-container * { user-select: none; -webkit-user-drag: none; }
@@ -133,7 +133,7 @@ function injectGlobalAssets() {
             .candidate-info { position: absolute; bottom: 0; width: 100%; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 1.5rem 1rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); transform: translateZ(40px); }
             .candidate-info h3 { margin: 0 0 0.4rem 0; font-size: 1.3rem; font-weight: 900; color: #fff; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; text-transform: uppercase; }
             .candidate-info p { margin: 0; font-size: 0.95rem; color: #ffc300; font-weight: bold; text-transform: uppercase; }
-            @media (max-width: 768px) { .candidate-card { width: 200px !important; height: 300px !important; border-radius: 1.2rem; } .candidate-info { padding: 0.6rem 0.5rem !important; } .candidate-info h3 { font-size: 1rem !important; margin-bottom: 0.2rem; } .candidate-info p { font-size: 0.7rem !important; } #candidatos-section { min-height: 85vh; padding-top: 10vh; } }
+            @media (max-width: 768px) { .candidate-card { width: 200px !important; height: 300px !important; border-radius: 1.2rem; } .candidate-info { padding: 0.6rem 0.5rem !important; } .candidate-info h3 { font-size: 1rem !important; margin-bottom: 0.2rem; } .candidate-info p { font-size: 0.7rem !important; } #candidatos-section { min-height: 100vh; padding-top: 15vh !important; } }
 
             /* --- Título de la Página de Candidatos --- */
             .candidatos-page-title {

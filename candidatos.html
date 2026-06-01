@@ -133,17 +133,19 @@
             /* --- Candidatos Section Styles --- */
             #candidatos-section {
                 background-color: transparent;
-                position: absolute;
-                top: 60%; /* Bajamos el carrusel a una altura cómoda en PC */
-                left: 0;
+                position: relative !important;
+                top: 0 !important;
+                transform: none !important;
+                min-height: 100vh;
                 width: 100%;
-                transform: translateY(-50%);
                 overflow: hidden;
                 color: #fff;
                 z-index: 10;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding-top: 15vh;
             }
             
             .marquee-container {
@@ -276,7 +278,7 @@
                 .candidate-info { padding: 0.6rem 0.5rem !important; } 
                 .candidate-info h3 { font-size: 1rem !important; margin-bottom: 0.2rem; } 
                 .candidate-info p { font-size: 0.7rem !important; } 
-                #candidatos-section { min-height: 85vh; padding-top: 10vh; top: 55%; } 
+                #candidatos-section { min-height: 100vh; padding-top: 15vh !important; } 
             }
 
             /* --- Título de la Página de Candidatos --- */
