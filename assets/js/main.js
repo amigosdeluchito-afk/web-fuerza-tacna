@@ -362,7 +362,7 @@ function injectGlobalAssets() {
             .glass-button-wrap:active { transform: translateY(0) scale(0.98); }
 
             /* --- Estilos Dinámicos de la Sección de Detalle de Candidatos --- */
-            #detalle-candidato-wrapper { display: none; width: 100%; flex-shrink: 0; clear: both; box-sizing: border-box; padding: 5rem 5%; min-height: 100vh; background: transparent; position: relative; z-index: 20; margin-top: 0; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+            #detalle-candidato-wrapper { display: none; width: 100%; flex-shrink: 0; clear: both; box-sizing: border-box; padding: 5rem 5%; min-height: 100vh; background: transparent; position: relative; z-index: 40; margin-top: -10vh; border-top: 1px solid rgba(255, 255, 255, 0.1); }
             .candidato-detalle-container { display: flex; gap: 2.5rem; max-width: 90rem; margin: 0 auto; align-items: flex-start; }
             .candidato-sidebar { display: flex; flex-direction: column; gap: 1rem; width: 95px; flex-shrink: 0; position: sticky; top: 120px; }
             .mini-card { width: 100%; height: 120px; border-radius: 1rem; cursor: pointer; overflow: hidden; opacity: 0.5; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); border: 2px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
@@ -482,6 +482,7 @@ function injectGlobalAssets() {
             .next-candidate-module:hover .next-candidate-arrow { transform: translateX(10px); }
             
             @media (max-width: 991px) {
+                #detalle-candidato-wrapper { margin-top: -26vh !important; padding-top: 2rem !important; }
                 .candidato-detalle-container { flex-direction: column; }
                 .candidato-sidebar { flex-direction: row; width: 100%; overflow-x: auto; padding-bottom: 1.5rem; position: static; }
                 .mini-card { width: 85px; height: 110px; flex-shrink: 0; }
@@ -1223,7 +1224,7 @@ window.showCandidateDetail = function(selectedName) {
     if(isFirstTime || window.scrollY < wrapper.offsetTop - 300) {
         // CLAVE: Usar setTimeout permite que el navegador dibuje la sección antes de calcular hacia dónde bajar
         setTimeout(() => {
-            const targetPos = wrapper.offsetTop - (window.innerHeight * 0.1); // Centrar bonito
+            const targetPos = wrapper.offsetTop - (window.innerHeight * 0.05); // Centrado ajustado a la nueva altura
             
             // Obligamos físicamente al navegador a bajar la pantalla
             if (window.scroller && typeof window.scroller.setPostion === 'function') window.scroller.setPostion(targetPos);
