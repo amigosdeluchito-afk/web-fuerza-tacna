@@ -336,72 +336,58 @@
                 #contacto-escenario {
                     display: flex !important;
                     flex-direction: column !important;
-                    justify-content: flex-start !important;
+                    justify-content: center !important;
                     align-items: center !important;
-                    padding: 120px 15px 2rem 15px !important; /* Espacio fijo superior para la cabecera */
+                    padding: 100px 15px 2rem 15px !important; 
                     margin: 0 !important;
-                    min-height: auto !important; /* CRÍTICO: Desactivar 100svh mata cualquier centrado vertical heredado */
+                    min-height: 100svh !important; 
                     height: auto !important;
                     position: relative !important;
-                    top: 0 !important;
-                    transform: none !important;
                 }
                 .comic-layout { 
                     display: flex !important;
-                    flex-direction: column !important; 
-                    justify-content: flex-start !important;
+                    flex-direction: column-reverse !important; /* Lucho abajo, globo de diálogo arriba */
+                    justify-content: center !important;
                     align-items: center !important;
                     text-align: center !important; 
                     gap: 0 !important; 
                     width: 100% !important; 
                     padding: 0 !important;
                     box-sizing: border-box !important;
-                    order: 2 !important; /* Lucho y globo van ABAJO de las tarjetas */
                     margin: 0 !important; /* Corta márgenes ocultos */
                     position: relative !important;
-                    top: 0 !important;
                     transform: none !important; /* Rompe el translateY del JS */
+                    z-index: 10 !important;
                 }
                 #contact-cards-container { 
                     display: flex !important;
                     flex-direction: column !important;
-                    position: relative !important; 
-                    right: auto !important; 
-                    left: auto !important;
-                    top: 0 !important; 
-                    bottom: auto !important;
-                    transform: none !important; /* CRÍTICO: Elimina el top: 50% de PC */
+                    position: absolute !important; /* CRÍTICO: Saca las tarjetas del flujo para que no empujen */
+                    top: 110px !important; /* Las fija en la parte superior permanentemente */
+                    left: 50% !important;
+                    transform: translateX(-50%) !important; 
                     width: 100% !important; 
-                    max-width: 100% !important; 
-                    margin: 0 auto 1.5rem auto !important; 
-                    padding: 0 !important; 
+                    max-width: 400px !important; 
+                    margin: 0 !important; 
+                    padding: 0 15px !important; 
                     box-sizing: border-box !important;
-                    order: 1 !important; /* ARRIBA de luchito */
+                    z-index: 50 !important; /* Por encima de todo */
                 }
                 .dialog-stage { 
                     display: flex !important;
                     flex-direction: column !important;
                     align-items: center !important; 
-                    justify-content: flex-start !important;
-                    margin: 0 !important; 
+                    margin: 0 0 1.5rem 0 !important; 
                     padding: 0 !important; 
                     width: 100% !important;
                     max-width: 100% !important;
-                    box-sizing: border-box !important;
-                    order: 1 !important; 
-                    transform: none !important;
-                    position: relative !important;
-                    top: 0 !important;
+                    z-index: 20 !important;
                 }
                 #contacto-escenario .lucho-stage { 
-                    width: clamp(140px, 45vw, 220px) !important; 
-                    height: clamp(160px, 30vh, 260px) !important; 
-                    order: 2 !important; 
-                    margin: -10px auto 0 auto !important; 
+                    width: clamp(160px, 45vw, 280px) !important; 
+                    height: clamp(200px, 35vh, 350px) !important; 
+                    margin: 0 auto !important; 
                     position: relative !important;
-                    top: 0 !important;
-                    transform: none !important;
-                    padding: 0 !important;
                 } 
                 .glass-bubble { 
                     border-radius: 20px !important; 
@@ -414,7 +400,6 @@
                     box-sizing: border-box !important; 
                     overflow: hidden !important; 
                     position: relative !important;
-                    top: 0 !important;
                 }
                 .glass-bubble::before { 
                     left: 50% !important; 
@@ -438,14 +423,12 @@
                     width: 100% !important; 
                     max-width: 250px !important; 
                     margin: 15px auto 0 auto !important; /* Espaciado fijo con el globo */
-                    position: relative !important;
                 }
                 .glass-contact-card {
                     padding: 1rem !important;
                     gap: 0.8rem !important;
                     width: 100% !important;
                     box-sizing: border-box !important;
-                    overflow: hidden !important; 
                     margin: 0 !important;
                 }
                 .card-icon {
