@@ -334,110 +334,141 @@
             /* --- RESPONSIVE MOBILE --- */
             @media (max-width: 991px) {
                 #contacto-escenario {
-                    padding-top: 75px !important; /* Espacio mínimo para subir todo el bloque al techo */
-                    min-height: 100svh !important;
-                    padding-bottom: 2rem !important;
+                    display: flex !important;
                     flex-direction: column !important;
-                    justify-content: flex-start !important; /* Fuerza a los elementos a pegarse estrictamente arriba */
+                    justify-content: flex-start !important;
+                    align-items: center !important;
+                    padding: 120px 15px 2rem 15px !important; /* Espacio fijo superior para la cabecera */
+                    margin: 0 !important;
+                    min-height: auto !important; /* CRÍTICO: Desactivar 100svh mata cualquier centrado vertical heredado */
+                    height: auto !important;
+                    position: relative !important;
+                    top: 0 !important;
+                    transform: none !important;
                 }
                 .comic-layout { 
+                    display: flex !important;
                     flex-direction: column !important; 
-                    text-align: center; 
-                    gap: 0 !important; /* Eliminamos el gap extra para juntar más los elementos */
-                    width: 100%; 
-                    padding: 0 15px;
-                    box-sizing: border-box;
-                    order: 2; /* Lucho y globo van ABAJO de las tarjetas */
-                    margin-top: 0 !important; /* Previene que JS añada márgenes superiores */
-                    transform: none !important; /* Bloquea cualquier animación JS que intente hundirlo */
+                    justify-content: flex-start !important;
+                    align-items: center !important;
+                    text-align: center !important; 
+                    gap: 0 !important; 
+                    width: 100% !important; 
+                    padding: 0 !important;
+                    box-sizing: border-box !important;
+                    order: 2 !important; /* Lucho y globo van ABAJO de las tarjetas */
+                    margin: 0 !important; /* Corta márgenes ocultos */
+                    position: relative !important;
+                    top: 0 !important;
+                    transform: none !important; /* Rompe el translateY del JS */
                 }
                 #contact-cards-container { 
+                    display: flex !important;
+                    flex-direction: column !important;
                     position: relative !important; 
                     right: auto !important; 
                     left: auto !important;
-                    top: auto !important; 
+                    top: 0 !important; 
                     bottom: auto !important;
-                    transform: none !important; /* CRÍTICO: Anula el top:50% y translateY(-50%) de escritorio y JS */
-                    width: 100%; 
-                    max-width: 100%; 
-                    margin: 0 auto 0.5rem auto !important; /* Margen inferior reducido */
-                    padding: 0 15px; 
-                    box-sizing: border-box;
-                    order: 1; /* Las cajas de contacto aparecen ARRIBA */
+                    transform: none !important; /* CRÍTICO: Elimina el top: 50% de PC */
+                    width: 100% !important; 
+                    max-width: 100% !important; 
+                    margin: 0 auto 1.5rem auto !important; 
+                    padding: 0 !important; 
+                    box-sizing: border-box !important;
+                    order: 1 !important; /* ARRIBA de luchito */
                 }
                 .dialog-stage { 
+                    display: flex !important;
+                    flex-direction: column !important;
                     align-items: center !important; 
-                    margin-left: 0; 
-                    padding: 0; 
-                    width: 100%;
-                    max-width: 100%;
-                    box-sizing: border-box;
-                    order: 1; /* Globo de diálogo por encima de Lucho */
+                    justify-content: flex-start !important;
+                    margin: 0 !important; 
+                    padding: 0 !important; 
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    order: 1 !important; 
                     transform: none !important;
+                    position: relative !important;
+                    top: 0 !important;
                 }
                 #contacto-escenario .lucho-stage { 
-                    width: clamp(140px, 45vw, 220px) !important; /* Personaje un poco más chico para ahorrar alto */
+                    width: clamp(140px, 45vw, 220px) !important; 
                     height: clamp(160px, 30vh, 260px) !important; 
-                    order: 2; /* Dibujo AL FONDO (Abajo de todo) */
-                    margin: -5px auto 0 auto !important; /* Lo junta milimétricamente al globo */
+                    order: 2 !important; 
+                    margin: -10px auto 0 auto !important; 
+                    position: relative !important;
+                    top: 0 !important;
+                    transform: none !important;
+                    padding: 0 !important;
                 } 
                 .glass-bubble { 
-                    border-radius: 20px; 
-                    padding: 1.2rem 1rem; /* Reducimos el relleno interno vertical */
-                    text-align: center; 
-                    transform-origin: center top; 
-                    margin-bottom: 0 !important; /* Cero separación adicional */
-                    width: 100%;
-                    max-width: 100%;
-                    box-sizing: border-box; 
-                    overflow: hidden; /* Corta lo que intente desbordar hacia los costados */
+                    border-radius: 20px !important; 
+                    padding: 1.2rem 1rem !important; 
+                    text-align: center !important; 
+                    transform-origin: center top !important; 
+                    margin: 0 !important; 
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important; 
+                    overflow: hidden !important; 
+                    position: relative !important;
+                    top: 0 !important;
                 }
                 .glass-bubble::before { 
-                    left: 50%; 
-                    bottom: -18px; 
-                    top: auto; 
-                    transform: translateX(-50%); 
-                    border-top: none;
-                    border-left: none;
-                    border-bottom: 1px solid rgba(255, 195, 0, 0.4); 
-                    clip-path: polygon(0 0, 100% 0, 50% 100%); 
-                    background: rgba(50, 5, 20, 0.95); 
+                    left: 50% !important; 
+                    bottom: -18px !important; 
+                    top: auto !important; 
+                    transform: translateX(-50%) !important; 
+                    border-top: none !important;
+                    border-left: none !important;
+                    border-bottom: 1px solid rgba(255, 195, 0, 0.4) !important; 
+                    clip-path: polygon(0 0, 100% 0, 50% 100%) !important; 
+                    background: rgba(50, 5, 20, 0.95) !important; 
                 }
                 .dialog-text { 
-                    font-size: clamp(1rem, 4.5vw, 1.25rem); 
-                    word-wrap: break-word; 
+                    font-size: clamp(1rem, 4.5vw, 1.25rem) !important; 
+                    word-wrap: break-word !important; 
+                    margin: 0 !important;
                 }
                 .shiny-pillar { 
-                    font-size: 1rem; 
-                    padding: 0.8rem 1.5rem; 
-                    width: 100%; 
-                    max-width: 250px; 
+                    font-size: 1rem !important; 
+                    padding: 0.8rem 1.5rem !important; 
+                    width: 100% !important; 
+                    max-width: 250px !important; 
+                    margin: 15px auto 0 auto !important; /* Espaciado fijo con el globo */
+                    position: relative !important;
                 }
                 .glass-contact-card {
-                    padding: 1rem;
-                    gap: 0.8rem;
-                    width: 100%;
-                    box-sizing: border-box;
-                    overflow: hidden; /* Protege contra desbordes en celulares chicos */
+                    padding: 1rem !important;
+                    gap: 0.8rem !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    overflow: hidden !important; 
+                    margin: 0 !important;
                 }
                 .card-icon {
-                    width: 40px;
-                    height: 40px;
+                    width: 40px !important;
+                    height: 40px !important;
                 }
                 .card-icon svg {
-                    width: 20px;
-                    height: 20px;
+                    width: 20px !important;
+                    height: 20px !important;
                 }
                 .card-info h4 {
-                    font-size: 0.95rem;
+                    font-size: 0.95rem !important;
+                    margin: 0 0 0.2rem 0 !important;
                 }
                 .card-info p {
-                    font-size: 0.85rem;
-                    word-break: break-word; /* Fuerza a los textos largos a bajar de renglón */
+                    font-size: 0.85rem !important;
+                    margin: 0 !important;
+                    word-break: break-word !important; 
                 }
                 .social-icons-row { 
-                    flex-wrap: wrap; 
-                    justify-content: flex-start; 
+                    flex-wrap: wrap !important; 
+                    justify-content: flex-start !important; 
+                    margin-top: 5px !important;
                 }
             }
         </style>
