@@ -334,45 +334,49 @@
             /* --- RESPONSIVE MOBILE --- */
             @media (max-width: 991px) {
                 #contacto-escenario {
-                    padding-top: 80px; /* Reducido drásticamente para subir las cajas a la parte superior */
-                    min-height: 100svh;
-                    padding-bottom: 2rem;
-                    flex-direction: column;
-                    justify-content: flex-start;
+                    padding-top: 100px !important; /* Espacio exacto de la cabecera */
+                    min-height: 100svh !important;
+                    padding-bottom: 2rem !important;
+                    flex-direction: column !important;
+                    justify-content: flex-start !important; /* Fuerza a los elementos a pegarse estrictamente arriba */
                 }
                 .comic-layout { 
-                    flex-direction: column; 
+                    flex-direction: column !important; 
                     text-align: center; 
-                    gap: 0.5rem; /* Reduce el espacio general entre elementos */
+                    gap: 0.5rem !important; 
                     width: 100%; 
                     padding: 0 15px;
                     box-sizing: border-box;
                     order: 2; /* Lucho y globo van ABAJO de las tarjetas */
+                    transform: none !important; /* Bloquea cualquier animación JS que intente hundirlo */
                 }
                 #contact-cards-container { 
-                    position: relative; 
-                    right: auto; 
-                    top: auto; 
-                    transform: none; 
+                    position: relative !important; 
+                    right: auto !important; 
+                    left: auto !important;
+                    top: auto !important; 
+                    bottom: auto !important;
+                    transform: none !important; /* CRÍTICO: Anula el top:50% y translateY(-50%) de escritorio y JS */
                     width: 100%; 
                     max-width: 100%; 
-                    margin: 0 auto 0.5rem auto; /* Sube la sección de Lucho y el diálogo hacia las cajas */
+                    margin: 0 auto 1rem auto !important; 
                     padding: 0 15px; 
                     box-sizing: border-box;
                     order: 1; /* Las cajas de contacto aparecen ARRIBA */
                 }
                 .dialog-stage { 
-                    align-items: center; 
+                    align-items: center !important; 
                     margin-left: 0; 
                     padding: 0; 
                     width: 100%;
                     max-width: 100%;
                     box-sizing: border-box;
                     order: 1; /* Globo de diálogo por encima de Lucho */
+                    transform: none !important;
                 }
                 #contacto-escenario .lucho-stage { 
-                    width: clamp(200px, 55vw, 320px); 
-                    height: clamp(250px, 40vh, 380px); 
+                    width: clamp(180px, 50vw, 300px) !important; 
+                    height: clamp(200px, 35vh, 350px) !important; 
                     order: 2; /* Dibujo AL FONDO (Abajo de todo) */
                     margin: 0 auto;
                 } 
