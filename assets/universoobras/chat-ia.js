@@ -233,12 +233,15 @@ function initChatIA() {
         const text = inputField.value.trim();
         if (!text) return;
 
+        // 1. Mostrar mensaje del usuario limpio
         const safeText = escapeHTML(text);
         addMessage(safeText, 'user-message');
         inputField.value = '';
 
+        // 2. Mostrar animación de escritura
         showTypingIndicator();
 
+        // 3. Buscar coincidencias en la Capa 1 local
         const normalizedText = normalizeText(text);
         let matchFound = false;
         let responseText = "";
@@ -254,16 +257,38 @@ function initChatIA() {
             }
         }
 
-        const typingDelay = 600 + Math.random() * 600;
-
-        setTimeout(() => {
-            removeTypingIndicator();
-            if (matchFound) {
+        // 4. Lógica de derivación: Local vs Servidor
+        if (matchFound) {
+            // Respuesta Local (Capa 1)
+            const typingDelay = 600 + Math.random() * 600;
+            setTimeout(() => {
+                removeTypingIndicator();
                 addMessage(responseText, 'ai-message', responseActions);
-            } else {
-                addMessage("Déjame revisar mis apuntes un ratito, vecino... 🤔 (Pronto conectaré con el servidor para darte una respuesta).", 'ai-message');
-            }
-        }, typingDelay);
+            }, typingDelay);
+        } else {
+            // No hay respuesta local -> Derivar al Router (Capa 2)
+            const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
+            const routerUrl = basePath + 'assets/ia_luchito/router.php';
+
+            fetch(routerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensaje: text }) // Enviamos el texto original para el contexto de IA
+            })
+            .then(response => response.json())
+            .then(data => {
+                removeTypingIndicator();
+                if (data.ok) {
+                    addMessage(data.texto, 'ai-message', data.acciones || []);
+                } else {
+                    addMessage("😅 " + (data.error || "Se me cruzaron los cables un ratito."), 'ai-message');
+                }
+            })
+            .catch(error => {
+                removeTypingIndicator();
+                addMessage("😅 Uf, tuve un bajón de internet, vecino. ¿Puedes intentarlo de nuevo?", 'ai-message');
+            });
+        }
     };
 
     fabBtn.addEventListener('click', () => {
