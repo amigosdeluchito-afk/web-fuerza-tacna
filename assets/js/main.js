@@ -1999,7 +1999,7 @@ barba.hooks.after((data) => {
     }
 });
 
-function initCircularTimeline(container) {
+async function initCircularTimeline(container) {
     const target = container || document;
     const wheel = target.querySelector('#timeline-wheel');
     const itemsContainer = target.querySelector('#timeline-items');
@@ -2014,23 +2014,31 @@ function initCircularTimeline(container) {
     if(!wheel || !itemsContainer || wheel.dataset.initialized) return;
     wheel.dataset.initialized = 'true';
 
-    const baseEvents = [
-        { year: "2018", description: "Iniciamos nuestro camino con la firme convicción de construir una Tacna más fuerte, uniendo a líderes vecinales.", details: "<p>En este año, comenzamos reuniéndonos con representantes de diferentes distritos para escuchar de primera mano las necesidades más urgentes. <strong>Fuerza Tacna</strong> nace como una respuesta directa a la falta de liderazgo y a la necesidad de construir un proyecto político con base ciudadana y visión a largo plazo.</p><img src='assets/img/historia-2018.jpg' loading='lazy'>" },
-        { year: "2019", description: "Consolidamos nuestras bases vecinales en diferentes distritos de la región, escuchando al pueblo.", details: "<p>Se abrieron los primeros locales partidarios y se formaron comités en cada junta vecinal. Este año estuvo marcado por un fuerte trabajo de campo, recorriendo asentamientos humanos y asociaciones de vivienda para empadronar a nuevos militantes y recoger las verdaderas prioridades de la población.</p><img src='assets/img/historia-2019.jpg' loading='lazy'>" },
-        { year: "2020", description: "Lanzamiento de nuestros programas de apoyo solidario durante tiempos de crisis, apoyando a las familias.", details: "<p>Frente a los desafíos de la pandemia, adaptamos nuestro enfoque hacia la asistencia social directa. Implementamos campañas de donación de alimentos, asesoría médica gratuita y creación de ollas comunes solidarias, demostrando que nuestra fuerza está en la solidaridad y el trabajo en equipo.</p><img src='assets/img/historia-2020.jpg' loading='lazy'>" },
-        { year: "2021", description: "Expansión de nuestro equipo técnico para diseñar soluciones urbanas sostenibles y modernas.", details: "<p>Convocamos a profesionales tacneños de primer nivel (ingenieros, arquitectos, economistas) para conformar las mesas técnicas. Juntos comenzamos a estructurar proyectos viables en transporte, seguridad ciudadana y servicios básicos, asegurando que cada propuesta tenga un sustento técnico sólido.</p><img src='assets/img/historia-2021.jpg' loading='lazy'>" },
-        { year: "2022", description: "Participación histórica en elecciones locales, ganando representación y consolidando la confianza ciudadana.", details: "<p>Marcamos un hito en nuestra historia política al lograr una importante votación que nos permitió obtener representación en diferentes niveles de gobierno local. Esto demostró el respaldo popular y nos impulsó a seguir trabajando con mayor compromiso y fiscalización.</p><img src='assets/img/historia-2022.jpg' loading='lazy'>" },
-        { year: "2023", description: "Mesas de trabajo ciudadanas y foros para la creación integral de nuestro plan de gobierno.", details: "<p>Realizamos asambleas públicas participativas donde la ciudadanía tuvo voz y voto en la construcción de nuestro plan de gobierno. Integramos propuestas de jóvenes, emprendedores y asociaciones civiles para asegurar un plan de desarrollo verdaderamente inclusivo.</p>" },
-        { year: "2024", description: "Presentación oficial de nuestra campaña por la Alcaldía, con propuestas concretas, transparentes y viables.", details: "<p>Iniciamos nuestra campaña central enfocada en la innovación y la transparencia. Recorrimos calles y plazas presentando nuestra visión de una Tacna ordenada, con megaproyectos de infraestructura, modernización del comercio y tolerancia cero a la corrupción.</p>" },
-        { year: "2025", description: "Implementación de foros de inversión y alianzas estratégicas para el financiamiento de megaproyectos.", details: "<p>Nos proyectamos a gestionar asociaciones público-privadas para viabilizar obras de envergadura. Planeamos atraer inversión nacional e internacional para modernizar nuestro sistema de transporte y crear verdaderos parques ecológicos zonales.</p>" },
-        { year: "2026", description: "Proyección hacia una ciudad inteligente y segura, garantizando obras reales y bienestar para todos.", details: "<p>Nuestro objetivo es implementar el primer centro de monitoreo integral (Smart City) en Tacna, con cámaras 4K, drones de vigilancia y botones de pánico conectados en tiempo real, garantizando la paz y tranquilidad de las familias.</p>" },
-        { year: "2028", description: "Inauguración de la primera etapa del nuevo sistema de transporte integrado y parques ecológicos.", details: "<p>Vislumbramos la entrega de corredores viales modernos que reduzcan los tiempos de viaje y la inauguración de pulmones verdes en áreas antes abandonadas. Un modelo de ciudad que prioriza al peatón y al transporte limpio.</p>" },
-        { year: "2030", description: "Tacna consolidada como la capital de la innovación, el turismo y el desarrollo sostenible en el sur.", details: "<p>Vemos a nuestra Heroica Ciudad como el principal polo de desarrollo del sur del Perú. Una metrópoli ordenada, segura, que atrae turismo todo el año, potencia a sus emprendedores y brinda calidad de vida a cada uno de sus habitantes.</p>" }
-    ];
+    try {
+        const response = await fetch('assets/panel-admin-universo/api_cronologia.php');
+        const result = await response.json();
+        
+        if(!result.ok || !result.datos || result.datos.length === 0) {
+            if(badgeElement) badgeElement.innerText = "";
+            if(descElement) descElement.innerText = "Próximamente la historia de nuestra fuerza...";
+            if(verMasElement) verMasElement.style.display = "none";
+            return;
+        }
 
-    // TRUCO MATEMÁTICO: Duplicamos la lista para rellenar el círculo gigante de 1600px 
-    // y hacer que las fechas estén mucho más cerca unas de otras sin romper el circuito cerrado.
-    const events = [...baseEvents, ...baseEvents];
+        // Mapeamos los datos de tu BD al formato que entiende la web
+        const baseEvents = result.datos.map(item => {
+            let detailsHtml = `<h3 style="color:#ffc300; margin-top:0;">${item.titulo}</h3><p style="margin-top:1rem;">${item.descripcion}</p>`;
+            if (item.imagen && item.imagen !== "") {
+                detailsHtml = `<img src="assets/IMG/cronologia/${item.imagen}" alt="${item.titulo}" loading="lazy">` + detailsHtml;
+            }
+            return { year: item.fecha_texto, description: item.titulo, details: detailsHtml };
+        });
+
+        // TRUCO: Multiplicamos la lista para rellenar el círculo gigante, así si subes 3 fotos, el círculo no se ve vacío
+        let events = [...baseEvents];
+        while (events.length < 12) {
+            events = [...events, ...baseEvents];
+        }
 
     const STEP = 360 / events.length; // 360 grados repartidos entre todas las fechas = circuito cerrado
     let activeIndex = 0;
@@ -2207,6 +2215,9 @@ function initCircularTimeline(container) {
             btn.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px)`;
         });
     });
+    } catch (error) {
+        console.error("Error cargando la historia dinámica:", error);
+    }
 }
 
 // --- Animación Épica WOW del Cómic de Contacto ---
