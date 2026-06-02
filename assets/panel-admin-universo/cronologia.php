@@ -120,9 +120,9 @@ if (isset($_GET['edit'])) {
         input:focus, textarea:focus { border-color: #2563eb; }
         .btn-submit { margin-top: 25px; width: 100%; padding: 12px; background: #2563eb; color: #f9fafb; border: none; font-weight: 600; font-size: 14px; border-radius: 999px; cursor: pointer; transition: background 0.3s; }
         .btn-submit:hover { background: #1d4ed8; }
-        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: bold; height: 30px; box-sizing: border-box; }
         .btn-delete:hover { background: #dc2626; }
-        .btn-edit { background: #eab308; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; transition: background 0.3s; }
+        .btn-edit { background: #eab308; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; transition: background 0.3s; height: 30px; box-sizing: border-box; }
         .btn-edit:hover { background: #ca8a04; }
         .msg-success { background: rgba(16, 185, 129, 0.1); color: #34d399; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; border: 1px solid #059669; }
         .msg-error { background: rgba(239, 68, 68, 0.1); color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; border: 1px solid #dc2626; }
@@ -180,13 +180,15 @@ if (isset($_GET['edit'])) {
                             <td><?= !empty($item['imagen']) ? '<img src="../IMG/cronologia/'.$item['imagen'].'" class="thumb">' : 'Sin foto' ?></td>
                             <td><strong><?= htmlspecialchars($item['fecha_texto']) ?></strong></td>
                             <td><?= htmlspecialchars($item['titulo']) ?></td>
-                            <td style="display: flex; gap: 8px;">
-                                <a href="cronologia.php?edit=<?= $item['id'] ?>#formulario-edicion" class="btn-edit">✏️ Editar</a>
-                                <form action="cronologia.php" method="POST" onsubmit="return confirm('¿Borrar esta fecha para siempre?');" style="margin:0;">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?= $item['id'] ?>">
-                                    <button type="submit" class="btn-delete">🗑️ Eliminar</button>
-                                </form>
+                            <td>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <a href="cronologia.php?edit=<?= $item['id'] ?>#formulario-edicion" class="btn-edit">✏️ Editar</a>
+                                    <form action="cronologia.php" method="POST" onsubmit="return confirm('¿Borrar esta fecha para siempre?');" style="margin:0;">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<?= $item['id'] ?>">
+                                        <button type="submit" class="btn-delete">🗑️ Eliminar</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -229,7 +231,11 @@ if (isset($_GET['edit'])) {
                         <span style="font-size: 12px; color: #9ca3af; margin-left: 10px;">Foto actual</span>
                     </div>
                 <?php endif; ?>
-                <input type="file" name="imagen" accept="image/*">
+                <input type="file" name="imagen" id="inputImagen" accept="image/*">
+                <div id="previewContainer" style="display: none; margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border: 1px dashed #3b82f6; width: fit-content;">
+                    <p style="font-size: 12px; color: #93c5fd; margin: 0 0 8px 0;">📸 Previsualización de la nueva foto:</p>
+                    <img id="previewImagen" src="" style="height: 80px; border-radius: 6px; border: 1px solid #334155; display: block; object-fit: cover;">
+                </div>
                 
                 <div class="row">
                     <div><button type="submit" class="btn-submit">✅ <?= $is_editing ? 'Guardar Cambios' : 'Agregar a la Cronología' ?></button></div>
@@ -240,5 +246,26 @@ if (isset($_GET['edit'])) {
             </form>
         </div>
     </main>
+
+    <script>
+        // Script para previsualizar la imagen antes de subirla
+        document.getElementById('inputImagen').addEventListener('change', function(event) {
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImagen = document.getElementById('previewImagen');
+            const file = event.target.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImagen.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewImagen.src = '';
+                previewContainer.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
