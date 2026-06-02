@@ -58,7 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'save') {
         $id = $_POST['id'] ?? '';
-        $categoria = trim($_POST['categoria'] ?? '');
+        $categoria = trim($_POST['categoria_select'] ?? '');
+        if ($categoria === 'NEW') {
+            $categoria = trim($_POST['categoria_nueva'] ?? '');
+        }
+        
         $palabras = trim($_POST['palabras_clave'] ?? '');
         $orden = (int)($_POST['orden'] ?? 0);
         $estado = isset($_POST['estado']) ? 1 : 0;
@@ -147,6 +151,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 4. Obtener listado para la tabla
 $stmt = $db->query("SELECT * FROM panel_ia_respuestas ORDER BY orden ASC, id DESC");
 $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 5. Calcular Estadísticas y Extraer Categorías Dinámicas
+$total_reglas = count($respuestas_list);
+$total_respuestas = 0;
+$total_botones = 0;
+$activas = 0;
+$inactivas = 0;
+$cat_counts = [];
+
+foreach ($respuestas_list as $r) {
+    $resp_arr = json_decode($r['respuestas'], true) ?: [];
+    $acc_arr = json_decode($r['acciones'], true) ?: [];
+    
+    $total_respuestas += count($resp_arr);
+    $total_botones += count($acc_arr);
+    if ($r['estado'] == 1) { $activas++; } else { $inactivas++; }
+    
+    $c = trim($r['categoria']);
+    if ($c !== '') {
+        if (!isset($cat_counts[$c])) $cat_counts[$c] = 0;
+        $cat_counts[$c]++;
+    }
+}
+
+// Unir categorías existentes con las predefinidas
+$default_cats = ["Saludos", "Despedidas", "Quién eres", "Eres IA", "Obras", "Candidatos", "Propuestas", "Contacto", "Súmate", "Ayuda", "Humor", "Chistes", "Curiosidades", "Preguntas Personales", "Insultos Suaves", "Política Nacional", "Fuera de Tema", "Navegación", "Espera", "Otros"];
+$all_cats = array_unique(array_merge($default_cats, array_keys($cat_counts)));
+sort($all_cats);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -206,13 +238,39 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="alert alert-success"><?= htmlspecialchars($mensaje) ?></div>
     <?php endif; ?>
 
+    <!-- PANEL DE ESTADÍSTICAS -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm" style="border-radius: 12px; border: 1px solid rgba(128, 16, 57, 0.2);">
+                <div class="card-body d-flex flex-wrap justify-content-around text-center py-3">
+                    <div class="px-3">
+                        <h4 class="mb-0 font-weight-bold" style="color: #801039;">🧠 <?= $total_reglas ?></h4><small class="text-muted font-weight-bold text-uppercase">Reglas</small>
+                    </div>
+                    <div class="px-3" style="border-left: 1px solid #eee;">
+                        <h4 class="mb-0 font-weight-bold" style="color: #801039;">💬 <?= $total_respuestas ?></h4><small class="text-muted font-weight-bold text-uppercase">Respuestas</small>
+                    </div>
+                    <div class="px-3" style="border-left: 1px solid #eee;">
+                        <h4 class="mb-0 font-weight-bold" style="color: #801039;">🔘 <?= $total_botones ?></h4><small class="text-muted font-weight-bold text-uppercase">Botones</small>
+                    </div>
+                    <div class="px-3" style="border-left: 1px solid #eee;">
+                        <h4 class="mb-0 font-weight-bold text-success">✅ <?= $activas ?></h4><small class="text-muted font-weight-bold text-uppercase">Activas</small>
+                    </div>
+                    <div class="px-3" style="border-left: 1px solid #eee;">
+                        <h4 class="mb-0 font-weight-bold text-danger">⏸ <?= $inactivas ?></h4><small class="text-muted font-weight-bold text-uppercase">Inactivas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Columna Formulario -->
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header d-flex p-0" id="form-tabs-header">
-                    <button type="button" class="btn flex-fill tab-btn active" id="tab-manual" onclick="switchTab('manual')">✍️ Crear Manual</button>
-                    <button type="button" class="btn flex-fill tab-btn" id="tab-import" onclick="switchTab('import')">📦 Importar Masivo</button>
+                    <button type="button" class="btn flex-fill tab-btn active" id="tab-manual" onclick="switchTab('manual')">✍️ Manual</button>
+                    <button type="button" class="btn flex-fill tab-btn" id="tab-import" onclick="switchTab('import')">📦 Masivo</button>
+                    <button type="button" class="btn flex-fill tab-btn" id="tab-test" onclick="switchTab('test')">🧪 Probar</button>
                 </div>
                 <div class="card-body" id="body-manual">
                     <h6 class="mb-3 font-weight-bold" id="form-title" style="color:#801039;">Nueva Respuesta</h6>
@@ -221,8 +279,16 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <input type="hidden" name="id" id="input-id" value="">
                         
                         <div class="form-group">
-                            <label>Categoría (Interna)</label>
-                            <input type="text" name="categoria" id="input-categoria" class="form-control" placeholder="Ej: Saludos" required>
+                            <label>Categoría</label>
+                            <select name="categoria_select" id="input-categoria-select" class="form-control" onchange="checkNewCategory()" required>
+                                <option value="">-- Seleccionar --</option>
+                                <?php foreach($all_cats as $cat): ?>
+                                    <?php $count = $cat_counts[$cat] ?? 0; ?>
+                                    <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?> (<?= $count ?>)</option>
+                                <?php endforeach; ?>
+                                <option value="NEW" style="font-weight: bold; color: #801039;">+ Nueva Categoría</option>
+                            </select>
+                            <input type="text" name="categoria_nueva" id="input-categoria-nueva" class="form-control mt-2" placeholder="Escribe el nombre de la categoría..." style="display:none;">
                         </div>
 
                         <div class="form-group">
@@ -297,6 +363,22 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <button type="submit" id="btn-confirm-import" class="btn btn-ft btn-block" style="display:none;">✅ Confirmar Importación</button>
                         </div>
                     </form>
+                </div>
+
+                <!-- TAB DE PRUEBA LUCHITO -->
+                <div class="card-body" id="body-test" style="display:none; flex-direction:column; height: 620px;">
+                    <h6 class="mb-3 font-weight-bold" style="color:#801039;">🧪 Simulador de Capa 1</h6>
+                    <p style="font-size: 12px; color: #6c757d; margin-top: -10px;">Comprueba cómo responderá Luchito según las reglas actualmente activas.</p>
+                    
+                    <div id="test-chat-box" style="flex:1; border:1px solid #dee2e6; border-radius:8px; padding:15px; overflow-y:auto; background:#f4f6f9; margin-bottom:15px; display:flex; flex-direction:column; gap:12px;">
+                        <div style="align-self:flex-start; background:#ffffff; padding:10px 14px; border-radius:15px 15px 15px 0; border:1px solid #e0e0e0; max-width:85%; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <strong style="color: #801039;">🤖 Luchito:</strong><br><span style="line-height: 1.4;">¡Hola! Prueba tus reglas escribiendo aquí abajo.</span>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <input type="text" id="test-chat-input" class="form-control" placeholder="Mensaje de prueba..." autocomplete="off" onkeypress="if(event.key==='Enter') testSendMessage()">
+                        <button type="button" class="btn btn-ft ml-2" onclick="testSendMessage()">Enviar</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,6 +467,18 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
+    // Reglas procesadas directamente desde PHP para el entorno de pruebas
+    const testRules = <?php 
+        $test_data = [];
+        foreach ($respuestas_list as $r) {
+            if ($r['estado'] != 1) continue;
+            $palabras = array_filter(array_map('trim', explode(',', $r['palabras_clave'])));
+            if (empty($palabras)) continue;
+            $test_data[] = ['pattern_str' => '(' . implode('|', $palabras) . ')', 'responses' => json_decode($r['respuestas'], true) ?: [], 'actions' => json_decode($r['acciones'], true) ?: []];
+        }
+        echo json_encode($test_data);
+    ?>;
+
     function addResponseField(val = '') {
         const cont = document.getElementById('respuestas-container');
         const div = document.createElement('div');
@@ -427,10 +521,24 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         cont.appendChild(div);
     }
 
+    function checkNewCategory() {
+        const sel = document.getElementById('input-categoria-select');
+        const input = document.getElementById('input-categoria-nueva');
+        if (sel.value === 'NEW') {
+            input.style.display = 'block';
+            input.required = true;
+        } else {
+            input.style.display = 'none';
+            input.required = false;
+            input.value = '';
+        }
+    }
+
     function resetForm() {
         document.getElementById('form-title').innerText = "Nueva Respuesta";
         document.getElementById('input-id').value = "";
-        document.getElementById('input-categoria').value = "";
+        document.getElementById('input-categoria-select').value = "";
+        checkNewCategory();
         document.getElementById('input-palabras').value = "";
         document.getElementById('input-orden').value = "10";
         document.getElementById('input-estado').checked = true;
@@ -445,17 +553,20 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
     function switchTab(tab) {
         document.getElementById('body-manual').style.display = tab === 'manual' ? 'block' : 'none';
         document.getElementById('body-import').style.display = tab === 'import' ? 'block' : 'none';
+        document.getElementById('body-test').style.display = tab === 'test' ? 'flex' : 'none';
         
         const btnManual = document.getElementById('tab-manual');
         const btnImport = document.getElementById('tab-import');
+        const btnTest = document.getElementById('tab-test');
         
         if (tab === 'manual') {
-            btnManual.classList.add('active'); 
-            btnImport.classList.remove('active');
+            btnManual.classList.add('active'); btnImport.classList.remove('active'); btnTest.classList.remove('active');
             document.getElementById('preview-container').style.display = 'none';
+        } else if (tab === 'import') {
+            btnImport.classList.add('active'); btnManual.classList.remove('active'); btnTest.classList.remove('active');
         } else {
-            btnImport.classList.add('active'); 
-            btnManual.classList.remove('active');
+            btnTest.classList.add('active'); btnManual.classList.remove('active'); btnImport.classList.remove('active');
+            document.getElementById('test-chat-box').scrollTop = document.getElementById('test-chat-box').scrollHeight;
         }
     }
 
@@ -515,7 +626,23 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         document.getElementById('form-title').innerText = "Editar Respuesta #" + id;
         document.getElementById('input-id').value = id;
-        document.getElementById('input-categoria').value = dataSpan.getAttribute('data-cat');
+        
+        const cat = dataSpan.getAttribute('data-cat');
+        const sel = document.getElementById('input-categoria-select');
+        let found = false;
+        for(let i=0; i<sel.options.length; i++) {
+            if(sel.options[i].value === cat) {
+                sel.selectedIndex = i;
+                found = true;
+                break;
+            }
+        }
+        if(!found) {
+            sel.value = 'NEW';
+            document.getElementById('input-categoria-nueva').value = cat;
+        }
+        checkNewCategory();
+        
         document.getElementById('input-palabras').value = dataSpan.getAttribute('data-palabras');
         document.getElementById('input-orden').value = dataSpan.getAttribute('data-orden');
         document.getElementById('input-estado').checked = (dataSpan.getAttribute('data-estado') == "1");
@@ -533,6 +660,48 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         document.getElementById('btn-cancelar').style.display = "block";
         window.scrollTo(0, 0);
+    }
+
+    // Funciones del Entorno de Pruebas (Simulador IA)
+    function normalizeText(str) {
+        return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    }
+
+    function testSendMessage() {
+        const input = document.getElementById('test-chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+        appendTestMessage('user', text);
+        input.value = '';
+        
+        const normalizedText = normalizeText(text);
+        let matchFound = false; let responseText = ""; let responseActions = [];
+        
+        for (const intent of testRules) {
+            const regex = new RegExp(intent.pattern_str, "i");
+            if (regex.test(normalizedText)) {
+                matchFound = true;
+                const randIndex = Math.floor(Math.random() * intent.responses.length);
+                responseText = intent.responses[randIndex];
+                if (intent.actions) responseActions = intent.actions;
+                break;
+            }
+        }
+        
+        setTimeout(() => {
+            if (matchFound) appendTestMessage('ai', responseText, responseActions);
+            else appendTestMessage('ai', "Déjame revisar mis apuntes un ratito, vecino... 🤔<br><small style='color:#dc3545;'>*Ninguna regla local hizo match. En producción, esto derivará a OpenAI.*</small>");
+        }, 400);
+    }
+
+    function appendTestMessage(type, text, actions = []) {
+        const box = document.getElementById('test-chat-box');
+        const div = document.createElement('div');
+        const isUser = type === 'user';
+        div.style.alignSelf = isUser ? 'flex-end' : 'flex-start'; div.style.background = isUser ? '#801039' : '#ffffff'; div.style.color = isUser ? '#ffffff' : '#333333'; div.style.padding = '10px 14px'; div.style.borderRadius = isUser ? '15px 15px 0 15px' : '15px 15px 15px 0'; div.style.border = isUser ? 'none' : '1px solid #e0e0e0'; div.style.maxWidth = '85%'; div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)';
+        let html = `<strong style="color: ${isUser ? '#ffc300' : '#801039'};">${isUser ? '👤 Tú' : '🤖 Luchito'}</strong><br><span style="line-height: 1.4;">${text}</span>`;
+        if (actions && actions.length > 0) { html += `<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">`; actions.forEach(act => { html += `<span style="background:rgba(128,16,57,0.1); color:#801039; border:1px solid #801039; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:bold;">${act.label} <small>(${act.type})</small></span>`; }); html += `</div>`; }
+        div.innerHTML = html; box.appendChild(div); box.scrollTop = box.scrollHeight;
     }
 </script>
 </body>
