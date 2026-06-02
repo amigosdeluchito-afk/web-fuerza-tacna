@@ -333,15 +333,73 @@
 
             /* --- RESPONSIVE MOBILE --- */
             @media (max-width: 991px) {
-                .comic-layout { flex-direction: column; text-align: center; gap: 1rem; }
-                #contacto-escenario .lucho-stage { width: 320px; height: 420px; } /* Lucho más grande en celulares */
-                .dialog-stage { align-items: center; margin-left: 0; padding: 0 15px; }
-                .glass-bubble { border-radius: 20px; padding: 1.5rem; text-align: center; transform-origin: center top; margin-bottom: 1.5rem; }
+                #contacto-escenario {
+                    padding-top: 120px; /* Da espacio a la cabecera en móvil */
+                    min-height: auto;
+                    padding-bottom: 3rem;
+                }
+                .comic-layout { 
+                    flex-direction: column; 
+                    text-align: center; 
+                    gap: 1rem; 
+                    width: 100%; 
+                    padding: 0 15px;
+                    box-sizing: border-box;
+                }
+                #contacto-escenario .lucho-stage { 
+                    width: clamp(200px, 60vw, 320px); 
+                    height: clamp(300px, 45vh, 420px); 
+                } /* Lucho escalable para que no desborde */
+                .dialog-stage { 
+                    align-items: center; 
+                    margin-left: 0; 
+                    padding: 0; 
+                    width: 100%;
+                    max-width: 100%;
+                    box-sizing: border-box;
+                }
+                .glass-bubble { 
+                    border-radius: 20px; 
+                    padding: 1.2rem; 
+                    text-align: center; 
+                    transform-origin: center top; 
+                    margin-bottom: 1.5rem;
+                    width: 100%;
+                    box-sizing: border-box; 
+                }
                 .glass-bubble::before { left: 50%; bottom: 100%; top: -20px; transform: translateX(-50%); border-bottom: none; border-left: 1px solid rgba(255, 195, 0, 0.4); border-top: 2px solid rgba(255, 195, 0, 0.8); clip-path: polygon(0 0, 100% 0, 50% 100%); background: rgba(128, 16, 57, 0.9); }
-                .dialog-text { font-size: 1.35rem; } /* Texto móvil mejorado */
-                .shiny-pillar { font-size: 1.15rem; padding: 0.8rem 2.5rem; }
+                .dialog-text { font-size: clamp(1.1rem, 5vw, 1.3rem); } /* Texto móvil dinámico */
+                .shiny-pillar { font-size: 1.1rem; padding: 0.8rem 2rem; width: 100%; max-width: 250px; }
                 
-                #contact-cards-container { position: relative; right: auto; top: auto; transform: none; width: 100%; max-width: 400px; margin: -110px auto 0 auto; padding: 0 15px; padding-bottom: 40px; } /* Margen negativo extremo para acercarlo en celular */
+                #contact-cards-container { 
+                    position: relative; 
+                    right: auto; 
+                    top: auto; 
+                    transform: none; 
+                    width: 100%; 
+                    max-width: 100%; 
+                    margin: 2rem auto 0 auto; /* Se elimina el margen negativo que causaba solapamiento */
+                    padding: 0 15px; 
+                    box-sizing: border-box;
+                }
+                .glass-contact-card {
+                    padding: 1rem;
+                    gap: 1rem;
+                }
+                .card-icon {
+                    width: 45px;
+                    height: 45px;
+                }
+                .card-icon svg {
+                    width: 22px;
+                    height: 22px;
+                }
+                .card-info h4 {
+                    font-size: 1rem;
+                }
+                .card-info p {
+                    font-size: 0.9rem;
+                }
             }
         </style>
         <input type="checkbox" id="openmenu" class="hamburger-checkbox">
