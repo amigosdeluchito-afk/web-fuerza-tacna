@@ -53,6 +53,11 @@ function regenerar_json_ia($db) {
 
 // 3. Procesar Formularios (POST)
 $mensaje = '';
+if (isset($_SESSION['ia_mensaje'])) {
+    $mensaje = $_SESSION['ia_mensaje'];
+    unset($_SESSION['ia_mensaje']);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -146,6 +151,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensaje = "Error al procesar el JSON en el servidor.";
         }
     }
+    
+    // Prevenir reenvío del formulario al actualizar la página (F5)
+    $_SESSION['ia_mensaje'] = $mensaje;
+    header("Location: ia_respuestas.php");
+    exit;
 }
 
 // 4. Obtener listado para la tabla
