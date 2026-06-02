@@ -11,7 +11,7 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-// Manejo de los formularios (Agregar y Eliminar)
+// Manejo de los formularios (Agregar, Editar y Eliminar)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -35,6 +35,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $mensaje = '<div class="msg-error">Error al guardar la fecha.</div>';
         }
+    } elseif ($action === 'edit') {
+        $id = (int)$_POST['id'];
+        $fecha_texto = $_POST['fecha_texto'] ?? '';
+        $titulo = $_POST['titulo'] ?? '';
+        $descripcion = $_POST['descripcion'] ?? '';
+        $orden = (int)($_POST['orden'] ?? 0);
+        
+        $update_query = "UPDATE cronologia_historia SET fecha_texto = ?, titulo = ?, descripcion = ?, orden = ?";
+        $params = [$fecha_texto, $titulo, $descripcion, $orden];
+
+        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+            $ext = pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION);
+            $imagen = 'historia_' . time() . '_' . rand(100, 999) . '.' . $ext;
+            if (move_uploaded_file($_FILES['imagen']['tmp_name'], $uploadDir . $imagen)) {
+                $update_query .= ", imagen = ?";
+                $params[] = $imagen;
+            }
+        }
+        $update_query .= " WHERE id = ?";
+        $params[] = $id;
+
+        $stmt = $db->prepare($update_query);
+        if ($stmt->execute($params)) {
+            $mensaje = '<div class="msg-success">¡Fecha editada exitosamente!</div>';
+        } else {
+            $mensaje = '<div class="msg-error">Error al actualizar la fecha.</div>';
+        }
     } elseif ($action === 'delete') {
         $id = (int)$_POST['id'];
         // Obtener nombre de imagen para borrarla del servidor
@@ -56,6 +83,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Obtener la lista actual para mostrarla en la tabla
 $stmt = $db->query("SELECT * FROM cronologia_historia ORDER BY orden ASC");
 $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Lógica para preparar la Edición si se solicita por la URL (?edit=X)
+$is_editing = false;
+$edit_data = [
+    'id' => '', 'fecha_texto' => '', 'titulo' => '', 'descripcion' => '', 'orden' => count($items) + 1, 'imagen' => ''
+];
+
+if (isset($_GET['edit'])) {
+    $is_editing = true;
+    $stmt = $db->prepare("SELECT * FROM cronologia_historia WHERE id = ?");
+    $stmt->execute([(int)$_GET['edit']]);
+    $found = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($found) {
+        $edit_data = $found;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -79,6 +122,8 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .btn-submit:hover { background: #1d4ed8; }
         .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-delete:hover { background: #dc2626; }
+        .btn-edit { background: #eab308; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; transition: background 0.3s; }
+        .btn-edit:hover { background: #ca8a04; }
         .msg-success { background: rgba(16, 185, 129, 0.1); color: #34d399; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; border: 1px solid #059669; }
         .msg-error { background: rgba(239, 68, 68, 0.1); color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; border: 1px solid #dc2626; }
         .row { display: flex; gap: 15px; }
@@ -112,40 +157,10 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </header>
 
     <main class="app-main">
-        <!-- Formulario para agregar -->
-        <div class="card">
-            <h1>Agregar Punto a la Historia</h1>
-            <?= $mensaje ?>
-            
-            <form action="cronologia.php" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="add">
-                
-                <div class="row">
-                    <div>
-                        <label>Año / Fecha (Ej: "2019", "Actualidad"):</label>
-                        <input type="text" name="fecha_texto" required>
-                    </div>
-                    <div>
-                        <label>Orden (1 va primero, 2 después...):</label>
-                        <input type="number" name="orden" value="<?= count($items) + 1 ?>" required>
-                    </div>
-                </div>
-
-                <label>Título (El encabezado amarillo en el popup):</label>
-                <input type="text" name="titulo" required>
-                
-                <label>Descripción completa (La historia):</label>
-                <textarea name="descripcion" rows="4" required></textarea>
-                
-                <label>Foto representativa:</label>
-                <input type="file" name="imagen" accept="image/*">
-                
-                <button type="submit" class="btn-submit">✅ Guardar en la Cronología</button>
-            </form>
-        </div>
-
         <!-- Tabla de registros existentes -->
         <div class="card">
+            <h1>Cronología de Fuerza Tacna</h1>
+            <?= $mensaje ?>
             <h2>Fechas Registradas</h2>
             <div style="overflow-x: auto;">
                 <table>
@@ -165,11 +180,12 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= !empty($item['imagen']) ? '<img src="../IMG/cronologia/'.$item['imagen'].'" class="thumb">' : 'Sin foto' ?></td>
                             <td><strong><?= htmlspecialchars($item['fecha_texto']) ?></strong></td>
                             <td><?= htmlspecialchars($item['titulo']) ?></td>
-                            <td>
-                                <form action="cronologia.php" method="POST" onsubmit="return confirm('¿Borrar esta fecha para siempre?');">
+                            <td style="display: flex; gap: 8px;">
+                                <a href="cronologia.php?edit=<?= $item['id'] ?>#formulario-edicion" class="btn-edit">✏️ Editar</a>
+                                <form action="cronologia.php" method="POST" onsubmit="return confirm('¿Borrar esta fecha para siempre?');" style="margin:0;">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?= $item['id'] ?>">
-                                    <button type="submit" class="btn-delete">Eliminar</button>
+                                    <button type="submit" class="btn-delete">🗑️ Eliminar</button>
                                 </form>
                             </td>
                         </tr>
@@ -177,6 +193,51 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
                 </table>
             </div>
+        </div>
+        
+        <!-- Formulario para agregar / editar -->
+        <div class="card" id="formulario-edicion">
+            <h2><?= $is_editing ? '✏️ Editar Punto de la Historia' : '➕ Agregar Nuevo Punto' ?></h2>
+            
+            <form action="cronologia.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="<?= $is_editing ? 'edit' : 'add' ?>">
+                <?php if ($is_editing): ?>
+                    <input type="hidden" name="id" value="<?= $edit_data['id'] ?>">
+                <?php endif; ?>
+                
+                <div class="row">
+                    <div>
+                        <label>Año / Fecha (Ej: "2019", "Actualidad"):</label>
+                        <input type="text" name="fecha_texto" value="<?= htmlspecialchars($edit_data['fecha_texto']) ?>" required>
+                    </div>
+                    <div>
+                        <label>Orden (1 va primero, 2 después...):</label>
+                        <input type="number" name="orden" value="<?= htmlspecialchars($edit_data['orden']) ?>" required>
+                    </div>
+                </div>
+
+                <label>Título (El encabezado amarillo en el popup):</label>
+                <input type="text" name="titulo" value="<?= htmlspecialchars($edit_data['titulo']) ?>" required>
+                
+                <label>Descripción completa (La historia):</label>
+                <textarea name="descripcion" rows="4" required><?= htmlspecialchars($edit_data['descripcion']) ?></textarea>
+                
+                <label>Foto representativa <?= $is_editing ? '<small style="color:#9ca3af;">(Sube una nueva solo si quieres cambiar la actual)</small>' : '' ?>:</label>
+                <?php if($is_editing && !empty($edit_data['imagen'])): ?>
+                    <div style="margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; display: inline-block;">
+                        <img src="../IMG/cronologia/<?= $edit_data['imagen'] ?>" style="height: 60px; border-radius: 6px; border: 1px solid #334155; vertical-align: middle;">
+                        <span style="font-size: 12px; color: #9ca3af; margin-left: 10px;">Foto actual</span>
+                    </div>
+                <?php endif; ?>
+                <input type="file" name="imagen" accept="image/*">
+                
+                <div class="row">
+                    <div><button type="submit" class="btn-submit">✅ <?= $is_editing ? 'Guardar Cambios' : 'Agregar a la Cronología' ?></button></div>
+                    <?php if ($is_editing): ?>
+                    <div><a href="cronologia.php" class="btn-submit" style="display:block; text-align:center; background:#4b5563; text-decoration:none;">❌ Cancelar Edición</a></div>
+                    <?php endif; ?>
+                </div>
+            </form>
         </div>
     </main>
 </body>
