@@ -340,6 +340,18 @@ sort($all_cats);
                         <input type="hidden" name="json_data" id="input-final-json">
                         
                         <div class="form-group">
+                            <label>Asignar lote a categoría (Opcional)</label>
+                            <select id="input-import-categoria-select" class="form-control" onchange="checkNewImportCategory()">
+                                <option value="">-- Mantener las categorías que vengan dentro del JSON --</option>
+                                <?php foreach($all_cats as $cat): ?>
+                                    <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
+                                <?php endforeach; ?>
+                                <option value="NEW" style="font-weight: bold; color: #801039;">+ Nueva Categoría a todo el lote</option>
+                            </select>
+                            <input type="text" id="input-import-categoria-nueva" class="form-control mt-2" placeholder="Escribe el nombre de la categoría..." style="display:none;">
+                        </div>
+
+                        <div class="form-group">
                             <textarea id="input-json-raw" class="form-control" rows="12" style="font-family: monospace; font-size: 12px; background: #1e1e1e; color: #d4d4d4;" placeholder='[\n  {\n    "categoria": "Saludos",\n    "palabras_clave": ["hola", "buenos dias"],\n    "respuestas": ["¡Hola vecino!"],\n    "acciones": [],\n    "estado": 1,\n    "orden": 10\n  }\n]'></textarea>
                             <small class="text-muted d-block mt-1">Pega aquí el arreglo JSON generado por IA.</small>
                         </div>
@@ -534,6 +546,19 @@ sort($all_cats);
         }
     }
 
+    function checkNewImportCategory() {
+        const sel = document.getElementById('input-import-categoria-select');
+        const input = document.getElementById('input-import-categoria-nueva');
+        if (sel.value === 'NEW') {
+            input.style.display = 'block';
+            input.required = true;
+        } else {
+            input.style.display = 'none';
+            input.required = false;
+            input.value = '';
+        }
+    }
+
     function resetForm() {
         document.getElementById('form-title').innerText = "Nueva Respuesta";
         document.getElementById('input-id').value = "";
@@ -592,9 +617,14 @@ sort($all_cats);
         let errors = [];
         let validRules = [];
         
+        let globalCat = document.getElementById('input-import-categoria-select').value;
+        if (globalCat === 'NEW') globalCat = document.getElementById('input-import-categoria-nueva').value.trim();
+        
         parsed.forEach((rule, idx) => {
+            if (globalCat !== '') rule.categoria = globalCat;
+            
             let ruleName = rule.categoria || `Regla #${idx + 1}`;
-            if(!rule.categoria) errors.push(`[Regla #${idx + 1}]: Falta 'categoria'.`);
+            if(!rule.categoria) errors.push(`[Regla #${idx + 1}]: Falta 'categoria'. Selecciónala en el menú de arriba o inclúyela en el JSON.`);
             if(!rule.palabras_clave || !Array.isArray(rule.palabras_clave)) errors.push(`[${ruleName}]: 'palabras_clave' debe ser un arreglo de textos.`);
             if(!rule.respuestas || !Array.isArray(rule.respuestas) || rule.respuestas.length === 0) errors.push(`[${ruleName}]: 'respuestas' debe ser un arreglo con al menos un texto.`);
             
