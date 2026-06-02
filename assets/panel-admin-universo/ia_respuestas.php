@@ -575,8 +575,10 @@ sort($all_cats);
         const errDiv = document.getElementById('preview-errors');
         const sucDiv = document.getElementById('preview-success');
         const btnConfirm = document.getElementById('btn-confirm-import');
+        const previewContainer = document.getElementById('preview-container');
         
         errDiv.style.display = 'none'; sucDiv.style.display = 'none'; btnConfirm.style.display = 'none';
+        previewContainer.style.display = 'block'; // Faltaba hacer visible el contenedor principal
         
         if(!raw) { errDiv.innerHTML = "El JSON está vacío."; errDiv.style.display = 'block'; return; }
         
