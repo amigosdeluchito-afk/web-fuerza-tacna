@@ -806,6 +806,137 @@
                     <!-- ========================================== -->
                     <!-- FIN DE LA LÍNEA DE TIEMPO                  -->
                     <!-- ========================================== -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', async () => {
+                            const itemsContainer = document.getElementById('timeline-items');
+                            const wheel = document.getElementById('timeline-wheel');
+                            const yearBadge = document.getElementById('timeline-year-badge');
+                            const descText = document.getElementById('timeline-desc');
+                            const verMasBtn = document.getElementById('timeline-ver-mas');
+                            const modal = document.getElementById('timeline-modal');
+                            const modalClose = document.getElementById('timeline-modal-close');
+                            const modalYear = document.getElementById('timeline-modal-year');
+                            const modalText = document.getElementById('timeline-modal-text');
+                            const modalLeft = document.getElementById('timeline-modal-left');
+
+                            if(!itemsContainer) return;
+
+                            try {
+                                // 1. Llamar a nuestro puente (la API)
+                                const response = await fetch('assets/panel-admin-universo/api_cronologia.php');
+                                const result = await response.json();
+                                
+                                if(!result.ok || !result.datos || result.datos.length === 0) {
+                                    yearBadge.innerText = "";
+                                    descText.innerText = "Próximamente la historia de nuestra fuerza...";
+                                    verMasBtn.style.display = "none";
+                                    return;
+                                }
+
+                                const data = result.datos;
+                                const total = data.length;
+                                
+                                // 2. Matemáticas del Semicírculo: Distribuimos los puntos equitativamente (-75 a 75 grados)
+                                const startAngle = -75;
+                                const endAngle = 75;
+                                const angleStep = total > 1 ? (endAngle - startAngle) / (total - 1) : 0;
+
+                                let dots = [];
+
+                                // 3. Construir los puntos dinámicamente
+                                data.forEach((item, index) => {
+                                    const currentAngle = total === 1 ? 0 : startAngle + (angleStep * index);
+                                    
+                                    // Contenedor "brazo" que gira desde el centro de la rueda
+                                    const dotWrapper = document.createElement('div');
+                                    dotWrapper.className = 'timeline-wrapper';
+                                    dotWrapper.style.position = 'absolute';
+                                    dotWrapper.style.left = '50%';
+                                    dotWrapper.style.top = '50%';
+                                    dotWrapper.style.width = '100%';
+                                    dotWrapper.style.height = '100%';
+                                    dotWrapper.style.transform = `translate(-50%, -50%) rotate(${currentAngle}deg)`;
+                                    dotWrapper.style.pointerEvents = 'none';
+
+                                    // El botón (Punto brillante + Año) en el extremo del brazo
+                                    const dotBtn = document.createElement('button');
+                                    dotBtn.className = 'timeline-btn';
+                                    dotBtn.style.position = 'absolute';
+                                    dotBtn.style.top = '0'; 
+                                    dotBtn.style.left = '50%';
+                                    dotBtn.style.transform = `translate(-50%, -50%) rotate(${-currentAngle}deg)`;
+                                    
+                                    const dotInner = document.createElement('div');
+                                    dotInner.className = 'timeline-dot';
+                                    
+                                    const yearText = document.createElement('div');
+                                    yearText.className = 'timeline-year-text';
+                                    yearText.innerText = item.fecha_texto;
+
+                                    dotBtn.appendChild(dotInner);
+                                    dotBtn.appendChild(yearText);
+                                    dotWrapper.appendChild(dotBtn);
+                                    itemsContainer.appendChild(dotWrapper);
+
+                                    dots.push({ index, angle: currentAngle, element: dotInner, data: item, btn: dotBtn });
+
+                                    // Evento al hacer clic
+                                    dotBtn.addEventListener('click', () => activateDot(index));
+                                });
+
+                                // 4. Lógica de activación, giro del mapa y textos
+                                function activateDot(index) {
+                                    const target = dots[index];
+
+                                    // Prender luz en el seleccionado
+                                    dots.forEach(d => d.element.classList.remove('active-dot'));
+                                    target.element.classList.add('active-dot');
+
+                                    // Girar la gran rueda central
+                                    wheel.style.transform = `translate(-50%, -50%) rotate(${-target.angle}deg)`;
+
+                                    // Contrarrestar el giro de los números para que no queden de cabeza
+                                    dots.forEach(d => {
+                                        d.btn.style.transform = `translate(-50%, -50%) rotate(${-(d.angle - target.angle)}deg)`;
+                                    });
+
+                                    // Transición de los textos centrales
+                                    yearBadge.style.opacity = 0;
+                                    descText.style.opacity = 0;
+                                    setTimeout(() => {
+                                        yearBadge.innerText = target.data.fecha_texto;
+                                        descText.innerText = target.data.titulo; 
+                                        yearBadge.style.opacity = 1;
+                                        descText.style.opacity = 1;
+                                    }, 400);
+
+                                    // Configurar y abrir el Popup (Modal)
+                                    verMasBtn.onclick = () => {
+                                        modalYear.innerText = target.data.fecha_texto;
+                                        modalText.innerHTML = `<h3 style="color:#ffc300; margin-top:0;">${target.data.titulo}</h3><p style="margin-top:1rem;">${target.data.descripcion}</p>`;
+                                        
+                                        if(target.data.imagen && target.data.imagen !== "") {
+                                            // Preparado para buscar en la futura carpeta que crearemos
+                                            modalLeft.innerHTML = `<img src="assets/IMG/cronologia/${target.data.imagen}" alt="${target.data.titulo}">`;
+                                        } else {
+                                            modalLeft.innerHTML = '';
+                                        }
+                                        modal.classList.add('active');
+                                    };
+                                }
+
+                                // Comenzar por el primer punto de la historia
+                                if(dots.length > 0) activateDot(0);
+
+                                // Configuración para cerrar el modal
+                                modalClose.onclick = () => modal.classList.remove('active');
+                                modal.onclick = (e) => { if(e.target === modal) modal.classList.remove('active'); };
+
+                            } catch (error) {
+                                console.error("Error cargando la historia:", error);
+                            }
+                        });
+                    </script>
                 </div>
                 
                 <!-- Flechas de la Segunda Sección (Línea de Tiempo -> Servicios) -->
