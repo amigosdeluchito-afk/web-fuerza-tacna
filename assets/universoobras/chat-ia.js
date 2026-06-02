@@ -232,6 +232,8 @@ function initChatIA() {
     const sendMessage = () => {
         const text = inputField.value.trim();
         if (!text) return;
+        
+        console.log("ENTRÓ A SENDMESSAGE");
 
         // 1. Mostrar mensaje del usuario limpio
         const safeText = escapeHTML(text);
@@ -257,6 +259,8 @@ function initChatIA() {
             }
         }
 
+        console.log("MATCH FOUND:", matchFound);
+
         // 4. Lógica de derivación: Local vs Servidor
         if (matchFound) {
             // Respuesta Local (Capa 1)
@@ -269,6 +273,9 @@ function initChatIA() {
             // No hay respuesta local -> Derivar al Router (Capa 2)
             const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
             const routerUrl = basePath + 'assets/ia_luchito/router.php';
+            
+            console.log("VA A LLAMAR AL ROUTER");
+            console.log("ROUTER URL:", routerUrl);
 
             fetch(routerUrl, {
                 method: 'POST',
