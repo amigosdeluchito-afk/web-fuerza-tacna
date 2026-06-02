@@ -26,24 +26,48 @@ if (mb_strlen($mensaje) > 150) {
 // 4. Simular tiempo de "razonamiento" (1.5 segundos)
 usleep(1500000);
 
-// 5. Enrutador básico por palabras clave (Simulador Fase 2)
+// 5. Filtro Temático de Seguridad (Simulador Fase 3 - Pre-OpenAI)
 $mensaje_lower = mb_strtolower($mensaje, 'UTF-8');
 
-$texto = '¡Esa es una gran pregunta, vecino! Pero mi cerebro (Servidor PHP) todavía está en entrenamiento antes de conectarse a la IA. 🧠';
+$texto = '';
 $acciones = [];
+$tema_valido = true;
 
-if (preg_match('/(obra|obras|proyecto|mapa)/', $mensaje_lower)) {
+if (preg_match('/(obra|obras|proyecto|mapa|construccion|colegio|posta)/', $mensaje_lower)) {
     $texto = '¡Claro que sí! Tenemos obras por toda Tacna. Te llevo directito al mapa para que las cheques tú mismo. 🗺️';
     $acciones = [['label' => '🗺️ Abrir Mapa', 'type' => 'ir_a_obras']];
-} elseif (preg_match('/(candidato|candidatos|equipo|regidor|alcalde)/', $mensaje_lower)) {
+} elseif (preg_match('/(candidato|candidatos|equipo|regidor|alcalde|patrick|alena)/', $mensaje_lower)) {
     $texto = '¡Tenemos un equipazo, campeón! Pura gente chamba. Te acompaño a la sección para que los conozcas a todos. 👥';
     $acciones = [['label' => '👥 Ver Equipo', 'type' => 'ir_a_candidatos']];
-} elseif (preg_match('/(sumate|unirme|apoyar|voluntario)/', $mensaje_lower)) {
+} elseif (preg_match('/(propuesta|propuestas|plan|seguridad|educacion|salud)/', $mensaje_lower)) {
+    $texto = 'Ese es mi tema favorito, vecino. Cero floro y puras propuestas reales. ¿Le damos una mirada? 🚀';
+    $acciones = [['label' => '🚀 Ver Propuestas', 'type' => 'ir_a_propuestas']];
+} elseif (preg_match('/(sumate|unirme|apoyar|voluntario|equipo)/', $mensaje_lower)) {
     $texto = '¡Esa es la actitud! Siempre hay sitio en la familia para los que quieren ver crecer a Tacna. ¿Te apuntas? 💪';
     $acciones = [['label' => '💪 Súmate a la Fuerza', 'type' => 'ir_a_sumate']];
-} elseif (preg_match('/(contacto|llamar|telefono|ubicacion)/', $mensaje_lower)) {
+} elseif (preg_match('/(contacto|llamar|telefono|ubicacion|redes|facebook|whatsapp)/', $mensaje_lower)) {
     $texto = '¡Al toque! Si necesitas escribirnos o visitarnos, te paso toda la info para que estemos en contacto. 📞';
     $acciones = [['label' => '📞 Contacto', 'type' => 'ir_a_contacto']];
+} elseif (preg_match('/(cronologia|historia|pasado|años)/', $mensaje_lower)) {
+    $texto = 'Tenemos una historia con mucha fuerza, vecino. ¿Qué te parece si conocemos al equipo que lo hace posible? ⏳';
+    $acciones = [['label' => '👥 Ver Equipo', 'type' => 'ir_a_candidatos']];
+} elseif (preg_match('/(actividad|actividades|mitin|evento|campaña)/', $mensaje_lower)) {
+    $texto = 'Siempre estamos moviéndonos por la región. Revisa nuestras redes en la sección de contacto para enterarte de los próximos eventos. 📱';
+    $acciones = [['label' => '📞 Contacto', 'type' => 'ir_a_contacto']];
+} elseif (preg_match('/(pagina|web|sitio|explorar|menu)/', $mensaje_lower)) {
+    $texto = '¡Esta página tiene de todo! ¿Quieres que te muestre los proyectos o prefieres conocer al equipo? 👇';
+    $acciones = [
+        ['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'],
+        ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']
+    ];
+} else {
+    // EL ESCUDO: Si no hace match con NINGÚN tema de la campaña
+    $tema_valido = false;
+    $texto = '😄 Me agarraste fuera de juego, vecino. Yo ando más pendiente de esta página. ¿Te muestro obras o candidatos?';
+    $acciones = [
+        ['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'],
+        ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']
+    ];
 }
 
 // 6. Devolver el JSON final
@@ -51,5 +75,5 @@ echo json_encode([
     'ok' => true,
     'texto' => $texto,
     'acciones' => $acciones,
-    'origen' => 'simulador_fase2'
+    'origen' => 'simulador_fase3'
 ]);
