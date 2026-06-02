@@ -334,7 +334,7 @@
             /* --- RESPONSIVE MOBILE --- */
             @media (max-width: 991px) {
                 #contacto-escenario {
-                    padding-top: 100px !important; /* Espacio exacto de la cabecera */
+                    padding-top: 75px !important; /* Espacio mínimo para subir todo el bloque al techo */
                     min-height: 100svh !important;
                     padding-bottom: 2rem !important;
                     flex-direction: column !important;
@@ -343,11 +343,12 @@
                 .comic-layout { 
                     flex-direction: column !important; 
                     text-align: center; 
-                    gap: 0.5rem !important; 
+                    gap: 0 !important; /* Eliminamos el gap extra para juntar más los elementos */
                     width: 100%; 
                     padding: 0 15px;
                     box-sizing: border-box;
                     order: 2; /* Lucho y globo van ABAJO de las tarjetas */
+                    margin-top: 0 !important; /* Previene que JS añada márgenes superiores */
                     transform: none !important; /* Bloquea cualquier animación JS que intente hundirlo */
                 }
                 #contact-cards-container { 
@@ -359,7 +360,7 @@
                     transform: none !important; /* CRÍTICO: Anula el top:50% y translateY(-50%) de escritorio y JS */
                     width: 100%; 
                     max-width: 100%; 
-                    margin: 0 auto 1rem auto !important; 
+                    margin: 0 auto 0.5rem auto !important; /* Margen inferior reducido */
                     padding: 0 15px; 
                     box-sizing: border-box;
                     order: 1; /* Las cajas de contacto aparecen ARRIBA */
@@ -375,17 +376,17 @@
                     transform: none !important;
                 }
                 #contacto-escenario .lucho-stage { 
-                    width: clamp(180px, 50vw, 300px) !important; 
-                    height: clamp(200px, 35vh, 350px) !important; 
+                    width: clamp(140px, 45vw, 220px) !important; /* Personaje un poco más chico para ahorrar alto */
+                    height: clamp(160px, 30vh, 260px) !important; 
                     order: 2; /* Dibujo AL FONDO (Abajo de todo) */
-                    margin: 0 auto;
+                    margin: -5px auto 0 auto !important; /* Lo junta milimétricamente al globo */
                 } 
                 .glass-bubble { 
                     border-radius: 20px; 
-                    padding: 1.5rem 1rem; 
+                    padding: 1.2rem 1rem; /* Reducimos el relleno interno vertical */
                     text-align: center; 
                     transform-origin: center top; 
-                    margin-bottom: 0.5rem; /* Pega el globo de diálogo un poco más al personaje */
+                    margin-bottom: 0 !important; /* Cero separación adicional */
                     width: 100%;
                     max-width: 100%;
                     box-sizing: border-box; 
