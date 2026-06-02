@@ -113,6 +113,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensaje = "Estado actualizado.";
         }
     }
+    elseif ($action === 'import_json') {
+        $mode = $_POST['import_mode'] ?? 'append';
+        $json_data = $_POST['json_data'] ?? '[]';
+        $rules = json_decode($json_data, true);
+        
+        if (is_array($rules)) {
+            if ($mode === 'replace') {
+                $db->exec("DELETE FROM panel_ia_respuestas");
+            }
+            
+            $stmt = $db->prepare("INSERT INTO panel_ia_respuestas (categoria, palabras_clave, respuestas, acciones, estado, orden) VALUES (?, ?, ?, ?, ?, ?)");
+            $imported = 0;
+            foreach ($rules as $r) {
+                $stmt->execute([
+                    $r['categoria'],
+                    $r['palabras_clave'],
+                    json_encode($r['respuestas'], JSON_UNESCAPED_UNICODE),
+                    json_encode($r['acciones'], JSON_UNESCAPED_UNICODE),
+                    $r['estado'],
+                    $r['orden']
+                ]);
+                $imported++;
+            }
+            regenerar_json_ia($db);
+            $mensaje = "Se importaron $imported respuestas masivamente con éxito.";
+        } else {
+            $mensaje = "Error al procesar el JSON en el servidor.";
+        }
+    }
 }
 
 // 4. Obtener listado para la tabla
@@ -137,6 +166,12 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .response-row, .action-row { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; border: 1px solid #dee2e6; }
         .remove-row-btn { position: absolute; top: 10px; right: 10px; cursor: pointer; color: #dc3545; font-weight: bold; border: none; background: none; }
         
+        /* Tabs de Navegación */
+        .tab-btn { border-radius: 0; padding: 12px; font-size: 14px; font-weight: bold; border: none; transition: 0.3s; }
+        .tab-btn.active { background-color: #801039 !important; color: #ffc300 !important; opacity: 1; }
+        .tab-btn:not(.active) { background-color: #4a051d !important; color: #ffc300 !important; opacity: 0.6; }
+        .tab-btn:hover:not(.active) { opacity: 0.8; }
+
         /* Estilos Header General */
         .app-header { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #020617; border-bottom: 1px solid #111827; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 2000; font-family: system-ui, sans-serif; }
         .app-header nav a { color: #9ca3af; margin-right: 16px; text-decoration: none; font-size: 14px; }
@@ -175,8 +210,12 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <!-- Columna Formulario -->
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header card-header-ft" id="form-title">Nueva Respuesta</div>
-                <div class="card-body">
+                <div class="card-header d-flex p-0" id="form-tabs-header">
+                    <button type="button" class="btn flex-fill tab-btn active" id="tab-manual" onclick="switchTab('manual')">✍️ Crear Manual</button>
+                    <button type="button" class="btn flex-fill tab-btn" id="tab-import" onclick="switchTab('import')">📦 Importar Masivo</button>
+                </div>
+                <div class="card-body" id="body-manual">
+                    <h6 class="mb-3 font-weight-bold" id="form-title" style="color:#801039;">Nueva Respuesta</h6>
                     <form method="POST" id="ia-form">
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="id" id="input-id" value="">
@@ -224,6 +263,39 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <hr>
                         <button type="submit" class="btn btn-ft btn-block">Guardar Regla</button>
                         <button type="button" class="btn btn-light btn-block" onclick="resetForm()" id="btn-cancelar" style="display:none;">Cancelar Edición</button>
+                    </form>
+                </div>
+
+                <!-- TAB DE IMPORTACIÓN MASIVA -->
+                <div class="card-body" id="body-import" style="display:none;">
+                    <h6 class="mb-3 font-weight-bold" style="color:#801039;">Importación Masiva (JSON)</h6>
+                    <form method="POST" id="import-form">
+                        <input type="hidden" name="action" value="import_json">
+                        <input type="hidden" name="json_data" id="input-final-json">
+                        
+                        <div class="form-group">
+                            <textarea id="input-json-raw" class="form-control" rows="12" style="font-family: monospace; font-size: 12px; background: #1e1e1e; color: #d4d4d4;" placeholder='[\n  {\n    "categoria": "Saludos",\n    "palabras_clave": ["hola", "buenos dias"],\n    "respuestas": ["¡Hola vecino!"],\n    "acciones": [],\n    "estado": 1,\n    "orden": 10\n  }\n]'></textarea>
+                            <small class="text-muted d-block mt-1">Pega aquí el arreglo JSON generado por IA.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-radio">
+                              <input type="radio" id="modeAppend" name="import_mode" class="custom-control-input" value="append" checked>
+                              <label class="custom-control-label" for="modeAppend">Añadir sin borrar (Sumar a las actuales)</label>
+                            </div>
+                            <div class="custom-control custom-radio mt-1">
+                              <input type="radio" id="modeReplace" name="import_mode" class="custom-control-input" value="replace">
+                              <label class="custom-control-label" for="modeReplace" style="color: #dc3545; font-weight: bold;">Reemplazar todas (Borrará las actuales)</label>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn btn-outline-info btn-block" onclick="previewImport()">🔍 Previsualizar y Validar</button>
+                        
+                        <div id="preview-container" class="mt-3" style="display:none;">
+                            <div id="preview-errors" class="alert alert-danger" style="display:none; font-size:12px; padding: 10px;"></div>
+                            <div id="preview-success" class="alert alert-success" style="display:none; font-size:13px; padding: 10px;"></div>
+                            <button type="submit" id="btn-confirm-import" class="btn btn-ft btn-block" style="display:none;">✅ Confirmar Importación</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -370,9 +442,76 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('btn-cancelar').style.display = "none";
     }
 
+    function switchTab(tab) {
+        document.getElementById('body-manual').style.display = tab === 'manual' ? 'block' : 'none';
+        document.getElementById('body-import').style.display = tab === 'import' ? 'block' : 'none';
+        
+        const btnManual = document.getElementById('tab-manual');
+        const btnImport = document.getElementById('tab-import');
+        
+        if (tab === 'manual') {
+            btnManual.classList.add('active'); 
+            btnImport.classList.remove('active');
+            document.getElementById('preview-container').style.display = 'none';
+        } else {
+            btnImport.classList.add('active'); 
+            btnManual.classList.remove('active');
+        }
+    }
+
+    function previewImport() {
+        const raw = document.getElementById('input-json-raw').value.trim();
+        const errDiv = document.getElementById('preview-errors');
+        const sucDiv = document.getElementById('preview-success');
+        const btnConfirm = document.getElementById('btn-confirm-import');
+        
+        errDiv.style.display = 'none'; sucDiv.style.display = 'none'; btnConfirm.style.display = 'none';
+        
+        if(!raw) { errDiv.innerHTML = "El JSON está vacío."; errDiv.style.display = 'block'; return; }
+        
+        let parsed;
+        try { parsed = JSON.parse(raw); } 
+        catch(e) { errDiv.innerHTML = "Error de sintaxis JSON: " + e.message; errDiv.style.display = 'block'; return; }
+        
+        if(!Array.isArray(parsed)) { errDiv.innerHTML = "El JSON debe ser un arreglo [ ... ]"; errDiv.style.display = 'block'; return; }
+        
+        const allowedActions = ['ir_a_obras', 'ir_a_candidatos', 'ir_a_propuestas', 'ir_a_sumate', 'ir_a_contacto'];
+        let errors = [];
+        let validRules = [];
+        
+        parsed.forEach((rule, idx) => {
+            let ruleName = rule.categoria || `Regla #${idx + 1}`;
+            if(!rule.categoria) errors.push(`[Regla #${idx + 1}]: Falta 'categoria'.`);
+            if(!rule.palabras_clave || !Array.isArray(rule.palabras_clave)) errors.push(`[${ruleName}]: 'palabras_clave' debe ser un arreglo de textos.`);
+            if(!rule.respuestas || !Array.isArray(rule.respuestas) || rule.respuestas.length === 0) errors.push(`[${ruleName}]: 'respuestas' debe ser un arreglo con al menos un texto.`);
+            
+            if(rule.acciones && Array.isArray(rule.acciones)) {
+                rule.acciones.forEach((acc, aIdx) => {
+                    if(!acc.label || !acc.type) errors.push(`[${ruleName}] Acción #${aIdx + 1}: Faltan 'label' o 'type'.`);
+                    else if(!allowedActions.includes(acc.type)) errors.push(`[${ruleName}] Acción #${aIdx + 1}: Type '${acc.type}' no permitido.`);
+                });
+            }
+            
+            if(errors.length === 0) {
+                validRules.push({ categoria: rule.categoria, palabras_clave: rule.palabras_clave.join(', '), respuestas: rule.respuestas, acciones: rule.acciones || [], estado: (rule.estado !== undefined) ? (rule.estado ? 1 : 0) : 1, orden: (rule.orden !== undefined) ? parseInt(rule.orden) : 10 });
+            }
+        });
+        
+        if(errors.length > 0) {
+            errDiv.innerHTML = "<strong>Errores encontrados:</strong><br>" + errors.join("<br>");
+            errDiv.style.display = 'block';
+        } else {
+            document.getElementById('input-final-json').value = JSON.stringify(validRules);
+            sucDiv.innerHTML = `<strong>JSON Válido.</strong><br>Se importarán ${validRules.length} reglas listas para usar.`;
+            sucDiv.style.display = 'block'; btnConfirm.style.display = 'block';
+        }
+    }
+
     function editRow(id) {
         const dataSpan = document.getElementById('data-' + id);
         if(!dataSpan) return;
+        
+        switchTab('manual');
         
         document.getElementById('form-title').innerText = "Editar Respuesta #" + id;
         document.getElementById('input-id').value = id;
