@@ -71,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="agregar_obra.php">➕ Agregar Obra</a>
     <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
     <a href="segmentos.php">🗂️ Segmentos</a>
+    <a href="cronologia.php">⏳ Cronología</a>
+    <a href="ia_respuestas.php">🧠 Cerebro IA</a>
     <?php if (is_admin()): ?>
     <a href="usuarios.php" class="active">👤 Usuarios</a>
     <a href="historial.php">🕒 Historial</a>

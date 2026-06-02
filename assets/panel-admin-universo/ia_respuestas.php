@@ -136,20 +136,37 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .status-badge.inactive { background-color: #dc3545; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; }
         .response-row, .action-row { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; border: 1px solid #dee2e6; }
         .remove-row-btn { position: absolute; top: 10px; right: 10px; cursor: pointer; color: #dc3545; font-weight: bold; border: none; background: none; }
+        
+        /* Estilos Header General */
+        .app-header { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #020617; border-bottom: 1px solid #111827; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 2000; font-family: system-ui, sans-serif; }
+        .app-header nav a { color: #9ca3af; margin-right: 16px; text-decoration: none; font-size: 14px; }
+        .app-header nav a.active { color: #ffffff; font-weight: 600; }
+        .app-header nav a:hover { color: #e5e7eb; }
+        .app-header .user { font-size: 13px; color: #9ca3af; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-ft mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="#">🧠 Cerebro Luchito (Capa 1)</a>
-        <div class="ml-auto">
-            <a href="index.php" class="btn btn-sm btn-light">Volver al Panel</a>
-        </div>
-    </div>
-</nav>
+<header class="app-header">
+  <nav>
+    <a href="index.php">📷 Fotos</a>
+    <a href="agregar_obra.php">➕ Agregar Obra</a>
+    <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
+    <a href="segmentos.php">🗂️ Segmentos</a>
+    <a href="cronologia.php">⏳ Cronología</a>
+    <a href="ia_respuestas.php" class="active">🧠 Cerebro IA</a>
+    <?php if (is_admin()): ?>
+    <a href="usuarios.php">👤 Usuarios</a>
+    <a href="historial.php">🕒 Historial</a>
+    <a href="ver_accesos.php">🕵️ Accesos IP</a>
+    <?php endif; ?>
+  </nav>
+  <div class="user">
+    <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php" style="color:#9ca3af;">Salir</a>
+  </div>
+</header>
 
-<div class="container">
+<div class="container" style="margin-top: 80px;">
     <?php if ($mensaje): ?>
         <div class="alert alert-success"><?= htmlspecialchars($mensaje) ?></div>
     <?php endif; ?>

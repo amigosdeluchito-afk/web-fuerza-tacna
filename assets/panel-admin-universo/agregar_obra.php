@@ -101,6 +101,8 @@ if (isset($_GET['success'])) {
         <a href="agregar_obra.php" class="active">➕ Agregar Obra</a>
         <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
         <a href="segmentos.php">🗂️ Segmentos</a>
+        <a href="cronologia.php">⏳ Cronología</a>
+        <a href="ia_respuestas.php">🧠 Cerebro IA</a>
         <?php if (is_admin()): ?>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
