@@ -322,7 +322,7 @@ sort($all_cats);
   </div>
 </header>
 
-<div class="container" style="margin-top: 80px;">
+<div class="container-fluid px-4" style="margin-top: 80px;">
     <?php if ($mensaje): ?>
         <div class="alert alert-success"><?= htmlspecialchars($mensaje) ?></div>
     <?php endif; ?>
@@ -354,7 +354,7 @@ sort($all_cats);
 
     <div class="row">
         <!-- Columna Formulario -->
-        <div class="col-md-4 mb-4">
+        <div class="col-lg-5 col-xl-5 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header d-flex p-0" id="form-tabs-header">
                     <button type="button" class="btn flex-fill tab-btn active" id="tab-manual" onclick="switchTab('manual')">✍️ Manual</button>
@@ -547,7 +547,7 @@ sort($all_cats);
 
                         <div class="row">
                             <!-- Columna Izquierda: Personalidad -->
-                            <div class="col-md-7 border-right">
+                            <div class="col-xl-7 col-lg-12 mb-4 mb-xl-0 pr-xl-4">
                                 <h6 class="font-weight-bold mb-3 text-secondary">🧠 Personalidad y Mensajes</h6>
                                 
                                 <div class="form-group">
@@ -564,7 +564,7 @@ sort($all_cats);
                             </div>
 
                             <!-- Columna Derecha: Parámetros Técnicos -->
-                            <div class="col-md-5 pl-4">
+                            <div class="col-xl-5 col-lg-12 pl-xl-4">
                                 <h6 class="font-weight-bold mb-3 text-secondary">⚙️ Parámetros Técnicos</h6>
                                 
                                 <div class="form-group">
@@ -629,7 +629,7 @@ sort($all_cats);
         </div>
 
         <!-- Columna Listado -->
-        <div class="col-md-8">
+        <div class="col-lg-7 col-xl-7">
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <span>Reglas Actuales</span>
