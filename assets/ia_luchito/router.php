@@ -22,7 +22,54 @@ if (mb_strlen($mensaje) > 150) {
         'ok' => true,
         'texto' => '¡Epa vecino! Me escribiste un testamento. Mándame mensajes un poquito más cortos para leerte más rápido, que con mis lentes me demoro. 👓',
         'acciones' => [],
-        'origen' => 'simulador_limite'
+        'origen' => 'escudo_longitud',
+        'categoria_detectada' => 'Bloqueo',
+        'permitir_ia' => false,
+        'motivo_bloqueo' => 'MENSAJE_MUY_LARGO'
+    ]);
+    exit;
+}
+
+// --- ESCUDOS CRÍTICOS DE PRIVACIDAD Y SEGURIDAD ---
+
+// DNI o Teléfonos
+if (preg_match('/[0-9]{8,}/', $mensaje)) {
+    echo json_encode([
+        'ok' => true,
+        'texto' => 'Por tu privacidad vecino, prefiero no recibir números de teléfono ni documentos personales. ¿Te ayudo con alguna obra?',
+        'acciones' => [],
+        'origen' => 'escudo_seguridad',
+        'categoria_detectada' => 'Seguridad',
+        'permitir_ia' => false,
+        'motivo_bloqueo' => 'DATOS_SENSIBLES'
+    ]);
+    exit;
+}
+
+// Correos Electrónicos
+if (preg_match('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $mensaje)) {
+    echo json_encode([
+        'ok' => true,
+        'texto' => 'Vecino, no es necesario que me dejes tu correo por aquí. Si quieres unirte al equipo, ve a la sección de Contacto.',
+        'acciones' => [],
+        'origen' => 'escudo_seguridad',
+        'categoria_detectada' => 'Seguridad',
+        'permitir_ia' => false,
+        'motivo_bloqueo' => 'CORREO_DETECTADO'
+    ]);
+    exit;
+}
+
+// URLs o Enlaces
+if (preg_match('/(https?:\/\/|www\.|\.(com|pe|net|org|info|gob)\b)/i', $mensaje)) {
+    echo json_encode([
+        'ok' => true,
+        'texto' => 'Con estos lentes no puedo abrir enlaces de internet, vecino. Mejor cuéntame qué buscabas.',
+        'acciones' => [],
+        'origen' => 'escudo_seguridad',
+        'categoria_detectada' => 'Seguridad',
+        'permitir_ia' => false,
+        'motivo_bloqueo' => 'URL_DETECTADA'
     ]);
     exit;
 }
