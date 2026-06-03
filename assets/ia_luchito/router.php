@@ -197,6 +197,15 @@ if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instru
     if (preg_match('/(.)\1{7,}/', $normalizada)) $spam_extremo = true;
 }
 
+// --- MODO SIMULADOR IA (ETAPA 5C) ---
+if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuera_tema') {
+    $permitir_ia = true;
+    $categoria_detectada = 'Consulta IA';
+    $origen_final = 'simulador_ia';
+    $texto_final = '[SIMULADOR IA] Recibí tu consulta y ya estoy usando el Prompt Maestro cargado desde el panel. En la siguiente etapa esta respuesta vendrá desde OpenAI.';
+    $acciones_final = [];
+}
+
 // --- REGISTRO DE PREGUNTAS HUÉRFANAS ---
 // Crear tabla si no existe (Paso 1)
 $db->exec("CREATE TABLE IF NOT EXISTS panel_preguntas_huerfanas (
