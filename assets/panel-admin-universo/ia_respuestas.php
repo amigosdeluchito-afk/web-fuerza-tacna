@@ -252,6 +252,13 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmtH = $db->query("SELECT * FROM panel_preguntas_huerfanas WHERE estado = 'pendiente' ORDER BY repeticiones DESC, fecha DESC");
 $huerfanas_list = $stmtH->fetchAll(PDO::FETCH_ASSOC);
 
+// Obtener Auditoría IA (Últimos 300 registros)
+$auditoria_list = [];
+try {
+    $stmtAud = $db->query("SELECT * FROM panel_ia_auditoria ORDER BY fecha DESC LIMIT 300");
+    if ($stmtAud) $auditoria_list = $stmtAud->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {}
+
 // Obtener Configuración de IA
 $stmtC = $db->query("SELECT clave, valor, fecha_actualizacion FROM panel_configuracion");
 $config_rows = $stmtC->fetchAll(PDO::FETCH_ASSOC);
@@ -389,6 +396,7 @@ sort($all_cats);
                     <button type="button" class="btn flex-fill tab-btn" id="tab-test" onclick="switchTab('test')">🧪 Probar</button>
                     <button type="button" class="btn flex-fill tab-btn" id="tab-huerfanas" onclick="switchTab('huerfanas')">❓ Huérfanas <span class="badge badge-light ml-1"><?= count($huerfanas_list) ?></span></button>
                     <button type="button" class="btn flex-fill tab-btn" id="tab-prompt" onclick="switchTab('prompt')">🤖 Prompt IA</button>
+                    <button type="button" class="btn flex-fill tab-btn" id="tab-auditoria" onclick="switchTab('auditoria')">📊 Auditoría</button>
                 </div>
                 <div class="card-body" id="body-manual">
                     <h6 class="mb-3 font-weight-bold" id="form-title" style="color:#801039;">Nueva Respuesta</h6>
@@ -652,6 +660,67 @@ sort($all_cats);
                     </form>
                     <form method="POST" id="restore-form" style="display:none;"><input type="hidden" name="action" value="restore_prompt"></form>
                 </div>
+
+                <!-- TAB DE AUDITORÍA -->
+                <div class="card-body" id="body-auditoria" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-0 font-weight-bold" style="color:#801039;">Auditoría y Consumo de IA</h6>
+                            <p style="font-size: 12px; color: #6c757d; margin:0;">Registro en tiempo real de consultas, límites y errores.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive" style="max-height: 520px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
+                        <table class="table table-sm table-hover mb-0" style="font-size: 12px;">
+                            <thead class="thead-light" style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>IP (Hash)</th>
+                                    <th>Interacción (Pregunta / Respuesta)</th>
+                                    <th class="text-center">Tokens</th>
+                                    <th class="text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if(empty($auditoria_list)): ?>
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">No hay registros de auditoría aún.</td></tr>
+                                <?php else: ?>
+                                    <?php foreach($auditoria_list as $a): ?>
+                                    <tr>
+                                        <td class="align-middle" style="white-space: nowrap;"><?= date('d/m H:i', strtotime($a['fecha'])) ?></td>
+                                        <td class="align-middle" title="<?= htmlspecialchars($a['ip_hash']) ?>"><span class="badge badge-light border"><?= substr($a['ip_hash'], 0, 8) ?></span></td>
+                                        <td>
+                                            <strong style="color: #020617;">U:</strong> <?= htmlspecialchars($a['pregunta']) ?><br>
+                                            <span style="color: #801039;"><strong>IA:</strong> <?= htmlspecialchars(mb_strimwidth($a['respuesta'], 0, 80, '...')) ?></span>
+                                            <?php if(!empty($a['motivo_error'])): ?>
+                                                <br><small style="color:#dc3545;"><strong>Error:</strong> <?= htmlspecialchars($a['motivo_error']) ?></small>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <?php if($a['tokens_input'] > 0 || $a['tokens_output'] > 0): ?>
+                                                <span class="badge badge-info" title="Input: <?= $a['tokens_input'] ?> | Output: <?= $a['tokens_output'] ?>"><?= $a['tokens_input'] + $a['tokens_output'] ?></span>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <?php
+                                            $badgeClass = 'badge-secondary';
+                                            if ($a['estado'] === 'exito_openai') $badgeClass = 'badge-success';
+                                            elseif ($a['estado'] === 'exito_simulador') $badgeClass = 'badge-primary';
+                                            elseif (strpos($a['estado'], 'error') !== false) $badgeClass = 'badge-danger';
+                                            elseif (strpos($a['estado'], 'limite') !== false) $badgeClass = 'badge-warning';
+                                            ?>
+                                            <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($a['estado']) ?></span>
+                                            <br><small class="text-muted"><?= htmlspecialchars($a['modelo']) ?></small>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -842,14 +911,16 @@ sort($all_cats);
         document.getElementById('body-test').style.display = tab === 'test' ? 'flex' : 'none';
         document.getElementById('body-huerfanas').style.display = tab === 'huerfanas' ? 'block' : 'none';
         document.getElementById('body-prompt').style.display = tab === 'prompt' ? 'block' : 'none';
+        document.getElementById('body-auditoria').style.display = tab === 'auditoria' ? 'block' : 'none';
         
         const btnManual = document.getElementById('tab-manual');
         const btnImport = document.getElementById('tab-import');
         const btnTest = document.getElementById('tab-test');
         const btnHuerfanas = document.getElementById('tab-huerfanas');
         const btnPrompt = document.getElementById('tab-prompt');
+        const btnAuditoria = document.getElementById('tab-auditoria');
         
-        btnManual.classList.remove('active'); btnImport.classList.remove('active'); btnTest.classList.remove('active'); btnHuerfanas.classList.remove('active'); btnPrompt.classList.remove('active');
+        btnManual.classList.remove('active'); btnImport.classList.remove('active'); btnTest.classList.remove('active'); btnHuerfanas.classList.remove('active'); btnPrompt.classList.remove('active'); btnAuditoria.classList.remove('active');
 
         if (tab === 'manual') {
             btnManual.classList.add('active');
@@ -860,6 +931,8 @@ sort($all_cats);
             btnHuerfanas.classList.add('active');
         } else if (tab === 'prompt') {
             btnPrompt.classList.add('active');
+        } else if (tab === 'auditoria') {
+            btnAuditoria.classList.add('active');
         } else {
             btnTest.classList.add('active');
             document.getElementById('test-chat-box').scrollTop = document.getElementById('test-chat-box').scrollHeight;
