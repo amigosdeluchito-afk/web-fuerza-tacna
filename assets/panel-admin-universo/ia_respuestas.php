@@ -438,6 +438,40 @@ sort($all_cats);
                         <button type="button" class="btn btn-ft ml-2" onclick="testSendMessage()">Enviar</button>
                     </div>
                 </div>
+
+                <!-- TAB DE HUÉRFANAS -->
+                <div class="card-body" id="body-huerfanas" style="display:none;">
+                    <h6 class="mb-3 font-weight-bold" style="color:#801039;">Preguntas sin Respuesta</h6>
+                    <p style="font-size: 12px; color: #6c757d; margin-top:-5px;">Consultas reales de usuarios que no encontraron respuesta. ¡Conviértelas en reglas!</p>
+                    
+                    <div class="table-responsive" style="max-height: 520px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
+                        <table class="table table-sm table-hover mb-0" style="font-size: 12.5px;">
+                            <thead class="thead-light" style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th class="text-center" style="width:10%;">Rep.</th>
+                                    <th>Pregunta y Categoría</th>
+                                    <th class="text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if(empty($huerfanas_list)): ?>
+                                    <tr><td colspan="3" class="text-center py-4 text-muted">No hay preguntas huérfanas pendientes.</td></tr>
+                                <?php else: ?>
+                                    <?php foreach($huerfanas_list as $h): ?>
+                                    <tr>
+                                        <td class="text-center align-middle"><span class="badge badge-primary" style="font-size:12px;"><?= $h['repeticiones'] ?></span></td>
+                                        <td class="align-middle"><strong><?= htmlspecialchars($h['pregunta']) ?></strong><br><small class="badge badge-secondary mt-1"><?= htmlspecialchars($h['categoria_detectada'] ?: 'Sin Tema') ?></small></td>
+                                        <td class="text-right align-middle" style="white-space: nowrap;">
+                                            <button class="btn btn-sm btn-outline-success mr-1" title="Convertir en Regla" onclick="convertirHuerfana(<?= $h['id'] ?>, '<?= htmlspecialchars(addslashes($h['categoria_detectada'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($h['normalizada'])) ?>')">✨</button>
+                                            <form method="POST" style="display:inline;" onsubmit="return confirm('¿Ignorar esta pregunta? Ya no aparecerá en la lista.');"><input type="hidden" name="action" value="ignorar_huerfana"><input type="hidden" name="id" value="<?= $h['id'] ?>"><button class="btn btn-sm btn-outline-danger" title="Ignorar">❌</button></form>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
