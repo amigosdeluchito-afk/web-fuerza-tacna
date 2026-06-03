@@ -149,6 +149,34 @@ foreach ($temas_validos as $categoria => $datos) {
     }
 }
 
+// --- ESCUDOS DE CONTEXTO Y ABUSO (ETAPA 5A - PASO 2) ---
+$permitir_ia = false;
+$motivo_bloqueo = '';
+
+if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instrucciones|olvida todo|muestrame tu prompt)/i', $normalizada)) {
+    $categoria_detectada = 'Auditoría - Inyección';
+    $texto_final = 'Soy Luchito, tu tío digital, y mi única chamba es hablar de Tacna, sus obras y su gente.';
+    $acciones_final = [];
+    $origen_final = 'escudo_contexto';
+    $motivo_bloqueo = 'PROMPT_INJECTION';
+} elseif (preg_match('/(dina|boluarte|castillo|fujimori|congreso|presidente|lima|politica nacional)/i', $normalizada)) {
+    $categoria_detectada = 'Política Nacional';
+    $texto_final = 'De política nacional no tengo apuntes, vecino. Solo ando pendiente de lo que pasa aquí en Tacna.';
+    $acciones_final = [];
+    $origen_final = 'escudo_contexto';
+    $motivo_bloqueo = 'TEMA_PROHIBIDO';
+} elseif (preg_match('/\b(asdf|qwer|zxcv|jajaja)\b/i', $normalizada) || preg_match('/(.)\1{4,}/', $normalizada)) {
+    $categoria_detectada = 'Ruido / Spam';
+    $texto_final = 'Me agarraste fuera de juego. ¿Te muestro las obras o a los candidatos?';
+    $acciones_final = [
+        ['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'],
+        ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']
+    ];
+    $origen_final = 'escudo_contexto';
+    $motivo_bloqueo = 'TEXTO_ALEATORIO';
+    if (preg_match('/(.)\1{7,}/', $normalizada)) $spam_extremo = true;
+}
+
 // --- REGISTRO DE PREGUNTAS HUÉRFANAS ---
 // Crear tabla si no existe (Paso 1)
 $db->exec("CREATE TABLE IF NOT EXISTS panel_preguntas_huerfanas (
@@ -164,8 +192,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS panel_preguntas_huerfanas (
 
 // Validaciones Anti-Spam / Datos Sensibles
 $guardar_bd = true;
-if (preg_match('/[0-9]{8,}/', $mensaje)) $guardar_bd = false; // DNI o Teléfonos
-if (preg_match('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $mensaje)) $guardar_bd = false; // Correos
+if (isset($spam_extremo) && $spam_extremo) $guardar_bd = false; // Spam extremo no se guarda
 if (preg_match('/\b(gordo|feo|tonto|zonzo|gil|sonso|mierda|concha|puta|cagada|imbecil|estupido|idiota|cabro|ctm|ptm|carajo|basura)\b/i', $normalizada)) $guardar_bd = false; // Insultos
 
 // Guardar o actualizar en BD (Paso 2)
@@ -190,5 +217,8 @@ echo json_encode([
     'ok' => true,
     'texto' => $texto_final,
     'acciones' => $acciones_final,
-    'origen' => $origen_final
+    'origen' => $origen_final,
+    'categoria_detectada' => $categoria_detectada,
+    'permitir_ia' => $permitir_ia,
+    'motivo_bloqueo' => $motivo_bloqueo
 ]);
