@@ -26,7 +26,7 @@ function initChatIA() {
         return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     };
 
-    const quickResponses = [
+    let quickResponses = [
         {
             pattern: /^(hola|holas|buenos dias|buenas tardes|buenas noches|que tal|q tal|saludos|habla)/i,
             responses: [
@@ -148,6 +148,33 @@ function initChatIA() {
             ]
         }
     ];
+
+    // CARGA DINÁMICA: Intentar traer las respuestas desde el JSON
+    const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
+    const jsonUrl = basePath + 'assets/ia_luchito/cache/quick_responses.json';
+    const fetchUrl = jsonUrl + '?v=' + new Date().getTime(); // Evitar caché antigua
+
+    fetch(fetchUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('El archivo JSON no se pudo cargar.');
+            return response.json();
+        })
+        .then(data => {
+            // Si el JSON trae datos válidos, sobrescribimos quickResponses
+            if (Array.isArray(data) && data.length > 0) {
+                quickResponses = data.map(item => ({
+                    categoria: item.categoria,
+                    pattern: new RegExp(item.pattern || item.pattern_str, 'i'),
+                    responses: item.responses || [],
+                    actions: item.actions || []
+                }));
+                console.log("Cerebro JSON cargado exitosamente.");
+            }
+        })
+        .catch(error => {
+            // Si falla, no hacemos nada y Luchito seguirá usando las respuestas originales del código
+            console.warn('Cerebro Local (JSON) inactivo. Usando fallback del código:', error);
+        });
 
     const navigateTo = (actionType) => {
         const routes = {
