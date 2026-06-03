@@ -519,31 +519,106 @@ sort($all_cats);
                     </div>
                 </div>
 
-                <!-- TAB DE PROMPT MAESTRO -->
+                <!-- TAB DE PROMPT MAESTRO Y CONFIGURACIÓN -->
                 <div class="card-body" id="body-prompt" style="display:none;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h6 class="mb-0 font-weight-bold" style="color:#801039;">Prompt Maestro de Luchito</h6>
-                            <p style="font-size: 12px; color: #6c757d; margin:0;">Instrucciones base que definen la personalidad de la IA.</p>
-                        </div>
-                        <div class="custom-control custom-switch" style="transform: scale(1.2); margin-right: 15px;">
-                            <input type="checkbox" class="custom-control-input" id="switchIA" form="prompt-form" name="ia_activa" <?= $config_ia['ia_activa'] === '1' ? 'checked' : '' ?>>
-                            <label class="custom-control-label font-weight-bold" for="switchIA" style="cursor: pointer; color: <?= $config_ia['ia_activa'] === '1' ? '#28a745' : '#dc3545' ?>;" id="labelSwitchIA">
-                                <?= $config_ia['ia_activa'] === '1' ? 'IA ACTIVADA' : 'IA APAGADA' ?>
-                            </label>
-                        </div>
-                    </div>
-            
                     <form method="POST" id="prompt-form">
                         <input type="hidden" name="action" value="save_prompt">
-                        <textarea name="prompt_maestro" id="promptMaestroArea" class="form-control" rows="18" style="font-family: monospace; font-size: 12.5px; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; line-height: 1.5; resize: vertical;" required maxlength="100000"><?= htmlspecialchars($config_ia['ia_prompt_maestro']) ?></textarea>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
-                                <small class="text-muted d-block">Actualizado: <?= date('d/m/Y H:i', strtotime($config_ia['fecha_actualizacion'] ?: 'now')) ?></small>
-                                <small class="text-muted d-block mt-1" id="promptCounter">0 / 100000 caracteres</small>
+                                <h6 class="mb-0 font-weight-bold" style="color:#801039;">Cerebro de Luchito y Configuración API</h6>
+                                <p style="font-size: 12px; color: #6c757d; margin:0;">Configura la personalidad, parámetros técnicos y límites de consumo.</p>
                             </div>
+                            <div class="d-flex align-items-center">
+                                <?php if ($api_key_configured): ?>
+                                    <span class="badge badge-success mr-4 p-2" style="font-size:12px;">✅ API Key Servidor: OK</span>
+                                <?php else: ?>
+                                    <span class="badge badge-danger mr-4 p-2" style="font-size:12px;">❌ API Key Faltante en config.php</span>
+                                <?php endif; ?>
+
+                                <div class="custom-control custom-switch" style="transform: scale(1.2);">
+                                    <input type="checkbox" class="custom-control-input" id="switchIA" name="ia_activa" <?= $config_ia['ia_activa'] === '1' ? 'checked' : '' ?>>
+                                    <label class="custom-control-label font-weight-bold" for="switchIA" style="cursor: pointer; color: <?= $config_ia['ia_activa'] === '1' ? '#28a745' : '#dc3545' ?>;" id="labelSwitchIA">
+                                        <?= $config_ia['ia_activa'] === '1' ? 'IA ACTIVADA' : 'IA APAGADA' ?>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Columna Izquierda: Personalidad -->
+                            <div class="col-md-7 border-right">
+                                <h6 class="font-weight-bold mb-3 text-secondary">🧠 Personalidad y Mensajes</h6>
+                                
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Prompt Maestro</label>
+                                    <textarea name="prompt_maestro" id="promptMaestroArea" class="form-control" rows="12" style="font-family: monospace; font-size: 12.5px; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; line-height: 1.5; resize: vertical;" required maxlength="100000"><?= htmlspecialchars($config_ia['ia_prompt_maestro']) ?></textarea>
+                                    <small class="text-muted d-block mt-1 text-right" id="promptCounter">0 / 100000 caracteres</small>
+                                </div>
+
+                                <div class="form-group mt-4">
+                                    <label class="font-weight-bold">Mensaje Fallback (Si OpenAI falla)</label>
+                                    <textarea name="ia_mensaje_fallback_openai" class="form-control" rows="2" required><?= htmlspecialchars($config_ia['ia_mensaje_fallback_openai']) ?></textarea>
+                                    <small class="text-muted">Se mostrará si hay timeout, error de API Key o saldo insuficiente.</small>
+                                </div>
+                            </div>
+
+                            <!-- Columna Derecha: Parámetros Técnicos -->
+                            <div class="col-md-5 pl-4">
+                                <h6 class="font-weight-bold mb-3 text-secondary">⚙️ Parámetros Técnicos</h6>
+                                
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Modo de Ejecución</label>
+                                    <select name="ia_modo" class="form-control">
+                                        <option value="simulador" <?= $config_ia['ia_modo'] === 'simulador' ? 'selected' : '' ?>>🧪 Modo Simulador (Gratis - Sin cURL)</option>
+                                        <option value="produccion" <?= $config_ia['ia_modo'] === 'produccion' ? 'selected' : '' ?>>🚀 Modo Producción (Conectar OpenAI)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Modelo OpenAI</label>
+                                    <select name="ia_modelo" class="form-control">
+                                        <option value="gpt-4o-mini" <?= $config_ia['ia_modelo'] === 'gpt-4o-mini' ? 'selected' : '' ?>>gpt-4o-mini (Rápido y económico)</option>
+                                        <option value="gpt-4o" <?= $config_ia['ia_modelo'] === 'gpt-4o' ? 'selected' : '' ?>>gpt-4o (Mayor razonamiento, más caro)</option>
+                                        <option value="gpt-3.5-turbo" <?= $config_ia['ia_modelo'] === 'gpt-3.5-turbo' ? 'selected' : '' ?>>gpt-3.5-turbo (Legado)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="font-weight-bold">Temperatura</label>
+                                        <input type="number" step="0.1" min="0" max="1" name="ia_temperatura" class="form-control" value="<?= htmlspecialchars($config_ia['ia_temperatura']) ?>" required>
+                                        <small class="text-muted">0.0 a 1.0 (Rec. 0.7)</small>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="font-weight-bold">Max Tokens Salida</label>
+                                        <input type="number" step="10" min="10" max="1000" name="ia_max_tokens" class="form-control" value="<?= htmlspecialchars($config_ia['ia_max_tokens']) ?>" required>
+                                        <small class="text-muted">Límite de respuesta</small>
+                                    </div>
+                                </div>
+
+                                <h6 class="font-weight-bold mt-4 mb-3 text-secondary">🛡️ Límites Diarios y Costos</h6>
+                                
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="font-weight-bold">Límite Global</label>
+                                        <input type="number" name="ia_limite_global_diario" class="form-control" value="<?= htmlspecialchars($config_ia['ia_limite_global_diario']) ?>" required>
+                                        <small class="text-muted">Consultas de toda la web</small>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="font-weight-bold">Límite por IP</label>
+                                        <input type="number" name="ia_limite_ip_diario" class="form-control" value="<?= htmlspecialchars($config_ia['ia_limite_ip_diario']) ?>" required>
+                                        <small class="text-muted">Consultas por persona</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">Actualizado: <?= date('d/m/Y H:i', strtotime($config_ia['fecha_actualizacion'] ?: 'now')) ?></small>
                             <div>
-                                <button type="button" class="btn btn-outline-danger btn-sm mr-2" onclick="if(confirm('¿Seguro que deseas restaurar el prompt por defecto? Perderás tus cambios actuales.')) { document.getElementById('restore-form').submit(); }">🔄 Restaurar original</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm mr-2" onclick="if(confirm('¿Seguro que deseas restaurar el prompt por defecto? Perderás tus cambios actuales.')) { document.getElementById('restore-form').submit(); }">🔄 Restaurar prompt original</button>
                                 <button type="submit" class="btn btn-ft">💾 Guardar Configuración</button>
                             </div>
                         </div>
