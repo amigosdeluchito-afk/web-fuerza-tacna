@@ -6,6 +6,26 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../panel-admin-universo/config.php';
 $db = get_db_connection();
 
+// --- LECTURA DE CONFIGURACIÓN IA (ETAPA 5B - PASO 2) ---
+$prompt_fallback = "Eres Luchito, el asistente virtual y mascota oficial de Fuerza Tacna. Eres un osito andino amigable, un 'tío digital' con mucho cariño por Tacna. Respondes de forma coloquial, cercana y breve (máximo 2 o 3 oraciones). Nunca inventas información que no tienes. Si te preguntan sobre temas políticos nacionales (Presidentes, Congreso, Lima), respondes que tu labor es exclusivamente sobre Tacna y sus obras.";
+$ia_activa = 0;
+$prompt_maestro = $prompt_fallback;
+$debug_prompt_cargado = false;
+
+try {
+    $stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('ia_prompt_maestro', 'ia_activa')");
+    $configs = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+    if ($configs) {
+        foreach ($configs as $c) {
+            if ($c['clave'] === 'ia_activa') $ia_activa = (int)$c['valor'];
+            if ($c['clave'] === 'ia_prompt_maestro' && trim($c['valor']) !== '') $prompt_maestro = $c['valor'];
+        }
+        $debug_prompt_cargado = true;
+    }
+} catch (Exception $e) {
+    // Fallback silencioso (ia_activa = 0 y usa prompt_fallback)
+}
+
 // 1. Capturar el paquete JSON enviado desde Javascript
 $input = json_decode(file_get_contents('php://input'), true);
 $mensaje = trim($input['mensaje'] ?? '');
