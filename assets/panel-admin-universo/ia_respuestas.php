@@ -354,7 +354,7 @@ sort($all_cats);
 
     <div class="row">
         <!-- Columna Formulario -->
-        <div class="col-lg-5 col-xl-5 mb-4">
+        <div class="col-lg-6 col-xl-7 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header d-flex p-0" id="form-tabs-header">
                     <button type="button" class="btn flex-fill tab-btn active" id="tab-manual" onclick="switchTab('manual')">✍️ Manual</button>
@@ -629,7 +629,7 @@ sort($all_cats);
         </div>
 
         <!-- Columna Listado -->
-        <div class="col-lg-7 col-xl-7">
+        <div class="col-lg-6 col-xl-5">
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <span>Reglas Actuales</span>
@@ -640,11 +640,11 @@ sort($all_cats);
                         <table class="table table-hover mb-0">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Orden</th>
-                                    <th>Categoría / Palabras</th>
-                                    <th>Respuestas</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th style="width: 8%;">Orden</th>
+                                    <th style="width: 25%;">Categoría / Palabras</th>
+                                    <th style="width: 32%;">Respuestas</th>
+                                    <th style="width: 10%;">Estado</th>
+                                    <th style="width: 25%;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
