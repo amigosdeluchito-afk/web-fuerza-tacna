@@ -15,14 +15,20 @@ $ia_limite_global_diario = 1000;
 $ia_limite_ip_diario = 10;
 $ia_mensaje_fallback_openai = "😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?";
 $debug_prompt_cargado = false;
+$ia_modelo = 'gpt-4o-mini';
+$ia_temperatura = 0.7;
+$ia_max_tokens = 150;
 
 try {
-    $stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('ia_prompt_maestro', 'ia_activa', 'ia_modo', 'ia_limite_global_diario', 'ia_limite_ip_diario', 'ia_mensaje_fallback_openai')");
+    $stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('ia_prompt_maestro', 'ia_activa', 'ia_modo', 'ia_modelo', 'ia_temperatura', 'ia_max_tokens', 'ia_limite_global_diario', 'ia_limite_ip_diario', 'ia_mensaje_fallback_openai')");
     $configs = $stmtC->fetchAll(PDO::FETCH_ASSOC);
     if ($configs) {
         foreach ($configs as $c) {
             if ($c['clave'] === 'ia_activa') $ia_activa = (int)$c['valor'];
             if ($c['clave'] === 'ia_modo') $ia_modo = $c['valor'];
+            if ($c['clave'] === 'ia_modelo') $ia_modelo = $c['valor'];
+            if ($c['clave'] === 'ia_temperatura') $ia_temperatura = (float)$c['valor'];
+            if ($c['clave'] === 'ia_max_tokens') $ia_max_tokens = (int)$c['valor'];
             if ($c['clave'] === 'ia_limite_global_diario') $ia_limite_global_diario = (int)$c['valor'];
             if ($c['clave'] === 'ia_limite_ip_diario') $ia_limite_ip_diario = (int)$c['valor'];
             if ($c['clave'] === 'ia_mensaje_fallback_openai' && trim($c['valor']) !== '') $ia_mensaje_fallback_openai = trim($c['valor']);
