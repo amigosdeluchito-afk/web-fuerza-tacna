@@ -661,13 +661,15 @@ sort($all_cats);
         document.getElementById('body-import').style.display = tab === 'import' ? 'block' : 'none';
         document.getElementById('body-test').style.display = tab === 'test' ? 'flex' : 'none';
         document.getElementById('body-huerfanas').style.display = tab === 'huerfanas' ? 'block' : 'none';
+        document.getElementById('body-prompt').style.display = tab === 'prompt' ? 'block' : 'none';
         
         const btnManual = document.getElementById('tab-manual');
         const btnImport = document.getElementById('tab-import');
         const btnTest = document.getElementById('tab-test');
         const btnHuerfanas = document.getElementById('tab-huerfanas');
+        const btnPrompt = document.getElementById('tab-prompt');
         
-        btnManual.classList.remove('active'); btnImport.classList.remove('active'); btnTest.classList.remove('active'); btnHuerfanas.classList.remove('active');
+        btnManual.classList.remove('active'); btnImport.classList.remove('active'); btnTest.classList.remove('active'); btnHuerfanas.classList.remove('active'); btnPrompt.classList.remove('active');
 
         if (tab === 'manual') {
             btnManual.classList.add('active');
@@ -676,6 +678,8 @@ sort($all_cats);
             btnImport.classList.add('active');
         } else if (tab === 'huerfanas') {
             btnHuerfanas.classList.add('active');
+        } else if (tab === 'prompt') {
+            btnPrompt.classList.add('active');
         } else {
             btnTest.classList.add('active');
             document.getElementById('test-chat-box').scrollTop = document.getElementById('test-chat-box').scrollHeight;
@@ -846,6 +850,18 @@ sort($all_cats);
         if (actions && actions.length > 0) { html += `<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">`; actions.forEach(act => { html += `<span style="background:rgba(128,16,57,0.1); color:#801039; border:1px solid #801039; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:bold;">${act.label} <small>(${act.type})</small></span>`; }); html += `</div>`; }
         div.innerHTML = html; box.appendChild(div); box.scrollTop = box.scrollHeight;
     }
+
+    // Animación visual del Switch de IA
+    document.getElementById('switchIA').addEventListener('change', function() {
+        const label = document.getElementById('labelSwitchIA');
+        if(this.checked) {
+            label.textContent = 'IA ACTIVADA';
+            label.style.color = '#28a745';
+        } else {
+            label.textContent = 'IA APAGADA';
+            label.style.color = '#dc3545';
+        }
+    });
 </script>
 </body>
 </html>
