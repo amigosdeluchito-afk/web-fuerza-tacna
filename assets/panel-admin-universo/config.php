@@ -50,6 +50,7 @@ const DB_NAME = 'tacnwddf_fuerza';
 //  SEGURIDAD IA (SALT PARA IPs)
 // =======================
 define('IA_HASH_SALT', 'FuerzaTacna_IA_SecretSalt_2024!@#');
+define('OPENAI_API_KEY', ''); // Dejar vacío en esta etapa. Reemplazar luego con 'sk-...'
 
 function get_db_connection() {
     try {

@@ -260,12 +260,27 @@ if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuer
     if (!$limite_alcanzado) {
         $permitir_ia = true;
         $categoria_detectada = 'Consulta IA';
-        $origen_final = 'simulador_ia';
-        $texto_final = "[SIMULADOR IA] Recibí tu consulta. Mi modo actual es: $ia_modo. Pronto conectaremos con OpenAI.";
         $acciones_final = [];
         
-        // Registrar éxito en el simulador
-        $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'exito_simulador')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
+        if ($ia_modo === 'simulador') {
+            $origen_final = 'simulador_ia';
+            $texto_final = "[SIMULADOR IA] Recibí tu consulta y ya estoy usando el Prompt Maestro cargado desde el panel. En la siguiente etapa esta respuesta vendrá desde OpenAI.";
+            $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'exito_simulador')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
+        } else {
+            // Modo Producción
+            require_once __DIR__ . '/openai_client.php';
+            $ia_result = llamar_openai_responses($ia_modelo, $prompt_maestro, $normalizada, $ia_temperatura, $ia_max_tokens);
+
+            if ($ia_result['ok']) {
+                $texto_final = $ia_result['texto'];
+                $origen_final = 'openai_responses';
+                $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, tokens_input, tokens_output, estado) VALUES (NOW(), ?, ?, ?, ?, ?, ?, 'exito_openai')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo, $ia_result['tokens_input'], $ia_result['tokens_output']]);
+            } else {
+                $texto_final = $ia_mensaje_fallback_openai;
+                $origen_final = 'openai_error';
+                $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado, motivo_error) VALUES (NOW(), ?, ?, ?, ?, 'error_openai', ?)")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo, $ia_result['error']]);
+            }
+        }
     }
 }
 
