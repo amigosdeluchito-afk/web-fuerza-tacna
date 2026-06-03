@@ -18,6 +18,18 @@ $db->exec("CREATE TABLE IF NOT EXISTS panel_ia_respuestas (
 // Forzar la conversión de la tabla antigua y sus columnas al formato que soporta emojis
 $db->exec("ALTER TABLE panel_ia_respuestas CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
+// Crear tabla de huérfanas si no se creó antes (Seguridad)
+$db->exec("CREATE TABLE IF NOT EXISTS panel_preguntas_huerfanas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pregunta TEXT NOT NULL,
+    normalizada VARCHAR(255) NOT NULL,
+    categoria_detectada VARCHAR(100) NULL,
+    fecha DATETIME NOT NULL,
+    repeticiones INT DEFAULT 1,
+    origen VARCHAR(50) DEFAULT 'router',
+    estado VARCHAR(50) DEFAULT 'pendiente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 // 2. Función para generar el JSON Público
 function regenerar_json_ia($db) {
     $stmt = $db->query("SELECT * FROM panel_ia_respuestas WHERE estado = 1 ORDER BY orden ASC, id ASC");
@@ -101,6 +113,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$categoria, $palabras, json_encode($respuestas), json_encode($acciones), $estado, $orden]);
                 $mensaje = "Nueva respuesta creada correctamente.";
             }
+            
+            // Marcar huérfana como convertida si venía de ahí
+            $huerfana_id = $_POST['huerfana_id'] ?? '';
+            if ($huerfana_id) {
+                $stmtH = $db->prepare("UPDATE panel_preguntas_huerfanas SET estado='convertida' WHERE id=?");
+                $stmtH->execute([$huerfana_id]);
+            }
             regenerar_json_ia($db);
         } else {
             $mensaje = "Error: Categoría, palabras clave y al menos una respuesta son obligatorios.";
@@ -113,6 +132,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$id]);
             regenerar_json_ia($db);
             $mensaje = "Respuesta eliminada.";
+        }
+    }
+    elseif ($action === 'ignorar_huerfana') {
+        $id = $_POST['id'] ?? '';
+        if ($id) {
+            $stmt = $db->prepare("UPDATE panel_preguntas_huerfanas SET estado='ignorada' WHERE id=?");
+            $stmt->execute([$id]);
+            $mensaje = "Pregunta huérfana ignorada correctamente.";
         }
     }
     elseif ($action === 'toggle') {
@@ -164,6 +191,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 4. Obtener listado para la tabla
 $stmt = $db->query("SELECT * FROM panel_ia_respuestas ORDER BY orden ASC, id DESC");
 $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener Huérfanas Pendientes
+$stmtH = $db->query("SELECT * FROM panel_preguntas_huerfanas WHERE estado = 'pendiente' ORDER BY repeticiones DESC, fecha DESC");
+$huerfanas_list = $stmtH->fetchAll(PDO::FETCH_ASSOC);
 
 // 5. Calcular Estadísticas y Extraer Categorías Dinámicas
 $total_reglas = count($respuestas_list);
@@ -284,12 +315,14 @@ sort($all_cats);
                     <button type="button" class="btn flex-fill tab-btn active" id="tab-manual" onclick="switchTab('manual')">✍️ Manual</button>
                     <button type="button" class="btn flex-fill tab-btn" id="tab-import" onclick="switchTab('import')">📦 Masivo</button>
                     <button type="button" class="btn flex-fill tab-btn" id="tab-test" onclick="switchTab('test')">🧪 Probar</button>
+                    <button type="button" class="btn flex-fill tab-btn" id="tab-huerfanas" onclick="switchTab('huerfanas')">❓ Huérfanas <span class="badge badge-light ml-1"><?= count($huerfanas_list) ?></span></button>
                 </div>
                 <div class="card-body" id="body-manual">
                     <h6 class="mb-3 font-weight-bold" id="form-title" style="color:#801039;">Nueva Respuesta</h6>
                     <form method="POST" id="ia-form">
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="id" id="input-id" value="">
+                        <input type="hidden" name="huerfana_id" id="input-huerfana-id" value="">
                         
                         <div class="form-group">
                             <label>Categoría</label>
@@ -575,6 +608,7 @@ sort($all_cats);
     function resetForm() {
         document.getElementById('form-title').innerText = "Nueva Respuesta";
         document.getElementById('input-id').value = "";
+        document.getElementById('input-huerfana-id').value = "";
         document.getElementById('input-categoria-select').value = "";
         checkNewCategory();
         document.getElementById('input-palabras').value = "";
@@ -592,20 +626,50 @@ sort($all_cats);
         document.getElementById('body-manual').style.display = tab === 'manual' ? 'block' : 'none';
         document.getElementById('body-import').style.display = tab === 'import' ? 'block' : 'none';
         document.getElementById('body-test').style.display = tab === 'test' ? 'flex' : 'none';
+        document.getElementById('body-huerfanas').style.display = tab === 'huerfanas' ? 'block' : 'none';
         
         const btnManual = document.getElementById('tab-manual');
         const btnImport = document.getElementById('tab-import');
         const btnTest = document.getElementById('tab-test');
+        const btnHuerfanas = document.getElementById('tab-huerfanas');
         
+        btnManual.classList.remove('active'); btnImport.classList.remove('active'); btnTest.classList.remove('active'); btnHuerfanas.classList.remove('active');
+
         if (tab === 'manual') {
-            btnManual.classList.add('active'); btnImport.classList.remove('active'); btnTest.classList.remove('active');
+            btnManual.classList.add('active');
             document.getElementById('preview-container').style.display = 'none';
         } else if (tab === 'import') {
-            btnImport.classList.add('active'); btnManual.classList.remove('active'); btnTest.classList.remove('active');
+            btnImport.classList.add('active');
+        } else if (tab === 'huerfanas') {
+            btnHuerfanas.classList.add('active');
         } else {
-            btnTest.classList.add('active'); btnManual.classList.remove('active'); btnImport.classList.remove('active');
+            btnTest.classList.add('active');
             document.getElementById('test-chat-box').scrollTop = document.getElementById('test-chat-box').scrollHeight;
         }
+    }
+
+    function convertirHuerfana(id, categoria, pregunta) {
+        switchTab('manual');
+        document.getElementById('form-title').innerText = "Convertir Huérfana en Regla";
+        document.getElementById('input-huerfana-id').value = id;
+        
+        const sel = document.getElementById('input-categoria-select');
+        let found = false;
+        for(let i=0; i<sel.options.length; i++) {
+            if(sel.options[i].value === categoria) { sel.selectedIndex = i; found = true; break; }
+        }
+        if(!found && categoria && categoria !== 'Fuera de Tema') {
+            sel.value = 'NEW';
+            document.getElementById('input-categoria-nueva').value = categoria;
+        } else if (!found) {
+            sel.value = '';
+        }
+        checkNewCategory();
+        
+        document.getElementById('input-palabras').value = pregunta;
+        document.getElementById('btn-cancelar').style.display = "block";
+        window.scrollTo(0, 0);
+        setTimeout(() => document.querySelector('textarea[name="respuestas[]"]').focus(), 100);
     }
 
     function previewImport() {
