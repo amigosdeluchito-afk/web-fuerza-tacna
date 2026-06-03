@@ -220,5 +220,7 @@ echo json_encode([
     'origen' => $origen_final,
     'categoria_detectada' => $categoria_detectada,
     'permitir_ia' => $permitir_ia,
-    'motivo_bloqueo' => $motivo_bloqueo
+    'motivo_bloqueo' => $motivo_bloqueo,
+    'debug_ia_activa' => $ia_activa,
+    'debug_prompt_cargado' => $debug_prompt_cargado
 ]);
