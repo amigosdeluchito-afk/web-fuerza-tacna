@@ -30,6 +30,20 @@ $db->exec("CREATE TABLE IF NOT EXISTS panel_preguntas_huerfanas (
     estado VARCHAR(50) DEFAULT 'pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+// Crear tabla de configuración global (Paso 5B-1)
+$db->exec("CREATE TABLE IF NOT EXISTS panel_configuracion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clave VARCHAR(100) NOT NULL UNIQUE,
+    valor TEXT NOT NULL,
+    fecha_actualizacion DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+$default_prompt = "Eres Luchito, el asistente virtual y mascota oficial de Fuerza Tacna. Eres un osito andino amigable, un 'tío digital' con mucho cariño por Tacna. Respondes de forma coloquial, cercana y breve (máximo 2 o 3 oraciones). Nunca inventas información que no tienes. Si te preguntan sobre temas políticos nacionales (Presidentes, Congreso, Lima), respondes que tu labor es exclusivamente sobre Tacna y sus obras.";
+
+$stmtConf = $db->prepare("INSERT IGNORE INTO panel_configuracion (clave, valor, fecha_actualizacion) VALUES (?, ?, NOW())");
+$stmtConf->execute(['ia_prompt_maestro', $default_prompt]);
+$stmtConf->execute(['ia_activa', '0']);
+
 // 2. Función para generar el JSON Público
 function regenerar_json_ia($db) {
     $stmt = $db->query("SELECT * FROM panel_ia_respuestas WHERE estado = 1 ORDER BY orden ASC, id ASC");
@@ -181,6 +195,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensaje = "Error al procesar el JSON en el servidor.";
         }
     }
+    elseif ($action === 'save_prompt') {
+        $prompt = $_POST['prompt_maestro'] ?? '';
+        $activa = isset($_POST['ia_activa']) ? '1' : '0';
+        if (trim($prompt) === '') {
+            $mensaje = "Error: El prompt no puede estar vacío.";
+        } else {
+            $stmt = $db->prepare("UPDATE panel_configuracion SET valor=?, fecha_actualizacion=NOW() WHERE clave=?");
+            $stmt->execute([$prompt, 'ia_prompt_maestro']);
+            $stmt->execute([$activa, 'ia_activa']);
+            $mensaje = "Prompt Maestro y configuración de IA guardados correctamente.";
+        }
+    }
+    elseif ($action === 'restore_prompt') {
+        $stmt = $db->prepare("UPDATE panel_configuracion SET valor=?, fecha_actualizacion=NOW() WHERE clave=?");
+        $stmt->execute([$default_prompt, 'ia_prompt_maestro']);
+        $mensaje = "Prompt Maestro restaurado al valor por defecto.";
+    }
     
     // Prevenir reenvío del formulario al actualizar la página (F5)
     $_SESSION['ia_mensaje'] = $mensaje;
@@ -195,6 +226,17 @@ $respuestas_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Obtener Huérfanas Pendientes
 $stmtH = $db->query("SELECT * FROM panel_preguntas_huerfanas WHERE estado = 'pendiente' ORDER BY repeticiones DESC, fecha DESC");
 $huerfanas_list = $stmtH->fetchAll(PDO::FETCH_ASSOC);
+
+// Obtener Configuración de IA
+$stmtC = $db->query("SELECT clave, valor, fecha_actualizacion FROM panel_configuracion");
+$config_rows = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+$config_ia = ['ia_prompt_maestro' => '', 'ia_activa' => '0', 'fecha_actualizacion' => ''];
+foreach ($config_rows as $row) {
+    $config_ia[$row['clave']] = $row['valor'];
+    if ($row['clave'] === 'ia_prompt_maestro') {
+        $config_ia['fecha_actualizacion'] = $row['fecha_actualizacion'];
+    }
+}
 
 // 5. Calcular Estadísticas y Extraer Categorías Dinámicas
 $total_reglas = count($respuestas_list);
@@ -316,6 +358,7 @@ sort($all_cats);
                     <button type="button" class="btn flex-fill tab-btn" id="tab-import" onclick="switchTab('import')">📦 Masivo</button>
                     <button type="button" class="btn flex-fill tab-btn" id="tab-test" onclick="switchTab('test')">🧪 Probar</button>
                     <button type="button" class="btn flex-fill tab-btn" id="tab-huerfanas" onclick="switchTab('huerfanas')">❓ Huérfanas <span class="badge badge-light ml-1"><?= count($huerfanas_list) ?></span></button>
+                    <button type="button" class="btn flex-fill tab-btn" id="tab-prompt" onclick="switchTab('prompt')">🤖 Prompt IA</button>
                 </div>
                 <div class="card-body" id="body-manual">
                     <h6 class="mb-3 font-weight-bold" id="form-title" style="color:#801039;">Nueva Respuesta</h6>
@@ -471,6 +514,35 @@ sort($all_cats);
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <!-- TAB DE PROMPT MAESTRO -->
+                <div class="card-body" id="body-prompt" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-0 font-weight-bold" style="color:#801039;">Prompt Maestro de Luchito</h6>
+                            <p style="font-size: 12px; color: #6c757d; margin:0;">Instrucciones base que definen la personalidad de la IA.</p>
+                        </div>
+                        <div class="custom-control custom-switch" style="transform: scale(1.2); margin-right: 15px;">
+                            <input type="checkbox" class="custom-control-input" id="switchIA" form="prompt-form" name="ia_activa" <?= $config_ia['ia_activa'] === '1' ? 'checked' : '' ?>>
+                            <label class="custom-control-label font-weight-bold" for="switchIA" style="cursor: pointer; color: <?= $config_ia['ia_activa'] === '1' ? '#28a745' : '#dc3545' ?>;" id="labelSwitchIA">
+                                <?= $config_ia['ia_activa'] === '1' ? 'IA ACTIVADA' : 'IA APAGADA' ?>
+                            </label>
+                        </div>
+                    </div>
+            
+                    <form method="POST" id="prompt-form">
+                        <input type="hidden" name="action" value="save_prompt">
+                        <textarea name="prompt_maestro" class="form-control" rows="18" style="font-family: monospace; font-size: 12.5px; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; line-height: 1.5; resize: vertical;" required><?= htmlspecialchars($config_ia['ia_prompt_maestro']) ?></textarea>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">Actualizado: <?= date('d/m/Y H:i', strtotime($config_ia['fecha_actualizacion'] ?: 'now')) ?></small>
+                            <div>
+                                <button type="button" class="btn btn-outline-danger btn-sm mr-2" onclick="if(confirm('¿Seguro que deseas restaurar el prompt por defecto? Perderás tus cambios actuales.')) { document.getElementById('restore-form').submit(); }">🔄 Restaurar original</button>
+                                <button type="submit" class="btn btn-ft">💾 Guardar Configuración</button>
+                            </div>
+                        </div>
+                    </form>
+                    <form method="POST" id="restore-form" style="display:none;"><input type="hidden" name="action" value="restore_prompt"></form>
                 </div>
             </div>
         </div>
