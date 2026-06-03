@@ -1,0 +1,91 @@
+[
+  {
+    "categoria": "Prueba Infiltrado",
+    "pattern": "^(por que eres un oso|porque eres un oso)",
+    "responses": [
+      "Soy un oso que lee JSON. ¡He cargado mis respuestas desde el archivo correctamente! 🐻"
+    ],
+    "actions": []
+  },
+  {
+    "categoria": "Saludos JSON",
+    "pattern": "^(hola|holas|buenos dias|buenas tardes|buenas noches|que tal)",
+    "responses": [
+      "¡Hola vecina! Estoy leyendo mis saludos directamente desde el archivo JSON."
+    ],
+    "actions": []
+  },
+  {
+    "categoria": "Ayuda",
+    "pattern_str": "que puedes hacer|que sabes hacer|ayuda|help|opciones|menu|que hago",
+    "responses": [
+      "Te la pongo fácil, vecino. Te puedo mostrar nuestras obras, presentarte a los candidatos o enseñarte el plan de trabajo. ¿Lo vemos?"
+    ],
+    "actions": [
+      { "label": "🏗️ Ver Obras", "type": "ir_a_obras" },
+      { "label": "👥 Candidatos", "type": "ir_a_candidatos" }
+    ],
+    "estado": 1,
+    "orden": 10
+  },
+  {
+    "categoria": "Obras",
+    "pattern_str": "obras|mapa|construccion|infraestructura",
+    "responses": [
+      "¡Al toque! Justo estaba dando una vuelta por el mapa de obras. ¿Te llevo?"
+    ],
+    "actions": [
+      { "label": "🗺️ Abrir Mapa de Obras", "type": "ir_a_obras" }
+    ],
+    "estado": 1,
+    "orden": 20
+  },
+  {
+    "categoria": "Candidatos",
+    "pattern_str": "candidatos|equipo|regidores|alcalde|patrick",
+    "responses": [
+      "Vamos viendo... ¡Aquí están en mis apuntes! Tenemos un equipazo. ¿Te acompaño a conocerlos?"
+    ],
+    "actions": [
+      { "label": "👥 Ver Candidatos", "type": "ir_a_candidatos" }
+    ],
+    "estado": 1,
+    "orden": 30
+  },
+  {
+    "categoria": "Propuestas",
+    "pattern_str": "propuestas|plan|seguridad|educacion|salud",
+    "responses": [
+      "Ese es mi tema favorito, vecino. Cero floro y puras propuestas reales. ¿Le damos una mirada?"
+    ],
+    "actions": [
+      { "label": "🚀 Ver Propuestas", "type": "ir_a_propuestas" }
+    ],
+    "estado": 1,
+    "orden": 40
+  },
+  {
+    "categoria": "Súmate",
+    "pattern_str": "sumate|unirme|apoyar|voluntario|afiliarse",
+    "responses": [
+      "¡Esa es la actitud, campeón! Siempre hay sitio para uno más en la familia. ¿Te enseño dónde inscribirte?"
+    ],
+    "actions": [
+      { "label": "💪 Súmate a la Fuerza", "type": "ir_a_sumate" }
+    ],
+    "estado": 1,
+    "orden": 50
+  },
+  {
+    "categoria": "Contacto",
+    "pattern_str": "contacto|llamar|telefono|ubicacion|redes|facebook|whatsapp|local",
+    "responses": [
+      "¡Al toque! Si necesitas escribirnos o visitarnos, te paso toda la info para que estemos en contacto. 📞"
+    ],
+    "actions": [
+      { "label": "📞 Contacto", "type": "ir_a_contacto" }
+    ],
+    "estado": 1,
+    "orden": 60
+  }
+]
