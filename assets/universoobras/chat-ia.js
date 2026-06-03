@@ -38,31 +38,6 @@ function initChatIA() {
             ]
         },
         {
-            pattern: /^(adios|chau|chaufa|nos vemos|hasta luego|bye|me voy)/i,
-            responses: [
-                "👋 Nos vemos vecino. Aquí sigo haciendo guardia por si necesitas algo más.",
-                "Un gusto ayudarte. Que tengas un excelente día.",
-                "😄 Chaufa amigo. Vuelve cuando quieras.",
-                "Hasta la próxima campeón. Las puertas siempre están abiertas.",
-                "Que te vaya muy bien. Gracias por darte una vuelta por nuestra página."
-            ]
-        },
-        {
-            pattern: /^(gracias|muchas gracias|te lo agradezco|chevere|bacán|bacan|ok|listo|perfecto)/i,
-            responses: [
-                "¡De nada vecino! Para eso estamos. ¿Quieres seguir explorando?",
-                "😄 ¡Con gusto! Yo aquí sigo con mis apuntes. ¿Le damos una mirada a algo más?",
-                "Ya sabes que estoy para servirte. ¿Te animas a ver nuestras obras?"
-            ]
-        },
-        {
-            pattern: /^(quien eres|como te llamas|eres (lucho|luis)|eres (una )?(ia|bot|robot|chatbot|inteligencia artificial))/i,
-            responses: [
-                "Soy Luchito, la mascota oficial y tu anfitrión digital en esta página. ¡Un tío con mucho cariño por Tacna! ¿Te enseño dónde están nuestras propuestas?",
-                "😄 Justo estaba revisando mis apuntes sobre eso. Soy Luchito, tu asistente virtual buena gente. ¿Quieres que te muestre al equipo de candidatos?"
-            ]
-        },
-        {
             pattern: /^(que (puedes|sabes) hacer|ayuda|help|opciones|menu|que hago)/i,
             responses: [
                 "Te la pongo fácil, vecino. Te puedo mostrar nuestras obras, presentarte a los candidatos o enseñarte el plan de trabajo. ¿Lo vemos?"
@@ -72,79 +47,6 @@ function initChatIA() {
                 { label: '👥 Candidatos', type: 'ir_a_candidatos' },
                 { label: '🚀 Propuestas', type: 'ir_a_propuestas' },
                 { label: '📞 Contacto', type: 'ir_a_contacto' }
-            ]
-        },
-        {
-            pattern: /\b(gordo|feo|tonto|zonzo|gil|sonso|mierda|concha|puta|cagada|imbecil|estupido|idiota|cabro|ctm|ptm|carajo|basura)\b/i,
-            responses: [
-                "😄 Puede ser vecino, pero al menos soy un gordito buena gente. Ahora dime, ¿qué andabas buscando? ¿Le damos una mirada a las obras?",
-                "Con estos dedos gorditos a veces leo mal los mensajes, pero no me enojo. ¿Quieres que te muestre los proyectos que tenemos?"
-            ]
-        },
-        {
-            pattern: /(dina|boluarte|castillo|fujimori|congreso|presidente|lima|politica nacional)/i,
-            responses: [
-                "😅 Me agarraste fuera de juego, vecino. Yo ando más pendiente de las obras, propuestas y todo lo que pasa por aquí en Tacna. ¿Quieres que te lo muestre?",
-                "A ver vecino, de eso no tengo apuntes. Pero de nuestra región sí tengo todo clarito. ¿Te acompaño a la sección de proyectos?"
-            ]
-        },
-        {
-            pattern: /(chiste|clima|futbol|alianza|universitario|cristal|messi|ronaldo)/i,
-            responses: [
-                "Jajaja, de eso sí que no tengo apuntes guardados. Pero si quieres conocer las obras o los proyectos, ahí sí te puedo ayudar. ¿Te llevo?",
-                "Déjame ponerme los lentes... no, de ese tema no tengo papeles aquí. Pero te puedo enseñar cómo sumarte al equipo. ¿Quieres verlo?"
-            ]
-        },
-        {
-            pattern: /(obras|mapa)/i,
-            responses: [
-                "¡Al toque! Justo estaba dando una vuelta por el mapa de obras. ¿Te llevo?"
-            ],
-            actions: [{ label: '🗺️ Abrir Mapa de Obras', type: 'ir_a_obras' }]
-        },
-        {
-            pattern: /(candidatos|equipo|regidores)/i,
-            responses: [
-                "Vamos viendo... ¡Aquí están en mis apuntes! Tenemos un equipazo. ¿Te acompaño a conocerlos?"
-            ],
-            actions: [{ label: '👥 Ver Candidatos', type: 'ir_a_candidatos' }]
-        },
-        {
-            pattern: /(propuestas|plan|seguridad|educacion)/i,
-            responses: [
-                "Ese es mi tema favorito, vecino. Cero floro y puras propuestas reales. ¿Le damos una mirada?"
-            ],
-            actions: [{ label: '🚀 Ver Propuestas', type: 'ir_a_propuestas' }]
-        },
-        {
-            pattern: /(sumate|unirme|apoyar|voluntario)/i,
-            responses: [
-                "¡Esa es la actitud, campeón! Siempre hay sitio para uno más en la familia. ¿Te enseño dónde inscribirte?"
-            ],
-            actions: [{ label: '💪 Súmate a la Fuerza', type: 'ir_a_sumate' }]
-        },
-        {
-            pattern: /(edad|años|cumpleaños|donde vives|que comes|casado|hijos|familia|cuanto pesas|gordito)/i,
-            responses: [
-                "😄 Los kilitos son pura experiencia acumulada, vecino. Y de edad... digamos que tengo la suficiente para conocer esta página de memoria. ¿Te llevo a ver el mapa de obras?",
-                "Vivo aquí mismito, entre los servidores y las secciones de nuestra web. Y mi comida favorita, uff, un buen picante a la tacneña. 🐻 ¿Pero qué te parece si mejor miramos a los candidatos?",
-                "Jajaja, familia somos todos los que nos damos una vuelta por aquí. Yo soy tu tío digital y anfitrión. ¿Te enseño dónde sumarte al equipo?"
-            ]
-        },
-        {
-            pattern: /(cuentame un chiste|hazme reir|broma|aburrido|chistoso|divertido|cuenta algo)/i,
-            responses: [
-                "A ver vecino, déjame revisar mis apuntes... ¿Qué le dice un cable a otro? 'Sígueme la corriente'. 😅 Jajaja, con estos dedos gorditos no soy el mejor comediante. ¿Mejor le damos una mirada a las propuestas?",
-                "Te la pongo fácil: yo haciendo dieta. Ese es mi mejor chiste, campeón. 😄 Pero ya hablando en serio, aquí en la web tenemos secciones bien interesantes. ¿Quieres que te las muestre?",
-                "Déjame ponerme los lentes porque chistes no tengo guardados en mis papeles. Lo que sí tengo es información al toque. ¿Te acompaño a ver alguna obra?"
-            ]
-        },
-        {
-            pattern: /(por que eres un (oso|animal)|mascota|lentes|mate|apuntes|dedos gorditos|historia tienes)/i,
-            responses: [
-                "Soy un osito porque así gordito inspiro más confianza para guiarte por la página, ¿no crees? 😄 Al toque te muestro cómo funciona esto... ¿buscabas alguna obra en especial?",
-                "Siempre ando con mis apuntes y mi matecito para no perderme de nada. Como anfitrión de la web, tengo que estar listo para darte una mano. ¿Qué te gustaría explorar hoy?",
-                "Me diseñaron con estos dedos gorditos y lentes porque así veo mejor cada detalle de nuestras secciones. Al toque te lo demuestro... ¿Le damos una mirada al mapa?"
             ]
         }
     ];
