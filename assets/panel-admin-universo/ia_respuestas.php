@@ -34,9 +34,10 @@ $db->exec("CREATE TABLE IF NOT EXISTS panel_preguntas_huerfanas (
 $db->exec("CREATE TABLE IF NOT EXISTS panel_configuracion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     clave VARCHAR(100) NOT NULL UNIQUE,
-    valor TEXT NOT NULL,
+    valor MEDIUMTEXT NOT NULL,
     fecha_actualizacion DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+$db->exec("ALTER TABLE panel_configuracion MODIFY COLUMN valor MEDIUMTEXT NOT NULL");
 
 $default_prompt = "Eres Luchito, el asistente virtual y mascota oficial de Fuerza Tacna. Eres un osito andino amigable, un 'tío digital' con mucho cariño por Tacna. Respondes de forma coloquial, cercana y breve (máximo 2 o 3 oraciones). Nunca inventas información que no tienes. Si te preguntan sobre temas políticos nacionales (Presidentes, Congreso, Lima), respondes que tu labor es exclusivamente sobre Tacna y sus obras.";
 
@@ -200,6 +201,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $activa = isset($_POST['ia_activa']) ? '1' : '0';
         if (trim($prompt) === '') {
             $mensaje = "Error: El prompt no puede estar vacío.";
+        } elseif (mb_strlen($prompt, 'UTF-8') > 100000) {
+            $mensaje = "Error: El prompt supera el límite de 100,000 caracteres.";
         } else {
             $stmt = $db->prepare("UPDATE panel_configuracion SET valor=?, fecha_actualizacion=NOW() WHERE clave=?");
             $stmt->execute([$prompt, 'ia_prompt_maestro']);
@@ -533,9 +536,12 @@ sort($all_cats);
             
                     <form method="POST" id="prompt-form">
                         <input type="hidden" name="action" value="save_prompt">
-                        <textarea name="prompt_maestro" class="form-control" rows="18" style="font-family: monospace; font-size: 12.5px; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; line-height: 1.5; resize: vertical;" required><?= htmlspecialchars($config_ia['ia_prompt_maestro']) ?></textarea>
+                        <textarea name="prompt_maestro" id="promptMaestroArea" class="form-control" rows="18" style="font-family: monospace; font-size: 12.5px; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; line-height: 1.5; resize: vertical;" required maxlength="100000"><?= htmlspecialchars($config_ia['ia_prompt_maestro']) ?></textarea>
                         <div class="d-flex justify-content-between align-items-center mt-3">
-                            <small class="text-muted">Actualizado: <?= date('d/m/Y H:i', strtotime($config_ia['fecha_actualizacion'] ?: 'now')) ?></small>
+                            <div>
+                                <small class="text-muted d-block">Actualizado: <?= date('d/m/Y H:i', strtotime($config_ia['fecha_actualizacion'] ?: 'now')) ?></small>
+                                <small class="text-muted d-block mt-1" id="promptCounter">0 / 100000 caracteres</small>
+                            </div>
                             <div>
                                 <button type="button" class="btn btn-outline-danger btn-sm mr-2" onclick="if(confirm('¿Seguro que deseas restaurar el prompt por defecto? Perderás tus cambios actuales.')) { document.getElementById('restore-form').submit(); }">🔄 Restaurar original</button>
                                 <button type="submit" class="btn btn-ft">💾 Guardar Configuración</button>
@@ -934,6 +940,17 @@ sort($all_cats);
             label.style.color = '#dc3545';
         }
     });
+
+    // Contador visual de caracteres para el Prompt Maestro
+    const promptArea = document.getElementById('promptMaestroArea');
+    const promptCounter = document.getElementById('promptCounter');
+    if (promptArea && promptCounter) {
+        const updateCounter = () => {
+            promptCounter.textContent = promptArea.value.length + ' / 100000 caracteres';
+        };
+        promptArea.addEventListener('input', updateCounter);
+        updateCounter(); // Inicializar estado
+    }
 </script>
 </body>
 </html>
