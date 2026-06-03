@@ -197,13 +197,68 @@ if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instru
     if (preg_match('/(.)\1{7,}/', $normalizada)) $spam_extremo = true;
 }
 
-// --- MODO SIMULADOR IA (ETAPA 5C) ---
+// --- AUDITORÍA Y LÍMITES IA (ETAPA 6B) ---
 if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuera_tema') {
-    $permitir_ia = true;
-    $categoria_detectada = 'Consulta IA';
-    $origen_final = 'simulador_ia';
-    $texto_final = '[SIMULADOR IA] Recibí tu consulta y ya estoy usando el Prompt Maestro cargado desde el panel. En la siguiente etapa esta respuesta vendrá desde OpenAI.';
-    $acciones_final = [];
+    
+    $ip_real = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
+    $salt = defined('IA_HASH_SALT') ? IA_HASH_SALT : 'FallbackSalt';
+    $ip_hash = hash('sha256', $ip_real . $salt);
+    $fecha_hoy = date('Y-m-d');
+    $limite_alcanzado = false;
+
+    // 1. Crear tabla de auditoría si no existe
+    $db->exec("CREATE TABLE IF NOT EXISTS panel_ia_auditoria (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        fecha DATETIME NOT NULL,
+        ip_hash VARCHAR(64) NOT NULL,
+        pregunta TEXT NOT NULL,
+        respuesta TEXT NOT NULL,
+        modelo VARCHAR(50) NOT NULL,
+        tokens_input INT DEFAULT 0,
+        tokens_output INT DEFAULT 0,
+        estado VARCHAR(50) NOT NULL,
+        motivo_error TEXT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // 2. Verificar Límite Global (Si es > 0)
+    if ($ia_limite_global_diario > 0) {
+        $stmtG = $db->prepare("SELECT COUNT(*) FROM panel_ia_auditoria WHERE DATE(fecha) = ? AND estado IN ('exito_simulador', 'exito_openai')");
+        $stmtG->execute([$fecha_hoy]);
+        if ((int)$stmtG->fetchColumn() >= $ia_limite_global_diario) {
+            $limite_alcanzado = true;
+            $texto_final = 'Hoy Luchito recibió bastantes consultas y mi cerebro inteligente está en pausa para cuidar el sistema. Igual puedo ayudarte a navegar la página.';
+            $acciones_final = [['label'=>'🏗️ Obras', 'type'=>'ir_a_obras'], ['label'=>'👥 Candidatos', 'type'=>'ir_a_candidatos'], ['label'=>'🚀 Propuestas', 'type'=>'ir_a_propuestas'], ['label'=>'📞 Contacto', 'type'=>'ir_a_contacto']];
+            $origen_final = 'escudo_limite_global';
+            $motivo_bloqueo = 'LIMITE_GLOBAL_ALCANZADO';
+            $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_global')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
+        }
+    }
+
+    // 3. Verificar Límite por IP (Si es > 0 y no saltó el global)
+    if (!$limite_alcanzado && $ia_limite_ip_diario > 0) {
+        $stmtI = $db->prepare("SELECT COUNT(*) FROM panel_ia_auditoria WHERE ip_hash = ? AND DATE(fecha) = ? AND estado IN ('exito_simulador', 'exito_openai')");
+        $stmtI->execute([$ip_hash, $fecha_hoy]);
+        if ((int)$stmtI->fetchColumn() >= $ia_limite_ip_diario) {
+            $limite_alcanzado = true;
+            $texto_final = 'Vecino, por hoy ya usé tus respuestas inteligentes disponibles. Pero igual puedo ayudarte a navegar la página. ¿Quieres ver obras, candidatos o propuestas?';
+            $acciones_final = [['label'=>'🏗️ Obras', 'type'=>'ir_a_obras'], ['label'=>'👥 Candidatos', 'type'=>'ir_a_candidatos'], ['label'=>'🚀 Propuestas', 'type'=>'ir_a_propuestas'], ['label'=>'📞 Contacto', 'type'=>'ir_a_contacto']];
+            $origen_final = 'escudo_limite_ip';
+            $motivo_bloqueo = 'LIMITE_IP_ALCANZADO';
+            $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_ip')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
+        }
+    }
+
+    // 4. Si pasa los límites, luz verde (Simulador)
+    if (!$limite_alcanzado) {
+        $permitir_ia = true;
+        $categoria_detectada = 'Consulta IA';
+        $origen_final = 'simulador_ia';
+        $texto_final = "[SIMULADOR IA] Recibí tu consulta. Mi modo actual es: $ia_modo. Pronto conectaremos con OpenAI.";
+        $acciones_final = [];
+        
+        // Registrar éxito en el simulador
+        $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'exito_simulador')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
+    }
 }
 
 // --- REGISTRO DE PREGUNTAS HUÉRFANAS ---

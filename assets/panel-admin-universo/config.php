@@ -46,6 +46,11 @@ const DB_USER = 'tacnwddf_adminfreddy';
 const DB_PASS = 'adminfreddy14021993';
 const DB_NAME = 'tacnwddf_fuerza'; 
 
+// =======================
+//  SEGURIDAD IA (SALT PARA IPs)
+// =======================
+define('IA_HASH_SALT', 'FuerzaTacna_IA_SecretSalt_2024!@#');
+
 function get_db_connection() {
     try {
         $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
