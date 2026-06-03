@@ -13,7 +13,10 @@ $db->exec("CREATE TABLE IF NOT EXISTS panel_ia_respuestas (
     acciones TEXT,
     estado TINYINT DEFAULT 1,
     orden INT DEFAULT 0
-)");
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+// Forzar la conversión de la tabla antigua y sus columnas al formato que soporta emojis
+$db->exec("ALTER TABLE panel_ia_respuestas CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
 // 2. Función para generar el JSON Público
 function regenerar_json_ia($db) {
