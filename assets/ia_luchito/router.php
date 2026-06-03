@@ -26,54 +26,80 @@ if (mb_strlen($mensaje) > 150) {
 // 4. Simular tiempo de "razonamiento" (1.5 segundos)
 usleep(1500000);
 
-// 5. Filtro Temático de Seguridad (Simulador Fase 3 - Pre-OpenAI)
-$mensaje_lower = mb_strtolower($mensaje, 'UTF-8');
+// 5. Normalizar texto (Quitar tildes y mayúsculas para buscar coincidencias)
+$normalizada = mb_strtolower($mensaje, 'UTF-8');
+$unwanted_array = array('á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ü'=>'u', 'ñ'=>'n');
+$normalizada = strtr($normalizada, $unwanted_array);
 
-$texto = '';
-$acciones = [];
-$tema_valido = true;
+// 6. Diccionario Temático de Clasificación
+$temas_validos = [
+    'Obras' => [
+        'regex' => '/(obra|proyecto|mapa|construccion|colegio|posta|infraestructura)/i',
+        'simulado' => '😄 A ver vecino, esa consulta va por el lado de obras. Pronto podré buscar ese dato con más detalle. ¿Te llevo al mapa?',
+        'acciones' => [['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras']]
+    ],
+    'Candidatos' => [
+        'regex' => '/(candidato|equipo|regidor|alcalde|patrick|alena|fletch|marc|natalia)/i',
+        'simulado' => '😄 Esa pregunta es sobre nuestro equipazo. Pronto tendré los apuntes completos de todos. ¿Te muestro a los candidatos por ahora?',
+        'acciones' => [['label' => '👥 Ver Candidatos', 'type' => 'ir_a_candidatos']]
+    ],
+    'Propuestas' => [
+        'regex' => '/(propuesta|plan|seguridad|educacion|salud|emprendimiento|promesa)/i',
+        'simulado' => '😄 Me hablas de nuestras propuestas, vecino. Estoy organizando esos documentos. ¿Le damos una mirada a la sección mientras tanto?',
+        'acciones' => [['label' => '🚀 Ver Propuestas', 'type' => 'ir_a_propuestas']]
+    ],
+    'Súmate' => [
+        'regex' => '/(sumate|unirme|apoyar|voluntario|afiliarse)/i',
+        'simulado' => '😄 ¡Qué bacán que quieras sumarte! Te dejo el acceso directo para que te inscribas.',
+        'acciones' => [['label' => '💪 Súmate a la Fuerza', 'type' => 'ir_a_sumate']]
+    ],
+    'Contacto' => [
+        'regex' => '/(contacto|llamar|telefono|ubicacion|redes|facebook|whatsapp|local)/i',
+        'simulado' => '😄 ¿Buscas cómo contactarnos? Te paso el acceso para que hablemos directo.',
+        'acciones' => [['label' => '📞 Contacto', 'type' => 'ir_a_contacto']]
+    ],
+    'Cronología' => [
+        'regex' => '/(cronologia|historia|pasado|años)/i',
+        'simulado' => '😄 Quieres saber de nuestra historia. Acompáñame a ver cómo empezamos.',
+        'acciones' => [['label' => '⏳ Conocer Historia', 'type' => 'ir_a_candidatos']]
+    ],
+    'Actividades' => [
+        'regex' => '/(actividad|mitin|evento|campaña|recorrido)/i',
+        'simulado' => '😄 Sobre nuestros eventos, siempre publicamos todo en redes. ¿Te llevo a la sección de contacto?',
+        'acciones' => [['label' => '📞 Contacto', 'type' => 'ir_a_contacto']]
+    ],
+    'Navegación' => [
+        'regex' => '/(pagina|web|sitio|explorar|menu)/i',
+        'simulado' => '😄 ¡Esta página tiene de todo! ¿Quieres que te muestre los proyectos o prefieres conocer al equipo?',
+        'acciones' => [
+            ['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'],
+            ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']
+        ]
+    ]
+];
 
-if (preg_match('/(obra|obras|proyecto|mapa|construccion|colegio|posta)/', $mensaje_lower)) {
-    $texto = '¡Claro que sí! Tenemos obras por toda Tacna. Te llevo directito al mapa para que las cheques tú mismo. 🗺️';
-    $acciones = [['label' => '🗺️ Abrir Mapa', 'type' => 'ir_a_obras']];
-} elseif (preg_match('/(candidato|candidatos|equipo|regidor|alcalde|patrick|alena)/', $mensaje_lower)) {
-    $texto = '¡Tenemos un equipazo, campeón! Pura gente chamba. Te acompaño a la sección para que los conozcas a todos. 👥';
-    $acciones = [['label' => '👥 Ver Equipo', 'type' => 'ir_a_candidatos']];
-} elseif (preg_match('/(propuesta|propuestas|plan|seguridad|educacion|salud)/', $mensaje_lower)) {
-    $texto = 'Ese es mi tema favorito, vecino. Cero floro y puras propuestas reales. ¿Le damos una mirada? 🚀';
-    $acciones = [['label' => '🚀 Ver Propuestas', 'type' => 'ir_a_propuestas']];
-} elseif (preg_match('/(sumate|unirme|apoyar|voluntario|equipo)/', $mensaje_lower)) {
-    $texto = '¡Esa es la actitud! Siempre hay sitio en la familia para los que quieren ver crecer a Tacna. ¿Te apuntas? 💪';
-    $acciones = [['label' => '💪 Súmate a la Fuerza', 'type' => 'ir_a_sumate']];
-} elseif (preg_match('/(contacto|llamar|telefono|ubicacion|redes|facebook|whatsapp)/', $mensaje_lower)) {
-    $texto = '¡Al toque! Si necesitas escribirnos o visitarnos, te paso toda la info para que estemos en contacto. 📞';
-    $acciones = [['label' => '📞 Contacto', 'type' => 'ir_a_contacto']];
-} elseif (preg_match('/(cronologia|historia|pasado|años)/', $mensaje_lower)) {
-    $texto = 'Tenemos una historia con mucha fuerza, vecino. ¿Qué te parece si conocemos al equipo que lo hace posible? ⏳';
-    $acciones = [['label' => '👥 Ver Equipo', 'type' => 'ir_a_candidatos']];
-} elseif (preg_match('/(actividad|actividades|mitin|evento|campaña)/', $mensaje_lower)) {
-    $texto = 'Siempre estamos moviéndonos por la región. Revisa nuestras redes en la sección de contacto para enterarte de los próximos eventos. 📱';
-    $acciones = [['label' => '📞 Contacto', 'type' => 'ir_a_contacto']];
-} elseif (preg_match('/(pagina|web|sitio|explorar|menu)/', $mensaje_lower)) {
-    $texto = '¡Esta página tiene de todo! ¿Quieres que te muestre los proyectos o prefieres conocer al equipo? 👇';
-    $acciones = [
-        ['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'],
-        ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']
-    ];
-} else {
-    // EL ESCUDO: Si no hace match con NINGÚN tema de la campaña
-    $tema_valido = false;
-    $texto = '😄 Me agarraste fuera de juego, vecino. Yo ando más pendiente de esta página. ¿Te muestro obras o candidatos?';
-    $acciones = [
-        ['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'],
-        ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']
-    ];
+// Valores por defecto (Fuera de Tema)
+$texto_final = '😄 Me agarraste fuera de juego, vecino. Yo ando más pendiente de esta página. ¿Te muestro obras o candidatos?';
+$acciones_final = [
+    ['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'],
+    ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']
+];
+$origen_final = 'router_fuera_tema';
+
+// 7. Motor de Clasificación
+foreach ($temas_validos as $categoria => $datos) {
+    if (preg_match($datos['regex'], $normalizada)) {
+        $texto_final = $datos['simulado'];
+        $acciones_final = $datos['acciones'];
+        $origen_final = 'router_simulado_' . strtolower(str_replace(' ', '_', $categoria));
+        break; // Detener búsqueda tras encontrar el primer tema
+    }
 }
 
-// 6. Devolver el JSON final
+// 8. Devolver el JSON final
 echo json_encode([
     'ok' => true,
-    'texto' => $texto,
-    'acciones' => $acciones,
-    'origen' => 'simulador_fase3'
+    'texto' => $texto_final,
+    'acciones' => $acciones_final,
+    'origen' => $origen_final
 ]);
