@@ -44,6 +44,13 @@ $default_prompt = "Eres Luchito, el asistente virtual y mascota oficial de Fuerz
 $stmtConf = $db->prepare("INSERT IGNORE INTO panel_configuracion (clave, valor, fecha_actualizacion) VALUES (?, ?, NOW())");
 $stmtConf->execute(['ia_prompt_maestro', $default_prompt]);
 $stmtConf->execute(['ia_activa', '0']);
+$stmtConf->execute(['ia_modo', 'simulador']);
+$stmtConf->execute(['ia_modelo', 'gpt-4o-mini']);
+$stmtConf->execute(['ia_temperatura', '0.7']);
+$stmtConf->execute(['ia_max_tokens', '150']);
+$stmtConf->execute(['ia_limite_global_diario', '1000']);
+$stmtConf->execute(['ia_limite_ip_diario', '10']);
+$stmtConf->execute(['ia_mensaje_fallback_openai', '😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?']);
 
 // 2. Función para generar el JSON Público
 function regenerar_json_ia($db) {
@@ -199,6 +206,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'save_prompt') {
         $prompt = $_POST['prompt_maestro'] ?? '';
         $activa = isset($_POST['ia_activa']) ? '1' : '0';
+        $modo = $_POST['ia_modo'] ?? 'simulador';
+        $modelo = $_POST['ia_modelo'] ?? 'gpt-4o-mini';
+        $temp = $_POST['ia_temperatura'] ?? '0.7';
+        $max_tokens = $_POST['ia_max_tokens'] ?? '150';
+        $lim_global = $_POST['ia_limite_global_diario'] ?? '1000';
+        $lim_ip = $_POST['ia_limite_ip_diario'] ?? '10';
+        $fallback = trim($_POST['ia_mensaje_fallback_openai'] ?? '');
+
         if (trim($prompt) === '') {
             $mensaje = "Error: El prompt no puede estar vacío.";
         } elseif (mb_strlen($prompt, 'UTF-8') > 100000) {
@@ -207,7 +222,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $db->prepare("UPDATE panel_configuracion SET valor=?, fecha_actualizacion=NOW() WHERE clave=?");
             $stmt->execute([$prompt, 'ia_prompt_maestro']);
             $stmt->execute([$activa, 'ia_activa']);
-            $mensaje = "Prompt Maestro y configuración de IA guardados correctamente.";
+            $stmt->execute([$modo, 'ia_modo']);
+            $stmt->execute([$modelo, 'ia_modelo']);
+            $stmt->execute([$temp, 'ia_temperatura']);
+            $stmt->execute([$max_tokens, 'ia_max_tokens']);
+            $stmt->execute([$lim_global, 'ia_limite_global_diario']);
+            $stmt->execute([$lim_ip, 'ia_limite_ip_diario']);
+            $stmt->execute([$fallback, 'ia_mensaje_fallback_openai']);
+            $mensaje = "Configuración de IA guardada correctamente.";
         }
     }
     elseif ($action === 'restore_prompt') {
@@ -233,7 +255,12 @@ $huerfanas_list = $stmtH->fetchAll(PDO::FETCH_ASSOC);
 // Obtener Configuración de IA
 $stmtC = $db->query("SELECT clave, valor, fecha_actualizacion FROM panel_configuracion");
 $config_rows = $stmtC->fetchAll(PDO::FETCH_ASSOC);
-$config_ia = ['ia_prompt_maestro' => '', 'ia_activa' => '0', 'fecha_actualizacion' => ''];
+$config_ia = [
+    'ia_prompt_maestro' => '', 'ia_activa' => '0', 'fecha_actualizacion' => '',
+    'ia_modo' => 'simulador', 'ia_modelo' => 'gpt-4o-mini', 'ia_temperatura' => '0.7',
+    'ia_max_tokens' => '150', 'ia_limite_global_diario' => '1000', 'ia_limite_ip_diario' => '10',
+    'ia_mensaje_fallback_openai' => '😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?'
+];
 foreach ($config_rows as $row) {
     $config_ia[$row['clave']] = $row['valor'];
     if ($row['clave'] === 'ia_prompt_maestro') {
