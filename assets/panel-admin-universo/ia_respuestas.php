@@ -63,8 +63,12 @@ function regenerar_json_ia($db) {
         $palabras = array_filter(array_map('trim', explode(',', $r['palabras_clave'])));
         if (empty($palabras)) continue;
         
-        // Patrón estricto: Máx 4 palabras y coincidencia exacta (evita que "habla" capture "háblame")
-        $pattern_str = '^(?=(?:\\S+\\s+){0,3}\\S+$).*?(?:^|[^a-z0-9])(' . implode('|', $palabras) . ')(?:[^a-z0-9]|$).*$';
+        // Normalizar palabras clave para que coincidan sin tildes con el input de JS
+        $unwanted = array('á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ü'=>'u', 'ñ'=>'n', 'Á'=>'a', 'É'=>'e', 'Í'=>'i', 'Ó'=>'o', 'Ú'=>'u', 'Ñ'=>'n');
+        $palabras = array_map(function($p) use ($unwanted) { return strtr(mb_strtolower($p, 'UTF-8'), $unwanted); }, $palabras);
+        
+        // Patrón estricto: Máx 3 palabras y coincidencia exacta
+        $pattern_str = '^(?=(?:\\S+\\s+){0,2}\\S+$).*?(?:^|[^a-z0-9])(' . implode('|', $palabras) . ')(?:[^a-z0-9]|$).*$';
         
         $item = [
             'categoria'   => $r['categoria'],
@@ -832,11 +836,15 @@ sort($all_cats);
     // Reglas procesadas directamente desde PHP para el entorno de pruebas
     const testRules = <?php 
         $test_data = [];
+        $unwanted = array('á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ü'=>'u', 'ñ'=>'n', 'Á'=>'a', 'É'=>'e', 'Í'=>'i', 'Ó'=>'o', 'Ú'=>'u', 'Ñ'=>'n');
         foreach ($respuestas_list as $r) {
             if ($r['estado'] != 1) continue;
             $palabras = array_filter(array_map('trim', explode(',', $r['palabras_clave'])));
             if (empty($palabras)) continue;
-            $pattern_str = '^(?=(?:\\S+\\s+){0,3}\\S+$).*?(?:^|[^a-z0-9])(' . implode('|', $palabras) . ')(?:[^a-z0-9]|$).*$';
+            
+            $palabras = array_map(function($p) use ($unwanted) { return strtr(mb_strtolower($p, 'UTF-8'), $unwanted); }, $palabras);
+            
+            $pattern_str = '^(?=(?:\\S+\\s+){0,2}\\S+$).*?(?:^|[^a-z0-9])(' . implode('|', $palabras) . ')(?:[^a-z0-9]|$).*$';
             $test_data[] = ['pattern_str' => $pattern_str, 'responses' => json_decode($r['respuestas'], true) ?: [], 'actions' => json_decode($r['acciones'], true) ?: []];
         }
         echo json_encode($test_data);
