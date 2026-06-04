@@ -28,6 +28,44 @@ if (isset($_SESSION['ia_msg'])) {
     unset($_SESSION['ia_msg']);
 }
 
+// 2. Procesar Formularios (POST)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+
+    // GUARDAR TEXTO MANUAL
+    if ($action === 'save_manual') {
+        $id = $_POST['id'] ?? '';
+        $titulo = trim($_POST['titulo'] ?? '');
+        $categoria = trim($_POST['categoria'] ?? '');
+        $contenido = trim($_POST['contenido_aprobado'] ?? '');
+        $palabras_clave = trim($_POST['palabras_clave'] ?? '');
+        $estado = $_POST['estado'] ?? 'borrador';
+        $prioridad = (int)($_POST['prioridad'] ?? 5);
+
+        if ($titulo && $categoria && $contenido) {
+            if ($id) {
+                $stmt = $db->prepare("UPDATE panel_fuentes_aprobadas SET titulo=?, categoria=?, contenido_aprobado=?, palabras_clave=?, estado=?, prioridad=?, fecha_aprobacion = CASE WHEN ? = 'aprobado' THEN NOW() ELSE fecha_aprobacion END WHERE id=?");
+                $stmt->execute([$titulo, $categoria, $contenido, $palabras_clave, $estado, $prioridad, $estado, $id]);
+                $_SESSION['ia_msg'] = "Fuente de texto actualizada correctamente.";
+            } else {
+                $stmt = $db->prepare("INSERT INTO panel_fuentes_aprobadas (tipo, titulo, categoria, contenido_aprobado, palabras_clave, fuente, prioridad, estado, fecha_creacion, fecha_aprobacion) VALUES ('texto_manual', ?, ?, ?, ?, 'Fuente Aprobada - Texto', ?, ?, NOW(), CASE WHEN ? = 'aprobado' THEN NOW() ELSE NULL END)");
+                $stmt->execute([$titulo, $categoria, $contenido, $palabras_clave, $prioridad, $estado, $estado]);
+                $_SESSION['ia_msg'] = "Nueva fuente de texto registrada.";
+            }
+        } else {
+            $_SESSION['ia_msg'] = "Error: Título, Categoría y Contenido son obligatorios.";
+        }
+    } elseif ($action === 'delete') {
+        $id = $_POST['id'] ?? '';
+        if ($id) {
+            $db->prepare("DELETE FROM panel_fuentes_aprobadas WHERE id=?")->execute([$id]);
+            $_SESSION['ia_msg'] = "Fuente eliminada permanentemente.";
+        }
+    }
+    header("Location: ia_fuentes.php");
+    exit;
+}
+
 // Por ahora solo leemos la tabla, las acciones de INSERT vendrán en los Bloques 2 y 3.
 $stmt = $db->query("SELECT * FROM panel_fuentes_aprobadas ORDER BY id DESC");
 $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -149,9 +187,28 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     ?>
                                     <span class="status-badge <?= $clase ?>"><?= str_replace('_', ' ', $row['estado']) ?></span>
                                 </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary py-0 px-2">Revisar/Editar</button>
-                                    <button class="btn btn-sm btn-outline-danger py-0 px-2">X</button>
+                                <td class="align-middle">
+                                    <!-- Datos para JS -->
+                                    <span id="fte-<?= $row['id'] ?>" class="d-none"
+                                          data-tit="<?= htmlspecialchars($row['titulo']) ?>"
+                                          data-cat="<?= htmlspecialchars($row['categoria']) ?>"
+                                          data-con="<?= htmlspecialchars($row['contenido_aprobado'] ?? '') ?>"
+                                          data-pal="<?= htmlspecialchars($row['palabras_clave'] ?? '') ?>"
+                                          data-est="<?= $row['estado'] ?>"
+                                          data-pri="<?= $row['prioridad'] ?>"
+                                    ></span>
+                                    
+                                    <?php if($row['tipo'] === 'texto_manual'): ?>
+                                        <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editTexto(<?= $row['id'] ?>)">Editar</button>
+                                    <?php else: ?>
+                                        <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="alert('Próximamente: Editar Link')">Revisar</button>
+                                    <?php endif; ?>
+                                    
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar fuente permanentemente?');">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                        <button class="btn btn-sm btn-outline-danger py-0 px-2">X</button>
+                                    </form>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -163,10 +220,91 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<!-- MODAL: TEXTO MANUAL -->
+<div class="modal-overlay" id="modalTextoManual" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2050; align-items:center; justify-content:center;">
+    <div class="card shadow-lg" style="width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto;">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0" id="modalTextoTitle">➕ Nuevo Texto Manual</h5>
+            <button type="button" class="close text-white" onclick="cerrarModalTexto()">&times;</button>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="save_manual">
+                <input type="hidden" name="id" id="texto-id" value="">
+                
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold">Título</label>
+                        <input type="text" name="titulo" id="texto-titulo" class="form-control" required placeholder="Ej. Contacto Oficial">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold">Categoría</label>
+                        <input type="text" name="categoria" id="texto-categoria" class="form-control" required placeholder="Ej. Contacto, Historia...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">Contenido Aprobado (Limpio para la IA)</label>
+                    <textarea name="contenido_aprobado" id="texto-contenido" class="form-control" rows="8" required placeholder="Escribe o pega aquí la información aprobada..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">Palabras Clave (Separadas por comas)</label>
+                    <input type="text" name="palabras_clave" id="texto-palabras" class="form-control" placeholder="Ej. contacto, whatsapp, direccion">
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold">Estado</label>
+                        <select name="estado" id="texto-estado" class="form-control">
+                            <option value="borrador">📝 Borrador (No usar aún)</option>
+                            <option value="aprobado">✅ Aprobado (Listo para sincronizar)</option>
+                            <option value="inactivo">⏸️ Inactivo (Pausado)</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold">Prioridad (1 más alta, 10 más baja)</label>
+                        <input type="number" name="prioridad" id="texto-prioridad" class="form-control" value="5" min="1" max="10">
+                    </div>
+                </div>
+                <hr>
+                <div class="text-right">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalTexto()">Cancelar</button>
+                    <button type="submit" class="btn btn-success font-weight-bold">💾 Guardar Texto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Funciones placeholders para los modales que se implementarán en Bloques 2 y 3
     function abrirModalTexto() {
-        alert("Próximamente: Abrirá el formulario para redactar un texto libre y guardarlo como Borrador o Aprobado.");
+        document.getElementById('modalTextoTitle').innerText = '➕ Nuevo Texto Manual';
+        document.getElementById('texto-id').value = '';
+        document.getElementById('texto-titulo').value = '';
+        document.getElementById('texto-categoria').value = '';
+        document.getElementById('texto-contenido').value = '';
+        document.getElementById('texto-palabras').value = '';
+        document.getElementById('texto-estado').value = 'borrador';
+        document.getElementById('texto-prioridad').value = '5';
+        document.getElementById('modalTextoManual').style.display = 'flex';
+    }
+    
+    function cerrarModalTexto() {
+        document.getElementById('modalTextoManual').style.display = 'none';
+    }
+
+    function editTexto(id) {
+        const span = document.getElementById('fte-' + id);
+        if(!span) return;
+        
+        document.getElementById('modalTextoTitle').innerText = '✏️ Editar Texto Manual';
+        document.getElementById('texto-id').value = id;
+        document.getElementById('texto-titulo').value = span.getAttribute('data-tit');
+        document.getElementById('texto-categoria').value = span.getAttribute('data-cat');
+        document.getElementById('texto-contenido').value = span.getAttribute('data-con');
+        document.getElementById('texto-palabras').value = span.getAttribute('data-pal');
+        document.getElementById('texto-estado').value = span.getAttribute('data-est');
+        document.getElementById('texto-prioridad').value = span.getAttribute('data-pri');
+        
+        document.getElementById('modalTextoManual').style.display = 'flex';
     }
     
     function abrirModalLink() {
