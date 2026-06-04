@@ -214,7 +214,7 @@ if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instru
 }
 
 // --- AUDITORÍA Y LÍMITES IA (ETAPA 6B) ---
-if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuera_tema') {
+if ($ia_activa === 1 && $motivo_bloqueo === '') {
     
     $ip_real = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
     $salt = defined('IA_HASH_SALT') ? IA_HASH_SALT : 'FallbackSalt';
@@ -242,8 +242,6 @@ if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuer
         $stmtG->execute([$fecha_hoy]);
         if ((int)$stmtG->fetchColumn() >= $ia_limite_global_diario) {
             $limite_alcanzado = true;
-            $texto_final = 'Hoy Luchito recibió bastantes consultas y mi cerebro inteligente está en pausa para cuidar el sistema. Igual puedo ayudarte a navegar la página.';
-            $acciones_final = [['label'=>'🏗️ Obras', 'type'=>'ir_a_obras'], ['label'=>'👥 Candidatos', 'type'=>'ir_a_candidatos'], ['label'=>'🚀 Propuestas', 'type'=>'ir_a_propuestas'], ['label'=>'📞 Contacto', 'type'=>'ir_a_contacto']];
             $origen_final = 'escudo_limite_global';
             $motivo_bloqueo = 'LIMITE_GLOBAL_ALCANZADO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_global')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
@@ -256,8 +254,6 @@ if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuer
         $stmtI->execute([$ip_hash, $fecha_hoy]);
         if ((int)$stmtI->fetchColumn() >= $ia_limite_ip_diario) {
             $limite_alcanzado = true;
-            $texto_final = 'Vecino, por hoy ya usé tus respuestas inteligentes disponibles. Pero igual puedo ayudarte a navegar la página. ¿Quieres ver obras, candidatos o propuestas?';
-            $acciones_final = [['label'=>'🏗️ Obras', 'type'=>'ir_a_obras'], ['label'=>'👥 Candidatos', 'type'=>'ir_a_candidatos'], ['label'=>'🚀 Propuestas', 'type'=>'ir_a_propuestas'], ['label'=>'📞 Contacto', 'type'=>'ir_a_contacto']];
             $origen_final = 'escudo_limite_ip';
             $motivo_bloqueo = 'LIMITE_IP_ALCANZADO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_ip')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
@@ -267,12 +263,10 @@ if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuer
     // 4. Si pasa los límites, luz verde (Simulador)
     if (!$limite_alcanzado) {
         $permitir_ia = true;
-        $categoria_detectada = 'Consulta IA';
-        $acciones_final = [];
         
         if ($ia_modo === 'simulador') {
             $origen_final = 'simulador_ia';
-            $texto_final = "[SIMULADOR IA] Recibí tu consulta y ya estoy usando el Prompt Maestro cargado desde el panel. En la siguiente etapa esta respuesta vendrá desde OpenAI.";
+            $texto_final = "[SIMULADOR IA] (Tema detectado: $categoria_detectada). Aquí responderá OpenAI. El fallback de emergencia es: $texto_final";
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'exito_simulador')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
         } else {
             // Modo Producción
@@ -283,7 +277,6 @@ if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuer
 
             if ($ia_api_key !== '' && $decrypted_key === '') {
                 // Falló el descifrado (ej. clave antigua en texto plano o llave maestra incorrecta)
-                $texto_final = $ia_mensaje_fallback_openai;
                 $origen_final = 'openai_error';
                 $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado, motivo_error) VALUES (NOW(), ?, ?, ?, ?, 'error_openai', 'Error crítico: No se pudo descifrar la API Key (AES-256).')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo]);
             } else {
@@ -295,7 +288,6 @@ if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuer
                     $origen_final = 'openai_responses';
                     $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, tokens_input, tokens_output, estado) VALUES (NOW(), ?, ?, ?, ?, ?, ?, 'exito_openai')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo, $ia_result['tokens_input'], $ia_result['tokens_output']]);
                 } else {
-                    $texto_final = $ia_mensaje_fallback_openai;
                     $origen_final = 'openai_error';
                     $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado, motivo_error) VALUES (NOW(), ?, ?, ?, ?, 'error_openai', ?)")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo, $ia_result['error']]);
                 }
