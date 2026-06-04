@@ -214,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lim_global = $_POST['ia_limite_global_diario'] ?? '1000';
         $lim_ip = $_POST['ia_limite_ip_diario'] ?? '10';
         $fallback = trim($_POST['ia_mensaje_fallback_openai'] ?? '');
-        $api_key = trim($_POST['ia_api_key'] ?? '');
+        $raw_api_key = trim($_POST['ia_api_key'] ?? '');
 
         if (trim($prompt) === '') {
             $mensaje = "Error: El prompt no puede estar vacío.";
@@ -231,8 +231,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$lim_global, 'ia_limite_global_diario']);
             $stmt->execute([$lim_ip, 'ia_limite_ip_diario']);
             $stmt->execute([$fallback, 'ia_mensaje_fallback_openai']);
-            $stmt->execute([$api_key, 'ia_api_key']);
+            
             $mensaje = "Configuración de IA guardada correctamente.";
+
+            if ($raw_api_key !== '') {
+                $encrypted_key = encrypt_api_key($raw_api_key);
+                if ($encrypted_key !== '') {
+                    $stmt->execute([$encrypted_key, 'ia_api_key']);
+                } else {
+                    $mensaje .= " (Atención: No se guardó la API Key porque falta configurar OPENAI_KEY_ENCRYPTION_SECRET en el servidor).";
+                }
+            }
         }
     }
     elseif ($action === 'restore_prompt') {
@@ -610,8 +619,8 @@ sort($all_cats);
                                 
                                 <div class="form-group">
                                     <label class="font-weight-bold">API Key de OpenAI</label>
-                                    <input type="password" name="ia_api_key" class="form-control" value="<?= htmlspecialchars($config_ia['ia_api_key']) ?>" placeholder="sk-proj-..." autocomplete="off">
-                                    <small class="text-muted">Se guardará de forma segura en la base de datos.</small>
+                                    <input type="password" name="ia_api_key" class="form-control" value="" placeholder="<?= $api_key_configured ? '•••••••••••• (Cifrada. Deja en blanco para no cambiar)' : 'sk-proj-...' ?>" autocomplete="new-password">
+                                    <small class="text-muted">Se guardará cifrada (AES-256) en la base de datos.</small>
                                 </div>
                                 
                                 <div class="form-group">

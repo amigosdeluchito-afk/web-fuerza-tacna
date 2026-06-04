@@ -51,6 +51,30 @@ const DB_NAME = 'tacnwddf_fuerza';
 // =======================
 define('IA_HASH_SALT', 'FuerzaTacna_IA_SecretSalt_2024!@#');
 define('OPENAI_API_KEY', ''); // Dejar vacío en Git, poner la clave directa en cPanel
+define('OPENAI_KEY_ENCRYPTION_SECRET', ''); // Dejar vacío en Git. Definir en cPanel
+
+function encrypt_api_key($plain_text) {
+    if (!defined('OPENAI_KEY_ENCRYPTION_SECRET') || trim(OPENAI_KEY_ENCRYPTION_SECRET) === '') return '';
+    $method = 'aes-256-cbc';
+    $key = hash('sha256', OPENAI_KEY_ENCRYPTION_SECRET, true);
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method));
+    $encrypted = openssl_encrypt($plain_text, $method, $key, 0, $iv);
+    return base64_encode($iv . $encrypted);
+}
+
+function decrypt_api_key($encoded_payload) {
+    if (!defined('OPENAI_KEY_ENCRYPTION_SECRET') || trim(OPENAI_KEY_ENCRYPTION_SECRET) === '') return '';
+    $method = 'aes-256-cbc';
+    $key = hash('sha256', OPENAI_KEY_ENCRYPTION_SECRET, true);
+    $decoded = base64_decode($encoded_payload);
+    if ($decoded === false) return '';
+    $iv_len = openssl_cipher_iv_length($method);
+    if (strlen($decoded) < $iv_len) return '';
+    $iv = substr($decoded, 0, $iv_len);
+    $encrypted = substr($decoded, $iv_len);
+    $decrypted = openssl_decrypt($encrypted, $method, $key, 0, $iv);
+    return $decrypted !== false ? $decrypted : '';
+}
 
 function get_db_connection() {
     try {
