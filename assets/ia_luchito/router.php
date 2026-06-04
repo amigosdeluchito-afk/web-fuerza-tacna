@@ -348,19 +348,24 @@ if ($guardar_bd) {
 }
 
 // 8. Devolver el JSON final
-echo json_encode([
+$response = [
     'ok' => true,
     'texto' => $texto_final,
     'acciones' => $acciones_final,
     'origen' => $origen_final,
     'categoria_detectada' => $categoria_detectada,
     'permitir_ia' => $permitir_ia,
-    'motivo_bloqueo' => $motivo_bloqueo,
-    'debug_ia_activa' => $ia_activa,
-    'debug_prompt_cargado' => $debug_prompt_cargado,
-    'ia_modo' => $ia_modo,
-    'limite_alcanzado' => $limite_alcanzado,
-    'fue_a_openai' => ($origen_final === 'openai_responses' || $origen_final === 'openai_error'),
-    'razon_no_openai' => $razon_no_openai,
-    'error_openai_debug' => $error_openai_debug
-]);
+    'motivo_bloqueo' => $motivo_bloqueo
+];
+
+if (defined('IA_DEBUG_MODE') && IA_DEBUG_MODE === true) {
+    $response['debug_ia_activa'] = $ia_activa;
+    $response['debug_prompt_cargado'] = $debug_prompt_cargado;
+    $response['ia_modo'] = $ia_modo;
+    $response['limite_alcanzado'] = $limite_alcanzado;
+    $response['fue_a_openai'] = ($origen_final === 'openai_responses' || $origen_final === 'openai_error');
+    $response['razon_no_openai'] = $razon_no_openai;
+    $response['error_openai_debug'] = $error_openai_debug;
+}
+
+echo json_encode($response);

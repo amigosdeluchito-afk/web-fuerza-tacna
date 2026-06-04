@@ -52,6 +52,7 @@ const DB_NAME = 'tacnwddf_fuerza';
 define('IA_HASH_SALT', 'FuerzaTacna_IA_SecretSalt_2024!@#');
 define('OPENAI_API_KEY', ''); // Dejar vacío en Git, poner la clave directa en cPanel
 define('OPENAI_KEY_ENCRYPTION_SECRET', 'FuerzaTacna_AES_MasterKey_2024**!!'); // Llave inventada, GitHub no la bloquea
+define('IA_DEBUG_MODE', false); // Poner en true solo para diagnosticar problemas de enrutamiento
 
 function encrypt_api_key($plain_text) {
     if (!defined('OPENAI_KEY_ENCRYPTION_SECRET') || trim(OPENAI_KEY_ENCRYPTION_SECRET) === '') return '';
