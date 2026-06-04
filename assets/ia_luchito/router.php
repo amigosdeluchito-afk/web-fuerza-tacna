@@ -284,7 +284,10 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         $stop_words_fuertes = ['el','la','los','las','un','una','unos','unas','y','o','pero','si','de','del','a','al','en','por','para','con','sin','sobre','web','pagina','que','es','como','cuando','donde','quien','cuales','mas'];
         $stop_words_suaves = ['tacna', 'fuerza']; // Ignorar solo si hay palabras más importantes
         
-        $words = array_filter(explode(' ', $normalizada), function($w) use ($stop_words_fuertes) {
+        // Limpiar signos de interrogación y puntuación para que "tacna?" sea solo "tacna"
+        $texto_limpio = preg_replace('/[^a-z0-9\s]/', '', $normalizada);
+        
+        $words = array_filter(explode(' ', $texto_limpio), function($w) use ($stop_words_fuertes) {
             $w = trim($w);
             return mb_strlen($w, 'UTF-8') > 2 && !in_array($w, $stop_words_fuertes);
         });
