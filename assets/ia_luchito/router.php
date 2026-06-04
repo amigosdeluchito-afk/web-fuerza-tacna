@@ -274,9 +274,69 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
     if (!$limite_alcanzado) {
         $permitir_ia = true;
         
+        // --- MOTOR RAG (BÚSQUEDA DE CONTEXTO) ---
+        $contexto_debug = '';
+        $input_para_openai = $mensaje; // Mandamos el mensaje con formato original a OpenAI
+
+        // Filtro de Stop Words (Evita que palabras comunes dominen la búsqueda)
+        $stop_words_fuertes = ['el','la','los','las','un','una','unos','unas','y','o','pero','si','de','del','a','al','en','por','para','con','sin','sobre','web','pagina','que','es','como','cuando','donde','quien','cuales','mas'];
+        $stop_words_suaves = ['tacna', 'fuerza']; // Ignorar solo si hay palabras más importantes
+        
+        $words = array_filter(explode(' ', $normalizada), function($w) use ($stop_words_fuertes) {
+            $w = trim($w);
+            return mb_strlen($w, 'UTF-8') > 2 && !in_array($w, $stop_words_fuertes);
+        });
+
+        // Aplicar filtro suave: Si quitar "fuerza" y "tacna" nos deja sin palabras, mejor no las quitamos
+        $words_strict = array_filter($words, function($w) use ($stop_words_suaves) {
+            return !in_array($w, $stop_words_suaves);
+        });
+        if (!empty($words_strict)) $words = $words_strict;
+        $words = array_values($words); // Reindexar array
+
+        if (!empty($words)) {
+            $words = array_slice($words, 0, 5); // Máximo 5 palabras para no saturar la BD
+            $score_sql = [];
+            $params = [];
+            
+            foreach ($words as $w) {
+                // Pesos de Relevancia: Título (3), Palabras Clave (3), Contenido (1)
+                $score_sql[] = "((CASE WHEN titulo LIKE ? THEN 3 ELSE 0 END) + (CASE WHEN palabras_clave LIKE ? THEN 3 ELSE 0 END) + (CASE WHEN contenido LIKE ? THEN 1 ELSE 0 END))";
+                array_push($params, "%$w%", "%$w%", "%$w%");
+            }
+            $score_str = implode(' + ', $score_sql);
+
+            // Ordena por Coincidencia + Prioridad
+            $sql = "SELECT titulo, contenido, fuente, ($score_str) as score 
+                    FROM panel_ia_conocimiento 
+                    WHERE estado = 1 AND ($score_str) > 0 
+                    ORDER BY score DESC, prioridad ASC 
+                    LIMIT 3";
+
+            $stmtRAG = $db->prepare($sql);
+            $stmtRAG->execute($params);
+            $documentos = $stmtRAG->fetchAll(PDO::FETCH_ASSOC);
+
+            if (count($documentos) > 0) {
+                $contexto_texto = "[INFORMACIÓN OFICIAL]\nRegla: Usa esta información solo si responde directamente a la pregunta. Si el contexto no contiene la respuesta, no inventes y dilo con naturalidad.\n\n";
+                foreach ($documentos as $doc) {
+                    $cont = mb_strimwidth(trim($doc['contenido']), 0, 800, '...');
+                    $contexto_texto .= "- Fuente: {$doc['titulo']} | Datos: $cont\n";
+                }
+                $contexto_texto .= "[/INFORMACIÓN OFICIAL]\n\nPregunta del usuario: " . $mensaje;
+                
+                $input_para_openai = $contexto_texto;
+                $contexto_debug = $contexto_texto;
+            }
+        }
+        // --- FIN MOTOR RAG ---
+
         if ($ia_modo === 'simulador') {
             $origen_final = 'simulador_ia';
             $texto_final = "[SIMULADOR IA] (Tema detectado: $categoria_detectada). Aquí responderá OpenAI. El fallback de emergencia es: $texto_final";
+            if ($contexto_debug !== '') {
+                $texto_final .= "\n\n📚 [Contexto inyectado en Simulación]:\n" . $contexto_debug;
+            }
             $razon_no_openai = 'MODO_SIMULADOR_ACTIVO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'exito_simulador')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
         } else {
@@ -294,7 +354,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                 $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado, motivo_error) VALUES (NOW(), ?, ?, ?, ?, 'error_openai', 'Error crítico: No se pudo descifrar la API Key (AES-256).')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo]);
             } else {
                 require_once __DIR__ . '/openai_client.php';
-                $ia_result = llamar_openai_responses($ia_modelo, $prompt_maestro, $normalizada, $ia_temperatura, $ia_max_tokens, $decrypted_key);
+                $ia_result = llamar_openai_responses($ia_modelo, $prompt_maestro, $input_para_openai, $ia_temperatura, $ia_max_tokens, $decrypted_key);
 
                 if ($ia_result['ok']) {
                     $texto_final = $ia_result['texto'];
@@ -366,9 +426,6 @@ if (defined('IA_DEBUG_MODE') && IA_DEBUG_MODE === true) {
     $response['fue_a_openai'] = ($origen_final === 'openai_responses' || $origen_final === 'openai_error');
     $response['razon_no_openai'] = $razon_no_openai;
     $response['error_openai_debug'] = $error_openai_debug;
-    if (isset($contexto_debug) && $contexto_debug !== '') {
-        $response['contexto_inyectado'] = $contexto_debug;
-    }
 }
 
 echo json_encode($response);
