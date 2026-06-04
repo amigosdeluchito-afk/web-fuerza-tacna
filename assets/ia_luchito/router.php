@@ -248,6 +248,8 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
             $limite_alcanzado = true;
             $origen_final = 'escudo_limite_global';
             $motivo_bloqueo = 'LIMITE_GLOBAL_ALCANZADO';
+            $texto_final = 'Hoy Luchito recibió bastantes consultas y su cerebro inteligente está en pausa para cuidar el sistema. ¡Pero igual puedo ayudarte a navegar!';
+            $acciones_final = [['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'], ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']];
             $razon_no_openai = 'LIMITE_GLOBAL_ALCANZADO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_global')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
         }
@@ -261,6 +263,8 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
             $limite_alcanzado = true;
             $origen_final = 'escudo_limite_ip';
             $motivo_bloqueo = 'LIMITE_IP_ALCANZADO';
+            $texto_final = '¡Vecino, ya usaste tus consultas inteligentes por hoy! Mañana se reinician. Mientras tanto, puedo ayudarte a navegar por la página.';
+            $acciones_final = [['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras'], ['label' => '👥 Candidatos', 'type' => 'ir_a_candidatos']];
             $razon_no_openai = 'LIMITE_IP_ALCANZADO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_ip')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
         }
