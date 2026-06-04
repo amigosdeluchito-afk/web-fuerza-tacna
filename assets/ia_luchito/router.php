@@ -315,20 +315,26 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                     ORDER BY score DESC, prioridad ASC 
                     LIMIT 3";
 
-            $stmtRAG = $db->prepare($sql);
-            $stmtRAG->execute($params);
-            $documentos = $stmtRAG->fetchAll(PDO::FETCH_ASSOC);
+            try {
+                $stmtRAG = $db->prepare($sql);
+                // Usamos array_merge para duplicar los parámetros porque $score_str se evalúa 2 veces (SELECT y WHERE)
+                $stmtRAG->execute(array_merge($params, $params));
+                $documentos = $stmtRAG->fetchAll(PDO::FETCH_ASSOC);
 
-            if (count($documentos) > 0) {
-                $contexto_texto = "[INFORMACIÓN OFICIAL]\nRegla: Usa esta información solo si responde directamente a la pregunta. Si el contexto no contiene la respuesta, no inventes y dilo con naturalidad.\n\n";
-                foreach ($documentos as $doc) {
-                    $cont = mb_strimwidth(trim($doc['contenido']), 0, 800, '...');
-                    $contexto_texto .= "- Fuente: {$doc['titulo']} | Datos: $cont\n";
+                if (count($documentos) > 0) {
+                    $contexto_texto = "[INFORMACIÓN OFICIAL]\nRegla: Usa esta información solo si responde directamente a la pregunta. Si el contexto no contiene la respuesta, no inventes y dilo con naturalidad.\n\n";
+                    foreach ($documentos as $doc) {
+                        $cont = mb_strimwidth(trim($doc['contenido']), 0, 800, '...');
+                        $contexto_texto .= "- Fuente: {$doc['titulo']} | Datos: $cont\n";
+                    }
+                    $contexto_texto .= "[/INFORMACIÓN OFICIAL]\n\nPregunta del usuario: " . $mensaje;
+                    
+                    $input_para_openai = $contexto_texto;
+                    $contexto_debug = $contexto_texto;
                 }
-                $contexto_texto .= "[/INFORMACIÓN OFICIAL]\n\nPregunta del usuario: " . $mensaje;
-                
-                $input_para_openai = $contexto_texto;
-                $contexto_debug = $contexto_texto;
+            } catch (Throwable $e) {
+                // Si falla el SQL, guardamos el error para el Debug, y dejamos que Luchito responda normalmente
+                $contexto_debug = "ERROR SQL RAG: " . $e->getMessage();
             }
         }
         // --- FIN MOTOR RAG ---
