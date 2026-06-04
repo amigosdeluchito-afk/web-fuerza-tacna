@@ -18,9 +18,10 @@ $debug_prompt_cargado = false;
 $ia_modelo = 'gpt-4o-mini';
 $ia_temperatura = 0.7;
 $ia_max_tokens = 150;
+$ia_api_key = '';
 
 try {
-    $stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('ia_prompt_maestro', 'ia_activa', 'ia_modo', 'ia_modelo', 'ia_temperatura', 'ia_max_tokens', 'ia_limite_global_diario', 'ia_limite_ip_diario', 'ia_mensaje_fallback_openai')");
+    $stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('ia_prompt_maestro', 'ia_activa', 'ia_modo', 'ia_modelo', 'ia_temperatura', 'ia_max_tokens', 'ia_limite_global_diario', 'ia_limite_ip_diario', 'ia_mensaje_fallback_openai', 'ia_api_key')");
     $configs = $stmtC->fetchAll(PDO::FETCH_ASSOC);
     if ($configs) {
         foreach ($configs as $c) {
@@ -33,6 +34,7 @@ try {
             if ($c['clave'] === 'ia_limite_ip_diario') $ia_limite_ip_diario = (int)$c['valor'];
             if ($c['clave'] === 'ia_mensaje_fallback_openai' && trim($c['valor']) !== '') $ia_mensaje_fallback_openai = trim($c['valor']);
             if ($c['clave'] === 'ia_prompt_maestro' && trim($c['valor']) !== '') $prompt_maestro = $c['valor'];
+            if ($c['clave'] === 'ia_api_key') $ia_api_key = trim($c['valor']);
         }
         $debug_prompt_cargado = true;
     }
@@ -275,7 +277,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '' && $origen_final === 'router_fuer
         } else {
             // Modo Producción
             require_once __DIR__ . '/openai_client.php';
-            $ia_result = llamar_openai_responses($ia_modelo, $prompt_maestro, $normalizada, $ia_temperatura, $ia_max_tokens);
+            $ia_result = llamar_openai_responses($ia_modelo, $prompt_maestro, $normalizada, $ia_temperatura, $ia_max_tokens, $ia_api_key);
 
             if ($ia_result['ok']) {
                 $texto_final = $ia_result['texto'];

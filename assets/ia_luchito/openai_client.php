@@ -1,9 +1,11 @@
 <?php
 // assets/ia_luchito/openai_client.php
 
-function llamar_openai_responses($modelo, $instructions, $input, $temp, $max_tokens) {
+function llamar_openai_responses($modelo, $instructions, $input, $temp, $max_tokens, $api_key_db = '') {
     // 1. Verificación de seguridad de la API Key
-    if (!defined('OPENAI_API_KEY') || trim(OPENAI_API_KEY) === '') {
+    $key = $api_key_db !== '' ? $api_key_db : (defined('OPENAI_API_KEY') ? OPENAI_API_KEY : '');
+    
+    if (trim($key) === '') {
         return [
             'ok' => false, 'texto' => '', 'tokens_input' => 0, 'tokens_output' => 0,
             'error' => 'API Key no configurada o vacía.'
@@ -27,7 +29,7 @@ function llamar_openai_responses($modelo, $instructions, $input, $temp, $max_tok
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . trim(OPENAI_API_KEY)
+        'Authorization: Bearer ' . trim($key)
     ]);
     curl_setopt($ch, CURLOPT_TIMEOUT, 8); // Timeout estricto de 8s para no colgar la web
 

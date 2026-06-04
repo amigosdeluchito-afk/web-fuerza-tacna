@@ -51,6 +51,7 @@ $stmtConf->execute(['ia_max_tokens', '150']);
 $stmtConf->execute(['ia_limite_global_diario', '1000']);
 $stmtConf->execute(['ia_limite_ip_diario', '10']);
 $stmtConf->execute(['ia_mensaje_fallback_openai', '😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?']);
+$stmtConf->execute(['ia_api_key', '']);
 
 // 2. Función para generar el JSON Público
 function regenerar_json_ia($db) {
@@ -213,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lim_global = $_POST['ia_limite_global_diario'] ?? '1000';
         $lim_ip = $_POST['ia_limite_ip_diario'] ?? '10';
         $fallback = trim($_POST['ia_mensaje_fallback_openai'] ?? '');
+        $api_key = trim($_POST['ia_api_key'] ?? '');
 
         if (trim($prompt) === '') {
             $mensaje = "Error: El prompt no puede estar vacío.";
@@ -229,6 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$lim_global, 'ia_limite_global_diario']);
             $stmt->execute([$lim_ip, 'ia_limite_ip_diario']);
             $stmt->execute([$fallback, 'ia_mensaje_fallback_openai']);
+            $stmt->execute([$api_key, 'ia_api_key']);
             $mensaje = "Configuración de IA guardada correctamente.";
         }
     }
@@ -266,7 +269,8 @@ $config_ia = [
     'ia_prompt_maestro' => '', 'ia_activa' => '0', 'fecha_actualizacion' => '',
     'ia_modo' => 'simulador', 'ia_modelo' => 'gpt-4o-mini', 'ia_temperatura' => '0.7',
     'ia_max_tokens' => '150', 'ia_limite_global_diario' => '1000', 'ia_limite_ip_diario' => '10',
-    'ia_mensaje_fallback_openai' => '😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?'
+    'ia_mensaje_fallback_openai' => '😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?',
+    'ia_api_key' => ''
 ];
 foreach ($config_rows as $row) {
     $config_ia[$row['clave']] = $row['valor'];
@@ -274,6 +278,8 @@ foreach ($config_rows as $row) {
         $config_ia['fecha_actualizacion'] = $row['fecha_actualizacion'];
     }
 }
+
+$api_key_configured = !empty($config_ia['ia_api_key']) || (defined('OPENAI_API_KEY') && trim(OPENAI_API_KEY) !== '');
 
 // 5. Calcular Estadísticas y Extraer Categorías Dinámicas
 $total_reglas = count($respuestas_list);
@@ -601,6 +607,12 @@ sort($all_cats);
                             <!-- Columna Derecha: Parámetros Técnicos -->
                             <div class="col-xl-5 col-lg-12 pl-xl-4">
                                 <h6 class="font-weight-bold mb-3 text-secondary">⚙️ Parámetros Técnicos</h6>
+                                
+                                <div class="form-group">
+                                    <label class="font-weight-bold">API Key de OpenAI</label>
+                                    <input type="password" name="ia_api_key" class="form-control" value="<?= htmlspecialchars($config_ia['ia_api_key']) ?>" placeholder="sk-proj-..." autocomplete="off">
+                                    <small class="text-muted">Se guardará de forma segura en la base de datos.</small>
+                                </div>
                                 
                                 <div class="form-group">
                                     <label class="font-weight-bold">Modo de Ejecución</label>
