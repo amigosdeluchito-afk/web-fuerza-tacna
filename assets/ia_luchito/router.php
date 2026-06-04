@@ -281,11 +281,24 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         $input_para_openai = $mensaje; // Mandamos el mensaje con formato original a OpenAI
 
         // Filtro de Stop Words (Evita que palabras comunes dominen la búsqueda)
-        $stop_words_fuertes = ['el','la','los','las','un','una','unos','unas','y','o','pero','si','de','del','a','al','en','por','para','con','sin','sobre','web','pagina','que','es','como','cuando','donde','quien','cuales','mas'];
+        $stop_words_fuertes = ['el','la','los','las','un','una','unos','unas','y','o','pero','si','de','del','a','al','en','por','para','con','sin','sobre','web','pagina','que','es','como','cuando','donde','quien','cuales','mas','estan','son','hay','tiene','tienen','hizo','han'];
         $stop_words_suaves = ['tacna', 'fuerza']; // Ignorar solo si hay palabras más importantes
         
         // Limpiar signos de interrogación y puntuación para que "tacna?" sea solo "tacna"
         $texto_limpio = preg_replace('/[^a-z0-9\s]/', '', $normalizada);
+        
+        // Estandarizar plurales y variaciones para que coincidan con los textos de la BD
+        $reemplazos = [
+            '/\bentregadas\b/' => 'entregado',
+            '/\bentregados\b/' => 'entregado',
+            '/\bentregada\b/' => 'entregado',
+            '/\bparalizadas\b/' => 'paralizado',
+            '/\bparalizados\b/' => 'paralizado',
+            '/\bparalizada\b/' => 'paralizado',
+            '/\bobras\b/' => 'obra',
+            '/\bproyectos\b/' => 'proyecto'
+        ];
+        $texto_limpio = preg_replace(array_keys($reemplazos), array_values($reemplazos), $texto_limpio);
         
         $words = array_filter(explode(' ', $texto_limpio), function($w) use ($stop_words_fuertes) {
             $w = trim($w);
