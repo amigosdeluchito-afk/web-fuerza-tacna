@@ -52,6 +52,7 @@ $stmtConf->execute(['ia_limite_global_diario', '1000']);
 $stmtConf->execute(['ia_limite_ip_diario', '10']);
 $stmtConf->execute(['ia_mensaje_fallback_openai', '😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?']);
 $stmtConf->execute(['ia_api_key', '']);
+$stmtConf->execute(['ia_debug_mode', '0']);
 
 // 2. Función para generar el JSON Público
 function regenerar_json_ia($db) {
@@ -219,6 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lim_ip = $_POST['ia_limite_ip_diario'] ?? '10';
         $fallback = trim($_POST['ia_mensaje_fallback_openai'] ?? '');
         $raw_api_key = trim($_POST['ia_api_key'] ?? '');
+        $debug_mode = isset($_POST['ia_debug_mode']) ? '1' : '0';
 
         if (trim($prompt) === '') {
             $mensaje = "Error: El prompt no puede estar vacío.";
@@ -235,6 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$lim_global, 'ia_limite_global_diario']);
             $stmt->execute([$lim_ip, 'ia_limite_ip_diario']);
             $stmt->execute([$fallback, 'ia_mensaje_fallback_openai']);
+            $stmt->execute([$debug_mode, 'ia_debug_mode']);
             
             $mensaje = "Configuración de IA guardada correctamente.";
 
@@ -283,7 +286,8 @@ $config_ia = [
     'ia_modo' => 'simulador', 'ia_modelo' => 'gpt-4o-mini', 'ia_temperatura' => '0.7',
     'ia_max_tokens' => '150', 'ia_limite_global_diario' => '1000', 'ia_limite_ip_diario' => '10',
     'ia_mensaje_fallback_openai' => '😅 Mi cerebro digital está un poco saturado ahorita, vecino. ¿Qué tal si mientras tanto vemos el mapa de obras o a los candidatos?',
-    'ia_api_key' => ''
+    'ia_api_key' => '',
+    'ia_debug_mode' => '0'
 ];
 foreach ($config_rows as $row) {
     $config_ia[$row['clave']] = $row['valor'];
@@ -671,6 +675,15 @@ sort($all_cats);
                                         <input type="number" name="ia_limite_ip_diario" class="form-control" value="<?= htmlspecialchars($config_ia['ia_limite_ip_diario']) ?>" required>
                                         <small class="text-muted">Consultas por persona</small>
                                     </div>
+                                </div>
+
+                                <h6 class="font-weight-bold mt-4 mb-3 text-secondary">🛠️ Herramientas de Desarrollo</h6>
+                                <div class="form-group p-3" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="switchDebug" name="ia_debug_mode" <?= $config_ia['ia_debug_mode'] === '1' ? 'checked' : '' ?>>
+                                        <label class="custom-control-label font-weight-bold text-danger" for="switchDebug">Activar Modo Debug</label>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Muestra la información inyectada a la IA en la pestaña "Network" del navegador. <b>¡Apágalo cuando termines de probar!</b></small>
                                 </div>
                             </div>
                         </div>

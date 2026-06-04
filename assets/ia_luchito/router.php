@@ -19,9 +19,10 @@ $ia_modelo = 'gpt-4o-mini';
 $ia_temperatura = 0.7;
 $ia_max_tokens = 150;
 $ia_api_key = '';
+$ia_debug_mode_db = false;
 
 try {
-    $stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('ia_prompt_maestro', 'ia_activa', 'ia_modo', 'ia_modelo', 'ia_temperatura', 'ia_max_tokens', 'ia_limite_global_diario', 'ia_limite_ip_diario', 'ia_mensaje_fallback_openai', 'ia_api_key')");
+    $stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('ia_prompt_maestro', 'ia_activa', 'ia_modo', 'ia_modelo', 'ia_temperatura', 'ia_max_tokens', 'ia_limite_global_diario', 'ia_limite_ip_diario', 'ia_mensaje_fallback_openai', 'ia_api_key', 'ia_debug_mode')");
     $configs = $stmtC->fetchAll(PDO::FETCH_ASSOC);
     if ($configs) {
         foreach ($configs as $c) {
@@ -35,6 +36,7 @@ try {
             if ($c['clave'] === 'ia_mensaje_fallback_openai' && trim($c['valor']) !== '') $ia_mensaje_fallback_openai = trim($c['valor']);
             if ($c['clave'] === 'ia_prompt_maestro' && trim($c['valor']) !== '') $prompt_maestro = $c['valor'];
             if ($c['clave'] === 'ia_api_key') $ia_api_key = trim($c['valor']);
+            if ($c['clave'] === 'ia_debug_mode') $ia_debug_mode_db = ($c['valor'] === '1');
         }
         $debug_prompt_cargado = true;
     }
@@ -418,7 +420,9 @@ $response = [
     'motivo_bloqueo' => $motivo_bloqueo
 ];
 
-if (defined('IA_DEBUG_MODE') && IA_DEBUG_MODE === true) {
+$debug_activado = $ia_debug_mode_db || (defined('IA_DEBUG_MODE') && IA_DEBUG_MODE === true);
+
+if ($debug_activado) {
     $response['debug_ia_activa'] = $ia_activa;
     $response['debug_prompt_cargado'] = $debug_prompt_cargado;
     $response['ia_modo'] = $ia_modo;
