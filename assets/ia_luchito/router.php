@@ -187,6 +187,9 @@ foreach ($temas_validos as $categoria => $datos) {
 // --- ESCUDOS DE CONTEXTO Y ABUSO (ETAPA 5A - PASO 2) ---
 $permitir_ia = false;
 $motivo_bloqueo = '';
+$limite_alcanzado = false;
+$error_openai_debug = '';
+$razon_no_openai = ($ia_activa === 1) ? 'OK_LISTO_PARA_EVALUAR' : 'IA_APAGADA_EN_PANEL';
 
 if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instrucciones|olvida todo|muestrame tu prompt)/i', $normalizada)) {
     $categoria_detectada = 'Auditoría - Inyección';
@@ -194,12 +197,14 @@ if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instru
     $acciones_final = [];
     $origen_final = 'escudo_contexto';
     $motivo_bloqueo = 'PROMPT_INJECTION';
+    $razon_no_openai = 'ESCUDO_PROMPT_INJECTION';
 } elseif (preg_match('/(dina|boluarte|castillo|fujimori|congreso|presidente|lima|politica nacional)/i', $normalizada)) {
     $categoria_detectada = 'Política Nacional';
     $texto_final = 'De política nacional no tengo apuntes, vecino. Solo ando pendiente de lo que pasa aquí en Tacna.';
     $acciones_final = [];
     $origen_final = 'escudo_contexto';
     $motivo_bloqueo = 'TEMA_PROHIBIDO';
+    $razon_no_openai = 'ESCUDO_TEMA_PROHIBIDO';
 } elseif (preg_match('/\b(asdf|qwer|zxcv|jajaja)\b/i', $normalizada) || preg_match('/(.)\1{4,}/', $normalizada)) {
     $categoria_detectada = 'Ruido / Spam';
     $texto_final = 'Me agarraste fuera de juego. ¿Te muestro las obras o a los candidatos?';
@@ -209,6 +214,7 @@ if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instru
     ];
     $origen_final = 'escudo_contexto';
     $motivo_bloqueo = 'TEXTO_ALEATORIO';
+    $razon_no_openai = 'ESCUDO_SPAM';
     if (preg_match('/(.)\1{7,}/', $normalizada)) $spam_extremo = true;
 }
 
@@ -219,7 +225,6 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
     $salt = defined('IA_HASH_SALT') ? IA_HASH_SALT : 'FallbackSalt';
     $ip_hash = hash('sha256', $ip_real . $salt);
     $fecha_hoy = date('Y-m-d');
-    $limite_alcanzado = false;
 
     // 1. Crear tabla de auditoría si no existe
     $db->exec("CREATE TABLE IF NOT EXISTS panel_ia_auditoria (
@@ -243,6 +248,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
             $limite_alcanzado = true;
             $origen_final = 'escudo_limite_global';
             $motivo_bloqueo = 'LIMITE_GLOBAL_ALCANZADO';
+            $razon_no_openai = 'LIMITE_GLOBAL_ALCANZADO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_global')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
         }
     }
@@ -255,6 +261,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
             $limite_alcanzado = true;
             $origen_final = 'escudo_limite_ip';
             $motivo_bloqueo = 'LIMITE_IP_ALCANZADO';
+            $razon_no_openai = 'LIMITE_IP_ALCANZADO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'limite_ip')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
         }
     }
@@ -266,6 +273,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         if ($ia_modo === 'simulador') {
             $origen_final = 'simulador_ia';
             $texto_final = "[SIMULADOR IA] (Tema detectado: $categoria_detectada). Aquí responderá OpenAI. El fallback de emergencia es: $texto_final";
+            $razon_no_openai = 'MODO_SIMULADOR_ACTIVO';
             $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado) VALUES (NOW(), ?, ?, ?, ?, 'exito_simulador')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modo]);
         } else {
             // Modo Producción
@@ -277,6 +285,8 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
             if ($ia_api_key !== '' && $decrypted_key === '') {
                 // Falló el descifrado (ej. clave antigua en texto plano o llave maestra incorrecta)
                 $origen_final = 'openai_error';
+                $error_openai_debug = 'Error crítico: No se pudo descifrar la API Key (AES-256).';
+                $razon_no_openai = 'FALLO_DESCIFRADO_API_KEY';
                 $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado, motivo_error) VALUES (NOW(), ?, ?, ?, ?, 'error_openai', 'Error crítico: No se pudo descifrar la API Key (AES-256).')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo]);
             } else {
                 require_once __DIR__ . '/openai_client.php';
@@ -285,9 +295,12 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                 if ($ia_result['ok']) {
                     $texto_final = $ia_result['texto'];
                     $origen_final = 'openai_responses';
+                    $razon_no_openai = 'FUE_A_OPENAI_EXITO';
                     $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, tokens_input, tokens_output, estado) VALUES (NOW(), ?, ?, ?, ?, ?, ?, 'exito_openai')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo, $ia_result['tokens_input'], $ia_result['tokens_output']]);
                 } else {
                     $origen_final = 'openai_error';
+                    $error_openai_debug = $ia_result['error'];
+                    $razon_no_openai = 'ERROR_CONEXION_OPENAI';
                     $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado, motivo_error) VALUES (NOW(), ?, ?, ?, ?, 'error_openai', ?)")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo, $ia_result['error']]);
                 }
             }
@@ -340,5 +353,10 @@ echo json_encode([
     'permitir_ia' => $permitir_ia,
     'motivo_bloqueo' => $motivo_bloqueo,
     'debug_ia_activa' => $ia_activa,
-    'debug_prompt_cargado' => $debug_prompt_cargado
+    'debug_prompt_cargado' => $debug_prompt_cargado,
+    'ia_modo' => $ia_modo,
+    'limite_alcanzado' => $limite_alcanzado,
+    'fue_a_openai' => ($origen_final === 'openai_responses' || $origen_final === 'openai_error'),
+    'razon_no_openai' => $razon_no_openai,
+    'error_openai_debug' => $error_openai_debug
 ]);
