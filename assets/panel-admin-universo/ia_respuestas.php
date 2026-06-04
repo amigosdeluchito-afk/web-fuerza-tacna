@@ -63,8 +63,8 @@ function regenerar_json_ia($db) {
         $palabras = array_filter(array_map('trim', explode(',', $r['palabras_clave'])));
         if (empty($palabras)) continue;
         
-        // Envolvemos las palabras en un grupo Regex
-        $pattern_str = '(' . implode('|', $palabras) . ')';
+        // Patrón estricto: Máx 4 palabras y coincidencia exacta (evita que "habla" capture "háblame")
+        $pattern_str = '^(?=(?:\\S+\\s+){0,3}\\S+$).*?(?:^|[^a-z0-9])(' . implode('|', $palabras) . ')(?:[^a-z0-9]|$).*$';
         
         $item = [
             'categoria'   => $r['categoria'],
@@ -836,7 +836,8 @@ sort($all_cats);
             if ($r['estado'] != 1) continue;
             $palabras = array_filter(array_map('trim', explode(',', $r['palabras_clave'])));
             if (empty($palabras)) continue;
-            $test_data[] = ['pattern_str' => '(' . implode('|', $palabras) . ')', 'responses' => json_decode($r['respuestas'], true) ?: [], 'actions' => json_decode($r['acciones'], true) ?: []];
+            $pattern_str = '^(?=(?:\\S+\\s+){0,3}\\S+$).*?(?:^|[^a-z0-9])(' . implode('|', $palabras) . ')(?:[^a-z0-9]|$).*$';
+            $test_data[] = ['pattern_str' => $pattern_str, 'responses' => json_decode($r['respuestas'], true) ?: [], 'actions' => json_decode($r['acciones'], true) ?: []];
         }
         echo json_encode($test_data);
     ?>;
