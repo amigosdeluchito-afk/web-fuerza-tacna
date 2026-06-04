@@ -199,6 +199,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
     <a href="cronologia.php">⏳ Cronología</a>
     <a href="ia_respuestas.php">🧠 Cerebro IA</a>
     <a href="ia_conocimiento.php" class="active">📚 Base Conocimiento</a>
+    <a href="ia_fuentes.php">🔗 Fuentes Externas</a>
     <?php if (is_admin()): ?>
     <a href="usuarios.php">👤 Usuarios</a>
     <a href="historial.php">🕒 Historial</a>
