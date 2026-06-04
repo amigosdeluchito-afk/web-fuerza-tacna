@@ -364,6 +364,7 @@ sort($all_cats);
     <a href="segmentos.php">🗂️ Segmentos</a>
     <a href="cronologia.php">⏳ Cronología</a>
     <a href="ia_respuestas.php" class="active">🧠 Cerebro IA</a>
+    <a href="ia_conocimiento.php">📚 Base Conocimiento</a>
     <?php if (is_admin()): ?>
     <a href="usuarios.php">👤 Usuarios</a>
     <a href="historial.php">🕒 Historial</a>
