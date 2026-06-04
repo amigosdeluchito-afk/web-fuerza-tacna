@@ -4,6 +4,95 @@ require_login();
 
 $db = get_db_connection();
 
+// --- INICIO FASE 8.3: MOTOR AJAX DE SINCRONIZACIÓN DE OBRAS ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array($_POST['action'], ['preview_sync_obras', 'confirm_sync_obras'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
+            throw new Exception("Falta la carpeta 'vendor' de Google API.");
+        }
+        require_once __DIR__ . '/vendor/autoload.php';
+        $rutaCredenciales = __DIR__ . '/data/credenciales.json';
+        $spreadsheetId = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
+
+        $client = new \Google_Client();
+        $client->setApplicationName('Panel de Obras Fuerza Tacna');
+        $client->setScopes([\Google_Service_Sheets::SPREADSHEETS_READONLY]);
+        $client->setAuthConfig($rutaCredenciales);
+        $service = new \Google_Service_Sheets($client);
+
+        // 1. Obtener pestañas activas desde SEGMENTOS
+        $responseSeg = $service->spreadsheets_values->get($spreadsheetId, 'SEGMENTOS!A:D');
+        $rowsSeg = $responseSeg->getValues() ?? [];
+        $segmentosActivos = [];
+        foreach ($rowsSeg as $i => $row) {
+            if ($i === 0) continue;
+            if (!empty($row[2]) && strtoupper($row[3] ?? '') === 'SI') {
+                $segmentosActivos[$row[2]] = $row[1] ?? $row[2]; // tab => nombre_visible
+            }
+        }
+
+        // 2. Extraer datos reales
+        $obrasAProcesar = [];
+        foreach ($segmentosActivos as $tab => $nombreSegmento) {
+            try {
+                $responseObras = $service->spreadsheets_values->get($spreadsheetId, $tab . '!A2:I');
+                $rowsObras = $responseObras->getValues() ?? [];
+                foreach ($rowsObras as $r) {
+                    $nombre = trim($r[0] ?? '');
+                    if (empty($nombre)) continue; // Regla 3: Ignorar si columna A está vacía
+
+                    $estado = trim($r[1] ?? '');
+                    $monto = trim($r[2] ?? '');
+                    $provincia = trim($r[5] ?? '');
+                    $distrito = trim($r[6] ?? '');
+                    $carpeta = trim($r[7] ?? '');
+                    $descripcion = trim($r[8] ?? '');
+
+                    // Regla 4: Redacción usando datos reales, sin inventar nada.
+                    $titulo = "Obra: " . $nombre;
+                    $palabras = implode(', ', array_filter([$nombre, $distrito, $nombreSegmento]));
+                    $contenido = "La obra '$nombre' pertenece al sector $nombreSegmento. ";
+                    if ($distrito || $provincia) $contenido .= "Ubicada en $distrito, $provincia. ";
+                    if ($estado) $contenido .= "Estado actual: '$estado'. ";
+                    if ($monto) $contenido .= "Monto referencial: $monto. ";
+                    if ($descripcion) $contenido .= "Descripción: $descripcion.";
+                    if ($carpeta && $carpeta !== '-') $contenido .= " (Tiene galería de fotos).";
+
+                    $obrasAProcesar[] = [
+                        'categoria' => 'Obras', 'titulo' => $titulo, 'contenido' => trim($contenido),
+                        'palabras_clave' => $palabras, 'prioridad' => 5, 'estado' => 1,
+                        'fuente' => 'Google Sheets - Obras' // Regla 1
+                    ];
+                }
+            } catch (\Exception $e) { continue; } // Ignorar si la pestaña no existe aún
+        }
+
+        if ($_POST['action'] === 'preview_sync_obras') { // Regla 5: Modo previsualización
+            $stmtDel = $db->query("SELECT COUNT(*) FROM panel_ia_conocimiento WHERE fuente = 'Google Sheets - Obras'");
+            echo json_encode([
+                'ok' => true, 'count_new' => count($obrasAProcesar), 
+                'count_delete' => (int)$stmtDel->fetchColumn(), 'samples' => array_slice($obrasAProcesar, 0, 3)
+            ]);
+        } elseif ($_POST['action'] === 'confirm_sync_obras') { // Regla 5: Modo Confirmación
+            $db->beginTransaction();
+            // Regla 2: DELETE SEGURO
+            $db->exec("DELETE FROM panel_ia_conocimiento WHERE fuente = 'Google Sheets - Obras'");
+            $stmtIns = $db->prepare("INSERT INTO panel_ia_conocimiento (categoria, titulo, contenido, palabras_clave, prioridad, estado, fuente, fecha_actualizacion) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+            foreach ($obrasAProcesar as $obra) {
+                $stmtIns->execute([$obra['categoria'], $obra['titulo'], $obra['contenido'], $obra['palabras_clave'], $obra['prioridad'], $obra['estado'], $obra['fuente']]);
+            }
+            $db->commit();
+            echo json_encode(['ok' => true, 'mensaje' => 'Sincronización exitosa. Se insertaron ' . count($obrasAProcesar) . ' obras para Luchito.']);
+        }
+        exit;
+    } catch (\Exception $e) {
+        echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+        exit;
+    }
+}
+// --- FIN FASE 8.3 ---
+
 // 1. Crear tabla de conocimiento si no existe
 $db->exec("CREATE TABLE IF NOT EXISTS panel_ia_conocimiento (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -204,6 +293,23 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
 
         <!-- Columna Listado -->
         <div class="col-lg-8">
+            
+            <!-- Nueva Card de Sincronización Automática -->
+            <div class="card shadow-sm mb-4" style="border: 1px solid #10b981;">
+                <div class="card-header text-white" style="background-color: #10b981;">
+                    🔄 Sincronizar Obras desde Excel
+                </div>
+                <div class="card-body">
+                    <p class="text-muted" style="font-size:13px;">Esto conectará con tu Google Sheets, leerá todas las pestañas activas y generará un documento de conocimiento por cada obra encontrada. <strong class="text-danger">Nunca borrará los documentos ingresados manualmente.</strong></p>
+                    <button type="button" class="btn btn-outline-success font-weight-bold" onclick="previewSyncObras()" id="btn-preview-sync">🔍 Previsualizar Sincronización de Obras</button>
+                    
+                    <div id="sync-preview-container" style="display:none; margin-top:15px; padding:15px; background:#f0fdf4; border-radius:8px; border:1px solid #a7f3d0;">
+                        <div id="sync-preview-content" style="font-size:13px; color:#064e3b;"></div>
+                        <button type="button" class="btn btn-success font-weight-bold mt-3" onclick="confirmSyncObras()" id="btn-confirm-sync">✅ Confirmar y Sincronizar</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <span>Documentos Cargados (<?= count($conocimientos) ?>)</span>
@@ -312,6 +418,50 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         
         document.getElementById('btn-cancelar').style.display = "block";
         window.scrollTo(0, 0);
+    }
+
+    // Funciones de Sincronización (Fase 8.3)
+    async function previewSyncObras() {
+        const btn = document.getElementById('btn-preview-sync');
+        const container = document.getElementById('sync-preview-container');
+        const content = document.getElementById('sync-preview-content');
+        const btnConfirm = document.getElementById('btn-confirm-sync');
+        
+        btn.disabled = true; btn.innerText = '⏳ Conectando con Google Sheets...';
+        container.style.display = 'none';
+
+        const fd = new FormData(); fd.append('action', 'preview_sync_obras');
+        try {
+            const resp = await fetch('ia_conocimiento.php', { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (data.ok) {
+                let html = `<p class="mb-2"><strong>📊 Resultados de lectura en Excel:</strong></p><ul>`;
+                html += `<li>Obras válidas encontradas: <strong class="text-success">${data.count_new}</strong></li>`;
+                html += `<li>Registros antiguos que se reemplazarán: <strong class="text-danger">${data.count_delete}</strong></li></ul>`;
+                if (data.samples.length > 0) {
+                    html += `<p class="mb-1 mt-3"><strong>👀 Ejemplos de lo que aprenderá Luchito:</strong></p>`;
+                    data.samples.forEach(s => {
+                        html += `<div style="background:#ffffff; padding:8px; border-radius:4px; border:1px solid #d1fae5; margin-bottom:8px; font-size:12px;"><strong>${s.titulo}</strong><br><span class="text-muted">${s.contenido}</span></div>`;
+                    });
+                } else { html += `<p class="text-danger">No se encontraron obras válidas.</p>`; btnConfirm.style.display = 'none'; }
+                content.innerHTML = html; container.style.display = 'block';
+                if (data.count_new > 0) btnConfirm.style.display = 'inline-block';
+            } else { alert('Error: ' + data.error); }
+        } catch (err) { alert('Error de conexión.'); } 
+        finally { btn.disabled = false; btn.innerText = '🔍 Previsualizar Sincronización de Obras'; }
+    }
+
+    async function confirmSyncObras() {
+        const btn = document.getElementById('btn-confirm-sync');
+        btn.disabled = true; btn.innerText = '⏳ Sincronizando e Inyectando Conocimiento...';
+        const fd = new FormData(); fd.append('action', 'confirm_sync_obras');
+        try {
+            const resp = await fetch('ia_conocimiento.php', { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (data.ok) { alert(data.mensaje); location.reload(); } 
+            else { alert('Error: ' + data.error); }
+        } catch (err) { alert('Error de conexión al guardar.'); } 
+        finally { btn.disabled = false; btn.innerText = '✅ Confirmar y Sincronizar'; }
     }
 </script>
 </body>
