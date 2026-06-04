@@ -12,14 +12,16 @@ function llamar_openai_responses($modelo, $instructions, $input, $temp, $max_tok
         ];
     }
 
-    // 2. Preparar el payload con la estructura estricta de Responses API
-    $url = 'https://api.openai.com/v1/responses';
+    // 2. Preparar el payload con la estructura de Chat Completions
+    $url = 'https://api.openai.com/v1/chat/completions';
     $data = [
         'model' => $modelo,
-        'instructions' => $instructions,
-        'input' => $input,
+        'messages' => [
+            ['role' => 'system', 'content' => $instructions],
+            ['role' => 'user', 'content' => $input]
+        ],
         'temperature' => (float)$temp,
-        'max_output_tokens' => (int)$max_tokens
+        'max_tokens' => (int)$max_tokens
     ];
 
     // 3. Ejecutar cURL protegido
@@ -31,7 +33,7 @@ function llamar_openai_responses($modelo, $instructions, $input, $temp, $max_tok
         'Content-Type: application/json',
         'Authorization: Bearer ' . trim($key)
     ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 8); // Timeout estricto de 8s para no colgar la web
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Aumentado a 15s para dar tiempo al prompt maestro
 
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -53,10 +55,10 @@ function llamar_openai_responses($modelo, $instructions, $input, $temp, $max_tok
         return ['ok' => false, 'texto' => '', 'tokens_input' => 0, 'tokens_output' => 0, 'error' => "HTTP $http_code - $apiError"];
     }
 
-    // 5. Extracción Limpia y Devolución
-    $texto_salida = $decoded['output'] ?? ''; // Estructura Responses API
-    $t_input = $decoded['usage']['input_tokens'] ?? 0;
-    $t_output = $decoded['usage']['output_tokens'] ?? 0;
+    // 5. Extracción de la respuesta del modelo
+    $texto_salida = $decoded['choices'][0]['message']['content'] ?? ''; 
+    $t_input = $decoded['usage']['prompt_tokens'] ?? 0;
+    $t_output = $decoded['usage']['completion_tokens'] ?? 0;
 
     return [
         'ok' => true,

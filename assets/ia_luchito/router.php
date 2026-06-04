@@ -110,8 +110,7 @@ if (preg_match('/(https?:\/\/|www\.|\.(com|pe|net|org|info|gob)\b)/i', $mensaje)
     exit;
 }
 
-// 4. Simular tiempo de "razonamiento" (1.5 segundos)
-usleep(1500000);
+// 4. (Se eliminó el retraso forzado de 1.5s para evitar Timeouts con OpenAI)
 
 // 5. Normalizar texto (Quitar tildes y mayúsculas para buscar coincidencias)
 $normalizada = mb_strtolower($mensaje, 'UTF-8');
@@ -271,7 +270,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         } else {
             // Modo Producción
             $decrypted_key = '';
-            if ($ia_api_key !== '') {
+            if ($ia_api_key !== '' && function_exists('decrypt_api_key')) {
                 $decrypted_key = decrypt_api_key($ia_api_key);
             }
 
