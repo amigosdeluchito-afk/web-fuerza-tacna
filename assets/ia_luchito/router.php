@@ -366,6 +366,9 @@ if (defined('IA_DEBUG_MODE') && IA_DEBUG_MODE === true) {
     $response['fue_a_openai'] = ($origen_final === 'openai_responses' || $origen_final === 'openai_error');
     $response['razon_no_openai'] = $razon_no_openai;
     $response['error_openai_debug'] = $error_openai_debug;
+    if (isset($contexto_debug) && $contexto_debug !== '') {
+        $response['contexto_inyectado'] = $contexto_debug;
+    }
 }
 
 echo json_encode($response);
