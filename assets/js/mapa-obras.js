@@ -632,6 +632,11 @@ window.initMapEngine = async function(container) {
             const nombre = (o.nombre || '').trim();
             const x = toNum(o.x), y = toNum(o.y);
             if (!nombre || isNaN(x) || isNaN(y) || x < 0 || x > 1 || y < 0 || y > 1) continue;
+            
+            // Ignorar obras ocultas
+            const estado = (o.estado || '').trim();
+            if (estado.includes('Oculto')) continue;
+
             const rawCarp = (o.carpeta ?? '').toString().trim();
             validas.push({ ...o, x, y, carpeta: (rawCarp && rawCarp.toLowerCase() !== 'null' && rawCarp !== '-') ? rawCarp : null });
         }
