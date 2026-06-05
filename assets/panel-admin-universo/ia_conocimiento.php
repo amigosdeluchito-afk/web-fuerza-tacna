@@ -141,6 +141,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['ia_msg'] = "Error: Categoría, Título y Contenido son obligatorios.";
         }
+    } elseif ($action === 'suggest_keywords') {
+        header('Content-Type: application/json');
+        $texto = trim($_POST['texto'] ?? '');
+        if (!$texto) {
+            echo json_encode(['ok' => false, 'error' => 'No hay texto para analizar.']);
+            exit;
+        }
+        
+        $stmtC = $db->query("SELECT valor FROM panel_configuracion WHERE clave = 'ia_api_key'");
+        $api_key_db = $stmtC->fetchColumn();
+        $decrypted_key = '';
+        if ($api_key_db && function_exists('decrypt_api_key')) {
+            $decrypted_key = decrypt_api_key($api_key_db);
+        }
+        
+        require_once __DIR__ . '/../ia_luchito/openai_client.php';
+        $prompt = "Actúa como un experto en extracción de datos. Lee el texto y devuelve ÚNICAMENTE una lista de 10 palabras clave separadas por comas. NO devuelvas viñetas ni explicaciones, solo las palabras clave en minúsculas.";
+        $ia_result = llamar_openai_responses('gpt-4o-mini', $prompt, mb_strimwidth($texto, 0, 3000, '...'), 0.3, 50, $decrypted_key);
+        
+        if ($ia_result['ok']) {
+            echo json_encode(['ok' => true, 'keywords' => str_replace(['"', '.'], '', $ia_result['texto'])]);
+        } else {
+            echo json_encode(['ok' => false, 'error' => $ia_result['error']]);
+        }
+        exit;
     } elseif ($action === 'delete') {
         $id = $_POST['id'] ?? '';
         if ($id) {
@@ -257,7 +282,15 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
 
                         <div class="form-group">
                             <label class="font-weight-bold">Palabras Clave (Opcional para mejorar búsqueda)</label>
-                            <input type="text" name="palabras_clave" id="input-palabras" class="form-control" placeholder="Ej. fundacion, historia, movimiento">
+                            <textarea name="palabras_clave" id="input-palabras" class="form-control" rows="3" placeholder="Ej. fundacion, historia, movimiento"></textarea>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted" id="msg-sugerencia">La IA leerá tu texto y te sugerirá etiquetas.</small>
+                                <button class="btn btn-sm btn-outline-info font-weight-bold" type="button" onclick="sugerirPalabrasClave(this)">✨ Sugerir Palabras con IA</button>
+                            </div>
+                            <div id="sugerencias-container" style="display:none; margin-top: 10px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px dashed #bee3f8;">
+                                <span style="font-size:12px; color:#0369a1; font-weight:bold; display:block; margin-bottom:5px;">Haz clic en las sugerencias para agregarlas:</span>
+                                <div id="lista-sugerencias"></div>
+                            </div>
                         </div>
 
                         <div class="form-row">
@@ -399,6 +432,9 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         document.getElementById('input-estado').checked = true;
         document.getElementById('input-fuente').value = "Manual";
         document.getElementById('input-url').value = "";
+        document.getElementById('sugerencias-container').style.display = 'none';
+        document.getElementById('lista-sugerencias').innerHTML = '';
+        document.getElementById('msg-sugerencia').innerText = 'La IA leerá tu texto y te sugerirá etiquetas.';
         document.getElementById('btn-cancelar').style.display = "none";
     }
 
@@ -417,8 +453,79 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         document.getElementById('input-fuente').value = dataSpan.getAttribute('data-fue');
         document.getElementById('input-url').value = dataSpan.getAttribute('data-url');
         
+        document.getElementById('sugerencias-container').style.display = 'none';
+        document.getElementById('lista-sugerencias').innerHTML = '';
+        document.getElementById('msg-sugerencia').innerText = 'La IA leerá tu texto y te sugerirá etiquetas.';
+
         document.getElementById('btn-cancelar').style.display = "block";
         window.scrollTo(0, 0);
+    }
+
+    async function sugerirPalabrasClave(btn) {
+        const contenido = document.getElementById('input-contenido').value.trim();
+        const msg = document.getElementById('msg-sugerencia');
+        const inputPalabras = document.getElementById('input-palabras');
+        const listaSugerencias = document.getElementById('lista-sugerencias');
+        const containerSugerencias = document.getElementById('sugerencias-container');
+
+        if (!contenido) {
+            alert('Primero debes escribir algún contenido para poder sugerir palabras.');
+            return;
+        }
+
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Analizando...';
+        btn.disabled = true;
+        msg.innerHTML = '<span style="color:#d97706;">Analizando texto con OpenAI...</span>';
+        containerSugerencias.style.display = 'none';
+
+        const fd = new FormData();
+        fd.append('action', 'suggest_keywords');
+        fd.append('texto', contenido);
+
+        try {
+            const resp = await fetch('ia_conocimiento.php', { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (data.ok) {
+                msg.innerHTML = '<span style="color:#10b981;">✅ Aquí tienes 10 opciones:</span>';
+                let words = data.keywords.split(',').map(w => w.trim()).filter(w => w.length > 0);
+                listaSugerencias.innerHTML = '';
+                
+                words.forEach(word => {
+                    const chip = document.createElement('button');
+                    chip.type = 'button';
+                    chip.className = 'btn btn-sm btn-outline-primary m-1 font-weight-bold';
+                    chip.style.borderRadius = '20px';
+                    chip.innerText = '+' + word;
+                    chip.onclick = function() {
+                        let curr = inputPalabras.value.trim();
+                        if (curr.endsWith(',')) curr = curr.slice(0, -1).trim();
+                        
+                        if (curr === '') {
+                            inputPalabras.value = word + ', ';
+                        } else {
+                            const regex = new RegExp('\\b' + word + '\\b', 'i');
+                            if (!regex.test(curr)) {
+                                inputPalabras.value = curr + ', ' + word + ', ';
+                            }
+                        }
+                        chip.classList.remove('btn-outline-primary');
+                        chip.classList.add('btn-primary');
+                        setTimeout(() => { chip.classList.remove('btn-primary'); chip.classList.add('btn-outline-primary'); }, 300);
+                        inputPalabras.focus();
+                    };
+                    listaSugerencias.appendChild(chip);
+                });
+                containerSugerencias.style.display = 'block';
+            } else {
+                msg.innerHTML = `<span style="color:#ef4444;">❌ Error: ${data.error}</span>`;
+            }
+        } catch (e) {
+            msg.innerHTML = `<span style="color:#ef4444;">❌ Error de conexión.</span>`;
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 
     // Funciones de Sincronización (Fase 8.3)
