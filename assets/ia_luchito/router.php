@@ -329,7 +329,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                     FROM panel_ia_conocimiento 
                     WHERE estado = 1 AND ($score_str) > 0 
                     ORDER BY score DESC, prioridad ASC 
-                    LIMIT 3";
+                    LIMIT 6";
 
             try {
                 $stmtRAG = $db->prepare($sql);
