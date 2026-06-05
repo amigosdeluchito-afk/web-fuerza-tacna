@@ -83,19 +83,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'sync_sources') {
         $db->beginTransaction();
         
-        // 1. DELETE seguro solo de textos manuales aprobados
-        $db->exec("DELETE FROM panel_ia_conocimiento WHERE fuente = 'Fuente Aprobada - Texto'");
+        // 1. DELETE seguro de textos manuales Y links aprobados
+        $db->exec("DELETE FROM panel_ia_conocimiento WHERE fuente IN ('Fuente Aprobada - Texto', 'Fuente Aprobada - Link')");
         
-        // 2. Seleccionar fuentes manuales aprobadas
-        $stmt = $db->query("SELECT * FROM panel_fuentes_aprobadas WHERE tipo = 'texto_manual' AND estado = 'aprobado'");
+        // 2. Seleccionar fuentes aprobadas (ambos tipos)
+        $stmt = $db->query("SELECT * FROM panel_fuentes_aprobadas WHERE tipo IN ('texto_manual', 'link') AND estado = 'aprobado'");
         $fuentesAprobadas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         $insertados = 0;
-        $stmtIns = $db->prepare("INSERT INTO panel_ia_conocimiento (categoria, titulo, contenido, palabras_clave, prioridad, estado, fuente, fecha_actualizacion) VALUES (?, ?, ?, ?, ?, 1, 'Fuente Aprobada - Texto', NOW())");
+        $stmtIns = $db->prepare("INSERT INTO panel_ia_conocimiento (categoria, titulo, contenido, palabras_clave, prioridad, estado, fuente, url, fecha_actualizacion) VALUES (?, ?, ?, ?, ?, 1, ?, ?, NOW())");
         
         foreach ($fuentesAprobadas as $fte) {
             $chunks = chunk_text_rag($fte['contenido_aprobado'], 1200, 800);
             $total_chunks = count($chunks);
+            
+            // Determinar fuente exacta según el tipo
+            $fuente_exacta = ($fte['tipo'] === 'link') ? 'Fuente Aprobada - Link' : 'Fuente Aprobada - Texto';
+            $url_insert = ($fte['tipo'] === 'link') ? $fte['url_original'] : null;
             
             foreach ($chunks as $i => $chunk) {
                 $titulo = $fte['titulo'];
@@ -103,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $titulo .= " (Parte " . ($i + 1) . ")";
                 }
                 
-                $stmtIns->execute([$fte['categoria'], $titulo, $chunk, $fte['palabras_clave'], $fte['prioridad']]);
+                $stmtIns->execute([$fte['categoria'], $titulo, $chunk, $fte['palabras_clave'], $fte['prioridad'], $fuente_exacta, $url_insert]);
                 $insertados++;
             }
         }
@@ -121,15 +125,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['ia_msg'] = "Error: Solo se permiten URLs válidas (http o https).";
             } else {
                 $host = $parsed['host'] ?? '';
-                $ip = gethostbyname($host);
-                // Protección SSRF estricta: Bloquea IPs locales (localhost, 192.168.x.x, 10.x.x.x, etc.)
-                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                
+                // Protección SSRF pre-DNS
+                if (in_array(strtolower($host), ['localhost', '127.0.0.1', '0.0.0.0'])) {
+                    $_SESSION['ia_msg'] = "Error SSRF: Host local bloqueado por seguridad.";
+                } elseif (filter_var(gethostbyname($host), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
                     $_SESSION['ia_msg'] = "Error SSRF: URL bloqueada por seguridad. No se pueden extraer datos de redes privadas.";
                 } else {
                     $stmtCheck = $db->prepare("SELECT id FROM panel_fuentes_aprobadas WHERE url_original = ?");
                     $stmtCheck->execute([$url]);
                     if ($stmtCheck->fetch()) {
-                        $_SESSION['ia_msg'] = "Error: Este enlace ya fue extraído anteriormente.";
+                        $_SESSION['ia_msg'] = "Error: Este enlace ya fue extraído anteriormente. Puedes buscarlo en la lista y editarlo.";
                     } else {
                         $ch = curl_init();
                         curl_setopt($ch, CURLOPT_URL, $url);
@@ -138,22 +144,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
                         curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Límite de 10 segundos
                         curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS); // Bloquea file://, ftp://, php://
+                        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
                         $html = curl_exec($ch);
+                        $curl_err = curl_error($ch);
                         curl_close($ch);
 
                         if (!$html) {
-                            $_SESSION['ia_msg'] = "Error: No se pudo descargar el contenido de la URL o tardó demasiado.";
+                            $_SESSION['ia_msg'] = "Error: No se pudo descargar el contenido de la URL o tardó demasiado. ($curl_err)";
                         } else {
                             // Limpieza profunda de HTML
-                            $html = preg_replace('@<(script|style|nav|footer|aside|header)[^>]*?>.*?</\1>@si', ' ', $html);
+                            $html = preg_replace('@<(script|style|nav|footer|aside|header|noscript|iframe)[^>]*?>.*?</\1>@si', ' ', $html);
+                            // Forzar punto y espacio tras bloques para evitar que las palabras se peguen
+                            $html = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>'], '. ', $html);
                             $text = strip_tags($html);
+                            
+                            // Decodificar entidades (&nbsp;, &aacute;, etc)
+                            $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            
+                            // Limpiar espacios y puntos múltiples
                             $text = preg_replace('/\s+/', ' ', $text);
+                            $text = preg_replace('/\.(\s*\.)+/', '.', $text);
                             $text = trim($text);
                             
                             if (empty($text)) {
                                 $_SESSION['ia_msg'] = "Error: No se encontró texto útil en la página.";
                             } else {
                                 $titulo = "Link Extraído: " . mb_strimwidth($host, 0, 40, '...');
+                                if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $matches)) {
+                                    $titulo = mb_strimwidth(trim(strip_tags($matches[1])), 0, 100, '...');
+                                }
                                 $stmt = $db->prepare("INSERT INTO panel_fuentes_aprobadas (tipo, titulo, categoria, url_original, contenido_extraido, contenido_aprobado, fuente, prioridad, estado, fecha_creacion, fecha_lectura) VALUES ('link', ?, ?, ?, ?, ?, 'Fuente Aprobada - Link', ?, 'pendiente_revision', NOW(), NOW())");
                                 $stmt->execute([$titulo, $categoria, $url, $text, $text, $prioridad]);
                                 $_SESSION['ia_msg'] = "Link extraído. ¡Haz clic en 'Revisar' para limpiar el texto y aprobarlo!";
@@ -309,12 +328,9 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                           data-pri="<?= $row['prioridad'] ?>"
                                     ></span>
                                     
-                                    <?php if($row['tipo'] === 'texto_manual'): ?>
-                                        <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editTexto(<?= $row['id'] ?>)">Editar</button>
-                                    <?php else: ?>
-                                        <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="alert('Próximamente: Editar Link')">Revisar</button>
-                                        <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editTexto(<?= $row['id'] ?>)">Revisar</button>
-                                    <?php endif; ?>
+                                    <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editTexto(<?= $row['id'] ?>, '<?= $row['tipo'] ?>')">
+                                        <?= $row['tipo'] === 'texto_manual' ? 'Editar' : 'Revisar' ?>
+                                    </button>
                                     
                                     <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar fuente permanentemente?');">
                                         <input type="hidden" name="action" value="delete">
@@ -436,11 +452,11 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('modalTextoManual').style.display = 'none';
     }
 
-    function editTexto(id) {
+    function editTexto(id, tipo = 'texto_manual') {
         const span = document.getElementById('fte-' + id);
         if(!span) return;
         
-        document.getElementById('modalTextoTitle').innerText = '✏️ Editar Texto Manual';
+        document.getElementById('modalTextoTitle').innerText = (tipo === 'link') ? '✏️ Revisar y Aprobar Link' : '✏️ Editar Texto Manual';
         document.getElementById('texto-id').value = id;
         document.getElementById('texto-titulo').value = span.getAttribute('data-tit');
         document.getElementById('texto-categoria').value = span.getAttribute('data-cat');
@@ -453,7 +469,6 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     function abrirModalLink() {
-        alert("Próximamente: Abrirá la herramienta para pegar una URL, descargar su texto de manera segura y limpiarlo.");
         document.getElementById('modalLink').style.display = 'flex';
     }
     
