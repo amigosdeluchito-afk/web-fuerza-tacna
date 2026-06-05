@@ -103,16 +103,28 @@ function initChatIA() {
     };
 
     const addMessage = (text, type, actions = []) => {
+        let finalActions = actions ? [...actions] : [];
+        let finalText = text;
+
+        // Parseo de botones inline (Shortcodes) solo para mensajes de la IA
+        if (type === 'ai-message') {
+            const btnRegex = /\[btn:([^|\]]+)\|([^\]]+)\]/gi;
+            finalText = finalText.replace(btnRegex, (match, actionType, actionLabel) => {
+                finalActions.push({ type: actionType.trim(), label: actionLabel.trim() });
+                return ""; // Elimina el shortcode del texto visible
+            }).trim();
+        }
+
         const msgDiv = document.createElement('div');
         msgDiv.className = `ft-message ${type}`;
         
         const avatarIcon = type === 'user-message' ? 'FT' : '🤖';
         
-        let htmlContent = `<div class="ft-avatar">${avatarIcon}</div><div class="ft-bubble">${text}`;
+        let htmlContent = `<div class="ft-avatar">${avatarIcon}</div><div class="ft-bubble">${finalText}`;
         
-        if (actions && actions.length > 0) {
+        if (finalActions.length > 0) {
             htmlContent += `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">`;
-            actions.forEach((act) => {
+            finalActions.forEach((act) => {
                 htmlContent += `<button class="ft-action-btn" data-action="${act.type}" style="background: rgba(128, 16, 57, 0.1); border: 1px solid #801039; color: #801039; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">${act.label}</button>`;
             });
             htmlContent += `</div>`;
@@ -121,7 +133,7 @@ function initChatIA() {
         
         msgDiv.innerHTML = htmlContent;
         
-        if (actions && actions.length > 0) {
+        if (finalActions.length > 0) {
             const btns = msgDiv.querySelectorAll('.ft-action-btn');
             btns.forEach(btn => {
                 btn.addEventListener('click', (e) => {

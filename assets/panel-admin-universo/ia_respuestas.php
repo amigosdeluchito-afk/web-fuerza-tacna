@@ -341,7 +341,16 @@ sort($all_cats);
         .btn-ft:hover { background-color: #e6b000; }
         .status-badge.active { background-color: #28a745; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; }
         .status-badge.inactive { background-color: #dc3545; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; }
-        .response-row, .action-row { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; border: 1px solid #dee2e6; }
+        
+        /* Contenedor escroleable de respuestas */
+        #respuestas-container { max-height: 380px; overflow-y: auto; padding: 10px; background: #f1f3f5; border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 10px; }
+        #respuestas-container::-webkit-scrollbar { width: 6px; }
+        #respuestas-container::-webkit-scrollbar-track { background: transparent; }
+        #respuestas-container::-webkit-scrollbar-thumb { background: #adb5bd; border-radius: 10px; }
+        #respuestas-container::-webkit-scrollbar-thumb:hover { background: #6c757d; }
+        
+        .response-row { background: #ffffff; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; border: 1px solid #dee2e6; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .action-row { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; border: 1px solid #dee2e6; }
         .remove-row-btn { position: absolute; top: 10px; right: 10px; cursor: pointer; color: #dc3545; font-weight: bold; border: none; background: none; }
         
         /* Tabs de Navegación */
@@ -459,10 +468,20 @@ sort($all_cats);
                         </div>
 
                         <div class="form-group">
-                            <label>¿Qué dirá Luchito? (Variantes)</label>
+                            <label>¿Qué dirá Luchito? (Variantes) <small class="text-muted ml-2">💡 Tip: Usa <code>[btn:ir_a_obras|Ver Mapa]</code> en el texto para un botón exclusivo.</small></label>
                             <div id="respuestas-container">
                                 <div class="response-row">
                                     <textarea name="respuestas[]" class="form-control" rows="2" required></textarea>
+                                    <div class="mt-1 text-right">
+                                        <select class="custom-select custom-select-sm d-inline-block w-auto" style="font-size: 11px; height: 24px; padding: 2px 20px 2px 8px;" onchange="insertShortcode(this)">
+                                            <option value="">+ Añadir Botón Mágico</option>
+                                            <option value="[btn:ir_a_obras|🗺️ Ver Mapa]">🗺️ Ver Mapa</option>
+                                            <option value="[btn:ir_a_candidatos|👥 Ver Candidatos]">👥 Ver Candidatos</option>
+                                            <option value="[btn:ir_a_propuestas|🚀 Ver Propuestas]">🚀 Ver Propuestas</option>
+                                            <option value="[btn:ir_a_sumate|💪 Súmate]">💪 Súmate</option>
+                                            <option value="[btn:ir_a_contacto|📞 Contacto]">📞 Contacto</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addResponseField()">+ Añadir variante</button>
@@ -881,8 +900,19 @@ sort($all_cats);
         div.innerHTML = `
             <button type="button" class="remove-row-btn" onclick="this.parentElement.remove()">✖</button>
             <textarea name="respuestas[]" class="form-control" rows="2" required>${val}</textarea>
+            <div class="mt-1 text-right">
+                <select class="custom-select custom-select-sm d-inline-block w-auto" style="font-size: 11px; height: 24px; padding: 2px 20px 2px 8px;" onchange="insertShortcode(this)">
+                    <option value="">+ Añadir Botón Mágico</option>
+                    <option value="[btn:ir_a_obras|🗺️ Ver Mapa]">🗺️ Ver Mapa</option>
+                    <option value="[btn:ir_a_candidatos|👥 Ver Candidatos]">👥 Ver Candidatos</option>
+                    <option value="[btn:ir_a_propuestas|🚀 Ver Propuestas]">🚀 Ver Propuestas</option>
+                    <option value="[btn:ir_a_sumate|💪 Súmate]">💪 Súmate</option>
+                    <option value="[btn:ir_a_contacto|📞 Contacto]">📞 Contacto</option>
+                </select>
+            </div>
         `;
         cont.appendChild(div);
+        cont.scrollTop = cont.scrollHeight; // Auto-scroll al final al añadir
     }
 
     function addActionField(label = '', type = 'ir_a_obras') {
@@ -942,6 +972,14 @@ sort($all_cats);
         }
     }
 
+    function insertShortcode(sel) {
+        if (!sel.value) return;
+        const textarea = sel.parentElement.previousElementSibling;
+        textarea.value = textarea.value.trim() + (textarea.value.trim() !== "" ? " " : "") + sel.value;
+        textarea.focus();
+        sel.value = ""; // Resetear select tras usar
+    }
+
     function resetForm() {
         document.getElementById('form-title').innerText = "Nueva Respuesta";
         document.getElementById('input-id').value = "";
@@ -953,7 +991,19 @@ sort($all_cats);
         document.getElementById('input-estado').checked = true;
         
         document.getElementById('respuestas-container').innerHTML = `
-            <div class="response-row"><textarea name="respuestas[]" class="form-control" rows="2" required></textarea></div>
+            <div class="response-row">
+                <textarea name="respuestas[]" class="form-control" rows="2" required></textarea>
+                <div class="mt-1 text-right">
+                    <select class="custom-select custom-select-sm d-inline-block w-auto" style="font-size: 11px; height: 24px; padding: 2px 20px 2px 8px;" onchange="insertShortcode(this)">
+                        <option value="">+ Añadir Botón Mágico</option>
+                        <option value="[btn:ir_a_obras|🗺️ Ver Mapa]">🗺️ Ver Mapa</option>
+                        <option value="[btn:ir_a_candidatos|👥 Ver Candidatos]">👥 Ver Candidatos</option>
+                        <option value="[btn:ir_a_propuestas|🚀 Ver Propuestas]">🚀 Ver Propuestas</option>
+                        <option value="[btn:ir_a_sumate|💪 Súmate]">💪 Súmate</option>
+                        <option value="[btn:ir_a_contacto|📞 Contacto]">📞 Contacto</option>
+                    </select>
+                </div>
+            </div>
         `;
         document.getElementById('acciones-container').innerHTML = "";
         document.getElementById('btn-cancelar').style.display = "none";
