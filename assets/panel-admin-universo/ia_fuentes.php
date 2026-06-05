@@ -84,6 +84,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['ia_msg'] = "Error: Título, Categoría y Contenido son obligatorios.";
         }
+    } elseif ($action === 'suggest_keywords') {
+        header('Content-Type: application/json');
+        $texto = trim($_POST['texto'] ?? '');
+        if (!$texto) {
+            echo json_encode(['ok' => false, 'error' => 'No hay texto para analizar.']);
+            exit;
+        }
+        
+        $stmtC = $db->query("SELECT valor FROM panel_configuracion WHERE clave = 'ia_api_key'");
+        $api_key_db = $stmtC->fetchColumn();
+        $decrypted_key = '';
+        if ($api_key_db && function_exists('decrypt_api_key')) {
+            $decrypted_key = decrypt_api_key($api_key_db);
+        }
+        
+        require_once __DIR__ . '/../ia_luchito/openai_client.php';
+        $prompt = "Actúa como un experto en extracción de datos. Lee el texto y devuelve ÚNICAMENTE una lista de 5 a 8 palabras clave separadas por comas. NO devuelvas viñetas ni explicaciones, solo las palabras clave en minúsculas.";
+        $ia_result = llamar_openai_responses('gpt-4o-mini', $prompt, mb_strimwidth($texto, 0, 3000, '...'), 0.3, 50, $decrypted_key);
+        
+        if ($ia_result['ok']) {
+            echo json_encode(['ok' => true, 'keywords' => str_replace(['"', '.'], '', $ia_result['texto'])]);
+        } else {
+            echo json_encode(['ok' => false, 'error' => $ia_result['error']]);
+        }
+        exit;
     } elseif ($action === 'sync_sources') {
         $db->beginTransaction();
         
@@ -401,7 +426,13 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 <div class="form-group">
                     <label class="font-weight-bold">Palabras Clave (Separadas por comas)</label>
-                    <input type="text" name="palabras_clave" id="texto-palabras" class="form-control" placeholder="Ej. contacto, whatsapp, direccion">
+                    <div class="input-group">
+                        <input type="text" name="palabras_clave" id="texto-palabras" class="form-control" placeholder="Ej. contacto, whatsapp, direccion">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-info font-weight-bold" type="button" onclick="sugerirPalabrasClave(this)">✨ Sugerir</button>
+                        </div>
+                    </div>
+                    <small class="text-muted" id="msg-sugerencia">La IA leerá tu texto y extraerá las palabras clave más importantes.</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
@@ -493,6 +524,42 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('modalTextoManual').style.display = 'flex';
     }
     
+    async function sugerirPalabrasClave(btn) {
+        const contenido = document.getElementById('texto-contenido').value.trim();
+        const msg = document.getElementById('msg-sugerencia');
+        const inputPalabras = document.getElementById('texto-palabras');
+
+        if (!contenido) {
+            alert('Primero debes escribir o extraer algún contenido para poder sugerir palabras.');
+            return;
+        }
+
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳...';
+        btn.disabled = true;
+        msg.innerHTML = '<span style="color:#d97706;">Analizando texto con OpenAI...</span>';
+
+        const fd = new FormData();
+        fd.append('action', 'suggest_keywords');
+        fd.append('texto', contenido);
+
+        try {
+            const resp = await fetch('ia_fuentes.php', { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (data.ok) {
+                inputPalabras.value = data.keywords;
+                msg.innerHTML = '<span style="color:#10b981;">✅ Palabras clave generadas con éxito.</span>';
+            } else {
+                msg.innerHTML = `<span style="color:#ef4444;">❌ Error: ${data.error}</span>`;
+            }
+        } catch (e) {
+            msg.innerHTML = `<span style="color:#ef4444;">❌ Error de conexión.</span>`;
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
     function abrirModalLink() {
         document.getElementById('modalLink').style.display = 'flex';
     }
