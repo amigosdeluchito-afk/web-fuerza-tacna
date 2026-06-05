@@ -281,7 +281,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         $input_para_openai = $mensaje; // Mandamos el mensaje con formato original a OpenAI
 
         // Filtro de Stop Words (Evita que palabras comunes dominen la búsqueda)
-        $stop_words_fuertes = ['el','la','los','las','un','una','unos','unas','y','o','pero','si','de','del','a','al','en','por','para','con','sin','sobre','web','pagina','que','es','como','cuando','donde','quien','cuales','mas','estan','son','hay','tiene','tienen','hizo','han'];
+        $stop_words_fuertes = ['el','la','los','las','un','una','unos','unas','y','o','pero','si','de','del','a','al','en','por','para','con','sin','sobre','web','pagina','que','es','como','cuando','donde','quien','cuales','mas','estan','son','hay','tiene','tienen','hizo','han','cuanto','cuantos','cuanta','cuantas','cual','ha','he','has','dinero','costo'];
         $stop_words_suaves = ['tacna', 'fuerza']; // Ignorar solo si hay palabras más importantes
         
         // Limpiar signos de interrogación y puntuación para que "tacna?" sea solo "tacna"
@@ -313,7 +313,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         $words = array_values($words); // Reindexar array
 
         if (!empty($words)) {
-            $words = array_slice($words, 0, 5); // Máximo 5 palabras para no saturar la BD
+            $words = array_slice($words, 0, 8); // Máximo 8 palabras para no saturar la BD y no perder el final de la frase
             $score_sql = [];
             $params = [];
             
