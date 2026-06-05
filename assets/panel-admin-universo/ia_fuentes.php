@@ -34,16 +34,20 @@ function chunk_text_rag($text, $max_len = 1200, $min_len = 800) {
     $text = trim($text);
     while (mb_strlen($text, 'UTF-8') > $max_len) {
         $substr = mb_substr($text, 0, $max_len, 'UTF-8');
-        $pos = mb_strrpos($substr, '. ', 0, 'UTF-8');
         
+        // 1. Intentar cortar por salto de línea primero (párrafos)
+        $pos = mb_strrpos($substr, "\n", 0, 'UTF-8');
         if ($pos !== false && $pos > $min_len) {
-            $cut = $pos + 1; // Corte ideal en un punto seguido
+            $cut = $pos;
         } else {
-            $pos = mb_strrpos($substr, ' ', 0, 'UTF-8');
+            // 2. Si no hay saltos, buscar un punto seguido
+            $pos = mb_strrpos($substr, '. ', 0, 'UTF-8');
             if ($pos !== false && $pos > $min_len) {
-                $cut = $pos; // Corte alternativo en un espacio
+                $cut = $pos + 1; 
             } else {
-                $cut = $max_len; // Corte abrupto (palabras excesivamente largas)
+                // 3. Última opción, buscar un espacio
+                $pos = mb_strrpos($substr, ' ', 0, 'UTF-8');
+                $cut = ($pos !== false && $pos > $min_len) ? $pos : $max_len;
             }
         }
         $chunks[] = trim(mb_substr($text, 0, $cut, 'UTF-8'));
@@ -163,17 +167,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             $xpath = new DOMXPath($dom);
                             
-                            // Palabras clave en clases o IDs para menús, barras laterales y publicidad
-                            $basura = ['menu', 'nav', 'footer', 'sidebar', 'widget', 'comment', 'related', 'promo', 'banner', 'social', 'share', 'cookie', 'popup', 'ad-', 'adsby', 'recomendado', 'mas-leido'];
-                            
-                            $condiciones = [];
-                            foreach ($basura as $b) {
-                                $condiciones[] = "contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')";
-                                $condiciones[] = "contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')";
-                            }
-                            
-                            // Cazamos etiquetas semánticas y elementos con clases/IDs basura
-                            $nodosEliminar = $xpath->query("//nav | //footer | //aside | //header | //form | //*[" . implode(' or ', $condiciones) . "]");
+                            // Cazamos solo etiquetas semánticas seguras y clases muy específicas (sin usar 'contains' de forma agresiva)
+                            $nodosEliminar = $xpath->query("//nav | //footer | //aside | //header | //form | //*[contains(concat(' ', normalize-space(@class), ' '), ' comments ')] | //*[contains(concat(' ', normalize-space(@class), ' '), ' social ')]");
                             
                             $nodos = [];
                             foreach ($nodosEliminar as $node) { $nodos[] = $node; }
@@ -183,16 +178,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             $htmlLimpio = $dom->saveHTML();
                             
-                            // 3. Forzar punto y espacio tras bloques para evitar que las palabras se peguen
-                            $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>', '</div>'], '. ', $htmlLimpio);
+                            // 3. Forzar saltos de línea reales para que el texto se lea como párrafos
+                            $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>', '</div>'], "\n", $htmlLimpio);
                             $text = strip_tags($htmlLimpio);
                             
                             // Decodificar entidades (&nbsp;, &aacute;, etc)
                             $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
                             
-                            // Limpiar espacios y puntos múltiples
-                            $text = preg_replace('/\s+/', ' ', $text);
-                            $text = preg_replace('/\.(\s*\.)+/', '.', $text);
+                            // Limpiar espacios múltiples pero CONSERVAR los saltos de línea (\n)
+                            $text = preg_replace('/[ \t]+/', ' ', $text);
+                            $text = preg_replace("/\n\s+/", "\n", $text);
+                            $text = preg_replace("/\n{3,}/", "\n\n", $text);
                             $text = trim($text);
                             
                             if (empty($text)) {
