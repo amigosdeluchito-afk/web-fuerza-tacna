@@ -200,6 +200,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-principal { background: transparent; color: #60a5fa; border: 1px solid #3b82f6; }
         .btn-eliminar { background: #ef4444; color: #fff; }
         .badge-principal { position: absolute; top: 6px; left: 6px; background: #10b981; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+        /* Estilos visuales para obras ocultas en edición */
+        .form-oculto input, .form-oculto select, .form-oculto textarea {
+            border-color: rgba(239, 68, 68, 0.5) !important;
+            background-color: rgba(239, 68, 68, 0.05) !important;
+            color: #fca5a5 !important;
+        }
+        .form-oculto label {
+            color: #fca5a5 !important;
+        }
+        .alerta-oculto {
+            display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5;
+            padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; text-align: center; font-size: 13px;
+        }
+        .form-oculto .alerta-oculto { display: block; }
     </style>
 </head>
 <body>
@@ -249,6 +264,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="segmento" id="formSegmento">
                 <input type="hidden" name="fila" id="formFila">
                 <input type="hidden" name="carpeta" id="formCarpeta">
+
+                <div class="alerta-oculto">⚠️ ESTÁS EDITANDO UNA OBRA OCULTA.<br><span style="font-weight: normal;">Los cambios se guardarán correctamente, pero seguirá sin verse en el mapa público.</span></div>
 
                 <label>Nombre de la Obra:</label>
                 <input type="text" name="nombre" id="inputNombre" required>
@@ -467,6 +484,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             const item = obrasPorSegmento[segmento][idx];
             
+            // Lógica visual para indicar si la obra está oculta
+            if (item.estado && item.estado.includes('Oculto')) {
+                formEditar.classList.add('form-oculto');
+            } else {
+                formEditar.classList.remove('form-oculto');
+            }
+
             document.getElementById('formSegmento').value = segmento;
             document.getElementById('formFila').value = parseInt(idx) + 2; 
             document.getElementById('formCarpeta').value = item.carpeta;
