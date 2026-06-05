@@ -152,11 +152,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (!$html) {
                             $_SESSION['ia_msg'] = "Error: No se pudo descargar el contenido de la URL o tardó demasiado. ($curl_err)";
                         } else {
-                            // Limpieza profunda de HTML
-                            $html = preg_replace('@<(script|style|nav|footer|aside|header|noscript|iframe)[^>]*?>.*?</\1>@si', ' ', $html);
-                            // Forzar punto y espacio tras bloques para evitar que las palabras se peguen
-                            $html = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>'], '. ', $html);
-                            $text = strip_tags($html);
+                            // 1. Limpieza inicial: Quitar scripts, estilos e iframes para no romper el DOM
+                            $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
+                            
+                            // 2. Limpieza Inteligente con DOMDocument (Francotirador anti-basura)
+                            $dom = new DOMDocument();
+                            libxml_use_internal_errors(true);
+                            @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+                            libxml_clear_errors();
+
+                            $xpath = new DOMXPath($dom);
+                            
+                            // Palabras clave en clases o IDs para menús, barras laterales y publicidad
+                            $basura = ['menu', 'nav', 'footer', 'sidebar', 'widget', 'comment', 'related', 'promo', 'banner', 'social', 'share', 'cookie', 'popup', 'ad-', 'adsby', 'recomendado', 'mas-leido'];
+                            
+                            $condiciones = [];
+                            foreach ($basura as $b) {
+                                $condiciones[] = "contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')";
+                                $condiciones[] = "contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')";
+                            }
+                            
+                            // Cazamos etiquetas semánticas y elementos con clases/IDs basura
+                            $nodosEliminar = $xpath->query("//nav | //footer | //aside | //header | //form | //*[" . implode(' or ', $condiciones) . "]");
+                            
+                            $nodos = [];
+                            foreach ($nodosEliminar as $node) { $nodos[] = $node; }
+                            foreach ($nodos as $node) {
+                                if ($node->parentNode) $node->parentNode->removeChild($node);
+                            }
+
+                            $htmlLimpio = $dom->saveHTML();
+                            
+                            // 3. Forzar punto y espacio tras bloques para evitar que las palabras se peguen
+                            $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>', '</div>'], '. ', $htmlLimpio);
+                            $text = strip_tags($htmlLimpio);
                             
                             // Decodificar entidades (&nbsp;, &aacute;, etc)
                             $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
