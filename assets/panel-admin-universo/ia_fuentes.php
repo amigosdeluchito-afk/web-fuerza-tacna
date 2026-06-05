@@ -28,6 +28,31 @@ if (isset($_SESSION['ia_msg'])) {
     unset($_SESSION['ia_msg']);
 }
 
+// Función Helper de Fragmentación Inteligente (Chunking)
+function chunk_text_rag($text, $max_len = 1200, $min_len = 800) {
+    $chunks = [];
+    $text = trim($text);
+    while (mb_strlen($text, 'UTF-8') > $max_len) {
+        $substr = mb_substr($text, 0, $max_len, 'UTF-8');
+        $pos = mb_strrpos($substr, '. ', 0, 'UTF-8');
+        
+        if ($pos !== false && $pos > $min_len) {
+            $cut = $pos + 1; // Corte ideal en un punto seguido
+        } else {
+            $pos = mb_strrpos($substr, ' ', 0, 'UTF-8');
+            if ($pos !== false && $pos > $min_len) {
+                $cut = $pos; // Corte alternativo en un espacio
+            } else {
+                $cut = $max_len; // Corte abrupto (palabras excesivamente largas)
+            }
+        }
+        $chunks[] = trim(mb_substr($text, 0, $cut, 'UTF-8'));
+        $text = trim(mb_substr($text, $cut, null, 'UTF-8'));
+    }
+    if (mb_strlen($text, 'UTF-8') > 0) { $chunks[] = $text; }
+    return $chunks;
+}
+
 // 2. Procesar Formularios (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -55,6 +80,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['ia_msg'] = "Error: Título, Categoría y Contenido son obligatorios.";
         }
+    } elseif ($action === 'sync_sources') {
+        $db->beginTransaction();
+        
+        // 1. DELETE seguro solo de textos manuales aprobados
+        $db->exec("DELETE FROM panel_ia_conocimiento WHERE fuente = 'Fuente Aprobada - Texto'");
+        
+        // 2. Seleccionar fuentes manuales aprobadas
+        $stmt = $db->query("SELECT * FROM panel_fuentes_aprobadas WHERE tipo = 'texto_manual' AND estado = 'aprobado'");
+        $fuentesAprobadas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $insertados = 0;
+        $stmtIns = $db->prepare("INSERT INTO panel_ia_conocimiento (categoria, titulo, contenido, palabras_clave, prioridad, estado, fuente, fecha_actualizacion) VALUES (?, ?, ?, ?, ?, 1, 'Fuente Aprobada - Texto', NOW())");
+        
+        foreach ($fuentesAprobadas as $fte) {
+            $chunks = chunk_text_rag($fte['contenido_aprobado'], 1200, 800);
+            $total_chunks = count($chunks);
+            
+            foreach ($chunks as $i => $chunk) {
+                $titulo = $fte['titulo'];
+                if ($total_chunks > 1) {
+                    $titulo .= " (Parte " . ($i + 1) . ")";
+                }
+                
+                $stmtIns->execute([$fte['categoria'], $titulo, $chunk, $fte['palabras_clave'], $fte['prioridad']]);
+                $insertados++;
+            }
+        }
+        $db->commit();
+        $_SESSION['ia_msg'] = "Sincronización exitosa: Se inyectaron $insertados fragmentos (chunks) como conocimiento a la IA.";
+        
     } elseif ($action === 'extract_link') {
         $url = trim($_POST['url_link'] ?? '');
         $categoria = trim($_POST['categoria_link'] ?? '');
@@ -178,7 +233,10 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <p class="text-muted">Espacio seguro de revisión (Human-in-the-Loop). Inyecta textos, noticias o links aprobados hacia la memoria de la IA.</p>
         </div>
         <div class="col-md-4 text-right">
-            <button class="btn btn-outline-success font-weight-bold mb-2">🔄 Sincronizar Hacia Conocimiento</button>
+            <form method="POST" style="display:inline;" onsubmit="return confirm('¿Sincronizar fuentes aprobadas hacia el cerebro de Luchito?\n\nSolo se sincronizarán las que estén en estado Aprobado. Las demás serán ignoradas.');">
+                <input type="hidden" name="action" value="sync_sources">
+                <button type="submit" class="btn btn-outline-success font-weight-bold mb-2">🔄 Sincronizar Hacia Conocimiento</button>
+            </form>
         </div>
     </div>
 
