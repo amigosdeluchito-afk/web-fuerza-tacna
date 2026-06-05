@@ -356,6 +356,16 @@ sort($all_cats);
         .app-header nav a.active { color: #ffffff; font-weight: 600; }
         .app-header nav a:hover { color: #e5e7eb; }
         .app-header .user { font-size: 13px; color: #9ca3af; }
+
+        /* Truncar palabras clave largas en la tabla */
+        .celda-palabras-clave {
+            max-width: 250px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -794,7 +804,7 @@ sort($all_cats);
                                         <td><?= $row['orden'] ?></td>
                                         <td>
                                             <strong><?= htmlspecialchars($row['categoria']) ?></strong><br>
-                                            <small class="text-muted"><?= htmlspecialchars($row['palabras_clave']) ?></small>
+                                            <div class="text-muted celda-palabras-clave" title="<?= htmlspecialchars($row['palabras_clave']) ?>" style="font-size: 85%; margin-top: 4px;"><?= htmlspecialchars($row['palabras_clave']) ?></div>
                                         </td>
                                         <td>
                                             <small><?= count($resp_arr) ?> variantes configuradas</small><br>
