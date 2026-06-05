@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         .app-header nav a:hover { color: #e5e7eb; }
         .app-header .user { font-size: 13px; color: #9ca3af; }
         .app-main { margin-top: 72px; display: flex; justify-content: center; padding: 20px; }
-        .card { width: 100%; max-width: 900px; background: #0b1020; border-radius: 18px; padding: 24px 28px 28px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.7); border: 1px solid rgba(148, 163, 184, 0.15); }
+        .card { width: 100%; max-width: 1050px; background: #0b1020; border-radius: 18px; padding: 24px 28px 28px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.7); border: 1px solid rgba(148, 163, 184, 0.15); }
         
         h1 { margin-top: 0; font-size: 22px; color: #f9fafb; margin-bottom: 20px; }
         label { font-size: 13px; color: #e5e7eb; display: block; margin-top: 15px; margin-bottom: 4px; }
@@ -116,9 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <thead>
                         <tr>
                             <th style="width: 5%;">Fila</th>
-                            <th style="width: 35%;">Nombre de la Obra</th>
+                            <th style="width: 30%;">Nombre de la Obra</th>
                             <th style="width: 15%;">Distrito</th>
-                            <th style="width: 20%;">Estado Actual</th>
+                            <th style="width: 25%;">Estado Actual</th>
                             <th style="width: 25%;">Acciones Rápidas</th>
                         </tr>
                     </thead>
