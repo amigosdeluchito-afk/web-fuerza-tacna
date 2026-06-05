@@ -44,7 +44,7 @@ function SmoothScroll(target, speed, smooth) {
 		// que tenga su propio scroll interno, apagamos SmoothScroll temporalmente para que 
 		// no haya choques, dejando actuar al comportamiento nativo.
 		if (e.target && e.target.closest) {
-			if (e.target.closest('#map, .sheet-body, .search-list, .timeline-modal-content, .fp-drawer-content-wrapper, .candidato-sidebar, .marquee-container')) return;
+			if (e.target.closest('#map, .sheet-body, .search-list, .timeline-modal-content, .fp-drawer-content-wrapper, .candidato-sidebar, .marquee-container, #ft-chat-container')) return;
 		}
 
 		e.preventDefault(); // disable default scrolling
