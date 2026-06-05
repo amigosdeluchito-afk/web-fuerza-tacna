@@ -55,6 +55,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['ia_msg'] = "Error: Título, Categoría y Contenido son obligatorios.";
         }
+    } elseif ($action === 'extract_link') {
+        $url = trim($_POST['url_link'] ?? '');
+        $categoria = trim($_POST['categoria_link'] ?? '');
+        $prioridad = (int)($_POST['prioridad_link'] ?? 5);
+
+        if ($url && $categoria) {
+            $parsed = parse_url($url);
+            if (!$parsed || !isset($parsed['scheme']) || !in_array(strtolower($parsed['scheme']), ['http', 'https'])) {
+                $_SESSION['ia_msg'] = "Error: Solo se permiten URLs válidas (http o https).";
+            } else {
+                $host = $parsed['host'] ?? '';
+                $ip = gethostbyname($host);
+                // Protección SSRF estricta: Bloquea IPs locales (localhost, 192.168.x.x, 10.x.x.x, etc.)
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                    $_SESSION['ia_msg'] = "Error SSRF: URL bloqueada por seguridad. No se pueden extraer datos de redes privadas.";
+                } else {
+                    $stmtCheck = $db->prepare("SELECT id FROM panel_fuentes_aprobadas WHERE url_original = ?");
+                    $stmtCheck->execute([$url]);
+                    if ($stmtCheck->fetch()) {
+                        $_SESSION['ia_msg'] = "Error: Este enlace ya fue extraído anteriormente.";
+                    } else {
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, $url);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+                        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Límite de 10 segundos
+                        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS); // Bloquea file://, ftp://, php://
+                        $html = curl_exec($ch);
+                        curl_close($ch);
+
+                        if (!$html) {
+                            $_SESSION['ia_msg'] = "Error: No se pudo descargar el contenido de la URL o tardó demasiado.";
+                        } else {
+                            // Limpieza profunda de HTML
+                            $html = preg_replace('@<(script|style|nav|footer|aside|header)[^>]*?>.*?</\1>@si', ' ', $html);
+                            $text = strip_tags($html);
+                            $text = preg_replace('/\s+/', ' ', $text);
+                            $text = trim($text);
+                            
+                            if (empty($text)) {
+                                $_SESSION['ia_msg'] = "Error: No se encontró texto útil en la página.";
+                            } else {
+                                $titulo = "Link Extraído: " . mb_strimwidth($host, 0, 40, '...');
+                                $stmt = $db->prepare("INSERT INTO panel_fuentes_aprobadas (tipo, titulo, categoria, url_original, contenido_extraido, contenido_aprobado, fuente, prioridad, estado, fecha_creacion, fecha_lectura) VALUES ('link', ?, ?, ?, ?, ?, 'Fuente Aprobada - Link', ?, 'pendiente_revision', NOW(), NOW())");
+                                $stmt->execute([$titulo, $categoria, $url, $text, $text, $prioridad]);
+                                $_SESSION['ia_msg'] = "Link extraído. ¡Haz clic en 'Revisar' para limpiar el texto y aprobarlo!";
+                            }
+                        }
+                    }
+                }
+            }
+        }
     } elseif ($action === 'delete') {
         $id = $_POST['id'] ?? '';
         if ($id) {
@@ -202,6 +255,7 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editTexto(<?= $row['id'] ?>)">Editar</button>
                                     <?php else: ?>
                                         <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="alert('Próximamente: Editar Link')">Revisar</button>
+                                        <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editTexto(<?= $row['id'] ?>)">Revisar</button>
                                     <?php endif; ?>
                                     
                                     <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar fuente permanentemente?');">
@@ -274,6 +328,39 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<!-- MODAL: EXTRAER LINK -->
+<div class="modal-overlay" id="modalLink" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2050; align-items:center; justify-content:center;">
+    <div class="card shadow-lg" style="width: 100%; max-width: 500px;">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">🌐 Extraer desde Link</h5>
+            <button type="button" class="close text-white" onclick="cerrarModalLink()">&times;</button>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="extract_link">
+                <div class="form-group">
+                    <label class="font-weight-bold">URL a Extraer</label>
+                    <input type="url" name="url_link" class="form-control" required placeholder="https://ejemplo.com/noticia">
+                    <small class="text-muted">El servidor descargará y limpiará el texto de esta página.</small>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">Categoría Sugerida</label>
+                    <input type="text" name="categoria_link" class="form-control" required placeholder="Ej. Noticias, Propuestas...">
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">Prioridad (1 más alta, 10 más baja)</label>
+                    <input type="number" name="prioridad_link" class="form-control" value="5" min="1" max="10">
+                </div>
+                <hr>
+                <div class="text-right">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalLink()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold" onclick="this.innerHTML='⏳ Extrayendo...'; this.style.pointerEvents='none'; this.form.submit();">🔍 Extraer Texto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function abrirModalTexto() {
         document.getElementById('modalTextoTitle').innerText = '➕ Nuevo Texto Manual';
@@ -309,6 +396,11 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     function abrirModalLink() {
         alert("Próximamente: Abrirá la herramienta para pegar una URL, descargar su texto de manera segura y limpiarlo.");
+        document.getElementById('modalLink').style.display = 'flex';
+    }
+    
+    function cerrarModalLink() {
+        document.getElementById('modalLink').style.display = 'none';
     }
 </script>
 </body>

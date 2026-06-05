@@ -260,6 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="Buena Pro">Buena Pro</option>
                     <option value="Transferencia">Transferencia</option>
                     <option value="En estudios">En estudios</option>
+                    <option value="Oculto" style="color: #ef4444; font-weight: bold;">🚫 Oculto (No mostrar en mapa)</option>
                 </select>
 
                 <div class="row">
