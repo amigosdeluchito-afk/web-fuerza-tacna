@@ -134,7 +134,9 @@ function initChatIA() {
         }
         
         messagesBody.appendChild(msgDiv);
-        messagesBody.scrollTop = messagesBody.scrollHeight;
+        setTimeout(() => {
+            messagesBody.scrollTop = messagesBody.scrollHeight;
+        }, 10);
     };
 
     const showTypingIndicator = () => {
@@ -150,7 +152,9 @@ function initChatIA() {
             </div>
         `;
         messagesBody.appendChild(msgDiv);
-        messagesBody.scrollTop = messagesBody.scrollHeight;
+        setTimeout(() => {
+            messagesBody.scrollTop = messagesBody.scrollHeight;
+        }, 10);
     };
 
     const removeTypingIndicator = () => {

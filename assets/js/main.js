@@ -610,6 +610,21 @@ function injectGlobalAssets() {
             @keyframes levitate { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
             .form-wrapper iframe { width: 100%; height: 100%; border-radius: 10px; background: transparent; }
             @media (max-width: 768px) { #sumate-hyperspace-section { padding: 120px 15px 40px; } .form-wrapper { height: 4000px; } }
+
+            /* --- Ajustes Visuales Chat IA (Scroll y Orden Inferior) --- */
+            #ft-chat-container.ft-chat-open { pointer-events: auto !important; }
+            #ft-chat-messages { 
+                overflow-y: auto !important; 
+                display: flex !important; 
+                flex-direction: column !important; 
+                overscroll-behavior: contain; 
+                scroll-behavior: smooth;
+            }
+            #ft-chat-messages > :first-child { margin-top: auto !important; }
+            #ft-chat-messages::-webkit-scrollbar { width: 6px; }
+            #ft-chat-messages::-webkit-scrollbar-track { background: transparent; }
+            #ft-chat-messages::-webkit-scrollbar-thumb { background-color: rgba(128, 16, 57, 0.3); border-radius: 10px; }
+            #ft-chat-messages::-webkit-scrollbar-thumb:hover { background-color: rgba(128, 16, 57, 0.6); }
         `;
         document.head.appendChild(style);
     }
