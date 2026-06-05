@@ -41,6 +41,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
     exit;
 }
+
+// --- MANEJO DE PETICIONES AJAX PARA ELIMINAR DEFINITIVAMENTE ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'eliminar_definitivo') {
+    header('Content-Type: application/json; charset=utf-8');
+    
+    try {
+        require_once __DIR__ . '/vendor/autoload.php';
+        $rutaCredenciales = __DIR__ . '/data/credenciales.json';
+        $spreadsheetId = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
+
+        $client = new \Google_Client();
+        $client->setApplicationName('Panel de Obras Fuerza Tacna');
+        $client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);
+        $client->setAuthConfig($rutaCredenciales);
+        $service = new \Google_Service_Sheets($client);
+
+        $segmento = $_POST['segmento'] ?? '';
+        $fila = (int)($_POST['fila'] ?? 0);
+        $carpeta = $_POST['carpeta'] ?? '';
+
+        if ($segmento !== '' && $fila >= 2) {
+            // 1. Encontrar el ID numérico de la pestaña del segmento
+            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+            $sheetId = null;
+            foreach ($spreadsheet->getSheets() as $sheet) {
+                if (strtoupper($sheet->getProperties()->getTitle()) === strtoupper($segmento)) {
+                    $sheetId = $sheet->getProperties()->getSheetId();
+                    break;
+                }
+            }
+
+            if ($sheetId !== null) {
+                // 2. Eliminar la fila en Google Sheets (subiendo las de abajo)
+                $request = new \Google_Service_Sheets_Request([
+                    'deleteDimension' => [
+                        'range' => [
+                            'sheetId' => $sheetId,
+                            'dimension' => 'ROWS',
+                            'startIndex' => $fila - 1, // Es 0-indexado e inclusivo
+                            'endIndex' => $fila      // Exclusivo
+                        ]
+                    ]
+                ]);
+                $batchUpdateRequest = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest(['requests' => [$request]]);
+                $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
+                
+                // 3. Eliminar carpeta de fotos del servidor (si existe)
+                if (!empty($carpeta) && $carpeta !== '-') {
+                    $dirAEliminar = rtrim($GLOBALS['FOTOS_BASE'], '/\\') . '/' . strtolower($segmento) . '/' . $carpeta;
+                    if (is_dir($dirAEliminar)) {
+                        $files = array_diff(scandir($dirAEliminar), ['.', '..']);
+                        foreach ($files as $file) {
+                            @unlink("$dirAEliminar/$file");
+                        }
+                        @rmdir($dirAEliminar);
+                    }
+                }
+
+                log_action('obra_eliminar', "Eliminó definitivamente la obra de $segmento (Fila $fila)");
+                echo json_encode(['ok' => true]);
+            } else {
+                echo json_encode(['ok' => false, 'error' => 'No se encontró la pestaña en el Excel.']);
+            }
+        } else {
+            echo json_encode(['ok' => false, 'error' => 'Datos inválidos recibidos.']);
+        }
+    } catch (Throwable $e) {
+        echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -72,7 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         .btn-ocultar:hover { background: #334155; }
         .btn-mostrar { background: #10b981; color: #f8fafc; }
         .btn-mostrar:hover { background: #059669; }
-        .btn-eliminar { background: transparent; color: #ef4444; border: 1px solid #ef4444; opacity: 0.5; cursor: not-allowed; }
+        .btn-eliminar { background: #ef4444; color: #ffffff; border: none; }
+        .btn-eliminar:hover { background: #dc2626; }
         
         .status-badge { padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }
         .status-oculto { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
@@ -178,7 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             tbodyObras.innerHTML = '<tr><td colspan="5" class="loader">⏳ Descargando datos desde Excel...</td></tr>';
 
             try {
-                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=${encodeURIComponent(segmento)}&range=A:G&headers=1`;
+                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=${encodeURIComponent(segmento)}&range=A:H&headers=1`;
                 const resp = await fetch(url);
                 const json = parseGviz(await resp.text());
                 
@@ -186,7 +258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     filaExcel: idx + 2, // Fila 1 es cabecera, así que idx 0 es fila 2
                     nombre: r.c[0]?.v || '',
                     estado: r.c[1]?.v || '',
-                    distrito: r.c[6]?.v || '-'
+                    distrito: r.c[6]?.v || '-',
+                    carpeta: r.c[7]?.v || ''
                 })).filter(o => o.nombre !== ''); // Filtrar filas vacías
 
                 renderTable();
@@ -225,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <td><span class="status-badge ${badgeClass}">${badgeText}</span><br><small style="color:#64748b; font-size:10px;">En Excel: ${obra.estado}</small></td>
                     <td>
                         ${actionButton}
-                        <button class="btn btn-eliminar" title="El borrado definitivo estará disponible en la Fase 2">🗑️ Eliminar</button>
+                        <button class="btn btn-eliminar" onclick="eliminarObra(${obra.filaExcel}, '${obra.carpeta}', this)">🗑️ Eliminar</button>
                     </td>
                 `;
                 tbodyObras.appendChild(tr);
@@ -265,6 +338,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     const obraObj = obrasActuales.find(o => o.filaExcel === fila);
                     if (obraObj) obraObj.estado = nuevoEstado;
                     renderTable();
+                } else {
+                    alert("Error: " + data.error);
+                    btnEl.innerHTML = originalHtml;
+                    btnEl.disabled = false;
+                }
+            } catch (err) {
+                alert("Error de conexión al servidor.");
+                btnEl.innerHTML = originalHtml;
+                btnEl.disabled = false;
+            }
+        }
+
+        // 5. Función AJAX para Eliminar Definitivamente
+        async function eliminarObra(fila, carpeta, btnEl) {
+            if (!confirm("⚠️ ¡ADVERTENCIA CRÍTICA!\n\n¿Estás seguro de que deseas ELIMINAR esta obra para siempre?\n\n- Se borrará la fila del Excel.\n- Se destruirán todas sus fotos del servidor.\n\nEsta acción NO se puede deshacer.")) {
+                return;
+            }
+
+            const segmento = selectSegmento.value;
+            const originalHtml = btnEl.innerHTML;
+            btnEl.innerHTML = '⏳ Destruyendo...';
+            btnEl.disabled = true;
+
+            const fd = new FormData();
+            fd.append('action', 'eliminar_definitivo');
+            fd.append('segmento', segmento);
+            fd.append('fila', fila);
+            fd.append('carpeta', carpeta);
+
+            try {
+                const resp = await fetch('gestionar_visibilidad.php', { method: 'POST', body: fd });
+                const data = await resp.json();
+
+                if (data.ok) {
+                    // Recargamos el segmento completo porque los números de fila cambiaron al borrar una de en medio
+                    selectSegmento.dispatchEvent(new Event('change'));
                 } else {
                     alert("Error: " + data.error);
                     btnEl.innerHTML = originalHtml;
