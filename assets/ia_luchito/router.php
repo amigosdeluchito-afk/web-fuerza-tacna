@@ -339,6 +339,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
 
                 if (count($documentos) > 0) {
                     $contexto_texto = "[INFORMACIÓN OFICIAL]\nRegla: Usa esta información solo si responde directamente a la pregunta. Si el contexto no contiene la respuesta, no inventes y dilo con naturalidad.\n\n";
+                    $main_topic_title = $documentos[0]['titulo']; // Guardamos el título del documento más relevante
                     foreach ($documentos as $doc) {
                         $cont = mb_strimwidth(trim($doc['contenido']), 0, 800, '...');
                         $contexto_texto .= "- Fuente: {$doc['titulo']} | Datos: $cont\n";
@@ -441,6 +442,11 @@ $response = [
     'permitir_ia' => $permitir_ia,
     'motivo_bloqueo' => $motivo_bloqueo
 ];
+
+// Si el RAG encontró un tema, lo añadimos a la respuesta para que el frontend lo sepa
+if (isset($main_topic_title)) {
+    $response['topic_title'] = $main_topic_title;
+}
 
 $debug_activado = $ia_debug_mode_db || (defined('IA_DEBUG_MODE') && IA_DEBUG_MODE === true);
 
