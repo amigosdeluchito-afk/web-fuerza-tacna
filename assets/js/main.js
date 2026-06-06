@@ -668,22 +668,31 @@ function injectGlobalAssets() {
         chatDiv.className = 'ft-chat-closed';
         chatDiv.innerHTML = `
             <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                <div class="ft-fab-avatar">🐻</div>
+                <div class="ft-fab-tooltip">¡Hola, vecino! ¿Te ayudo?</div>
             </button>
             <div id="ft-chat-window">
                 <div class="ft-chat-header">
-                    <div class="ft-chat-title"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span>Asistente IA</span></div>
-                    <button id="ft-chat-close" aria-label="Cerrar chat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                    <div class="ft-chat-title">
+                        <div class="ft-header-avatar">🐻</div>
+                        <div class="ft-header-info">
+                            <span>Luchito IA</span>
+                            <small><span class="ft-online-dot"></span> En línea</small>
+                        </div>
+                    </div>
+                    <button id="ft-chat-close" aria-label="Cerrar chat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
                 <div class="ft-chat-body" id="ft-chat-messages">
                     <div class="ft-message ai-message">
                         <div class="ft-avatar">🤖</div>
-                        <div class="ft-bubble">¡Hola! Soy el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?</div>
+                        <div class="ft-bubble">¡Hola! Soy Luchito, el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?</div>
                     </div>
                 </div>
                 <div class="ft-chat-footer">
-                    <input type="text" id="ft-chat-input" placeholder="Escribe tu consulta aquí..." autocomplete="off">
-                    <button id="ft-chat-send" aria-label="Enviar mensaje"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></button>
+                    <div class="ft-input-wrapper">
+                        <input type="text" id="ft-chat-input" placeholder="Pregúntale a Luchito..." autocomplete="off">
+                        <button id="ft-chat-send" aria-label="Enviar mensaje"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg></button>
+                    </div>
                 </div>
             </div>
         `;
