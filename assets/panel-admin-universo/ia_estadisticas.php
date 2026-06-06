@@ -34,13 +34,14 @@ switch ($filtro) {
 
 // 2. Consultas a Auditoría (Tráfico, Tokens, Errores y Límites)
 $stats = [
-    'total' => 0, 'openai' => 0, 'simulador' => 0, 'tokens_in' => 0, 'tokens_out' => 0,
-    'errores' => 0, 'limite_ip' => 0, 'limite_global' => 0
+    'total' => 0, 'usuarios' => 0, 'openai' => 0, 'simulador' => 0, 'tokens_in' => 0, 'tokens_out' => 0,
+    'errores' => 0, 'limite_ip' => 0, 'limite_global' => 0 
 ];
 
 try {
     $sql_auditoria = "SELECT 
         COUNT(*) as total_consultas,
+        COUNT(DISTINCT ip_hash) as total_usuarios,
         SUM(CASE WHEN estado = 'exito_openai' THEN 1 ELSE 0 END) as total_openai,
         SUM(CASE WHEN estado = 'exito_simulador' THEN 1 ELSE 0 END) as total_simulador,
         SUM(tokens_input) as tokens_input,
@@ -55,6 +56,7 @@ try {
     
     if ($row) {
         $stats['total'] = (int)$row['total_consultas'];
+        $stats['usuarios'] = (int)$row['total_usuarios'];
         $stats['openai'] = (int)$row['total_openai'];
         $stats['simulador'] = (int)$row['total_simulador'];
         $stats['tokens_in'] = (int)$row['tokens_input'];
@@ -87,6 +89,34 @@ $tipo_cambio = 3.75; // <-- TIPO DE CAMBIO CONFIGURABLE MANUALMENTE
 
 $costo_usd = ($stats['tokens_in'] / 1000000 * $tarifa_in_1M) + ($stats['tokens_out'] / 1000000 * $tarifa_out_1M);
 $costo_pen = $costo_usd * $tipo_cambio;
+
+// Métricas Avanzadas (Eficiencia)
+$promedio_consultas = $stats['usuarios'] > 0 ? round($stats['total'] / $stats['usuarios'], 1) : 0;
+$costo_por_usuario = $stats['usuarios'] > 0 ? ($costo_pen / $stats['usuarios']) : 0;
+$ratio_tokens = $stats['tokens_out'] > 0 ? round($stats['tokens_in'] / $stats['tokens_out'], 1) : 0;
+
+// Retención (Usuarios que visitan en días distintos)
+$usuarios_recurrentes = 0;
+try {
+    $stmt_ret = $db->query("SELECT COUNT(*) FROM (SELECT ip_hash FROM panel_ia_auditoria WHERE $where_auditoria GROUP BY ip_hash HAVING COUNT(DISTINCT DATE(fecha)) > 1) as t");
+    $usuarios_recurrentes = (int)$stmt_ret->fetchColumn();
+} catch(Exception $e) {}
+$tasa_retencion = $stats['usuarios'] > 0 ? round(($usuarios_recurrentes / $stats['usuarios']) * 100, 1) : 0;
+
+// Consulta más cara del periodo
+$consulta_cara = null;
+try {
+    $stmt_cara = $db->query("SELECT pregunta, (tokens_input + tokens_output) as total_t FROM panel_ia_auditoria WHERE $where_auditoria AND (tokens_input + tokens_output) > 0 ORDER BY total_t DESC LIMIT 1");
+    $consulta_cara = $stmt_cara->fetch(PDO::FETCH_ASSOC);
+} catch(Exception $e) {}
+
+// Gráfico de Horas Pico
+$labels_horas = []; $data_horas = [];
+try {
+    $stmt_horas = $db->query("SELECT HOUR(fecha) as hora, COUNT(*) as cantidad FROM panel_ia_auditoria WHERE $where_auditoria GROUP BY HOUR(fecha) ORDER BY hora ASC");
+    $horas_data = $stmt_horas->fetchAll(PDO::FETCH_ASSOC);
+    foreach($horas_data as $row) { $labels_horas[] = str_pad($row['hora'], 2, '0', STR_PAD_LEFT) . ':00'; $data_horas[] = (int)$row['cantidad']; }
+} catch(Exception $e) {}
 
 // ==========================================
 // BLOQUE 3 Y 4: DATOS PARA GRÁFICOS (AGRUPACIÓN SQL)
@@ -287,8 +317,41 @@ try {
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>
+                
+                <?php if($consulta_cara): ?>
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 10px; margin-top: 15px;">
+                        <span style="font-size: 10px; text-transform: uppercase; color: #fca5a5; font-weight: bold; display: block; margin-bottom: 5px;">🔥 La consulta más cara</span>
+                        <span style="font-size: 12px; color: #f8fafc; font-style: italic;">"<?= htmlspecialchars(mb_strimwidth($consulta_cara['pregunta'], 0, 50, '...')) ?>"</span>
+                        <span class="badge badge-danger float-right"><?= $consulta_cara['total_t'] ?> tokens</span>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
+    </div>
+
+    <!-- FILA EXTRA: Métricas de Eficiencia -->
+    <h6 style="color:#f8fafc; font-weight:bold; margin-top: 20px; margin-bottom: 15px;">⚡ Eficiencia y Comportamiento</h6>
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3"><div class="kpi-card" style="padding: 15px; height: auto;">
+            <div class="kpi-title" style="color:#a78bfa;">Consultas / Usuario</div>
+            <h3 class="kpi-value" style="font-size:22px;"><?= $promedio_consultas ?></h3>
+            <span class="kpi-sub">De <?= number_format($stats['usuarios']) ?> usuarios únicos.</span>
+        </div></div>
+        <div class="col-md-3 mb-3"><div class="kpi-card" style="padding: 15px; height: auto;">
+            <div class="kpi-title" style="color:#a78bfa;">Retención (Vuelven)</div>
+            <h3 class="kpi-value" style="font-size:22px;"><?= $tasa_retencion ?>%</h3>
+            <span class="kpi-sub"><?= $usuarios_recurrentes ?> volvieron otros días.</span>
+        </div></div>
+        <div class="col-md-3 mb-3"><div class="kpi-card" style="padding: 15px; height: auto;">
+            <div class="kpi-title" style="color:#34d399;">Ratio In/Out (Tokens)</div>
+            <h3 class="kpi-value" style="font-size:22px;"><?= $ratio_tokens ?></h3>
+            <span class="kpi-sub">Lee <?= $ratio_tokens ?> palabras por 1 que escribe.</span>
+        </div></div>
+        <div class="col-md-3 mb-3"><div class="kpi-card" style="padding: 15px; height: auto;">
+            <div class="kpi-title" style="color:#fbbf24;">Costo Prom. / Usuario</div>
+            <h3 class="kpi-value" style="font-size:22px;">S/ <?= number_format($costo_por_usuario, 4) ?></h3>
+            <span class="kpi-sub">Basado en el costo general.</span>
+        </div></div>
     </div>
 
     <!-- FILA 3: Contenedores para Bloque 3 (Gráficos) -->
@@ -309,6 +372,19 @@ try {
                     <div class="chart-placeholder">Sin interacciones registradas.</div>
                 <?php else: ?>
                     <canvas id="chartEstados"></canvas>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICO DE HORAS PICO -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="chart-box" style="min-height: 200px; padding: 15px;">
+                <?php if(empty($data_horas)): ?>
+                    <div class="chart-placeholder">No hay datos de tráfico por horas registrados.</div>
+                <?php else: ?>
+                    <canvas id="chartHoras"></canvas>
                 <?php endif; ?>
             </div>
         </div>
@@ -447,6 +523,24 @@ try {
                         }]
                     },
                     options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+                });
+            }
+            
+            // Renderizado: Horas Pico
+            const cvHoras = document.getElementById('chartHoras');
+            if (cvHoras) {
+                new Chart(cvHoras.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: <?= json_encode($labels_horas) ?>,
+                        datasets: [{
+                            label: 'Interacciones por Hora',
+                            data: <?= json_encode($data_horas) ?>,
+                            backgroundColor: '#8b5cf6',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
             }
         } catch(e) {
