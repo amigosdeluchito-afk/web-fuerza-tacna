@@ -119,6 +119,27 @@ try {
     }
 } catch(Exception $e) {}
 
+// Datos Tabla 1: Top Usuarios (IP Hash)
+$top_usuarios = [];
+try {
+    $sql_top_usuarios = "SELECT ip_hash, COUNT(*) as total, SUM(CASE WHEN estado='limite_ip' THEN 1 ELSE 0 END) as bloqueos FROM panel_ia_auditoria WHERE $where_auditoria GROUP BY ip_hash ORDER BY total DESC LIMIT 5";
+    $top_usuarios = $db->query($sql_top_usuarios)->fetchAll(PDO::FETCH_ASSOC);
+} catch(Exception $e) {}
+
+// Datos Tabla 2: Top Preguntas Huérfanas
+$top_huerfanas = [];
+try {
+    $sql_top_huerfanas = "SELECT pregunta, repeticiones, categoria_detectada FROM panel_preguntas_huerfanas WHERE $where_huerfanas ORDER BY repeticiones DESC LIMIT 5";
+    $top_huerfanas = $db->query($sql_top_huerfanas)->fetchAll(PDO::FETCH_ASSOC);
+} catch(Exception $e) {}
+
+// Datos Tabla 3: Últimos Errores
+$ultimos_errores = [];
+try {
+    $sql_errores = "SELECT fecha, motivo_error FROM panel_ia_auditoria WHERE estado='error_openai' AND $where_auditoria ORDER BY fecha DESC LIMIT 5";
+    $ultimos_errores = $db->query($sql_errores)->fetchAll(PDO::FETCH_ASSOC);
+} catch(Exception $e) {}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -271,7 +292,7 @@ try {
     </div>
 
     <!-- FILA 3: Contenedores para Bloque 3 (Gráficos) -->
-    <h6 style="color:#f8fafc; font-weight:bold; margin-top: 30px; margin-bottom: 0;">📉 Tendencias Gráficas (Bloque 3 - Próximamente)</h6>
+    <h6 style="color:#f8fafc; font-weight:bold; margin-top: 30px; margin-bottom: 0;">📉 Tendencias Gráficas</h6>
     <div class="row">
         <div class="col-md-8">
             <div class="chart-box">
@@ -289,6 +310,89 @@ try {
                 <?php else: ?>
                     <canvas id="chartEstados"></canvas>
                 <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILA 4: Tablas de Ranking y Monitoreo -->
+    <h6 style="color:#f8fafc; font-weight:bold; margin-top: 30px; margin-bottom: 15px;">📋 Tablas de Monitoreo Clave</h6>
+    <div class="row">
+        <!-- Top Usuarios -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm" style="background: #0f172a; border: 1px solid #1e293b; height: 100%;">
+                <div class="card-header bg-dark text-white border-bottom-0" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0" style="font-size: 13px;">🕵️ Top 5 Usuarios Activos</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-dark table-striped mb-0" style="background: transparent; font-size: 12px;">
+                        <thead><tr><th>Hash (IP)</th><th class="text-center">Consultas</th><th class="text-center">Límites</th></tr></thead>
+                        <tbody>
+                            <?php if(empty($top_usuarios)): ?>
+                                <tr><td colspan="3" class="text-center text-muted py-3">Sin datos registrados</td></tr>
+                            <?php else: ?>
+                                <?php foreach($top_usuarios as $tu): ?>
+                                    <tr>
+                                        <td><span title="<?= htmlspecialchars($tu['ip_hash']) ?>" style="font-family:monospace;"><?= substr($tu['ip_hash'], 0, 8) ?>...</span></td>
+                                        <td class="text-center text-info font-weight-bold"><?= $tu['total'] ?></td>
+                                        <td class="text-center <?= $tu['bloqueos'] > 0 ? 'text-danger' : 'text-muted' ?>"><?= $tu['bloqueos'] ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Huérfanas -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm" style="background: #0f172a; border: 1px solid #1e293b; height: 100%;">
+                <div class="card-header bg-dark text-white border-bottom-0" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0" style="font-size: 13px;">❓ Top 5 Huérfanas Más Repetidas</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-dark table-striped mb-0" style="background: transparent; font-size: 12px;">
+                        <thead><tr><th>Pregunta</th><th class="text-center">Repetidas</th></tr></thead>
+                        <tbody>
+                            <?php if(empty($top_huerfanas)): ?>
+                                <tr><td colspan="2" class="text-center text-muted py-3">No hay huérfanas pendientes</td></tr>
+                            <?php else: ?>
+                                <?php foreach($top_huerfanas as $th): ?>
+                                    <tr>
+                                        <td title="<?= htmlspecialchars($th['pregunta']) ?>"><?= htmlspecialchars(mb_strimwidth($th['pregunta'], 0, 30, '...')) ?> <br><small class="text-muted"><?= htmlspecialchars($th['categoria_detectada'] ?: 'Sin tema') ?></small></td>
+                                        <td class="text-center text-warning font-weight-bold align-middle"><?= $th['repeticiones'] ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimos Errores -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm" style="background: #0f172a; border: 1px solid #1e293b; height: 100%;">
+                <div class="card-header bg-dark text-white border-bottom-0" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0" style="font-size: 13px;">🚨 Últimos 5 Errores IA</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-dark table-striped mb-0" style="background: transparent; font-size: 12px;">
+                        <thead><tr><th>Hora</th><th>Motivo / Diagnóstico</th></tr></thead>
+                        <tbody>
+                            <?php if(empty($ultimos_errores)): ?>
+                                <tr><td colspan="2" class="text-center text-muted py-3">Todo funciona perfecto ✅</td></tr>
+                            <?php else: ?>
+                                <?php foreach($ultimos_errores as $te): ?>
+                                    <tr>
+                                        <td style="white-space:nowrap;"><?= date('H:i', strtotime($te['fecha'])) ?></td>
+                                        <td class="text-danger" title="<?= htmlspecialchars($te['motivo_error']) ?>"><?= htmlspecialchars(mb_strimwidth($te['motivo_error'], 0, 35, '...')) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
