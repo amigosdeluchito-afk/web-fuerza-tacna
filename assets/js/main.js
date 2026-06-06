@@ -669,7 +669,6 @@ function injectGlobalAssets() {
         chatDiv.innerHTML = `
             <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
                 <div class="ft-fab-avatar">🐻</div>
-                <div class="ft-fab-tooltip">¡Hola, vecino! ¿Te ayudo?</div>
             </button>
             <div id="ft-chat-window">
                 <div class="ft-chat-header">
