@@ -339,6 +339,7 @@ require_login();
         <a href="segmentos.php">🗂️ Segmentos</a>
         <a href="cronologia.php">⏳ Cronología</a>
         <a href="ia_respuestas.php">🧠 Cerebro IA</a>
+        <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
         <?php if (is_admin()): ?>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>

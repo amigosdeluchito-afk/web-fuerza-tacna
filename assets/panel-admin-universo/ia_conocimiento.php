@@ -225,6 +225,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
     <a href="ia_respuestas.php">🧠 Cerebro IA</a>
     <a href="ia_conocimiento.php" class="active">📚 Base Conocimiento</a>
     <a href="ia_fuentes.php">🔗 Fuentes Externas</a>
+    <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
     <?php if (is_admin()): ?>
     <a href="usuarios.php">👤 Usuarios</a>
     <a href="historial.php">🕒 Historial</a>

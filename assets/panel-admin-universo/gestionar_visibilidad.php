@@ -163,6 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <a href="segmentos.php">🗂️ Segmentos</a>
         <a href="cronologia.php">⏳ Cronología</a>
         <a href="ia_respuestas.php">🧠 Cerebro IA</a>
+        <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
       </nav>
       <div class="user">
         <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php" style="color:#9ca3af;">Salir</a>

@@ -282,6 +282,7 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="ia_respuestas.php">🧠 Cerebro IA</a>
     <a href="ia_conocimiento.php">📚 Base Conocimiento</a>
     <a href="ia_fuentes.php" class="active">🔗 Fuentes Externas</a>
+    <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
     <?php if (is_admin()): ?>
     <a href="usuarios.php">👤 Usuarios</a>
     <?php endif; ?>

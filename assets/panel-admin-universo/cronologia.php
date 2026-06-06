@@ -145,6 +145,7 @@ if (isset($_GET['edit'])) {
         <a href="segmentos.php">🗂️ Segmentos</a>
         <a href="cronologia.php" class="active">⏳ Cronología</a>
         <a href="ia_respuestas.php">🧠 Cerebro IA</a>
+        <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
         <?php if (is_admin()): ?>
         <a href="usuarios.php">👤 Usuarios</a>
         <a href="historial.php">🕒 Historial</a>
