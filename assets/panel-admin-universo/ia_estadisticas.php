@@ -87,6 +87,38 @@ $tipo_cambio = 3.75; // <-- TIPO DE CAMBIO CONFIGURABLE MANUALMENTE
 
 $costo_usd = ($stats['tokens_in'] / 1000000 * $tarifa_in_1M) + ($stats['tokens_out'] / 1000000 * $tarifa_out_1M);
 $costo_pen = $costo_usd * $tipo_cambio;
+
+// ==========================================
+// BLOQUE 3 Y 4: DATOS PARA GRÁFICOS (AGRUPACIÓN SQL)
+// ==========================================
+
+// Datos Gráfico 1: Tráfico por Día
+$labels_trafico = []; $data_total = []; $data_openai = [];
+try {
+    $sql_trafico = "SELECT DATE(fecha) as dia, COUNT(*) as total, SUM(CASE WHEN estado='exito_openai' THEN 1 ELSE 0 END) as openai FROM panel_ia_auditoria WHERE $where_auditoria GROUP BY DATE(fecha) ORDER BY DATE(fecha) ASC";
+    $trafico_data = $db->query($sql_trafico)->fetchAll(PDO::FETCH_ASSOC);
+    foreach($trafico_data as $row) {
+        $labels_trafico[] = date('d/m', strtotime($row['dia']));
+        $data_total[] = (int)$row['total'];
+        $data_openai[] = (int)$row['openai'];
+    }
+} catch(Exception $e) {}
+
+// Datos Gráfico 2: Distribución de Estados
+$labels_estados = []; $data_estados = []; $colores_estados = [];
+try {
+    $sql_estados = "SELECT estado, COUNT(*) as cantidad FROM panel_ia_auditoria WHERE $where_auditoria GROUP BY estado ORDER BY cantidad DESC";
+    $estados_data = $db->query($sql_estados)->fetchAll(PDO::FETCH_ASSOC);
+    // Paleta de colores semánticos
+    $bg_colors = ['exito_openai' => '#10b981', 'exito_simulador' => '#3b82f6', 'limite_ip' => '#f59e0b', 'limite_global' => '#f97316', 'error_openai' => '#ef4444', 'router_fuera_tema' => '#8b5cf6'];
+    foreach($estados_data as $row) {
+        $est = $row['estado'];
+        $labels_estados[] = ucfirst(str_replace('_', ' ', $est));
+        $data_estados[] = (int)$row['cantidad'];
+        $colores_estados[] = $bg_colors[$est] ?? '#64748b'; // Gris si es un estado desconocido
+    }
+} catch(Exception $e) {}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -243,32 +275,76 @@ $costo_pen = $costo_usd * $tipo_cambio;
     <div class="row">
         <div class="col-md-8">
             <div class="chart-box">
-                <div class="chart-placeholder">
-                    Aquí se renderizará el gráfico de <b>Tráfico de Consultas vs OpenAI</b> usando Chart.js.<br>
-                    <small class="text-muted">(Añadido en el siguiente bloque para no mezclar lógicas)</small>
-                </div>
-                <!-- <canvas id="chartTrafico"></canvas> -->
+                <?php if(empty($data_total)): ?>
+                    <div class="chart-placeholder">No hay datos de consultas para el rango de fechas seleccionado.</div>
+                <?php else: ?>
+                    <canvas id="chartTrafico"></canvas>
+                <?php endif; ?>
             </div>
         </div>
         <div class="col-md-4">
             <div class="chart-box">
-                <div class="chart-placeholder">
-                    Aquí se renderizará la Dona de <b>Distribución de Estados</b>.<br>
-                    <small class="text-muted">(Añadido en el siguiente bloque)</small>
-                </div>
-                <!-- <canvas id="chartEstados"></canvas> -->
+                <?php if(empty($data_estados)): ?>
+                    <div class="chart-placeholder">Sin interacciones registradas.</div>
+                <?php else: ?>
+                    <canvas id="chartEstados"></canvas>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 
 </div>
 
+<!-- Cargar librería Chart.js desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <!-- Script Wrapper seguro (No rompe UI si falla) -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         try {
-            // Aquí insertaremos la lógica de Chart.js en el Bloque 3.
-            // Al usar Try-Catch nos aseguramos de que el dashboard nunca se rompa.
+            if (typeof Chart === 'undefined') {
+                console.warn("Chart.js no cargó desde el CDN. Los gráficos no se mostrarán, pero el panel sigue vivo.");
+                return;
+            }
+
+            // Configuración global de Chart.js para Modo Oscuro
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = '#1e293b';
+            Chart.defaults.font.family = 'system-ui, sans-serif';
+
+            // Renderizado: Tráfico vs OpenAI
+            const cvTrafico = document.getElementById('chartTrafico');
+            if (cvTrafico) {
+                new Chart(cvTrafico.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: <?= json_encode($labels_trafico) ?>,
+                        datasets: [
+                            { label: 'Consultas Totales', data: <?= json_encode($data_total) ?>, borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.15)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 4 },
+                            { label: 'Llegaron a OpenAI', data: <?= json_encode($data_openai) ?>, borderColor: '#10b981', backgroundColor: 'transparent', borderWidth: 2, borderDash: [5, 5], tension: 0.3, pointRadius: 4 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+            }
+
+            // Renderizado: Dona de Distribución de Estados
+            const cvEstados = document.getElementById('chartEstados');
+            if (cvEstados) {
+                new Chart(cvEstados.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: <?= json_encode($labels_estados) ?>,
+                        datasets: [{
+                            data: <?= json_encode($data_estados) ?>,
+                            backgroundColor: <?= json_encode($colores_estados) ?>,
+                            borderWidth: 1,
+                            borderColor: '#0f172a'
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+                });
+            }
         } catch(e) {
             console.error("Error al cargar gráficos: ", e);
         }
