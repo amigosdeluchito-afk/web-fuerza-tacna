@@ -144,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'suggest_keywords') {
         header('Content-Type: application/json');
         $texto = trim($_POST['texto'] ?? '');
+        $actuales = trim($_POST['actuales'] ?? '');
         if (!$texto) {
             echo json_encode(['ok' => false, 'error' => 'No hay texto para analizar.']);
             exit;
@@ -158,6 +159,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         require_once __DIR__ . '/../ia_luchito/openai_client.php';
         $prompt = "Actúa como un experto en extracción de datos. Lee el texto y devuelve ÚNICAMENTE una lista de 10 palabras clave separadas por comas. NO devuelvas viñetas ni explicaciones, solo las palabras clave en minúsculas.";
+        if ($actuales !== '') {
+            $prompt .= " IMPORTANTE: NO incluyas ninguna de estas palabras que ya están seleccionadas o escritas manualmente: " . $actuales;
+        }
         $ia_result = llamar_openai_responses('gpt-4o-mini', $prompt, mb_strimwidth($texto, 0, 3000, '...'), 0.3, 50, $decrypted_key);
         
         if ($ia_result['ok']) {
@@ -483,12 +487,13 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         const fd = new FormData();
         fd.append('action', 'suggest_keywords');
         fd.append('texto', contenido);
+        fd.append('actuales', inputPalabras.value.trim());
 
         try {
             const resp = await fetch('ia_conocimiento.php', { method: 'POST', body: fd });
             const data = await resp.json();
             if (data.ok) {
-                msg.innerHTML = '<span style="color:#10b981;">✅ Aquí tienes 10 opciones:</span>';
+                msg.innerHTML = '<span style="color:#10b981;">✅ Aquí tienes opciones nuevas:</span>';
                 let words = data.keywords.split(',').map(w => w.trim()).filter(w => w.length > 0);
                 listaSugerencias.innerHTML = '';
                 
@@ -497,6 +502,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
                     chip.type = 'button';
                     chip.className = 'btn btn-sm btn-outline-primary m-1 font-weight-bold';
                     chip.style.borderRadius = '20px';
+                    chip.style.transition = 'all 0.2s ease';
                     chip.innerText = '+' + word;
                     chip.onclick = function() {
                         let curr = inputPalabras.value.trim();
@@ -510,9 +516,12 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
                                 inputPalabras.value = curr + ', ' + word + ', ';
                             }
                         }
-                        chip.classList.remove('btn-outline-primary');
-                        chip.classList.add('btn-primary');
-                        setTimeout(() => { chip.classList.remove('btn-primary'); chip.classList.add('btn-outline-primary'); }, 300);
+                        
+                        // Eliminar visualmente el chip sugerido
+                        chip.style.transform = 'scale(0)';
+                        chip.style.opacity = '0';
+                        setTimeout(() => { chip.remove(); }, 200);
+                        
                         inputPalabras.focus();
                     };
                     listaSugerencias.appendChild(chip);
