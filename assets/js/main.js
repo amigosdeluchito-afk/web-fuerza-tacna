@@ -843,7 +843,7 @@ barba.hooks.enter(() => {
 
 });
 
-function initCandidatos(container) {
+async function initCandidatos(container) {
     // Apuntamos estrictamente al nuevo contenedor de Barba para evitar atrapar el DOM de la página vieja
     const target = container || document;
 
@@ -864,6 +864,39 @@ function initCandidatos(container) {
     if(!marqueeContent || !marqueeContainer) {
         // Retornamos silenciosamente si la página actual no tiene el carrusel de candidatos
         return;
+    }
+
+    // --- NUEVO: FASE 5 - OBTENER CANDIDATOS DESDE LA BASE DE DATOS ---
+    if (marqueeContent.getAttribute('data-loaded') !== 'true') {
+        try {
+            // Llamamos a la API que construimos en la Fase 1
+            const resp = await fetch('assets/panel-admin-universo/api_candidatos.php?action=listar');
+            const data = await resp.json();
+            
+            if (data.ok && data.candidatos && data.candidatos.length > 0) {
+                // Filtramos solo los visibles y los guardamos en memoria global
+                window.CANDIDATOS_LIST = data.candidatos.filter(c => c.estado == 1);
+                
+                marqueeContent.innerHTML = ''; // Limpiamos las tarjetas estáticas del HTML
+                
+                window.CANDIDATOS_LIST.forEach(c => {
+                    const fotoUrl = c.foto_perfil ? `assets/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
+                    marqueeContent.innerHTML += `
+                        <div class="candidate-card" data-id="${c.id}">
+                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" loading="lazy" decoding="async">
+                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-hover" loading="lazy" decoding="async">
+                            <div class="candidate-info">
+                                <h3>${c.nombres}</h3>
+                                <p>${c.cargo_flotante}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                marqueeContent.setAttribute('data-loaded', 'true');
+            }
+        } catch (err) {
+            console.error("Error al cargar candidatos de la BD:", err);
+        }
     }
 
     // Le damos un pequeño respiro al navegador de 150ms para que renderice los tamaños y CSS del nuevo HTML
@@ -921,10 +954,10 @@ function initCandidatos(container) {
                     return;
                 }
                 
-                const nameTag = card.querySelector('h3');
-                const name = nameTag ? nameTag.textContent.trim() : '';
-                console.log("✅ Clic VÁLIDO en la tarjeta de:", name);
-                if (name) window.showCandidateDetail(name);
+                // Ahora le pasamos el ID real de la base de datos a la función del detalle
+                const cid = card.getAttribute('data-id');
+                console.log("✅ Clic VÁLIDO en la tarjeta del candidato ID:", cid);
+                if (cid) window.showCandidateDetail(cid);
             });
         });
 
@@ -1002,33 +1035,27 @@ function initCandidatos(container) {
 }
 
 // --- LÓGICA DE DETALLE Y MINIATURAS ---
-function extractUniqueCandidates() {
-    const allCards = document.querySelectorAll('.marquee-content .candidate-card');
-    const unique = [];
-    const seen = new Set();
-    allCards.forEach(card => {
-            const name = card.querySelector('h3')?.textContent.trim() || '';
-        if(!seen.has(name) && name !== '') {
-            seen.add(name);
-            unique.push({
-                name: name,
-                role: card.querySelector('p')?.innerText || 'Candidato',
-                imgSrc: card.querySelector('.img-default')?.src || card.querySelector('img')?.src || '',
-                // Si quieres textos específicos por candidato, ponlos en tu HTML en un atributo 'data-bio="Tu texto..."' en la .candidate-card
-                bio: card.getAttribute('data-bio') || 'Nuestra prioridad es devolver la confianza al pueblo con obras reales, transparencia y una gestión eficiente. Tenemos la experiencia y la energía para construir una ciudad segura, moderna y con igualdad de oportunidades para todos. ¡Somos la Fuerza Ganadora!'
-            });
-        }
-    });
-    return unique;
-}
-
 // Esta función es global para que pueda ser llamada desde los eventos onclick de las miniaturas
-window.showCandidateDetail = function(selectedName) {
-    const candidates = extractUniqueCandidates();
-    const selectedCandidate = candidates.find(c => c.name === selectedName) || candidates[0];
+window.showCandidateDetail = async function(candidatoId) {
+    const candidates = window.CANDIDATOS_LIST || [];
+    const currentIndex = candidates.findIndex(c => c.id == candidatoId);
     
-    const currentIndex = candidates.findIndex(c => c.name === selectedName);
+    if (currentIndex === -1) return;
+    
     const nextCandidate = candidates[(currentIndex + 1) % candidates.length];
+
+    // Petición al servidor para traer TODA la información profunda (Propuestas, Cronología, etc)
+    let fullCandidato = null;
+    try {
+        const resp = await fetch(`assets/panel-admin-universo/api_candidatos.php?action=obtener&id=${candidatoId}`);
+        const data = await resp.json();
+        if (data.ok) fullCandidato = data.candidato;
+    } catch(e) { console.error(e); }
+    
+    if (!fullCandidato) {
+        alert("Error al cargar la información del candidato.");
+        return;
+    }
     
     let wrapper = document.getElementById('detalle-candidato-wrapper');
     const isFirstTime = !wrapper;
@@ -1063,42 +1090,90 @@ window.showCandidateDetail = function(selectedName) {
     // 1. Construir Sidebar de Miniaturas
     let sidebarHTML = `<div class="candidato-sidebar animate-detail-element">`;
     candidates.forEach(c => {
-        const isActive = c.name === selectedName ? 'active' : '';
-        // Usamos onclick inline para agilizar la interacción
+        const isActive = c.id == candidatoId ? 'active' : '';
+        const thumbUrl = c.foto_perfil ? `assets/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
         sidebarHTML += `
-            <div class="mini-card ${isActive}" onclick="window.showCandidateDetail('${c.name}')">
-                <img src="${c.imgSrc}" alt="${c.name}" loading="lazy" decoding="async">
+            <div class="mini-card ${isActive}" onclick="window.showCandidateDetail('${c.id}')">
+                <img src="${thumbUrl}" alt="${c.nombres}" loading="lazy" decoding="async">
             </div>`;
     });
     sidebarHTML += `</div>`;
     
+    const fotoPrincipal = fullCandidato.foto_perfil ? `assets/IMG/candidatos/${fullCandidato.foto_perfil}` : 'https://via.placeholder.com/400';
+
+    let badgesHTML = '';
+    (fullCandidato.etiquetas || []).forEach(e => {
+        badgesHTML += `<span class="badge">${e.icono} ${e.texto}</span>`;
+    });
+
+    let trayectoriaHTML = '';
+    (fullCandidato.trayectoria || []).forEach(t => {
+        trayectoriaHTML += `
+            <div class="timeline-item stagger-el">
+                <div class="timeline-year">${t.periodo}</div>
+                <div class="timeline-body">
+                    <div class="timeline-content-left">
+                        <p class="timeline-text">${t.descripcion}</p>
+                    </div>
+                </div>
+            </div>`;
+    });
+    if (!trayectoriaHTML) trayectoriaHTML = '<p class="text-muted" style="color:#bbb;">Aún no se ha registrado trayectoria.</p>';
+
+    let propuestasHTML = '';
+    (fullCandidato.propuestas || []).forEach(p => {
+        propuestasHTML += `
+            <div class="proposal-card stagger-el">
+                <div class="proposal-icon">${p.icono || '✨'}</div>
+                <h6>${p.titulo}</h6>
+                <p>${p.descripcion}</p>
+            </div>`;
+    });
+    if (!propuestasHTML) propuestasHTML = '<p class="text-muted" style="color:#bbb;">Aún no se han registrado propuestas.</p>';
+
+    let fbHTML = '';
+    if (fullCandidato.fb_url_perfil && fullCandidato.fb_url_perfil.trim() !== '') {
+        fbHTML = `
+            <div id="sec-facebook" class="info-block">
+                <div class="block-title stagger-el">📱 Actividad Reciente</div>
+                <div class="facebook-layout-grid stagger-el">
+                    <div class="facebook-text">
+                        <h3>${fullCandidato.fb_titulo || '¡Sigue mi campaña!'}</h3>
+                        <p>${fullCandidato.fb_descripcion || 'Entérate de mis últimos recorridos y propuestas.'}</p>
+                        <a href="${fullCandidato.fb_url_perfil}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Perfil Completo</a>
+                    </div>
+                    <div class="fb-widget-container">
+                        <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="100%" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                    </div>
+                </div>
+            </div>`;
+    }
+
     // 2. Construir Contenido Principal
     let contentHTML = `
         <div class="candidato-content animate-detail-element">
             <div id="sec-perfil" class="candidate-top-row">
                 <div class="candidato-photo-wrapper stagger-el">
                     <div class="photo-glow"></div>
-                    <div class="photo-badge">${selectedCandidate.role}</div>
+                    <div class="photo-badge">${fullCandidato.cargo_flotante || 'Candidato'}</div>
                     <div class="candidato-photo">
-                        <img src="${selectedCandidate.imgSrc}" alt="${selectedCandidate.name}" loading="lazy" decoding="async">
+                        <img src="${fotoPrincipal}" alt="${fullCandidato.nombres}" loading="lazy" decoding="async">
                     </div>
                 </div>
                 <div class="candidate-top-info">
-                    <h2 class="stagger-el">${selectedCandidate.name}</h2>
+                    <h2 class="stagger-el">${fullCandidato.nombres}</h2>
                     
                     <div class="candidate-badges stagger-el">
-                        <span class="badge">📍 Tacna Centro</span>
-                        <span class="badge">💼 Gestión Pública</span>
-                        <span class="badge">🎯 Desarrollo Social</span>
+                        ${badgesHTML}
                     </div>
 
                     <div class="candidate-quote stagger-el">
-                        <p>"Trabajaré incansablemente por una ciudad más segura, ordenada y con verdaderas oportunidades de crecimiento para todos los tacneños."</p>
-                        <span class="quote-author">— ${selectedCandidate.name} | ${selectedCandidate.role}</span>
+                        <p>"${fullCandidato.frase_cita || 'Fuerza Tacna'}"</p>
+                        <span class="quote-author">— ${fullCandidato.nombres} | ${fullCandidato.cargo_flotante}</span>
                     </div>
                     
                     <p class="stagger-el" style="margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5; color: #ddd; max-width: 85ch;">
-                        ${selectedCandidate.bio}
+                        ${fullCandidato.biografia || ''}
                     </p>
                 </div>
             </div>
@@ -1107,133 +1182,31 @@ window.showCandidateDetail = function(selectedName) {
                 <div id="sec-trayectoria" class="info-block">
                     <div class="block-title stagger-el">⏱️ Trayectoria Profesional</div>
                     <div class="timeline">
-                        <div class="timeline-item stagger-el">
-                            <div class="timeline-year">2018 – 2020</div>
-                            <div class="timeline-body">
-                                <div class="timeline-content-left">
-                                    <p class="timeline-text">Líder en proyectos de desarrollo social comunitario y apoyo directo a familias vulnerables en distintos sectores. Implementación de ollas comunes y asistencia básica.</p>
-                                    <button class="mobile-gallery-btn" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Ver Galería (3)</button>
-                                </div>
-                                <div class="timeline-carousel-wrapper">
-                                    <div class="timeline-carousel-content">
-                                        <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-1.jpg" alt="Actividad 2018-1" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
-                                        </div>
-                                        <div class="timeline-carousel-item">
-                                            <img src="assets/img/design-service-1.jpg" alt="Actividad 2018-2" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
-                                        </div>
-                                        <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-2.jpg" alt="Actividad 2018-3" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-1.jpg', 'assets/img/design-service-1.jpg', 'assets/img/photo-service-2.jpg'])">
-                                        </div>
-                                    </div>
-                                    <div class="timeline-carousel-nav prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg></div>
-                                    <div class="timeline-carousel-nav next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item stagger-el">
-                            <div class="timeline-year">2021 – 2023</div>
-                            <div class="timeline-body">
-                                <div class="timeline-content-left">
-                                    <p class="timeline-text">Gestión estratégica en iniciativas vecinales orientadas a la recuperación de espacios urbanos abandonados, creando nuevas áreas de recreación seguras para la juventud.</p>
-                                    <button class="mobile-gallery-btn" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Ver Galería (2)</button>
-                                </div>
-                                <div class="timeline-carousel-wrapper">
-                                    <div class="timeline-carousel-content">
-                                        <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-2.jpg" alt="Actividad 2021-1" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])">
-                                        </div>
-                                        <div class="timeline-carousel-item">
-                                            <img src="assets/img/design-service-3.jpg" alt="Actividad 2021-2" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-2.jpg', 'assets/img/design-service-3.jpg'])">
-                                        </div>
-                                    </div>
-                                    <div class="timeline-carousel-nav prev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg></div>
-                                    <div class="timeline-carousel-nav next"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item stagger-el">
-                            <div class="timeline-year">2024 – Presente</div>
-                            <div class="timeline-body">
-                                <div class="timeline-content-left">
-                                    <p class="timeline-text">Candidatura oficial impulsando planes de modernización tecnológica e infraestructura pública regional, promoviendo el emprendimiento formal.</p>
-                                    <button class="mobile-gallery-btn" onclick="window.openCandidateGallery(['assets/img/photo-service-3.jpg'])"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Ver Foto (1)</button>
-                                </div>
-                                <div class="timeline-carousel-wrapper">
-                                    <div class="timeline-carousel-content">
-                                        <div class="timeline-carousel-item">
-                                            <img src="assets/img/photo-service-3.jpg" alt="Actividad 2024-1" loading="lazy" onclick="window.openCandidateGallery(['assets/img/photo-service-3.jpg'])">
-                                        </div>
-                                    </div>
-                                    <div class="timeline-carousel-nav prev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg></div>
-                                    <div class="timeline-carousel-nav next"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg></div>
-                                </div>
-                            </div>
-                        </div>
+                        ${trayectoriaHTML}
                     </div>
                 </div>
 
                 <div id="sec-propuestas" class="info-block">
                     <div class="block-title stagger-el">🚀 Ejes de Propuesta</div>
                     <div class="proposals-grid">
-                        <div class="proposal-card stagger-el">
-                            <div class="proposal-icon">🛡️</div>
-                            <h6>Seguridad Total</h6>
-                            <p>Cámaras 4K, drones de vigilancia táctica y un moderno sistema de patrullaje integrado 24/7.</p>
-                        </div>
-                        <div class="proposal-card stagger-el">
-                            <div class="proposal-icon">🌳</div>
-                            <h6>Espacios Vivos</h6>
-                            <p>Creación de 5 mega-parques ecológicos y la recuperación total de áreas recreativas familiares.</p>
-                        </div>
-                        <div class="proposal-card stagger-el">
-                            <div class="proposal-icon">📈</div>
-                            <h6>Emprendimiento</h6>
-                            <p>Fondo de apoyo directo a emprendedores locales con digitalización y cero papeleo.</p>
-                        </div>
-                        <div class="proposal-card stagger-el">
-                            <div class="proposal-icon">🛣️</div>
-                            <h6>Vías Modernas</h6>
-                            <p>Plan agresivo de pavimentación de calles, ordenamiento vial y mejora del transporte público.</p>
-                        </div>
-                        <div class="proposal-card stagger-el">
-                            <div class="proposal-icon">🏥</div>
-                            <h6>Salud Integral</h6>
-                            <p>Mejoramiento de las postas médicas y campañas de salud preventiva gratuitas para los vecinos.</p>
-                        </div>
-                        <div class="proposal-card stagger-el">
-                            <div class="proposal-icon">📚</div>
-                            <h6>Educación 3.0</h6>
-                            <p>Internet gratuito en plazas públicas y apoyo con herramientas tecnológicas para estudiantes.</p>
-                        </div>
+                        ${propuestasHTML}
                     </div>
                 </div>
                 
-                <div id="sec-facebook" class="info-block">
-                    <div class="block-title stagger-el">📱 Actividad Reciente</div>
-                    <div class="facebook-layout-grid stagger-el">
-                        <div class="facebook-text">
-                            <h3>¡Sigue mi campaña!</h3>
-                            <p>Conéctate a mis redes sociales para enterarte de los últimos recorridos, propuestas en vivo y conversar directamente conmigo. ¡Tu voz importa para el futuro de Tacna!</p>
-                            <a href="https://www.facebook.com/lilianabustinza.sa" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Perfil Completo</a>
-                        </div>
-                        <div class="fb-widget-container">
-                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Flilianabustinza.sa&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="100%" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-                        </div>
-                    </div>
-                </div>
+                ${fbHTML}
 
                 <div class="candidate-actions stagger-el" style="justify-content: center; margin-bottom: 3.5rem;">
                     <a href="contacto.html" class="action-btn outline" style="padding: 1.2rem 3rem;">Contactar Candidato</a>
                 </div>
 
+                ${nextCandidate ? `
                 <div class="stagger-el">
-                    <div class="next-candidate-module" onclick="window.showCandidateDetail('${nextCandidate.name}')">
+                    <div class="next-candidate-module" onclick="window.showCandidateDetail('${nextCandidate.id}')">
                         <div class="next-candidate-info">
-                            <img src="${nextCandidate.imgSrc}" alt="${nextCandidate.name}" class="next-candidate-avatar" loading="lazy" decoding="async">
+                            <img src="${nextCandidate.foto_perfil ? `assets/IMG/candidatos/${nextCandidate.foto_perfil}` : 'https://via.placeholder.com/100'}" alt="${nextCandidate.nombres}" class="next-candidate-avatar" loading="lazy" decoding="async">
                             <div class="next-candidate-text">
                                 <h5>Siguiente Perfil</h5>
-                                <h3>${nextCandidate.name}</h3>
+                                <h3>${nextCandidate.nombres}</h3>
                             </div>
                         </div>
                         <div class="next-candidate-arrow">
@@ -1241,6 +1214,7 @@ window.showCandidateDetail = function(selectedName) {
                         </div>
                     </div>
                 </div>
+                ` : ''}
             </div>
         </div>
     `;
