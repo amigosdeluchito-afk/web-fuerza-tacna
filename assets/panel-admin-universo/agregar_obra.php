@@ -92,23 +92,49 @@ if (isset($_GET['success'])) {
         .foto-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; display: block; }
         .foto-meta { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; align-items: center; }
         .badge-principal { position: absolute; top: 6px; left: 6px; background: #10b981; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+        /* Estilos del Menú Desplegable */
+        .dropdown { position: relative; display: inline-block; margin-right: 16px; }
+        .dropdown .dropbtn { background: transparent; border: none; color: #9ca3af; font-size: 14px; cursor: pointer; font-family: inherit; padding: 0; display: flex; align-items: center; outline: none; }
+        .dropdown .dropbtn.active { color: #ffffff; font-weight: 600; }
+        .dropdown:hover .dropbtn { color: #e5e7eb; }
+        .dropdown-content { display: none; position: absolute; background-color: #0f172a; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5); z-index: 1; border-radius: 8px; border: 1px solid #1e293b; top: 100%; left: 0; padding: 8px 0; margin-top: 10px; }
+        .dropdown-content a { color: #9ca3af !important; padding: 8px 16px !important; text-decoration: none; display: block; margin: 0 !important; font-size: 13px !important; }
+        .dropdown-content a:hover { background-color: #1e293b; color: #fff !important; }
+        .dropdown-content a.active { color: #3b82f6 !important; background-color: rgba(59,130,246,0.1); font-weight: 600; }
+        .dropdown:hover .dropdown-content { display: block; }
     </style>
 </head>
 <body>
     <header class="app-header">
-      <nav>
-        <a href="index.php">📷 Fotos</a>
-        <a href="agregar_obra.php" class="active">➕ Agregar Obra</a>
-        <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
-        <a href="segmentos.php">🗂️ Segmentos</a>
-        <a href="cronologia.php">⏳ Cronología</a>
-        <a href="editar_candidato.php">👥 Candidatos</a>
-        <a href="ia_respuestas.php">🧠 Cerebro IA</a>
-        <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
+      <nav style="display:flex; align-items:center;">
+        <a href="index.php" class="<?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>">📷 Fotos</a>
+        <a href="agregar_obra.php" class="<?= basename($_SERVER['PHP_SELF']) == 'agregar_obra.php' ? 'active' : '' ?>">➕ Agregar Obra</a>
+        <a href="editar_obra.php" class="<?= basename($_SERVER['PHP_SELF']) == 'editar_obra.php' ? 'active' : '' ?>">✏️ Editar Obra</a>
+        <a href="gestionar_visibilidad.php" class="<?= basename($_SERVER['PHP_SELF']) == 'gestionar_visibilidad.php' ? 'active' : '' ?>">👁️ Visibilidad</a>
+        <a href="segmentos.php" class="<?= basename($_SERVER['PHP_SELF']) == 'segmentos.php' ? 'active' : '' ?>">🗂️ Segmentos</a>
+        <a href="cronologia.php" class="<?= basename($_SERVER['PHP_SELF']) == 'cronologia.php' ? 'active' : '' ?>">⏳ Cronología</a>
+        <a href="editar_candidato.php" class="<?= basename($_SERVER['PHP_SELF']) == 'editar_candidato.php' ? 'active' : '' ?>">👥 Candidatos</a>
+        
+        <div class="dropdown">
+          <button class="dropbtn <?= in_array(basename($_SERVER['PHP_SELF']), ['ia_respuestas.php', 'ia_conocimiento.php', 'ia_fuentes.php', 'ia_estadisticas.php']) ? 'active' : '' ?>">🧠 IA y Conocimiento ▾</button>
+          <div class="dropdown-content">
+            <a href="ia_respuestas.php" class="<?= basename($_SERVER['PHP_SELF']) == 'ia_respuestas.php' ? 'active' : '' ?>">🧠 Cerebro IA</a>
+            <a href="ia_conocimiento.php" class="<?= basename($_SERVER['PHP_SELF']) == 'ia_conocimiento.php' ? 'active' : '' ?>">📚 Base Conocimiento</a>
+            <a href="ia_fuentes.php" class="<?= basename($_SERVER['PHP_SELF']) == 'ia_fuentes.php' ? 'active' : '' ?>">🔗 Fuentes Externas</a>
+            <a href="ia_estadisticas.php" class="<?= basename($_SERVER['PHP_SELF']) == 'ia_estadisticas.php' ? 'active' : '' ?>">📊 Estadísticas IA</a>
+          </div>
+        </div>
+
         <?php if (is_admin()): ?>
-        <a href="usuarios.php">👤 Usuarios</a>
-        <a href="historial.php">🕒 Historial</a>
-        <a href="ver_accesos.php">🕵️ Accesos IP</a>
+        <div class="dropdown">
+          <button class="dropbtn <?= in_array(basename($_SERVER['PHP_SELF']), ['usuarios.php', 'historial.php', 'ver_accesos.php']) ? 'active' : '' ?>">⚙️ Admin ▾</button>
+          <div class="dropdown-content">
+            <a href="usuarios.php" class="<?= basename($_SERVER['PHP_SELF']) == 'usuarios.php' ? 'active' : '' ?>">👤 Usuarios</a>
+            <a href="historial.php" class="<?= basename($_SERVER['PHP_SELF']) == 'historial.php' ? 'active' : '' ?>">🕒 Historial</a>
+            <a href="ver_accesos.php" class="<?= basename($_SERVER['PHP_SELF']) == 'ver_accesos.php' ? 'active' : '' ?>">🕵️ Accesos IP</a>
+          </div>
+        </div>
         <?php endif; ?>
       </nav>
       <div class="user">
