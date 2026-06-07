@@ -27,8 +27,35 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         
         /* MITAD DERECHA: Live Preview (Fase 3) */
         .editor-right { width: 55%; background: #1e293b; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        .placeholder-preview { text-align: center; color: #64748b; }
-        .placeholder-preview h2 { font-size: 24px; margin-bottom: 10px; color: #94a3b8; }
+        
+        /* --- VISTA PREVIA MÓVIL (DISEÑO FUERZA TACNA) --- */
+        .preview-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #0f172a; padding: 20px; box-sizing: border-box; }
+        .candidate-card { width: 375px; height: 100%; max-height: 800px; background: #1e293b; border-radius: 24px; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid #334155; position: relative; font-family: system-ui, sans-serif; }
+        .candidate-card::-webkit-scrollbar { width: 6px; }
+        .candidate-card::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .card-hero { text-align: center; padding: 30px 20px 10px; position: relative; border-bottom: 1px solid #334155; }
+        .badge-flotante { display: inline-block; background: #801039; color: #ffc300; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .hero-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #ffc300; margin-bottom: 10px; background: #334155; }
+        .card-hero h1 { font-size: 22px; margin: 0 0 10px; color: #f8fafc; font-weight: 900; }
+        .tags-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        .preview-tag { background: #334155; color: #cbd5e1; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+        .card-body { padding: 20px; }
+        .quote-box { background: linear-gradient(135deg, rgba(128,16,57,0.2), transparent); border-left: 3px solid #ffc300; padding: 12px 15px; font-style: italic; color: #f1f5f9; font-size: 14px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .bio-text { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 25px; }
+        .section-title { font-size: 15px; color: #f8fafc; margin: 0 0 15px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        .timeline { border-left: 2px solid #334155; padding-left: 15px; margin-bottom: 25px; margin-left: 5px; }
+        .timeline-item { position: relative; margin-bottom: 15px; }
+        .timeline-item::before { content: ""; position: absolute; left: -21px; top: 2px; width: 10px; height: 10px; background: #ffc300; border-radius: 50%; box-shadow: 0 0 8px rgba(255,195,0,0.5); }
+        .timeline-period { font-size: 11px; font-weight: bold; color: #3b82f6; text-transform: uppercase; }
+        .timeline-desc { font-size: 12px; color: #cbd5e1; margin: 4px 0 0; line-height: 1.4; }
+        .propuestas-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
+        .prop-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 12px; display: flex; gap: 12px; align-items: flex-start; }
+        .prop-icon { font-size: 22px; line-height: 1; }
+        .prop-content h4 { margin: 0 0 4px; font-size: 13px; color: #f8fafc; font-weight: bold; }
+        .prop-content p { margin: 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4; }
+        .fb-widget { background: #1877f2; border-radius: 12px; padding: 15px; text-align: center; color: white; display: flex; flex-direction: column; gap: 5px; }
+        .fb-widget h4 { margin: 0; font-size: 14px; font-weight: bold; }
+        .fb-widget p { margin: 0; font-size: 12px; opacity: 0.9; }
         
         /* Sistema de Pestañas (Tabs) */
         .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1e293b; flex-wrap: wrap; }
@@ -155,9 +182,38 @@ $id_candidato = (int)($_GET['id'] ?? 0);
 
     <!-- LADO DERECHO: VISTA PREVIA (Fase 3) -->
     <div class="editor-right">
-        <div class="placeholder-preview">
-            <h2>✨ Vista Previa en Vivo</h2>
-            <p>En la siguiente fase, aquí inyectaremos<br>el diseño oscuro en 3D de tu web pública.</p>
+        <div class="preview-container">
+            <div class="candidate-card">
+                <div class="card-hero">
+                    <div class="badge-flotante" id="preview-cargo">Candidato a Alcalde</div>
+                    <img src="https://via.placeholder.com/100/334155/94a3b8?text=Foto" id="preview-foto" class="hero-avatar" alt="Foto">
+                    <h1 id="preview-nombre">Nombre del Candidato</h1>
+                    <div class="tags-container" id="preview-etiquetas">
+                        <!-- Se inyectan etiquetas aquí -->
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="quote-box">
+                        <p id="preview-frase">"Escribe una frase destacada para verla aquí..."</p>
+                    </div>
+                    <p class="bio-text" id="preview-bio">Resumen biográfico aparecerá aquí...</p>
+                    
+                    <h3 class="section-title">Trayectoria</h3>
+                    <div class="timeline" id="preview-trayectoria">
+                        <!-- Se inyecta cronología aquí -->
+                    </div>
+
+                    <h3 class="section-title">Propuestas</h3>
+                    <div class="propuestas-grid" id="preview-propuestas">
+                        <!-- Se inyectan propuestas aquí -->
+                    </div>
+                    
+                    <div class="fb-widget">
+                        <h4 id="preview-fb-titulo">¡Sigue mi campaña!</h4>
+                        <p id="preview-fb-desc">Entérate de las últimas noticias</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -175,30 +231,80 @@ $id_candidato = (int)($_GET['id'] ?? 0);
     // --- 2. GENERADORES DE FORMULARIOS DINÁMICOS ---
     function addEtiqueta() {
         const container = document.getElementById('etiquetas-list');
-        const index = Date.now(); // Indice único
-        const html = `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Eliminar">X</button><div style="display:flex; gap:10px;"><div style="flex:1;"><label>Icono</label><input type="text" name="etiquetas[${index}][icono]" class="form-control" placeholder="📍"></div><div style="flex:3;"><label>Texto</label><input type="text" name="etiquetas[${index}][texto]" class="form-control" placeholder="Tacna Centro"></div></div></div>`;
+        const index = Date.now();
+        const html = `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div style="display:flex; gap:10px;"><div style="flex:1;"><label>Icono</label><input type="text" name="etiquetas[${index}][icono]" class="form-control" placeholder="📍"></div><div style="flex:3;"><label>Texto</label><input type="text" name="etiquetas[${index}][texto]" class="form-control" placeholder="Tacna Centro"></div></div></div>`;
         container.insertAdjacentHTML('beforeend', html);
+        setTimeout(updateLivePreview, 10);
     }
 
     function addTrayectoria() {
         const container = document.getElementById('trayectoria-list');
         const index = Date.now();
-        const html = `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Eliminar">X</button><div class="form-group"><label>Periodo o Año</label><input type="text" name="trayectoria[${index}][periodo]" class="form-control" placeholder="Ej: 2018 - 2022"></div><div class="form-group" style="margin-bottom:0;"><label>Descripción de Logros</label><textarea name="trayectoria[${index}][descripcion]" class="form-control" rows="2" placeholder="Fui responsable de..."></textarea></div><div style="background: rgba(0,0,0,0.3); border-radius:6px; padding: 10px; margin-top:10px; text-align:center;"><span style="font-size:11px; color:#64748b;">📷 Botón de subir galería de fotos (Se habilitará en la Fase 4)</span></div></div>`;
+        const html = `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div class="form-group"><label>Periodo o Año</label><input type="text" name="trayectoria[${index}][periodo]" class="form-control" placeholder="Ej: 2018 - 2022"></div><div class="form-group" style="margin-bottom:0;"><label>Descripción de Logros</label><textarea name="trayectoria[${index}][descripcion]" class="form-control" rows="2" placeholder="Fui responsable de..."></textarea></div><div style="background: rgba(0,0,0,0.3); border-radius:6px; padding: 10px; margin-top:10px; text-align:center;"><span style="font-size:11px; color:#64748b;">📷 Botón de subir galería de fotos (Se habilitará en la Fase 4)</span></div></div>`;
         container.insertAdjacentHTML('beforeend', html);
+        setTimeout(updateLivePreview, 10);
     }
 
     function addPropuesta() {
         const container = document.getElementById('propuestas-list');
         const index = Date.now();
-        const html = `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Eliminar">X</button><div style="display:flex; gap:10px; margin-bottom:10px;"><div style="flex:1;"><label>Icono</label><input type="text" name="propuestas[${index}][icono]" class="form-control" placeholder="🛡️"></div><div style="flex:3;"><label>Título de la Propuesta</label><input type="text" name="propuestas[${index}][titulo]" class="form-control" placeholder="Ej: Seguridad Ciudadana"></div></div><div class="form-group" style="margin-bottom:0;"><label>Descripción o Desarrollo</label><textarea name="propuestas[${index}][descripcion]" class="form-control" rows="2" placeholder="Implementaremos un sistema de vigilancia..."></textarea></div></div>`;
+        const html = `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div style="display:flex; gap:10px; margin-bottom:10px;"><div style="flex:1;"><label>Icono</label><input type="text" name="propuestas[${index}][icono]" class="form-control" placeholder="🛡️"></div><div style="flex:3;"><label>Título de la Propuesta</label><input type="text" name="propuestas[${index}][titulo]" class="form-control" placeholder="Ej: Seguridad Ciudadana"></div></div><div class="form-group" style="margin-bottom:0;"><label>Descripción o Desarrollo</label><textarea name="propuestas[${index}][descripcion]" class="form-control" rows="2" placeholder="Implementaremos un sistema de vigilancia..."></textarea></div></div>`;
         container.insertAdjacentHTML('beforeend', html);
+        setTimeout(updateLivePreview, 10);
     }
+
+    // --- 3. MAGIA DE LA VISTA PREVIA (LIVE PREVIEW) ---
+    function updateLivePreview() {
+        const form = document.getElementById('candidato-form');
+        
+        // Textos Fijos
+        document.getElementById('preview-nombre').innerText = form.querySelector('input[name="nombres"]').value || 'Nombre del Candidato';
+        document.getElementById('preview-cargo').innerText = form.querySelector('input[name="cargo_flotante"]').value || 'Cargo a postular';
+        document.getElementById('preview-frase').innerText = '"' + (form.querySelector('textarea[name="frase_cita"]').value || 'Frase destacada...') + '"';
+        document.getElementById('preview-bio').innerText = form.querySelector('textarea[name="biografia"]').value || 'Escribe el resumen biográfico y lo verás aquí...';
+        document.getElementById('preview-fb-titulo').innerText = form.querySelector('input[name="fb_titulo"]').value || '¡Sigue mi campaña!';
+        document.getElementById('preview-fb-desc').innerText = form.querySelector('input[name="fb_descripcion"]').value || 'Entérate de las últimas noticias.';
+        
+        // Etiquetas
+        const tagsCont = document.getElementById('preview-etiquetas');
+        tagsCont.innerHTML = '';
+        const iIco = form.querySelectorAll('input[name^="etiquetas"][name$="[icono]"]');
+        const iTex = form.querySelectorAll('input[name^="etiquetas"][name$="[texto]"]');
+        iIco.forEach((input, i) => {
+            if(input.value || iTex[i].value) tagsCont.innerHTML += `<div class="preview-tag">${input.value} ${iTex[i].value}</div>`;
+        });
+
+        // Trayectoria
+        const trayCont = document.getElementById('preview-trayectoria');
+        trayCont.innerHTML = '';
+        const tPer = form.querySelectorAll('input[name^="trayectoria"][name$="[periodo]"]');
+        const tDes = form.querySelectorAll('textarea[name^="trayectoria"][name$="[descripcion]"]');
+        tPer.forEach((input, i) => {
+            if(input.value || tDes[i].value) trayCont.innerHTML += `<div class="timeline-item"><div class="timeline-period">${input.value || 'Año'}</div><p class="timeline-desc">${tDes[i].value || '...'}</p></div>`;
+        });
+        if(trayCont.innerHTML === '') trayCont.innerHTML = '<div class="timeline-item"><div class="timeline-period">Año</div><p class="timeline-desc">Agrega trayectoria en la pestaña de la izquierda...</p></div>';
+
+        // Propuestas
+        const propCont = document.getElementById('preview-propuestas');
+        propCont.innerHTML = '';
+        const pIco = form.querySelectorAll('input[name^="propuestas"][name$="[icono]"]');
+        const pTit = form.querySelectorAll('input[name^="propuestas"][name$="[titulo]"]');
+        const pDes = form.querySelectorAll('textarea[name^="propuestas"][name$="[descripcion]"]');
+        pIco.forEach((input, i) => {
+            if(input.value || pTit[i].value || pDes[i].value) propCont.innerHTML += `<div class="prop-card"><div class="prop-icon">${input.value || '✨'}</div><div class="prop-content"><h4>${pTit[i].value || 'Propuesta'}</h4><p>${pDes[i].value || '...'}</p></div></div>`;
+        });
+        if(propCont.innerHTML === '') propCont.innerHTML = '<div class="prop-card"><div class="prop-icon">🛡️</div><div class="prop-content"><h4>Propuesta</h4><p>Agrega propuestas en la pestaña de la izquierda...</p></div></div>';
+    }
+
+    // Escuchar cada tecla pulsada para actualizar todo al instante
+    document.getElementById('candidato-form').addEventListener('input', updateLivePreview);
 
     // Iniciar con campos vacíos de ejemplo si es nuevo
     window.onload = function() {
         if (!<?= $id_candidato ?>) {
             addEtiqueta(); addTrayectoria(); addPropuesta();
         }
+        updateLivePreview(); // Primer render
     };
 </script>
 </body>
