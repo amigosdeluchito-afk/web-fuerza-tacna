@@ -881,10 +881,11 @@ async function initCandidatos(container) {
                 
                 window.CANDIDATOS_LIST.forEach(c => {
                     const fotoUrl = c.foto_perfil ? `assets/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
+                    const fotoHover = c.foto_portada ? `assets/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
                             <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" loading="lazy" decoding="async">
-                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-hover" loading="lazy" decoding="async">
+                            <img src="${fotoHover}" alt="${c.nombres}" class="img-hover" loading="lazy" decoding="async">
                             <div class="candidate-info">
                                 <h3>${c.nombres}</h3>
                                 <p>${c.cargo_flotante}</p>

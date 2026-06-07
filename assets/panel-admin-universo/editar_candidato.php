@@ -2,7 +2,12 @@
 require_once __DIR__ . '/config.php';
 require_login();
 
+$db = get_db_connection();
 $id_candidato = (int)($_GET['id'] ?? 0);
+
+// Obtener lista para el selector
+$stmt = $db->query("SELECT id, nombres FROM panel_candidatos ORDER BY orden ASC, id DESC");
+$candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -127,6 +132,19 @@ $id_candidato = (int)($_GET['id'] ?? 0);
 <div class="split-layout">
     <!-- LADO IZQUIERDO: CONTROLES DEL EDITOR -->
     <div class="editor-left">
+        <!-- NUEVO: Selector de Candidatos -->
+        <div style="padding: 15px; background: #0b1020; border-bottom: 1px solid #1e293b;">
+            <label style="color: #94a3b8; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block;">👥 Seleccionar Candidato:</label>
+            <select class="form-control" style="border-color: #3b82f6; background: #020617; color: #60a5fa; font-weight: bold;" onchange="if(this.value !== '') window.location.href='editar_candidato.php?id='+this.value;">
+                <option value="0">➕ CREAR NUEVO CANDIDATO...</option>
+                <?php foreach($candidatos_lista as $c): ?>
+                    <option value="<?= $c['id'] ?>" <?= $id_candidato == $c['id'] ? 'selected' : '' ?>>
+                        ✏️ Editar: <?= htmlspecialchars($c['nombres']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
         <div class="tabs-header">
             <button type="button" class="tab-btn active" onclick="openTab('perfil', this)">👤 Perfil</button>
             <button type="button" class="tab-btn" onclick="openTab('etiquetas', this)">🏷️ Etiquetas</button>
@@ -137,11 +155,17 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         <form id="candidato-form" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
             <!-- PESTAÑA 1: PERFIL PRINCIPAL -->
             <div id="tab-perfil" class="tab-content active">
-                <div class="form-group" style="background: rgba(59,130,246,0.1); padding: 15px; border-radius: 8px; border: 1px dashed #3b82f6;">
-                    <label style="color:#93c5fd;">📸 Foto de Perfil (Avatar)</label>
-                    <input type="file" name="foto_perfil" id="input_foto" class="form-control" accept="image/*" style="border: none; background: transparent; padding: 0;">
-                    <small style="color:#64748b;">Se recomienda una foto cuadrada o vertical (Ej. 800x800px).</small>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div class="form-group" style="flex: 1; background: rgba(59,130,246,0.1); padding: 15px; border-radius: 8px; border: 1px dashed #3b82f6; margin-bottom: 0;">
+                        <label style="color:#93c5fd;">📸 Foto Normal</label>
+                        <input type="file" name="foto_perfil" id="input_foto" class="form-control" accept="image/*" style="border: none; background: transparent; padding: 0;">
+                    </div>
+                    <div class="form-group" style="flex: 1; background: rgba(16,185,129,0.1); padding: 15px; border-radius: 8px; border: 1px dashed #10b981; margin-bottom: 0;">
+                        <label style="color:#6ee7b7;">✨ Foto Hover</label>
+                        <input type="file" name="foto_portada" id="input_foto_hover" class="form-control" accept="image/*" style="border: none; background: transparent; padding: 0;">
+                    </div>
                 </div>
+                <small style="color:#64748b; display: block; margin-top: -10px; margin-bottom: 15px;">Sube las dos fotos del carrusel. La Hover aparece al pasar el ratón.</small>
                 <div class="form-group">
                     <label>Nombres y Apellidos</label>
                     <input type="text" name="nombres" class="form-control" placeholder="Ej: Patrick Stewart">

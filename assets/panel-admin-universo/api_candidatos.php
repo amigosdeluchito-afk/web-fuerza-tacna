@@ -11,7 +11,7 @@ $action = $_REQUEST['action'] ?? '';
 try {
     // 1. Obtener lista rápida (Para el menú principal del panel admin)
     if ($action === 'listar') {
-        $stmt = $db->query("SELECT id, nombres, cargo_flotante, foto_perfil, estado FROM panel_candidatos ORDER BY orden ASC, id DESC");
+        $stmt = $db->query("SELECT id, nombres, cargo_flotante, foto_perfil, foto_portada, estado FROM panel_candidatos ORDER BY orden ASC, id DESC");
         $candidatos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode(['ok' => true, 'candidatos' => $candidatos]);
         exit;
@@ -89,6 +89,17 @@ try {
                     $foto_perfil = $filename;
                 }
             }
+            
+            $foto_portada = null;
+            if (isset($_FILES['foto_portada']) && $_FILES['foto_portada']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../universoobras/IMG/candidatos/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+                $ext = pathinfo($_FILES['foto_portada']['name'], PATHINFO_EXTENSION);
+                $filename = 'cand_hover_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+                if (move_uploaded_file($_FILES['foto_portada']['tmp_name'], $uploadDir . $filename)) {
+                    $foto_portada = $filename;
+                }
+            }
 
             if ($id > 0) {
                 // Actualizar candidato existente
@@ -99,6 +110,10 @@ try {
                     $sql .= ", foto_perfil=?";
                     $params[] = $foto_perfil;
                 }
+                if ($foto_portada) {
+                    $sql .= ", foto_portada=?";
+                    $params[] = $foto_portada;
+                }
                 $sql .= " WHERE id=?";
                 $params[] = $id;
 
@@ -106,9 +121,9 @@ try {
                 $stmt->execute($params);
             } else {
                 // Insertar nuevo candidato
-                $sql = "INSERT INTO panel_candidatos (nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, foto_perfil) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO panel_candidatos (nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, foto_perfil, foto_portada) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($sql);
-                $stmt->execute([$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $foto_perfil]);
+                $stmt->execute([$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $foto_perfil, $foto_portada]);
                 $id = $db->lastInsertId();
             }
 
