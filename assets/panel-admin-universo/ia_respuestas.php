@@ -378,6 +378,7 @@ sort($all_cats);
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }
+        .dropdown::after { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 15px; }
         .dropdown .dropbtn { background: transparent; border: none; color: #9ca3af; font-size: 14px; cursor: pointer; font-family: inherit; padding: 0; display: flex; align-items: center; outline: none; }
         .dropdown .dropbtn.active { color: #ffffff; font-weight: 600; }
         .dropdown:hover .dropbtn { color: #e5e7eb; }
