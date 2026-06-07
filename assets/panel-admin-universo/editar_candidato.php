@@ -62,9 +62,21 @@ $id_candidato = (int)($_GET['id'] ?? 0);
 <header class="app-header">
   <nav>
     <a href="index.php">📷 Fotos</a>
-    <a href="editar_obra.php">✏️ Editar Obra</a>
-    <a href="editar_candidato.php" class="active">👥 Editar Candidatos</a>
+    <a href="agregar_obra.php">➕ Agregar Obra</a>
+    <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
+    <a href="gestionar_visibilidad.php">👁️ Ocultar/Eliminar</a>
     <a href="segmentos.php">🗂️ Segmentos</a>
+    <a href="cronologia.php">⏳ Cronología</a>
+    <a href="editar_candidato.php" class="active">👥 Editar Candidatos</a>
+    <a href="ia_respuestas.php">🧠 Cerebro IA</a>
+    <a href="ia_conocimiento.php">📚 Base Conocimiento</a>
+    <a href="ia_fuentes.php">🔗 Fuentes Externas</a>
+    <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
+    <?php if (is_admin()): ?>
+    <a href="usuarios.php">👤 Usuarios</a>
+    <a href="historial.php">🕒 Historial</a>
+    <a href="ver_accesos.php">🕵️ Accesos IP</a>
+    <?php endif; ?>
   </nav>
   <div class="user">
     <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php">Salir</a>

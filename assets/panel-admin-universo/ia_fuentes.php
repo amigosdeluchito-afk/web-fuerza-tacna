@@ -283,6 +283,7 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="editar_obra.php">✏️ Editar Obra</a>
     <a href="segmentos.php">🗂️ Segmentos</a>
     <a href="cronologia.php">⏳ Cronología</a>
+    <a href="editar_candidato.php">👥 Candidatos</a>
     <a href="ia_respuestas.php">🧠 Cerebro IA</a>
     <a href="ia_conocimiento.php">📚 Base Conocimiento</a>
     <a href="ia_fuentes.php" class="active">🔗 Fuentes Externas</a>

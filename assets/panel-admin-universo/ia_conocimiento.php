@@ -226,6 +226,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
     <a href="editar_obra.php">✏️ Editar Obra y Fotos</a>
     <a href="segmentos.php">🗂️ Segmentos</a>
     <a href="cronologia.php">⏳ Cronología</a>
+    <a href="editar_candidato.php">👥 Candidatos</a>
     <a href="ia_respuestas.php">🧠 Cerebro IA</a>
     <a href="ia_conocimiento.php" class="active">📚 Base Conocimiento</a>
     <a href="ia_fuentes.php">🔗 Fuentes Externas</a>

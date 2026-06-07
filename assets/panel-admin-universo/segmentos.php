@@ -49,6 +49,7 @@ require_login();
         <a href="editar_obra.php">✏️ Editar Obra</a>
         <a href="segmentos.php" class="active">🗂️ Segmentos</a>
         <a href="cronologia.php">⏳ Cronología</a>
+        <a href="editar_candidato.php">👥 Candidatos</a>
         <a href="ia_respuestas.php">🧠 Cerebro IA</a>
         <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
         <?php if (is_admin()): ?>
