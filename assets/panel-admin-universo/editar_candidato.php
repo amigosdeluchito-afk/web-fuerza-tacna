@@ -137,6 +137,11 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         <form id="candidato-form" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
             <!-- PESTAÑA 1: PERFIL PRINCIPAL -->
             <div id="tab-perfil" class="tab-content active">
+                <div class="form-group" style="background: rgba(59,130,246,0.1); padding: 15px; border-radius: 8px; border: 1px dashed #3b82f6;">
+                    <label style="color:#93c5fd;">📸 Foto de Perfil (Avatar)</label>
+                    <input type="file" name="foto_perfil" id="input_foto" class="form-control" accept="image/*" style="border: none; background: transparent; padding: 0;">
+                    <small style="color:#64748b;">Se recomienda una foto cuadrada o vertical (Ej. 800x800px).</small>
+                </div>
                 <div class="form-group">
                     <label>Nombres y Apellidos</label>
                     <input type="text" name="nombres" class="form-control" placeholder="Ej: Patrick Stewart">
@@ -274,6 +279,18 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         setTimeout(updateLivePreview, 10);
     }
 
+    // --- 2.5 LÓGICA DE SUBIDA DE FOTO EN VIVO ---
+    document.getElementById('input_foto').addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Reemplaza la foto al instante en la Vista Previa
+                document.getElementById('preview-foto').src = e.target.result;
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
     // --- 3. MAGIA DE LA VISTA PREVIA (LIVE PREVIEW) ---
     function updateLivePreview() {
         const form = document.getElementById('candidato-form');
@@ -320,9 +337,89 @@ $id_candidato = (int)($_GET['id'] ?? 0);
     // Escuchar cada tecla pulsada para actualizar todo al instante
     document.getElementById('candidato-form').addEventListener('input', updateLivePreview);
 
-    // Iniciar con campos vacíos de ejemplo si es nuevo
-    window.onload = function() {
-        if (!<?= $id_candidato ?>) {
+    // --- 4. GUARDAR EN BASE DE DATOS (AJAX) ---
+    document.querySelector('.btn-save').addEventListener('click', async function() {
+        const form = document.getElementById('candidato-form');
+        const btn = this;
+        const originalText = btn.innerHTML;
+        
+        // Validación básica
+        if (!form.querySelector('input[name="nombres"]').value.trim()) {
+            alert('Por favor, ingresa el nombre del candidato.');
+            openTab('perfil', document.querySelector('.tab-btn.active'));
+            form.querySelector('input[name="nombres"]').focus();
+            return;
+        }
+        
+        btn.innerHTML = '⏳ Guardando en Base de Datos...';
+        btn.disabled = true;
+
+        const fd = new FormData(form);
+        fd.append('action', 'guardar');
+        fd.append('id', '<?= $id_candidato ?>'); 
+
+        try {
+            const resp = await fetch('api_candidatos.php', { method: 'POST', body: fd });
+            const data = await resp.json();
+            
+            if (data.ok) {
+                alert('✅ ¡Candidato guardado exitosamente!');
+                if (data.id && !<?= $id_candidato ?>) {
+                    // Si era nuevo, recargamos la página con su nuevo ID para seguir editando
+                    window.location.href = 'editar_candidato.php?id=' + data.id;
+                }
+            } else {
+                alert('❌ Error al guardar: ' + data.error);
+            }
+        } catch (err) {
+            alert('❌ Error de conexión con el servidor al guardar.');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    // --- 5. CARGAR DATOS SI ESTAMOS EDITANDO ---
+    window.onload = async function() {
+        const id_candidato = <?= $id_candidato ?>;
+        if (id_candidato) {
+            try {
+                const resp = await fetch('api_candidatos.php?action=obtener&id=' + id_candidato);
+                const data = await resp.json();
+                if (data.ok) {
+                    const c = data.candidato;
+                    const form = document.getElementById('candidato-form');
+                    
+                    form.querySelector('input[name="nombres"]').value = c.nombres || '';
+                    form.querySelector('input[name="cargo_flotante"]').value = c.cargo_flotante || '';
+                    form.querySelector('textarea[name="frase_cita"]').value = c.frase_cita || '';
+                    form.querySelector('textarea[name="biografia"]').value = c.biografia || '';
+                    form.querySelector('input[name="fb_titulo"]').value = c.fb_titulo || '';
+                    form.querySelector('input[name="fb_descripcion"]').value = c.fb_descripcion || '';
+                    form.querySelector('input[name="fb_url_perfil"]').value = c.fb_url_perfil || '';
+                    
+                    // Cargar la foto en la vista previa
+                    if (c.foto_perfil) {
+                        document.getElementById('preview-foto').src = '../universoobras/IMG/candidatos/' + c.foto_perfil;
+                    }
+
+                    // Limpiar y Llenar Listas Dinámicas (Evitando que las comillas rompan el HTML)
+                    const esc = (str) => (str||'').replace(/"/g, '&quot;');
+                    
+                    const cEti = document.getElementById('etiquetas-list'); cEti.innerHTML = '';
+                    (c.etiquetas || []).forEach((e, i) => { const idx = 'e'+i; cEti.insertAdjacentHTML('beforeend', `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div style="display:flex; gap:10px;"><div style="flex:1;"><label>Icono</label><input type="text" name="etiquetas[${idx}][icono]" class="form-control" value="${esc(e.icono)}"></div><div style="flex:3;"><label>Texto</label><input type="text" name="etiquetas[${idx}][texto]" class="form-control" value="${esc(e.texto)}"></div></div></div>`); });
+                    
+                    const cTra = document.getElementById('trayectoria-list'); cTra.innerHTML = '';
+                    (c.trayectoria || []).forEach((t, i) => { const idx = 't'+i; cTra.insertAdjacentHTML('beforeend', `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div class="form-group"><label>Periodo o Año</label><input type="text" name="trayectoria[${idx}][periodo]" class="form-control" value="${esc(t.periodo)}"></div><div class="form-group" style="margin-bottom:0;"><label>Descripción de Logros</label><textarea name="trayectoria[${idx}][descripcion]" class="form-control" rows="2">${esc(t.descripcion)}</textarea></div></div>`); });
+
+                    const cPro = document.getElementById('propuestas-list'); cPro.innerHTML = '';
+                    (c.propuestas || []).forEach((p, i) => { const idx = 'p'+i; cPro.insertAdjacentHTML('beforeend', `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div style="display:flex; gap:10px; margin-bottom:10px;"><div style="flex:1;"><label>Icono</label><input type="text" name="propuestas[${idx}][icono]" class="form-control" value="${esc(p.icono)}"></div><div style="flex:3;"><label>Título de la Propuesta</label><input type="text" name="propuestas[${idx}][titulo]" class="form-control" value="${esc(p.titulo)}"></div></div><div class="form-group" style="margin-bottom:0;"><label>Descripción o Desarrollo</label><textarea name="propuestas[${idx}][descripcion]" class="form-control" rows="2">${esc(p.descripcion)}</textarea></div></div>`); });
+                }
+            } catch (err) {
+                console.error("Error cargando datos del candidato", err);
+            }
+        } else {
+            // Si es nuevo, añadir campos vacíos por defecto
             addEtiqueta(); addTrayectoria(); addPropuesta();
         }
         updateLivePreview(); // Primer render

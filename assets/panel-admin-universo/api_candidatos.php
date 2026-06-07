@@ -47,6 +47,125 @@ try {
         echo json_encode(['ok' => true, 'candidato' => $candidato]);
         exit;
     }
+
+    // 3. Guardar Candidato (Crear o Actualizar) y Procesar Imágenes
+    if ($action === 'guardar') {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['ok' => false, 'error' => 'Método no permitido']);
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $nombres = trim($_POST['nombres'] ?? '');
+        $cargo_flotante = trim($_POST['cargo_flotante'] ?? '');
+        $frase_cita = trim($_POST['frase_cita'] ?? '');
+        $biografia = trim($_POST['biografia'] ?? '');
+        $fb_titulo = trim($_POST['fb_titulo'] ?? '');
+        $fb_descripcion = trim($_POST['fb_descripcion'] ?? '');
+        $fb_url_perfil = trim($_POST['fb_url_perfil'] ?? '');
+
+        if ($nombres === '') {
+            echo json_encode(['ok' => false, 'error' => 'El nombre es obligatorio']);
+            exit;
+        }
+
+        $db->beginTransaction();
+
+        try {
+            $foto_perfil = null;
+            
+            // Procesar la foto de perfil si se subió una
+            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../universoobras/IMG/candidatos/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
+                $ext = pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION);
+                // Creamos un nombre único aleatorio para no sobreescribir fotos (Ej. cand_17315512_8392.jpg)
+                $filename = 'cand_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+                
+                if (move_uploaded_file($_FILES['foto_perfil']['tmp_name'], $uploadDir . $filename)) {
+                    $foto_perfil = $filename;
+                }
+            }
+
+            if ($id > 0) {
+                // Actualizar candidato existente
+                $sql = "UPDATE panel_candidatos SET nombres=?, cargo_flotante=?, frase_cita=?, biografia=?, fb_titulo=?, fb_descripcion=?, fb_url_perfil=?";
+                $params = [$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil];
+                
+                if ($foto_perfil) {
+                    $sql .= ", foto_perfil=?";
+                    $params[] = $foto_perfil;
+                }
+                $sql .= " WHERE id=?";
+                $params[] = $id;
+
+                $stmt = $db->prepare($sql);
+                $stmt->execute($params);
+            } else {
+                // Insertar nuevo candidato
+                $sql = "INSERT INTO panel_candidatos (nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, foto_perfil) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $foto_perfil]);
+                $id = $db->lastInsertId();
+            }
+
+            // -- Procesar Relaciones Dinámicas (Eliminar viejas e insertar nuevas para mantener la sincronía) --
+            
+            // 1. Etiquetas (Badges)
+            $db->prepare("DELETE FROM panel_candidato_etiquetas WHERE candidato_id = ?")->execute([$id]);
+            if (!empty($_POST['etiquetas']) && is_array($_POST['etiquetas'])) {
+                $stmtEt = $db->prepare("INSERT INTO panel_candidato_etiquetas (candidato_id, icono, texto, orden) VALUES (?, ?, ?, ?)");
+                $ord = 0;
+                foreach ($_POST['etiquetas'] as $et) {
+                    $icono = trim($et['icono'] ?? '');
+                    $texto = trim($et['texto'] ?? '');
+                    if ($texto !== '' || $icono !== '') {
+                        $stmtEt->execute([$id, $icono, $texto, $ord++]);
+                    }
+                }
+            }
+
+            // 2. Trayectoria
+            $db->prepare("DELETE FROM panel_candidato_trayectoria WHERE candidato_id = ?")->execute([$id]);
+            if (!empty($_POST['trayectoria']) && is_array($_POST['trayectoria'])) {
+                $stmtTr = $db->prepare("INSERT INTO panel_candidato_trayectoria (candidato_id, periodo, descripcion, orden) VALUES (?, ?, ?, ?)");
+                $ord = 0;
+                foreach ($_POST['trayectoria'] as $tr) {
+                    $periodo = trim($tr['periodo'] ?? '');
+                    $descripcion = trim($tr['descripcion'] ?? '');
+                    if ($periodo !== '' || $descripcion !== '') {
+                        $stmtTr->execute([$id, $periodo, $descripcion, $ord++]);
+                    }
+                }
+            }
+
+            // 3. Propuestas
+            $db->prepare("DELETE FROM panel_candidato_propuestas WHERE candidato_id = ?")->execute([$id]);
+            if (!empty($_POST['propuestas']) && is_array($_POST['propuestas'])) {
+                $stmtPr = $db->prepare("INSERT INTO panel_candidato_propuestas (candidato_id, icono, titulo, descripcion, orden) VALUES (?, ?, ?, ?, ?)");
+                $ord = 0;
+                foreach ($_POST['propuestas'] as $pr) {
+                    $icono = trim($pr['icono'] ?? '');
+                    $titulo = trim($pr['titulo'] ?? '');
+                    $descripcion = trim($pr['descripcion'] ?? '');
+                    if ($titulo !== '' || $descripcion !== '') {
+                        $stmtPr->execute([$id, $icono, $titulo, $descripcion, $ord++]);
+                    }
+                }
+            }
+
+            $db->commit();
+            echo json_encode(['ok' => true, 'id' => $id]);
+            
+        } catch (Exception $e) {
+            $db->rollBack();
+            echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
 } catch (Exception $e) {
     echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
 }
