@@ -880,8 +880,8 @@ async function initCandidatos(container) {
                 marqueeContent.innerHTML = ''; // Limpiamos las tarjetas estáticas del HTML
                 
                 window.CANDIDATOS_LIST.forEach(c => {
-                    const fotoUrl = c.foto_perfil ? `assets/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
-                    const fotoHover = c.foto_portada ? `assets/IMG/candidatos/${c.foto_portada}` : fotoUrl;
+                    const fotoUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
+                    const fotoHover = c.foto_portada ? `assets/universoobras/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
                             <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" loading="lazy" decoding="async">
@@ -915,10 +915,16 @@ async function initCandidatos(container) {
         // Auto-duplicar tarjetas por JS (Asegura que la matemática del loop infinito nunca falle)
         if (marqueeContent.getAttribute('data-cloned') !== 'true') {
             const originalCards = Array.from(cards);
-            originalCards.forEach(card => {
-                const clone = card.cloneNode(true);
-                marqueeContent.appendChild(clone);
-            });
+            marqueeContent.setAttribute('data-original-count', originalCards.length);
+            
+            // Si hay muy pocos candidatos (ej. 1 o 2), clonamos varias veces para llenar la pantalla y que no se vea vacío
+            const multiplier = Math.max(2, Math.ceil(8 / originalCards.length));
+            for (let m = 1; m < multiplier; m++) {
+                originalCards.forEach(card => {
+                    const clone = card.cloneNode(true);
+                    marqueeContent.appendChild(clone);
+                });
+            }
             marqueeContent.setAttribute('data-cloned', 'true');
             cards = marqueeContent.querySelectorAll('.candidate-card'); // Actualizamos la lista
         }
@@ -981,7 +987,8 @@ async function initCandidatos(container) {
             // Blindaje contra "NaN" si la página inyectada aún no renderiza anchos
             if (cardWidth > 0) {
                 const gap = parseFloat(window.getComputedStyle(marqueeContent).gap) || 24;
-                const loopWidth = (cardWidth + gap) * (cards.length / 2);
+                const originalCount = parseInt(marqueeContent.getAttribute('data-original-count')) || 1;
+                const loopWidth = (cardWidth + gap) * originalCount;
                 
                 // Usamos 'while' como blindaje matemático absoluto por si hay lags de rendimiento
                 while (currentX <= -loopWidth) currentX += loopWidth;
@@ -1092,7 +1099,7 @@ window.showCandidateDetail = async function(candidatoId) {
     let sidebarHTML = `<div class="candidato-sidebar animate-detail-element">`;
     candidates.forEach(c => {
         const isActive = c.id == candidatoId ? 'active' : '';
-        const thumbUrl = c.foto_perfil ? `assets/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
+        const thumbUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
         sidebarHTML += `
             <div class="mini-card ${isActive}" onclick="window.showCandidateDetail('${c.id}')">
                 <img src="${thumbUrl}" alt="${c.nombres}" loading="lazy" decoding="async">
@@ -1100,7 +1107,7 @@ window.showCandidateDetail = async function(candidatoId) {
     });
     sidebarHTML += `</div>`;
     
-    const fotoPrincipal = fullCandidato.foto_perfil ? `assets/IMG/candidatos/${fullCandidato.foto_perfil}` : 'https://via.placeholder.com/400';
+    const fotoPrincipal = fullCandidato.foto_perfil ? `assets/universoobras/IMG/candidatos/${fullCandidato.foto_perfil}` : 'https://via.placeholder.com/400';
 
     let badgesHTML = '';
     (fullCandidato.etiquetas || []).forEach(e => {
@@ -1204,7 +1211,7 @@ window.showCandidateDetail = async function(candidatoId) {
                 <div class="stagger-el">
                     <div class="next-candidate-module" onclick="window.showCandidateDetail('${nextCandidate.id}')">
                         <div class="next-candidate-info">
-                            <img src="${nextCandidate.foto_perfil ? `assets/IMG/candidatos/${nextCandidate.foto_perfil}` : 'https://via.placeholder.com/100'}" alt="${nextCandidate.nombres}" class="next-candidate-avatar" loading="lazy" decoding="async">
+                            <img src="${nextCandidate.foto_perfil ? `assets/universoobras/IMG/candidatos/${nextCandidate.foto_perfil}` : 'https://via.placeholder.com/100'}" alt="${nextCandidate.nombres}" class="next-candidate-avatar" loading="lazy" decoding="async">
                             <div class="next-candidate-text">
                                 <h5>Siguiente Perfil</h5>
                                 <h3>${nextCandidate.nombres}</h3>
