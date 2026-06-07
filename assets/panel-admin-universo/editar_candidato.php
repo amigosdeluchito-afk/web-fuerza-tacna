@@ -28,34 +28,48 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         /* MITAD DERECHA: Live Preview (Fase 3) */
         .editor-right { width: 55%; background: #1e293b; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
         
-        /* --- VISTA PREVIA MÓVIL (DISEÑO FUERZA TACNA) --- */
-        .preview-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #0f172a; padding: 20px; box-sizing: border-box; }
-        .candidate-card { width: 375px; height: 100%; max-height: 800px; background: #1e293b; border-radius: 24px; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid #334155; position: relative; font-family: system-ui, sans-serif; }
-        .candidate-card::-webkit-scrollbar { width: 6px; }
-        .candidate-card::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        .card-hero { text-align: center; padding: 30px 20px 10px; position: relative; border-bottom: 1px solid #334155; }
-        .badge-flotante { display: inline-block; background: #801039; color: #ffc300; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .hero-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #ffc300; margin-bottom: 10px; background: #334155; }
-        .card-hero h1 { font-size: 22px; margin: 0 0 10px; color: #f8fafc; font-weight: 900; }
-        .tags-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-        .preview-tag { background: #334155; color: #cbd5e1; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
-        .card-body { padding: 20px; }
-        .quote-box { background: linear-gradient(135deg, rgba(128,16,57,0.2), transparent); border-left: 3px solid #ffc300; padding: 12px 15px; font-style: italic; color: #f1f5f9; font-size: 14px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
-        .bio-text { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 25px; }
-        .section-title { font-size: 15px; color: #f8fafc; margin: 0 0 15px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-        .timeline { border-left: 2px solid #334155; padding-left: 15px; margin-bottom: 25px; margin-left: 5px; }
-        .timeline-item { position: relative; margin-bottom: 15px; }
-        .timeline-item::before { content: ""; position: absolute; left: -21px; top: 2px; width: 10px; height: 10px; background: #ffc300; border-radius: 50%; box-shadow: 0 0 8px rgba(255,195,0,0.5); }
-        .timeline-period { font-size: 11px; font-weight: bold; color: #3b82f6; text-transform: uppercase; }
-        .timeline-desc { font-size: 12px; color: #cbd5e1; margin: 4px 0 0; line-height: 1.4; }
-        .propuestas-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
-        .prop-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 12px; display: flex; gap: 12px; align-items: flex-start; }
-        .prop-icon { font-size: 22px; line-height: 1; }
-        .prop-content h4 { margin: 0 0 4px; font-size: 13px; color: #f8fafc; font-weight: bold; }
-        .prop-content p { margin: 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4; }
-        .fb-widget { background: #1877f2; border-radius: 12px; padding: 15px; text-align: center; color: white; display: flex; flex-direction: column; gap: 5px; }
-        .fb-widget h4 { margin: 0; font-size: 14px; font-weight: bold; }
-        .fb-widget p { margin: 0; font-size: 12px; opacity: 0.9; }
+        /* --- VISTA PREVIA 100% IDÉNTICA (Extraída de main.js) --- */
+        .candidato-content { display: flex; flex-direction: column; background: #801039; border-radius: 2rem; padding: 3.5rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.7); font-family: system-ui, sans-serif; }
+        .candidate-top-row { display: flex; gap: 3.5rem; width: 100%; align-items: flex-start; }
+        .candidate-bottom-row { width: 100%; margin-top: 3.5rem; padding-top: 3.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+        
+        @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+        @keyframes border-rotate { 0% { --gradient-angle: 0deg; } 100% { --gradient-angle: 360deg; } }
+        
+        .candidato-photo-wrapper { position: relative; width: 35%; flex-shrink: 0; perspective: 1000px; }
+        .photo-glow { position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; background: #ffc300; filter: blur(70px); opacity: 0.15; z-index: 0; border-radius: 50%; }
+        .candidato-photo { position: relative; z-index: 1; width: 100%; border-radius: 1.5rem; box-shadow: 0 15px 40px rgba(0,0,0,0.5); border: 4px solid transparent; background-image: linear-gradient(#801039, #801039), conic-gradient(from var(--gradient-angle, 0deg), #801039 0%, #ffc300 20%, #fff 25%, #ffc300 30%, #801039 50%, #801039 50%, #ffc300 70%, #fff 75%, #ffc300 80%, #801039 100%); background-clip: padding-box, border-box; background-origin: padding-box, border-box; animation: border-rotate 4s linear infinite; aspect-ratio: 3/4; }
+        .candidato-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: calc(1.5rem - 4px); display: block; }
+        .photo-badge { position: absolute; top: 1.5rem; left: -1rem; background: #ffc300; color: #801039; font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 8px; z-index: 3; box-shadow: 0 6px 20px rgba(0,0,0,0.4); text-transform: uppercase; transform: rotate(-4deg); border: 2px solid #fff; }
+        
+        .candidate-top-info { flex: 1; color: #fff; display: flex; flex-direction: column; justify-content: flex-start; }
+        .candidate-top-info h2 { font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: clamp(2.5rem, 4vw, 4rem); color: #ffc300; text-transform: uppercase; margin: 0 0 1rem 0; line-height: 1.1; }
+        
+        .candidate-badges { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+        .badge-tag { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,195,0,0.4); color: #ffc300; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; text-transform: uppercase; font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; letter-spacing: 1px; }
+        
+        .candidate-quote { position: relative; border-left: 2px solid #ffc300; padding: 2rem 2.5rem 2rem 4rem; color: #fff; margin: 2.5rem 0; font-size: 1.4rem; line-height: 1.6; background: linear-gradient(90deg, rgba(255,195,0,0.15), transparent); border-radius: 0 1.5rem 1.5rem 0; }
+        .candidate-quote::before { content: '"'; position: absolute; left: 1rem; top: -0.5rem; font-family: Georgia, serif; font-size: 6rem; color: rgba(255, 195, 0, 0.4); line-height: 1; }
+        .candidate-quote p { font-style: italic; margin: 0; font-weight: 300; }
+        
+        .info-block { margin-bottom: 4rem; }
+        .block-title { font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 1.2rem; color: #ffc300; margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
+        
+        .proposals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+        .proposal-card { background: rgba(255,255,255,0.02); padding: 2rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
+        .proposal-icon { font-size: 2.8rem; margin-bottom: 1.5rem; }
+        .proposal-card h6 { color: #ffc300; font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 1.1rem; margin: 0 0 1rem 0; text-transform: uppercase; }
+        .proposal-card p { font-size: 0.95rem; margin: 0; line-height: 1.7; color: #bbb; }
+        
+        .timeline { border-left: 2px solid rgba(255,195,0,0.2); padding-left: 2.5rem; margin-left: 1rem; display: flex; flex-direction: column; }
+        .timeline-item { position: relative; padding-bottom: 2.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .timeline-item::before { content: ''; position: absolute; left: -3.05rem; top: 0.2rem; width: 18px; height: 18px; background: #801039; border: 4px solid #ffc300; border-radius: 50%; box-shadow: 0 0 15px rgba(255,195,0,0.4); }
+        .timeline-year { color: #ffc300; font-weight: 900; font-size: 1.25rem; margin-bottom: 0.6rem; font-family: 'Arial Black', Arial, sans-serif; letter-spacing: 1px; }
+        .timeline-text { color: #bbb; line-height: 1.8; font-size: 1.05rem; margin: 0; }
+        
+        .facebook-layout-grid { display: flex; flex-direction: column; gap: 1rem; background: rgba(255,255,255,0.02); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
+        .facebook-text h3 { color: #ffc300; font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 1.6rem; margin: 0; text-transform: uppercase; line-height: 1.1; }
+        .facebook-text p { color: #bbb; font-size: 1.05rem; line-height: 1.6; margin: 0; }
         
         /* Sistema de Pestañas (Tabs) */
         .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1e293b; flex-wrap: wrap; }
@@ -181,36 +195,43 @@ $id_candidato = (int)($_GET['id'] ?? 0);
     </div>
 
     <!-- LADO DERECHO: VISTA PREVIA (Fase 3) -->
-    <div class="editor-right">
-        <div class="preview-container">
-            <div class="candidate-card">
-                <div class="card-hero">
-                    <div class="badge-flotante" id="preview-cargo">Candidato a Alcalde</div>
-                    <img src="https://via.placeholder.com/100/334155/94a3b8?text=Foto" id="preview-foto" class="hero-avatar" alt="Foto">
-                    <h1 id="preview-nombre">Nombre del Candidato</h1>
-                    <div class="tags-container" id="preview-etiquetas">
-                        <!-- Se inyectan etiquetas aquí -->
+    <div class="editor-right" style="overflow-y: auto; padding: 40px 20px; align-items: flex-start; background: #000;">
+        <!-- Zoom al 75% para que encaje perfectamente como si fuera un monitor gigante -->
+        <div style="width: 100%; max-width: 950px; transform-origin: top center; zoom: 0.75; margin: 0 auto;">
+            
+            <div class="candidato-content">
+                <div class="candidate-top-row">
+                    <div class="candidato-photo-wrapper">
+                        <div class="photo-glow"></div>
+                        <div class="photo-badge" id="preview-cargo">Candidato a Alcalde</div>
+                        <div class="candidato-photo">
+                            <img src="https://via.placeholder.com/400" id="preview-foto" alt="Foto">
+                        </div>
+                    </div>
+                    <div class="candidate-top-info">
+                        <h2 id="preview-nombre">Nombre del Candidato</h2>
+                        <div class="candidate-badges" id="preview-etiquetas"></div>
+                        <div class="candidate-quote">
+                            <p id="preview-frase">"Escribe una frase destacada para verla aquí..."</p>
+                        </div>
+                        <p id="preview-bio" style="color: #ddd; max-width: 85ch; line-height: 1.5; font-size: 0.95rem;">Resumen biográfico aparecerá aquí...</p>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="quote-box">
-                        <p id="preview-frase">"Escribe una frase destacada para verla aquí..."</p>
-                    </div>
-                    <p class="bio-text" id="preview-bio">Resumen biográfico aparecerá aquí...</p>
-                    
-                    <h3 class="section-title">Trayectoria</h3>
-                    <div class="timeline" id="preview-trayectoria">
-                        <!-- Se inyecta cronología aquí -->
-                    </div>
 
-                    <h3 class="section-title">Propuestas</h3>
-                    <div class="propuestas-grid" id="preview-propuestas">
-                        <!-- Se inyectan propuestas aquí -->
+                <div class="candidate-bottom-row">
+                    <div class="info-block">
+                        <div class="block-title">⏱️ Trayectoria Profesional</div>
+                        <div class="timeline" id="preview-trayectoria"></div>
                     </div>
-                    
-                    <div class="fb-widget">
-                        <h4 id="preview-fb-titulo">¡Sigue mi campaña!</h4>
-                        <p id="preview-fb-desc">Entérate de las últimas noticias</p>
+                    <div class="info-block">
+                        <div class="block-title">🚀 Ejes de Propuesta</div>
+                        <div class="proposals-grid" id="preview-propuestas"></div>
+                    </div>
+                    <div class="info-block facebook-layout-grid">
+                        <div class="facebook-text">
+                            <h3 id="preview-fb-titulo">¡Sigue mi campaña!</h3>
+                            <p id="preview-fb-desc">Entérate de las últimas noticias</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -271,7 +292,7 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         const iIco = form.querySelectorAll('input[name^="etiquetas"][name$="[icono]"]');
         const iTex = form.querySelectorAll('input[name^="etiquetas"][name$="[texto]"]');
         iIco.forEach((input, i) => {
-            if(input.value || iTex[i].value) tagsCont.innerHTML += `<div class="preview-tag">${input.value} ${iTex[i].value}</div>`;
+            if(input.value || iTex[i].value) tagsCont.innerHTML += `<span class="badge-tag">${input.value} ${iTex[i].value}</span>`;
         });
 
         // Trayectoria
@@ -280,9 +301,9 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         const tPer = form.querySelectorAll('input[name^="trayectoria"][name$="[periodo]"]');
         const tDes = form.querySelectorAll('textarea[name^="trayectoria"][name$="[descripcion]"]');
         tPer.forEach((input, i) => {
-            if(input.value || tDes[i].value) trayCont.innerHTML += `<div class="timeline-item"><div class="timeline-period">${input.value || 'Año'}</div><p class="timeline-desc">${tDes[i].value || '...'}</p></div>`;
+            if(input.value || tDes[i].value) trayCont.innerHTML += `<div class="timeline-item"><div class="timeline-year">${input.value || 'Año'}</div><div class="timeline-body"><p class="timeline-text">${tDes[i].value || '...'}</p></div></div>`;
         });
-        if(trayCont.innerHTML === '') trayCont.innerHTML = '<div class="timeline-item"><div class="timeline-period">Año</div><p class="timeline-desc">Agrega trayectoria en la pestaña de la izquierda...</p></div>';
+        if(trayCont.innerHTML === '') trayCont.innerHTML = '<div class="timeline-item"><div class="timeline-year">Año</div><div class="timeline-body"><p class="timeline-text">Agrega trayectoria en la pestaña de la izquierda...</p></div></div>';
 
         // Propuestas
         const propCont = document.getElementById('preview-propuestas');
@@ -291,9 +312,9 @@ $id_candidato = (int)($_GET['id'] ?? 0);
         const pTit = form.querySelectorAll('input[name^="propuestas"][name$="[titulo]"]');
         const pDes = form.querySelectorAll('textarea[name^="propuestas"][name$="[descripcion]"]');
         pIco.forEach((input, i) => {
-            if(input.value || pTit[i].value || pDes[i].value) propCont.innerHTML += `<div class="prop-card"><div class="prop-icon">${input.value || '✨'}</div><div class="prop-content"><h4>${pTit[i].value || 'Propuesta'}</h4><p>${pDes[i].value || '...'}</p></div></div>`;
+            if(input.value || pTit[i].value || pDes[i].value) propCont.innerHTML += `<div class="proposal-card"><div class="proposal-icon">${input.value || '✨'}</div><h6>${pTit[i].value || 'Propuesta'}</h6><p>${pDes[i].value || '...'}</p></div>`;
         });
-        if(propCont.innerHTML === '') propCont.innerHTML = '<div class="prop-card"><div class="prop-icon">🛡️</div><div class="prop-content"><h4>Propuesta</h4><p>Agrega propuestas en la pestaña de la izquierda...</p></div></div>';
+        if(propCont.innerHTML === '') propCont.innerHTML = '<div class="proposal-card"><div class="proposal-icon">🛡️</div><h6>Propuesta</h6><p>Agrega propuestas en la pestaña de la izquierda...</p></div>';
     }
 
     // Escuchar cada tecla pulsada para actualizar todo al instante
