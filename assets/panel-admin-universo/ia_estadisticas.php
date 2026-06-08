@@ -215,6 +215,31 @@ $labels_escudos = array_keys($data_escudos);
 $valores_escudos = array_values($data_escudos);
 $total_escudos = array_sum($valores_escudos);
 
+// Datos Gráfico 4: Top Categorías Más Consultadas
+$labels_categorias = []; 
+$data_categorias = [];
+$colores_categorias = [];
+
+try {
+    // Excluimos las categorías de seguridad para centrarnos en intereses reales
+    $sql_cat = "SELECT categoria_detectada, SUM(repeticiones) as cant 
+                FROM panel_preguntas_huerfanas 
+                WHERE $where_huerfanas 
+                  AND categoria_detectada NOT IN ('Auditoría - Inyección', 'Spam / Ruido', 'Política Nacional', 'Seguridad', 'Bloqueo')
+                  AND categoria_detectada IS NOT NULL
+                  AND categoria_detectada != ''
+                GROUP BY categoria_detectada 
+                ORDER BY cant DESC LIMIT 10";
+    $res_cat = $db->query($sql_cat)->fetchAll(PDO::FETCH_ASSOC);
+    
+    $cat_colors_palette = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#64748b', '#ef4444', '#14b8a6'];
+    foreach ($res_cat as $i => $r) {
+        $labels_categorias[] = $r['categoria_detectada'];
+        $data_categorias[] = (int)$r['cant'];
+        $colores_categorias[] = $cat_colors_palette[$i % count($cat_colors_palette)];
+    }
+} catch(Exception $e) {}
+
 // Datos Tabla 1: Top Usuarios (IP Hash)
 $top_usuarios = [];
 try {
@@ -502,6 +527,20 @@ try {
         </div>
     </div>
 
+    <!-- GRÁFICO DE TOP CATEGORÍAS -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h6 style="color:#f8fafc; font-weight:bold; margin-bottom: 15px;">🎯 Top Temas de Interés (Categorías)</h6>
+            <div class="chart-box" style="min-height: 280px; padding: 15px; margin-top: 0;">
+                <?php if(empty($data_categorias)): ?>
+                    <div class="chart-placeholder">No hay suficientes datos de categorías en este periodo.</div>
+                <?php else: ?>
+                    <canvas id="chartCategorias"></canvas>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
     <!-- FILA 6: Tablas de Ranking y Monitoreo -->
     <h6 style="color:#f8fafc; font-weight:bold; margin-top: 30px; margin-bottom: 15px;">📋 Tablas de Monitoreo Clave</h6>
     <div class="row">
@@ -673,6 +712,32 @@ try {
                     options: { 
                         responsive: true, maintainAspectRatio: false, cutout: '65%', 
                         plugins: { legend: { position: 'right', labels: { boxWidth: 12, color: '#cbd5e1' } } } 
+                    }
+                });
+            }
+
+            // Renderizado: Top Categorías (Barras Horizontales)
+            const cvCategorias = document.getElementById('chartCategorias');
+            if (cvCategorias) {
+                new Chart(cvCategorias.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: <?= json_encode($labels_categorias) ?>,
+                        datasets: [{
+                            label: 'Veces Consultada',
+                            data: <?= json_encode($data_categorias) ?>,
+                            backgroundColor: <?= json_encode($colores_categorias) ?>,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, 
+                        indexAxis: 'y', // Convertir a barras horizontales
+                        plugins: { legend: { display: false } }, 
+                        scales: { 
+                            x: { beginAtZero: true, ticks: { stepSize: 1, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            y: { ticks: { color: '#cbd5e1', font: { weight: 'bold' } }, grid: { display: false } }
+                        } 
                     }
                 });
             }
