@@ -574,7 +574,7 @@ try {
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm" style="background: #0f172a; border: 1px solid #1e293b; height: 100%;">
                 <div class="card-header bg-dark text-white border-bottom-0" style="border-radius: 12px 12px 0 0;">
-                    <h6 class="mb-0" style="font-size: 13px;">🕵️ Top 5 Usuarios Activos</h6>
+                    <h6 class="mb-0" style="font-size: 13px;">🕵️ Top 10 Usuarios Activos</h6>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-dark table-striped mb-0" style="background: transparent; font-size: 12px;">
@@ -600,8 +600,9 @@ try {
         <!-- Top Huérfanas -->
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm" style="background: #0f172a; border: 1px solid #1e293b; height: 100%;">
-                <div class="card-header bg-dark text-white border-bottom-0" style="border-radius: 12px 12px 0 0;">
-                    <h6 class="mb-0" style="font-size: 13px;">❓ Top 5 Huérfanas Más Repetidas</h6>
+                <div class="card-header bg-dark text-white border-bottom-0 d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="mb-0" style="font-size: 13px;">❓ Top 10 Huérfanas</h6>
+                    <a href="ia_respuestas.php" class="badge badge-primary" style="background: #3b82f6;">Ver Todas</a>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-dark table-striped mb-0" style="background: transparent; font-size: 12px;">
@@ -612,7 +613,7 @@ try {
                             <?php else: ?>
                                 <?php foreach($top_huerfanas as $th): ?>
                                     <tr>
-                                        <td title="<?= htmlspecialchars($th['pregunta']) ?>"><?= htmlspecialchars(mb_strimwidth($th['pregunta'], 0, 30, '...')) ?> <br><small class="text-muted"><?= htmlspecialchars($th['categoria_detectada'] ?: 'Sin tema') ?></small></td>
+                                        <td title="<?= htmlspecialchars($th['pregunta']) ?>"><div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"><?= htmlspecialchars($th['pregunta']) ?></div><small class="text-muted"><?= htmlspecialchars($th['categoria_detectada'] ?: 'Sin tema') ?></small></td>
                                         <td class="text-center text-warning font-weight-bold align-middle"><?= $th['repeticiones'] ?></td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -627,7 +628,7 @@ try {
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm" style="background: #0f172a; border: 1px solid #1e293b; height: 100%;">
                 <div class="card-header bg-dark text-white border-bottom-0" style="border-radius: 12px 12px 0 0;">
-                    <h6 class="mb-0" style="font-size: 13px;">🚨 Últimos 5 Errores IA</h6>
+                    <h6 class="mb-0" style="font-size: 13px;">🚨 Últimos 10 Errores API</h6>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-dark table-striped mb-0" style="background: transparent; font-size: 12px;">
