@@ -647,8 +647,8 @@ function injectGlobalAssets() {
             loaderDiv.style.display = 'none';
         }
         loaderDiv.innerHTML = `
-            <h1>FUERZA<br>TACNA</h1>
-            <div class="water-layer"><div class="water-content"><h1>FUERZA<br>TACNA</h1></div></div>
+            <div class="loader-h1">FUERZA<br>TACNA</div>
+            <div class="water-layer"><div class="water-content"><div class="loader-h1">FUERZA<br>TACNA</div></div></div>
             <div class="wave"></div>
         `;
         document.body.insertBefore(loaderDiv, document.body.firstChild);

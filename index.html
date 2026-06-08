@@ -126,6 +126,19 @@
                 z-index: -1; /* Lo mantiene firmemente en el fondo, debajo de los textos y fotos */
             }
 
+            /* --- Accesibilidad: Screen Reader Only --- */
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip-path: inset(50%);
+                white-space: nowrap;
+                border: 0;
+            }
+
             /* --- Loader Inicial --- */
             .initial-loader {
                 position: fixed;
@@ -142,7 +155,7 @@
                 background-color: #ffc300; /* Fondo amarillo inicial */
             }
             
-            .initial-loader h1 {
+            .initial-loader .loader-h1 {
                 font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important;
                 font-size: 5rem;
                 line-height: 1.1;
@@ -174,7 +187,7 @@
                 justify-content: center;
             }
 
-            .initial-loader .water-content h1 {
+            .initial-loader .water-content .loader-h1 {
                 color: #ffc300; /* Texto amarillo cuando pasa el agua */
             }
             
@@ -368,7 +381,7 @@
             }
 
             @media (max-width: 768px) {
-                .initial-loader h1 { font-size: 3.5rem; }
+                .initial-loader .loader-h1 { font-size: 3.5rem; }
                 
                 /* --- Responsive Mobile: Título apilado al mismo ancho --- */
                 .title-desktop { display: none !important; }
@@ -712,10 +725,10 @@
         
         <!-- Loader que solo se ve al recargar -->
         <div class="initial-loader">
-            <h1>FUERZA<br>TACNA</h1>
+            <div class="loader-h1">FUERZA<br>TACNA</div>
             <div class="water-layer">
                 <div class="water-content">
-                    <h1>FUERZA<br>TACNA</h1>
+                    <div class="loader-h1">FUERZA<br>TACNA</div>
                 </div>
             </div>
             <div class="wave"></div>
@@ -1442,6 +1455,7 @@
                 <img src="assets/img/img-hero.png" alt="" class="hero-lcp-image" fetchpriority="high" decoding="async" width="1920" height="1080">
 
                 <header id="hero-header">
+                    <h1 class="sr-only">Fuerza Tacna - Movimiento Independiente Regional</h1>
                     <div class="logo-container">
                         <a href="index.html"><img id="logo-hero" src="assets/img/logo.svg"></a>
                     </div>
