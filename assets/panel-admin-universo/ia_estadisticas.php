@@ -616,6 +616,27 @@ try {
                 });
             }
 
+            // Renderizado: Escudos de Seguridad
+            const cvEscudos = document.getElementById('chartEscudos');
+            if (cvEscudos) {
+                new Chart(cvEscudos.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: <?= json_encode($labels_escudos) ?>,
+                        datasets: [{
+                            data: <?= json_encode($valores_escudos) ?>,
+                            backgroundColor: ['#f59e0b', '#f97316', '#ef4444', '#ec4899', '#8b5cf6'],
+                            borderWidth: 2,
+                            borderColor: '#0f172a'
+                        }]
+                    },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, cutout: '65%', 
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 12, color: '#cbd5e1' } } } 
+                    }
+                });
+            }
+
             // Renderizado: Evolución de Consumo y Costos (30 días)
             const cvCostos = document.getElementById('chartTokensCostos');
             if (cvCostos) {
