@@ -1555,33 +1555,6 @@
                             <a href="candidatos.html" class="shiny-pillar" style="text-decoration: none;"><span>Ver más</span></a>
                         </div>
                     </div>
-                    <!-- Carrusel Derecho -->
-                    <div class="circular-testimonial-container">
-                        <!-- Images 3D -->
-                        <div class="circular-image-container">
-                            <img src="assets/img/candidato-1.png" alt="Patrick Stewart" class="testimonial-image">
-                            <img src="assets/img/candidato-2.png" alt="Alena Rosser" class="testimonial-image">
-                            <img src="assets/img/candidato-3.png" alt="Fletch Skinner" class="testimonial-image">
-                            <img src="assets/img/candidato-4.png" alt="Marc Spector" class="testimonial-image">
-                            <img src="assets/img/candidato-5.png" alt="Natalia Skinner" class="testimonial-image">
-                                
-                                <!-- Texto superpuesto -->
-                                <div class="circular-testimonial-content">
-                                    <h3 class="circular-name" id="carousel-name"></h3>
-                                    <p class="circular-designation" id="carousel-designation"></p>
-                                    <p class="circular-quote" id="carousel-quote"></p>
-                                </div>
-                        </div>
-                        <!-- Botones de flechas debajo de las tarjetas -->
-                        <div class="circular-arrow-buttons">
-                                <div class="circular-arrow-button" id="carousel-prev" aria-label="Anterior" role="button">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
-                                </div>
-                                <div class="circular-arrow-button" id="carousel-next" aria-label="Siguiente" role="button">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
-                                </div>
-                        </div>
-                    </div>
                 </div>
                 <!-- Nuevas Flechas Flotantes (Sección 2 -> 3) -->
                 <a href="#video-section" class="mobile-arrows arr-left">
@@ -2049,77 +2022,6 @@
         <!-- ========================================== -->
 
         <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
-
-        <!-- Parche global para el carrusel (Persiste entre navegaciones Barba.js) -->
-        <script>
-            (function() {
-                let observer = null;
-                let currentImages = null;
-
-                const checkAndApplyPatch = () => {
-                    const images = document.querySelectorAll('.circular-image-container .testimonial-image');
-                    
-                    // Si no hay imágenes (estamos en otra página), limpiar observer
-                    if (images.length === 0) {
-                        if (observer) {
-                            observer.disconnect();
-                            observer = null;
-                            currentImages = null;
-                        }
-                        return;
-                    }
-
-                    // Si hay imágenes y son las mismas de antes, no hacer nada extra
-                    if (currentImages && currentImages.length === images.length && currentImages[0] === images[0]) {
-                        return;
-                    }
-
-                    // Si hay imágenes nuevas (ej. regresó a Inicio con Barba.js), aplicar parche
-                    if (observer) observer.disconnect();
-                    currentImages = images;
-
-                    const updateVisibility = () => {
-                        if (observer) observer.disconnect();
-                        
-                        const inlineValues = Array.from(images).map(img => {
-                            const z = parseInt(img.style.zIndex);
-                            const op = parseFloat(img.style.opacity);
-                            let scale = 1;
-                            if (img.style.transform && img.style.transform.includes('scale')) {
-                                const match = img.style.transform.match(/scale\(([^)]+)\)/);
-                                if (match) scale = parseFloat(match[1]);
-                            }
-                            return { img, z, op, scale };
-                        });
-
-                        let zValues = new Set(), opValues = new Set(), scaleValues = new Set();
-                        inlineValues.forEach(val => {
-                            if (!isNaN(val.z)) zValues.add(val.z);
-                            if (!isNaN(val.op)) opValues.add(val.op);
-                            if (!isNaN(val.scale)) scaleValues.add(val.scale);
-                        });
-
-                        inlineValues.forEach(val => {
-                            let isBack = false;
-                            if (zValues.size > 1) { if (val.z === Math.min(...Array.from(zValues))) isBack = true; }
-                            else if (opValues.size > 1) { if (val.op === Math.min(...Array.from(opValues))) isBack = true; }
-                            else if (scaleValues.size > 1) { if (val.scale === Math.min(...Array.from(scaleValues))) isBack = true; }
-
-                            if (isBack && images.length > 3) val.img.classList.add('ocultar-tarjeta-atras');
-                            else val.img.classList.remove('ocultar-tarjeta-atras');
-                        });
-                        
-                        images.forEach(img => observer.observe(img, { attributes: true, attributeFilter: ['style'] }));
-                    };
-                    
-                    observer = new MutationObserver(updateVisibility);
-                    updateVisibility();
-                };
-
-                // Comprobar cada medio segundo permite atrapar el momento exacto en que Barba.js inyecta el nuevo HTML
-                setInterval(checkAndApplyPatch, 500);
-            })();
-        </script>
 
         <!-- Audio para el efecto de sable de luz -->
         <audio id="saber-sound" src="assets/img/SONIDO%20SABLE.mp3" preload="auto"></audio>
