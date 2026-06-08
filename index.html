@@ -453,12 +453,6 @@
                 100% { opacity: 0; transform: translateY(10px) rotate(45deg); }
             }
 
-            /* --- Ocultar nivel profundo del carrusel --- */
-            .ocultar-tarjeta-atras {
-                opacity: 0 !important;
-                pointer-events: none !important;
-            }
-
             /* --- Animaciones y estilos del botón Ver Más (Shiny Pillar) --- */
             @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
             @property --gradient-angle-offset { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
@@ -1086,14 +1080,6 @@
                 flex-shrink: 0;
             text-align: left;
             }
-            .circular-testimonial-container {
-            width: 40%; /* Anclamos firmemente el carrusel hacia la derecha */
-                flex-shrink: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-
             /* --- Unificación del Imán: Apagamos el CSS nativo globalmente para que actúe el JS magnético --- */
                 html, body, main, .container-fluid, div { scroll-snap-type: none !important; scroll-behavior: auto !important; }
                 * {
@@ -1292,9 +1278,6 @@
                     width: 100%;
                     text-align: center;
                     gap: 0 !important; /* Anula cualquier hueco fantasma interno */
-                }
-                .circular-testimonial-container {
-                    display: none !important; /* Oculta el carrusel completamente en celulares */
                 }
             }
             
