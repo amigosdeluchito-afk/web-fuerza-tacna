@@ -97,6 +97,11 @@ $promedio_consultas = $stats['usuarios'] > 0 ? round($stats['total'] / $stats['u
 $costo_por_usuario = $stats['usuarios'] > 0 ? ($costo_usd / $stats['usuarios']) : 0;
 $ratio_tokens = $stats['tokens_out'] > 0 ? round($stats['tokens_in'] / $stats['tokens_out'], 1) : 0;
 
+// Eficiencia RAG vs OpenAI
+$total_exitos = $stats['openai'] + $stats['simulador'];
+$porcentaje_ahorro = $total_exitos > 0 ? round(($stats['simulador'] / $total_exitos) * 100, 1) : 0;
+$porcentaje_openai = $total_exitos > 0 ? round(($stats['openai'] / $total_exitos) * 100, 1) : 0;
+
 // Retención (Usuarios que visitan en días distintos)
 $usuarios_recurrentes = 0;
 try {
@@ -457,6 +462,27 @@ try {
 
     <!-- FILA 4: Métricas de Eficiencia -->
     <h6 style="color:#f8fafc; font-weight:bold; margin-top: 20px; margin-bottom: 15px;">⚡ Eficiencia y Comportamiento</h6>
+    
+    <!-- Tasa de Ahorro RAG vs OpenAI -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="kpi-card" style="padding: 20px; height: auto; border-color: rgba(16, 185, 129, 0.3);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="kpi-title" style="margin: 0; color: #10b981; font-size: 14px;">Tasa de Eficiencia (Consultas Gratis vs Pagas)</div>
+                    <h3 class="kpi-value" style="font-size: 24px; color: #10b981; margin: 0;"><?= $porcentaje_ahorro ?>% <span style="font-size: 14px; color:#64748b; font-weight: normal;">resueltas gratis</span></h3>
+                </div>
+                <div class="progress mt-3" style="height: 16px; background-color: rgba(59, 130, 246, 0.2); border-radius: 10px; overflow: hidden;">
+                    <div class="progress-bar" role="progressbar" style="width: <?= $porcentaje_ahorro ?>%; background-color: #10b981;" title="Simulador: <?= $porcentaje_ahorro ?>%"></div>
+                    <div class="progress-bar" role="progressbar" style="width: <?= $porcentaje_openai ?>%; background-color: #3b82f6;" title="OpenAI: <?= $porcentaje_openai ?>%"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2" style="font-size: 13px; color: #94a3b8;">
+                    <span>🛡️ <strong><?= number_format($stats['simulador']) ?></strong> derivadas al Simulador (Ahorro)</span>
+                    <span>🤖 <strong><?= number_format($stats['openai']) ?></strong> derivadas a OpenAI (Costo)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row mb-4">
         <div class="col-md-3 mb-3"><div class="kpi-card" style="padding: 15px; height: auto;">
             <div class="kpi-title" style="color:#a78bfa;">Consultas / Usuario</div>
