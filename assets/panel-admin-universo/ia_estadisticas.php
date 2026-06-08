@@ -186,6 +186,35 @@ try {
     }
 } catch(Exception $e) {}
 
+// Datos Gráfico 3: Escudos de Seguridad
+$data_escudos = [
+    'Límite de IP' => 0,
+    'Límite Global' => 0,
+    'Inyección / Hackeo' => 0,
+    'Política Nacional' => 0,
+    'Spam / Ruido' => 0,
+];
+try {
+    $sql_lim = "SELECT estado, COUNT(*) as cant FROM panel_ia_auditoria WHERE $where_auditoria AND estado IN ('limite_ip', 'limite_global') GROUP BY estado";
+    $res_lim = $db->query($sql_lim)->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res_lim as $r) {
+        if ($r['estado'] === 'limite_ip') $data_escudos['Límite de IP'] += (int)$r['cant'];
+        if ($r['estado'] === 'limite_global') $data_escudos['Límite Global'] += (int)$r['cant'];
+    }
+
+    $sql_huerf = "SELECT categoria_detectada, SUM(repeticiones) as cant FROM panel_preguntas_huerfanas WHERE $where_huerfanas AND categoria_detectada IN ('Auditoría - Inyección', 'Política Nacional', 'Ruido / Spam') GROUP BY categoria_detectada";
+    $res_huerf = $db->query($sql_huerf)->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res_huerf as $r) {
+        if ($r['categoria_detectada'] === 'Auditoría - Inyección') $data_escudos['Inyección / Hackeo'] += (int)$r['cant'];
+        if ($r['categoria_detectada'] === 'Política Nacional') $data_escudos['Política Nacional'] += (int)$r['cant'];
+        if ($r['categoria_detectada'] === 'Ruido / Spam') $data_escudos['Spam / Ruido'] += (int)$r['cant'];
+    }
+} catch(Exception $e) {}
+
+$labels_escudos = array_keys($data_escudos);
+$valores_escudos = array_values($data_escudos);
+$total_escudos = array_sum($valores_escudos);
+
 // Datos Tabla 1: Top Usuarios (IP Hash)
 $top_usuarios = [];
 try {
@@ -449,14 +478,25 @@ try {
         </div>
     </div>
 
-    <!-- GRÁFICO DE HORAS PICO -->
+    <!-- GRÁFICO DE HORAS PICO Y ESCUDOS -->
     <div class="row mt-4">
-        <div class="col-12">
-            <div class="chart-box" style="min-height: 200px; padding: 15px;">
+        <div class="col-md-7">
+            <h6 style="color:#f8fafc; font-weight:bold; margin-bottom: 15px;">🕒 Interacciones por Hora</h6>
+            <div class="chart-box" style="min-height: 250px; padding: 15px; margin-top: 0;">
                 <?php if(empty($data_horas)): ?>
                     <div class="chart-placeholder">No hay datos de tráfico por horas registrados.</div>
                 <?php else: ?>
                     <canvas id="chartHoras"></canvas>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <h6 style="color:#f8fafc; font-weight:bold; margin-bottom: 15px;">🛡️ Activación de Escudos</h6>
+            <div class="chart-box" style="min-height: 250px; padding: 15px; margin-top: 0;">
+                <?php if($total_escudos == 0): ?>
+                    <div class="chart-placeholder">No se han registrado intentos de abuso. ¡Todo en orden!</div>
+                <?php else: ?>
+                    <canvas id="chartEscudos"></canvas>
                 <?php endif; ?>
             </div>
         </div>
