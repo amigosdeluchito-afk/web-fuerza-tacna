@@ -993,28 +993,7 @@
                 z-index: 0;
             }
             /* Mantiene el contenido interactivo del hero por encima de la imagen LCP */
-            #hero-header, #hero-main-content, #mouse-scroll, .mobile-arrows {
-                position: relative;
-                z-index: 1; 
-            }
-
-            /* --- Optimización LCP Hero FASE 1 --- */
-            #hero-section {
-                background-image: none !important; /* Deshabilita el background tardío del CSS externo */
-                position: relative !important; /* Necesario para contener la imagen absoluta */
-                overflow: hidden; 
-            }
-            .hero-lcp-image {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                pointer-events: none;
-                z-index: 0;
-            }
-            /* Mantiene el contenido interactivo del hero por encima de la imagen LCP */
-            #hero-header, #hero-main-content, #mouse-scroll, .mobile-arrows {
+            #hero-main-content, #mouse-scroll, .mobile-arrows {
                 position: relative;
                 z-index: 1; 
             }
