@@ -196,70 +196,13 @@ function injectGlobalAssets() {
                 text-shadow: none;
             }
 
-            /* --- Circular 3D Carousel (Index) --- */
-            .circular-testimonial-container {
-                width: 100%;
-                max-width: 40rem;
-                color: #fff;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-            }
-            .circular-image-container {
-                position: relative;
-                width: 100%;
-                height: 26rem;
-                perspective: 1000px;
-            }
-            .testimonial-image {
-                position: absolute;
-                width: 320px;
-                left: 50%;
-                margin-left: -160px;
-                height: 100%;
-                object-fit: contain;
-                object-position: bottom;
-                background-color: #ffffff;
-                padding-top: 0.5rem; /* Reducimos el espacio superior dentro de la tarjeta */
-                border-radius: 1.5rem;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-                transition: all 0.8s cubic-bezier(.4,2,.3,1);
-                cursor: pointer;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            .circular-testimonial-content { 
-                position: absolute; bottom: 1rem; left: 50%; margin-left: -120px; width: 240px; /* Más pequeño */
-                background: rgba(128, 16, 57, 0.55); backdrop-filter: blur(6px); /* Más transparente */
-                border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 1rem;
-                padding: 0.8rem; z-index: 10; pointer-events: none; /* Padding reducido */
-                display: flex; flex-direction: column; justify-content: center; text-align: center;
-                box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-            }
-            .circular-name { font-size: 1.05rem; margin-bottom: 0.2rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; color: #fff; font-weight: 900; text-transform: uppercase; }
-            .circular-designation { font-size: 0.75rem; color: #ffc300; font-weight: bold; text-transform: uppercase; margin-bottom: 0.4rem; }
-            .circular-quote { font-size: 0.75rem; line-height: 1.35; color: #e5e7eb; margin: 0; min-height: 2.2rem; }
-            .circular-arrow-buttons { display: flex; gap: 1.5rem; padding-top: 1.5rem; justify-content: center; }
-            .circular-arrow-button {
-                width: 3.5rem; height: 3.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-                cursor: pointer; transition: all 0.3s; border: 2px solid #ffc300; background-color: #ffc300; z-index: 20;
-                box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-            }
-            .circular-arrow-button svg { fill: #801039; width: 1.8rem; height: 1.8rem; transition: transform 0.2s; }
-            .circular-arrow-button:hover { background-color: #fff; border-color: #fff; }
-            .circular-arrow-button:hover svg { transform: scale(1.15); }
             @media (min-width: 992px) {
                 .candidatos-intro-split { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 4rem; } /* Alineado arriba */
                 .candidatos-intro-text { flex: 1.2; text-align: left; padding-right: 1rem; margin-top: -5.5rem; margin-left: -2vw; } /* Subido notoriamente más arriba */
-                .circular-testimonial-container { flex: 1; }
             }
             @media (max-width: 991px) { 
                 .candidatos-intro-text { display: contents; }
                 .candidatos-intro-text h2 { order: 1; margin-bottom: 1.5rem; }
-                .circular-testimonial-container { order: 2; margin-top: 1rem; }
-                .circular-image-container { height: 22rem; }
-                .circular-testimonial-content { width: 220px; margin-left: -110px; bottom: 0.8rem; padding: 0.6rem; } /* Ajustado para móvil */
-                .testimonial-image { width: 280px; margin-left: -140px; }
             }
             
             /* --- Solución al Bug de Scroll en Videos (Escudo Transparente) --- */
@@ -1419,95 +1362,6 @@ function initTimelineCarousels(container) {
     });
 }
 
-function initCircularCarousel(container) {
-    const target = container || document;
-    const carousel = target.querySelector('.circular-testimonial-container');
-    if (!carousel) return;
-
-    // Limpiar memoria previa si existía
-    if (window.circularCarouselCleanup) window.circularCarouselCleanup();
-
-    const images = carousel.querySelectorAll('.testimonial-image');
-    const nameEl = target.querySelector('#carousel-name');
-    const desigEl = target.querySelector('#carousel-designation');
-    const quoteEl = target.querySelector('#carousel-quote');
-    const prevBtn = target.querySelector('#carousel-prev');
-    const nextBtn = target.querySelector('#carousel-next');
-
-    if (!images.length) return;
-
-    const candidatesData = [
-        { name: "Patrick Stewart", designation: "Candidato a Alcalde", quote: "Comprometido con el desarrollo urbano y la seguridad de nuestra ciudad para un futuro próspero." },
-        { name: "Alena Rosser", designation: "Regidora", quote: "Trabajando por una educación inclusiva, el deporte y oportunidades reales para todos los jóvenes." },
-        { name: "Fletch Skinner", designation: "Regidor", quote: "Transparencia y honestidad para una gestión municipal eficiente que realmente escuche al pueblo." },
-        { name: "Marc Spector", designation: "Regidor", quote: "Innovación y tecnología para modernizar nuestros servicios públicos y mejorar tu calidad de vida." },
-        { name: "Natalia Skinner", designation: "Regidora", quote: "Defendiendo el medio ambiente y creando espacios verdes sostenibles para las familias." }
-    ];
-
-    let activeIndex = 0;
-    const total = images.length;
-    let autoplayInterval;
-
-    function updateCarousel() {
-        const width = carousel.offsetWidth || 500;
-        const gap = Math.min(120, Math.max(60, width * 0.22));
-        const maxStickUp = gap * 0.5;
-
-        images.forEach((img, i) => {
-            const isLeft = (activeIndex - 1 + total) % total === i;
-            const isRight = (activeIndex + 1) % total === i;
-            const isFarLeft = (activeIndex - 2 + total) % total === i;
-            const isFarRight = (activeIndex + 2) % total === i;
-
-            if (i === activeIndex) {
-                img.style.transform = 'translateX(0px) translateY(0px) scale(1) rotateY(0deg)';
-                img.style.zIndex = 5; img.style.opacity = 1; img.style.pointerEvents = "auto";
-            } else if (isLeft) {
-                img.style.transform = `translateX(-${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(15deg)`;
-                img.style.zIndex = 4; img.style.opacity = 1; img.style.pointerEvents = "auto";
-            } else if (isRight) {
-                img.style.transform = `translateX(${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(-15deg)`;
-                img.style.zIndex = 4; img.style.opacity = 1; img.style.pointerEvents = "auto";
-            } else if (isFarLeft) {
-                img.style.transform = `translateX(-${gap * 1.8}px) translateY(-${maxStickUp * 1.8}px) scale(0.7) rotateY(25deg)`;
-                img.style.zIndex = 3; img.style.opacity = 0.5; img.style.pointerEvents = "auto";
-            } else if (isFarRight) {
-                img.style.transform = `translateX(${gap * 1.8}px) translateY(-${maxStickUp * 1.8}px) scale(0.7) rotateY(-25deg)`;
-                img.style.zIndex = 3; img.style.opacity = 0.5; img.style.pointerEvents = "auto";
-            } else {
-                img.style.transform = 'translateX(0px) translateY(0px) scale(0.5) rotateY(0deg)';
-                img.style.zIndex = 1; img.style.opacity = 0; img.style.pointerEvents = "none";
-            }
-        });
-
-        // Animación de cambio de texto
-        TweenMax.killTweensOf([nameEl, desigEl, quoteEl]);
-        TweenMax.to([nameEl, desigEl, quoteEl], 0.2, { y: -10, opacity: 0, onComplete: () => {
-            nameEl.textContent = candidatesData[activeIndex].name;
-            desigEl.textContent = candidatesData[activeIndex].designation;
-            quoteEl.textContent = candidatesData[activeIndex].quote;
-            TweenMax.staggerFromTo([nameEl, desigEl, quoteEl], 0.3, { y: 10, opacity: 0 }, { y: 0, opacity: 1 }, 0.05);
-        }});
-    }
-
-    function next() { activeIndex = (activeIndex + 1) % total; updateCarousel(); resetAutoplay(); }
-    function prev() { activeIndex = (activeIndex - 1 + total) % total; updateCarousel(); resetAutoplay(); }
-    function resetAutoplay() { clearInterval(autoplayInterval); autoplayInterval = setInterval(next, 5000); }
-
-    nextBtn.addEventListener('click', next);
-    prevBtn.addEventListener('click', prev);
-    window.addEventListener('resize', updateCarousel);
-    images.forEach((img, i) => { img.addEventListener('click', () => { if (i !== activeIndex) { activeIndex = i; updateCarousel(); resetAutoplay(); }}); });
-
-    updateCarousel();
-    resetAutoplay();
-
-    window.circularCarouselCleanup = () => {
-        clearInterval(autoplayInterval);
-        window.removeEventListener('resize', updateCarousel);
-    };
-}
-
 // --- Scroll Magnético Seguro (Efecto Imán Retardado) ---
 let isMagneticScrollInitialized = false;
 function initSafeMagneticScroll() {
@@ -1983,7 +1837,6 @@ function inits(container) {
         setTimeout(() => {
             requestAnimationFrame(() => {
                 initCandidatos(container);
-                initCircularCarousel(container);
                 initTimelineCarousels(container);
                 initMapaTacna(container);
                 initVideoScrollFix(container);
