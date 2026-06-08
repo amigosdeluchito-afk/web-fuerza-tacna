@@ -85,14 +85,16 @@ try {
 // Tarifas oficiales OpenAI: $0.150 / 1M Input, $0.600 / 1M Output
 $tarifa_in_1M = 0.150;
 $tarifa_out_1M = 0.600;
-$tipo_cambio = 3.75; // <-- TIPO DE CAMBIO CONFIGURABLE MANUALMENTE
 
 $costo_usd = ($stats['tokens_in'] / 1000000 * $tarifa_in_1M) + ($stats['tokens_out'] / 1000000 * $tarifa_out_1M);
-$costo_pen = $costo_usd * $tipo_cambio;
+
+// Ahorro: Asumimos que una consulta típica de simulador ahorra un promedio de 250 tokens input + 100 output
+$costo_promedio_consulta_ahorrada = ((250 / 1000000) * $tarifa_in_1M) + ((100 / 1000000) * $tarifa_out_1M);
+$ahorro_usd = $stats['simulador'] * $costo_promedio_consulta_ahorrada;
 
 // Métricas Avanzadas (Eficiencia)
 $promedio_consultas = $stats['usuarios'] > 0 ? round($stats['total'] / $stats['usuarios'], 1) : 0;
-$costo_por_usuario = $stats['usuarios'] > 0 ? ($costo_pen / $stats['usuarios']) : 0;
+$costo_por_usuario = $stats['usuarios'] > 0 ? ($costo_usd / $stats['usuarios']) : 0;
 $ratio_tokens = $stats['tokens_out'] > 0 ? round($stats['tokens_in'] / $stats['tokens_out'], 1) : 0;
 
 // Retención (Usuarios que visitan en días distintos)
@@ -117,6 +119,41 @@ try {
     $horas_data = $stmt_horas->fetchAll(PDO::FETCH_ASSOC);
     foreach($horas_data as $row) { $labels_horas[] = str_pad($row['hora'], 2, '0', STR_PAD_LEFT) . ':00'; $data_horas[] = (int)$row['cantidad']; }
 } catch(Exception $e) {}
+
+// ==========================================
+// BLOQUE 2: DATOS PARA GRÁFICO DE COSTOS Y ROI (30 DÍAS)
+// ==========================================
+$historial_consumo = [];
+$labels_costos = [];
+$data_costos_input = [];
+$data_costos_output = [];
+$data_costos_usd = [];
+
+try {
+    // Esta consulta es independiente del filtro de arriba, siempre muestra los últimos 30 días.
+    $sql_costos_30d = "
+        SELECT 
+            DATE(fecha) as dia,
+            SUM(tokens_input) as sum_input,
+            SUM(tokens_output) as sum_output
+        FROM panel_ia_auditoria
+        WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+          AND estado = 'exito_openai'
+        GROUP BY DATE(fecha)
+        ORDER BY dia ASC
+    ";
+    $historial_consumo = $db->query($sql_costos_30d)->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($historial_consumo as $row) {
+        $in = (int)$row['sum_input'];
+        $out = (int)$row['sum_output'];
+        $costo_dia_usd = (($in / 1000000) * $tarifa_in_1M) + (($out / 1000000) * $tarifa_out_1M);
+        $labels_costos[] = date('d/m', strtotime($row['dia']));
+        $data_costos_input[] = $in;
+        $data_costos_output[] = $out;
+        $data_costos_usd[] = round($costo_dia_usd, 4);
+    }
+} catch (Exception $e) {}
 
 // ==========================================
 // BLOQUE 3 Y 4: DATOS PARA GRÁFICOS (AGRUPACIÓN SQL)
@@ -273,39 +310,42 @@ try {
         </div>
     </div>
 
-    <!-- FILA 1: KPIs Principales -->
+    <!-- FILA 1: KPIs DE COSTOS Y ROI -->
     <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="kpi-card">
-                <div class="kpi-title">Consultas Registradas <span>💬</span></div>
-                <h3 class="kpi-value"><?= number_format($stats['total']) ?></h3>
-                <span class="kpi-sub">Total de interacciones recibidas (<?= $rango_label ?>)</span>
+        <div class="col-md-4 mb-3">
+            <div class="kpi-card" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
+                <div class="kpi-title">Costo Real API (<?= $rango_label ?>) <span>💰</span></div>
+                <h3 class="kpi-value" style="color: #ef4444;">$<?= number_format($costo_usd, 4) ?></h3>
+                <span class="kpi-sub">Costo exacto de peticiones a OpenAI.</span>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="kpi-card">
-                <div class="kpi-title">Llegaron a OpenAI <span class="text-openai">🤖</span></div>
-                <h3 class="kpi-value text-openai"><?= number_format($stats['openai']) ?></h3>
-                <span class="kpi-sub">Frente a <?= number_format($stats['simulador']) ?> atajadas en BD local.</span>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="kpi-card">
+        <div class="col-md-4 mb-3">
+            <div class="kpi-card" style="border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05);">
                 <div class="kpi-title">Tokens Consumidos <span>🪙</span></div>
-                <h3 class="kpi-value"><?= number_format($stats['tokens_in'] + $stats['tokens_out']) ?></h3>
-                <span class="kpi-sub">In: <?= number_format($stats['tokens_in']) ?> | Out: <?= number_format($stats['tokens_out']) ?></span>
+                <h3 class="kpi-value" style="color: #60a5fa;"><?= number_format($stats['tokens_in'] + $stats['tokens_out']) ?></h3>
+                <span class="kpi-sub">
+                    <span style="color: #60a5fa;">In: <?= number_format($stats['tokens_in']) ?></span> | 
+                    <span style="color: #a78bfa;">Out: <?= number_format($stats['tokens_out']) ?></span>
+                </span>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="kpi-card" style="border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.05);">
-                <div class="kpi-title">Costo Estimado (Aprox) <span>💰</span></div>
-                <h3 class="kpi-value text-costo">S/ <?= number_format($costo_pen, 4) ?></h3>
-                <span class="kpi-sub">≈ USD $<?= number_format($costo_usd, 4) ?> (T.C. <?= $tipo_cambio ?>)</span>
+        <div class="col-md-4 mb-3">
+            <div class="kpi-card" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05);">
+                <div class="kpi-title">Ahorro por Simulador <span>🛡️</span></div>
+                <h3 class="kpi-value" style="color: #10b981;">$<?= number_format($ahorro_usd, 4) ?></h3>
+                <span class="kpi-sub">Dinero ahorrado gracias a los escudos RAG locales.</span>
             </div>
         </div>
     </div>
 
-    <!-- FILA 2: Alertas y Salud -->
+    <!-- GRÁFICO DE EVOLUCIÓN DE COSTOS -->
+    <div class="row mb-4">
+        <div class="col-12"><div class="chart-box">
+            <?php if(empty($data_costos_usd)): ?><div class="chart-placeholder">No hay datos de consumo de OpenAI en los últimos 30 días.</div><?php else: ?><canvas id="chartTokensCostos"></canvas><?php endif; ?>
+        </div></div>
+    </div>
+
+    <!-- FILA 3: Alertas y Salud -->
     <div class="row">
         <div class="col-md-8">
             <h6 style="color:#f8fafc; font-weight:bold; margin-bottom: 15px;">🛡️ Monitoreo de Alertas y Escudos</h6>
@@ -361,7 +401,7 @@ try {
         </div>
     </div>
 
-    <!-- FILA EXTRA: Métricas de Eficiencia -->
+    <!-- FILA 4: Métricas de Eficiencia -->
     <h6 style="color:#f8fafc; font-weight:bold; margin-top: 20px; margin-bottom: 15px;">⚡ Eficiencia y Comportamiento</h6>
     <div class="row mb-4">
         <div class="col-md-3 mb-3"><div class="kpi-card" style="padding: 15px; height: auto;">
@@ -381,12 +421,12 @@ try {
         </div></div>
         <div class="col-md-3 mb-3"><div class="kpi-card" style="padding: 15px; height: auto;">
             <div class="kpi-title" style="color:#fbbf24;">Costo Prom. / Usuario</div>
-            <h3 class="kpi-value" style="font-size:22px;">S/ <?= number_format($costo_por_usuario, 4) ?></h3>
+            <h3 class="kpi-value" style="font-size:22px;">$<?= number_format($costo_por_usuario, 4) ?></h3>
             <span class="kpi-sub">Basado en el costo general.</span>
         </div></div>
     </div>
 
-    <!-- FILA 3: Contenedores para Bloque 3 (Gráficos) -->
+    <!-- FILA 5: Contenedores para Gráficos de Tráfico -->
     <h6 style="color:#f8fafc; font-weight:bold; margin-top: 30px; margin-bottom: 0;">📉 Tendencias Gráficas</h6>
     <div class="row">
         <div class="col-md-8">
@@ -422,7 +462,7 @@ try {
         </div>
     </div>
 
-    <!-- FILA 4: Tablas de Ranking y Monitoreo -->
+    <!-- FILA 6: Tablas de Ranking y Monitoreo -->
     <h6 style="color:#f8fafc; font-weight:bold; margin-top: 30px; margin-bottom: 15px;">📋 Tablas de Monitoreo Clave</h6>
     <div class="row">
         <!-- Top Usuarios -->
@@ -573,6 +613,67 @@ try {
                         }]
                     },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+            }
+
+            // Renderizado: Evolución de Consumo y Costos (30 días)
+            const cvCostos = document.getElementById('chartTokensCostos');
+            if (cvCostos) {
+                new Chart(cvCostos.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: <?= json_encode($labels_costos) ?>,
+                        datasets: [
+                            {
+                                label: 'Costo (USD)',
+                                data: <?= json_encode($data_costos_usd) ?>,
+                                type: 'line',
+                                borderColor: '#ef4444',
+                                backgroundColor: '#ef4444',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                yAxisID: 'yCosto',
+                                order: 0
+                            },
+                            {
+                                label: 'Tokens de Entrada (Prompt)',
+                                data: <?= json_encode($data_costos_input) ?>,
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                borderColor: '#3b82f6',
+                                borderWidth: 1,
+                                stack: 'Stack 0',
+                                yAxisID: 'yTokens',
+                                order: 1
+                            },
+                            {
+                                label: 'Tokens de Salida (Respuesta)',
+                                data: <?= json_encode($data_costos_output) ?>,
+                                backgroundColor: 'rgba(167, 139, 250, 0.7)',
+                                borderColor: '#a78bfa',
+                                borderWidth: 1,
+                                stack: 'Stack 0',
+                                yAxisID: 'yTokens',
+                                order: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: { 
+                            title: { display: true, text: 'Evolución de Consumo y Costos (Últimos 30 días)', color: '#f8fafc', font: { size: 16 } },
+                            legend: { position: 'top' } 
+                        },
+                        scales: {
+                            x: { stacked: true },
+                            yTokens: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Tokens', color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            yCosto: {
+                                type: 'linear', display: true, position: 'right', title: { display: true, text: 'Costo (USD)', color: '#ef4444' },
+                                ticks: { color: '#ef4444', callback: function(value) { return '$' + value.toFixed(4); } },
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
                 });
             }
         } catch(e) {
