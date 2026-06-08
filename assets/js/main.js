@@ -1704,6 +1704,35 @@ function initVideoScrollFix(container) {
     });
 }
 
+// --- Carga Diferida (Lazy Load) de Iframe de YouTube ---
+function initYouTubePlaceholder(container) {
+    const target = container || document;
+    const placeholders = target.querySelectorAll('.yt-placeholder');
+    
+    placeholders.forEach(ph => {
+        if (ph.dataset.youtubeReady === 'true') return;
+        ph.dataset.youtubeReady = 'true';
+        
+        const videoId = ph.getAttribute('data-video-id');
+        const playBtn = ph.querySelector('.yt-play-btn');
+        if (!videoId) return;
+
+        const loadVideo = () => {
+            if (ph.querySelector('iframe')) return; // Evita inyectar múltiples iframes
+            ph.innerHTML = `<iframe class="video-player" src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;" frameborder="0" title="Video de presentación de Fuerza Tacna" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+            ph.classList.add('is-interactive'); // Permite que funcione el scroll interno
+        };
+
+        ph.addEventListener('click', loadVideo);
+        if (playBtn) {
+            playBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                loadVideo();
+            });
+        }
+    });
+}
+
 // --- Smooth Scroll para Flechas Móviles (Evita el bug del hash en celulares) ---
 function initSmoothArrows(container) {
     const target = container || document;
@@ -1958,6 +1987,7 @@ function inits(container) {
                 initTimelineCarousels(container);
                 initMapaTacna(container);
                 initVideoScrollFix(container);
+                initYouTubePlaceholder(container);
                 initCircularTimeline(container);
                 // Paso 2: Despertar el nuevo motor MapLibre cuando entramos a la página del mapa
                 if (typeof initMapEngine === 'function') initMapEngine(container);

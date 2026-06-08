@@ -1207,6 +1207,13 @@
             #votar-section {
                     margin-top: 0vh !important; 
             }
+
+            /* --- Estilos Placeholder de YouTube (Lighthouse Fase 3) --- */
+            .yt-placeholder .yt-thumb { opacity: 0.85; transition: opacity 0.3s ease; }
+            .yt-placeholder:hover .yt-thumb { opacity: 1; }
+            .yt-placeholder:hover .yt-play-btn { background-color: #ffc300 !important; border-color: #801039 !important; transform: translate(-50%, -50%) scale(1.1) !important; }
+            .yt-placeholder:hover .yt-play-btn svg { fill: #801039 !important; }
+
                 #video-section .row, #drone-section .row, #votar-section .row {
                     width: 100%;
                     margin: 0;
@@ -1560,8 +1567,16 @@
                 <div class="row align-items-center">
                     <div class="col-md-6" style="display: flex; justify-content: center; align-items: center; width: 100%;">
                         <div class="services-img" id="camera-img" style="position: relative !important; left: 0 !important; right: 0 !important; display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; margin: 0 auto; padding: 0 !important; transform: none !important;">
-                            <div class="iframe-container" style="width: 100%; max-width: 90vw; margin: 0 auto; aspect-ratio: 16/9; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.4);">
-                                <iframe class="video-player" src="https://www.youtube.com/embed/5_Kk6u7S5FY" style="width: 100%; height: 100%;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            <!-- Fachada dinámica del video de YouTube -->
+                            <div class="iframe-container yt-placeholder" data-video-id="5_Kk6u7S5FY" style="width: 100%; max-width: 90vw; margin: 0 auto; aspect-ratio: 16/9; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.4); position: relative; background-color: #000; cursor: pointer;">
+                                <picture style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; pointer-events: none;">
+                                    <source srcset="assets/img/video-thumbnail.webp" type="image/webp">
+                                    <!-- Fallback temporal si no existe el archivo webp -->
+                                    <img src="https://img.youtube.com/vi/5_Kk6u7S5FY/maxresdefault.jpg" alt="Miniatura del video de Fuerza Tacna" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" class="yt-thumb">
+                                </picture>
+                                <button class="yt-play-btn" aria-label="Reproducir video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75px; height: 55px; background-color: rgba(128, 16, 57, 0.95); border: 2px solid #ffc300; border-radius: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 2; cursor: pointer;">
+                                    <svg viewBox="0 0 24 24" width="36" height="36" fill="#ffc300" style="margin-left: 4px; transition: fill 0.3s;"><path d="M8 5v14l11-7z"/></svg>
+                                </button>
                             </div>
                         </div>
                     </div>
