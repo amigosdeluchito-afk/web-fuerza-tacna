@@ -212,14 +212,14 @@ function injectGlobalAssets() {
 
             /* Estilos de la Pantalla de Carga */
             .initial-loader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999999 !important; display: flex; align-items: center; justify-content: center; background-color: #ffc300; }
-            .initial-loader h1 { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 5rem; line-height: 1.1; margin: 0; text-align: center; color: #801039; font-weight: 900; letter-spacing: 2px; }
+            .initial-loader .loader-h1 { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 5rem; line-height: 1.1; margin: 0; text-align: center; color: #801039; font-weight: 900; letter-spacing: 2px; }
             .initial-loader .water-layer { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background-color: #801039; overflow: hidden; }
             .initial-loader .water-content { position: absolute; bottom: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
-            .initial-loader .water-content h1 { color: #ffc300; }
+            .initial-loader .water-content .loader-h1 { color: #ffc300; }
             .initial-loader .wave { position: absolute; bottom: 0%; margin-bottom: -2vw; left: -10vw; width: 120vw; height: clamp(60px, 10vw, 130px); z-index: 2; pointer-events: none; }
             .initial-loader .wave::before { content: ''; position: absolute; bottom: 0; left: 0; width: 240vw; height: 100%; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 150" preserveAspectRatio="none"><path d="M0,50 Q125,10 250,50 T500,50 T750,50 T1000,50 L1000,150 L0,150 Z" fill="%23801039"/></svg>'); background-size: 120vw 100%; background-repeat: repeat-x; transform-origin: bottom center; animation: waveAnimFluid 2.5s linear infinite; }
             @keyframes waveAnimFluid { 0% { transform: translateX(0) translateY(0); } 50% { transform: translateX(-60vw) translateY(8px); } 100% { transform: translateX(-120vw) translateY(0); } }
-            @media (max-width: 768px) { .initial-loader h1 { font-size: 3.5rem; } }
+            @media (max-width: 768px) { .initial-loader .loader-h1 { font-size: 3.5rem; } }
 
             /* --- Glass Button v3 Global Styles (Anti-Barba.js Bug) --- */
             #hero-main-content {
