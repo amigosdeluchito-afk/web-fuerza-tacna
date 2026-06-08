@@ -1213,6 +1213,7 @@
             .yt-placeholder:hover .yt-thumb { opacity: 1; }
             .yt-placeholder:hover .yt-play-btn { background-color: #ffc300 !important; border-color: #801039 !important; transform: translate(-50%, -50%) scale(1.1) !important; }
             .yt-placeholder:hover .yt-play-btn svg { fill: #801039 !important; }
+            .yt-placeholder:hover .yt-play-btn .yt-triangle { border-left-color: #801039 !important; }
 
                 #video-section .row, #drone-section .row, #votar-section .row {
                     width: 100%;
@@ -1572,7 +1573,7 @@
                                 <!-- Miniatura directa desde YouTube con fallback infalible -->
                                 <img src="https://i.ytimg.com/vi/5_Kk6u7S5FY/maxresdefault.jpg" onerror="this.onerror=null; this.src='https://i.ytimg.com/vi/5_Kk6u7S5FY/hqdefault.jpg'" alt="Miniatura del video de Fuerza Tacna" loading="lazy" style="position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; margin: 0 !important; object-fit: cover; display: block; pointer-events: none;" class="yt-thumb">
                                 <button class="yt-play-btn" aria-label="Reproducir video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75px; height: 55px; background-color: rgba(128, 16, 57, 0.95); border: 2px solid #ffc300; border-radius: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 2; cursor: pointer;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="#ffc300" style="width: 36px !important; height: 36px !important; margin: 0 0 0 4px !important; display: block !important; transition: fill 0.3s;"><path d="M8 5v14l11-7z"/></svg>
+                                    <div class="yt-triangle" style="width: 0; height: 0; border-top: 14px solid transparent; border-bottom: 14px solid transparent; border-left: 22px solid #ffc300; margin-left: 6px; transition: border-left-color 0.3s;"></div>
                                 </button>
                             </div>
                         </div>
