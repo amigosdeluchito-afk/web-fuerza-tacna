@@ -1,5 +1,5 @@
-var cursor = $(".cursor"),
-    follower = $(".cursor-follower");
+var cursor = document.querySelectorAll(".cursor"),
+    follower = document.querySelectorAll(".cursor-follower");
 
 var posX = 0,
     posY = 0;
@@ -23,7 +23,7 @@ function renderCursor() {
         });
     }
     
-    if (cursor.length > 0) {
+    if (cursor.length > 0) { 
         TweenMax.set(cursor, {
             x: mouseX,
             y: mouseY,
@@ -34,16 +34,21 @@ function renderCursor() {
 }
 requestAnimationFrame(renderCursor);
 
-$(document).on("mousemove", function(e) {
+document.addEventListener("mousemove", function(e) {
     mouseX = e.clientX;
     mouseY = e.clientY;
 });
 
-$(".link").on("mouseenter", function() {
-    cursor.addClass("active");
-    follower.addClass("active");
+document.addEventListener("mouseover", function(e) {
+    if (e.target.closest && e.target.closest(".link")) {
+        cursor.forEach(function(c) { c.classList.add("active"); });
+        follower.forEach(function(f) { f.classList.add("active"); });
+    }
 });
-$(".link").on("mouseleave", function() {
-    cursor.removeClass("active");
-    follower.removeClass("active");
+
+document.addEventListener("mouseout", function(e) {
+    if (e.target.closest && e.target.closest(".link")) {
+        cursor.forEach(function(c) { c.classList.remove("active"); });
+        follower.forEach(function(f) { f.classList.remove("active"); });
+    }
 });
