@@ -417,10 +417,22 @@ try {
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="kpi-card">
-                        <div class="kpi-title text-alerta">Errores OpenAI <span>🔌</span></div>
-                        <h3 class="kpi-value"><?= number_format($stats['errores']) ?></h3>
-                        <span class="kpi-sub">Fallos de API Key, Saldo o Red.</span>
+                    <div class="kpi-card" style="border-color: <?= $salud_api_porcentaje < 90 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(30, 41, 59, 1)' ?>; background: <?= $salud_api_porcentaje < 90 ? 'rgba(239, 68, 68, 0.05)' : '#0f172a' ?>;">
+                        <div class="kpi-title" style="color: <?= $color_salud ?>;">Salud API OpenAI <span><?= $icono_salud ?></span></div>
+                        <div class="d-flex align-items-baseline">
+                            <h3 class="kpi-value" style="color: <?= $color_salud ?>; margin-right: 10px;"><?= $salud_api_porcentaje ?>%</h3>
+                            <span style="font-size: 14px; color: #94a3b8;">de éxito</span>
+                        </div>
+                        <div class="progress mt-2" style="height: 6px; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden;">
+                            <div class="progress-bar" role="progressbar" style="width: <?= $salud_api_porcentaje ?>%; background-color: <?= $color_salud ?>;"></div>
+                        </div>
+                        <span class="kpi-sub mt-2">
+                            <?php if($stats['errores'] > 0): ?>
+                                <strong style="color: #ef4444;"><?= number_format($stats['errores']) ?> errores</strong> vs <?= number_format($stats['openai']) ?> aciertos.
+                            <?php else: ?>
+                                <?= number_format($stats['openai']) ?> peticiones exitosas. Cero errores.
+                            <?php endif; ?>
+                        </span>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
