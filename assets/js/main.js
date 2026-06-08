@@ -722,7 +722,7 @@ function initialLoadAnimation() {
     }
 }
 
-$(function () {
+document.addEventListener("DOMContentLoaded", function () {
     barba.init({
         sync: true,
 
