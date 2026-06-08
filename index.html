@@ -1569,11 +1569,8 @@
                         <div class="services-img" id="camera-img" style="position: relative !important; left: 0 !important; right: 0 !important; display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; margin: 0 auto; padding: 0 !important; transform: none !important;">
                             <!-- Fachada dinámica del video de YouTube -->
                             <div class="iframe-container yt-placeholder" data-video-id="5_Kk6u7S5FY" style="width: 100%; max-width: 90vw; margin: 0 auto; aspect-ratio: 16/9; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.4); position: relative; background-color: #000; cursor: pointer;">
-                                <picture style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; pointer-events: none;">
-                                    <source srcset="assets/img/video-thumbnail.webp" type="image/webp">
-                                    <!-- Fallback temporal si no existe el archivo webp -->
-                                    <img src="https://img.youtube.com/vi/5_Kk6u7S5FY/maxresdefault.jpg" alt="Miniatura del video de Fuerza Tacna" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" class="yt-thumb">
-                                </picture>
+                                <!-- Miniatura directa desde YouTube con fallback infalible -->
+                                <img src="https://i.ytimg.com/vi/5_Kk6u7S5FY/maxresdefault.jpg" onerror="this.onerror=null; this.src='https://i.ytimg.com/vi/5_Kk6u7S5FY/hqdefault.jpg'" alt="Miniatura del video de Fuerza Tacna" loading="lazy" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;" class="yt-thumb">
                                 <button class="yt-play-btn" aria-label="Reproducir video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 75px; height: 55px; background-color: rgba(128, 16, 57, 0.95); border: 2px solid #ffc300; border-radius: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 2; cursor: pointer;">
                                     <svg viewBox="0 0 24 24" width="36" height="36" fill="#ffc300" style="margin-left: 4px; transition: fill 0.3s;"><path d="M8 5v14l11-7z"/></svg>
                                 </button>
