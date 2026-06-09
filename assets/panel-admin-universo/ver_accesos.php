@@ -6,6 +6,44 @@ require_login();
 require_admin();
 
 $db = get_db_connection();
+
+// Crear tabla de configuración si no existe
+$db->exec("CREATE TABLE IF NOT EXISTS panel_configuracion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clave VARCHAR(100) NOT NULL UNIQUE,
+    valor MEDIUMTEXT NOT NULL,
+    fecha_actualizacion DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+// Valores por defecto
+$stmtConf = $db->prepare("INSERT IGNORE INTO panel_configuracion (clave, valor, fecha_actualizacion) VALUES (?, ?, NOW())");
+$stmtConf->execute(['sitio_privado_activo', '1']);
+$stmtConf->execute(['sitio_privado_password', 'FT666']);
+
+$mensaje = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'guardar_config') {
+    $activo = isset($_POST['sitio_privado_activo']) ? '1' : '0';
+    $password = trim($_POST['sitio_privado_password'] ?? 'FT666');
+    if (empty($password)) $password = 'FT666';
+
+    $stmt = $db->prepare("UPDATE panel_configuracion SET valor=?, fecha_actualizacion=NOW() WHERE clave=?");
+    $stmt->execute([$activo, 'sitio_privado_activo']);
+    $stmt->execute([$password, 'sitio_privado_password']);
+    
+    $mensaje = "Configuración del escudo temporal actualizada correctamente.";
+}
+
+// Obtener valores actuales
+$stmtC = $db->query("SELECT clave, valor FROM panel_configuracion WHERE clave IN ('sitio_privado_activo', 'sitio_privado_password')");
+$configs = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+$sitio_privado_activo = '1';
+$sitio_privado_password = 'FT666';
+foreach ($configs as $c) {
+    if ($c['clave'] === 'sitio_privado_activo') $sitio_privado_activo = $c['valor'];
+    if ($c['clave'] === 'sitio_privado_password') $sitio_privado_password = $c['valor'];
+}
+
 $db->exec("CREATE TABLE IF NOT EXISTS panel_accesos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     time DATETIME NOT NULL,
@@ -90,8 +128,46 @@ $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </header>
   
 <main>
-  <h1>Registro de Accesos (Escudo Temporal)</h1>
-  <p>Esta lista muestra las direcciones IP y dispositivos de las personas que han colocado la contraseña correctamente en la web.</p>
+  <h1>Registro de Accesos y Seguridad</h1>
+  
+  <?php if ($mensaje): ?>
+    <div style="background: #10b981; color: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold;">
+        <?= htmlspecialchars($mensaje) ?>
+    </div>
+  <?php endif; ?>
+
+  <div style="background: #0b1020; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+      <h2 style="margin-top: 0; font-size: 18px; color: #f8fafc;">🛡️ Escudo Temporal (Modo Privado)</h2>
+      <p style="color: #94a3b8; font-size: 14px;">Aquí puedes activar o desactivar la pantalla de contraseña que aparece al entrar a la página web pública.</p>
+      
+      <form method="POST" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+          <input type="hidden" name="action" value="guardar_config">
+          
+          <div>
+              <label style="display: block; color: #cbd5e1; font-size: 13px; margin-bottom: 8px;">Estado del Escudo:</label>
+              <label style="display: flex; align-items: center; cursor: pointer; gap: 10px; background: #020617; padding: 10px 15px; border-radius: 6px; border: 1px solid #334155;">
+                  <input type="checkbox" name="sitio_privado_activo" style="width: 18px; height: 18px; accent-color: #3b82f6;" <?= $sitio_privado_activo === '1' ? 'checked' : '' ?>>
+                  <span style="color: <?= $sitio_privado_activo === '1' ? '#10b981' : '#ef4444' ?>; font-weight: bold;">
+                      <?= $sitio_privado_activo === '1' ? 'ACTIVO (Pide Contraseña)' : 'DESACTIVADO (Público)' ?>
+                  </span>
+              </label>
+          </div>
+          
+          <div style="flex: 1; min-width: 200px;">
+              <label style="display: block; color: #cbd5e1; font-size: 13px; margin-bottom: 8px;">Contraseña de Acceso:</label>
+              <input type="text" name="sitio_privado_password" value="<?= htmlspecialchars($sitio_privado_password) ?>" style="width: 100%; padding: 10px 15px; border-radius: 6px; border: 1px solid #334155; background: #020617; color: white; font-size: 14px;" required>
+          </div>
+          
+          <div>
+              <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 11px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; height: 41px;">
+                  Guardar Configuración
+              </button>
+          </div>
+      </form>
+  </div>
+
+  <h2 style="font-size: 18px; color: #f8fafc; border-top: 1px solid #1e293b; padding-top: 20px; margin-top: 0;">Historial de Ingresos Exitosos</h2>
+  <p style="color: #94a3b8; font-size: 14px;">Esta lista muestra las direcciones IP de quienes han colocado la contraseña en la web.</p>
 
   <table>
     <thead>

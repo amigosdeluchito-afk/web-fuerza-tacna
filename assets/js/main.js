@@ -15,7 +15,8 @@ function checkTemporalAccess() {
         font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
     `;
     shield.innerHTML = `
-        <div style="background: #801039; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border: 2px solid #ffc300; max-width: 90%; width: 350px;">
+        <div id="shield-loading" style="color: #ffc300; font-size: 20px; letter-spacing: 2px;">CARGANDO...</div>
+        <div id="shield-content" style="display: none; background: #801039; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border: 2px solid #ffc300; max-width: 90%; width: 350px;">
             <h2 style="color: #ffc300; margin: 0 0 10px 0; font-size: 1.5rem; text-transform: uppercase;">ACCESO PRIVADO</h2>
             <p style="color: #fff; font-family: system-ui, sans-serif; font-size: 0.9rem; margin-bottom: 25px; font-weight: 300;">Sitio en fase de revisión. Ingrese la contraseña:</p>
             <input type="password" id="shield-pass" style="padding: 12px; border: none; border-radius: 8px; margin-bottom: 15px; width: 100%; box-sizing: border-box; font-size: 16px; text-align: center; outline: 2px solid transparent; transition: outline 0.3s;" placeholder="Contraseña">
@@ -27,26 +28,62 @@ function checkTemporalAccess() {
     // Se inyecta en lo más alto del documento antes de que cargue el resto de la web
     document.documentElement.appendChild(shield);
     
-    const verifyPass = () => {
-        const pass = document.getElementById('shield-pass').value;
-        if (pass === 'FT666') { // <--- AQUÍ PUEDES CAMBIAR LA CONTRASEÑA
-            sessionStorage.setItem('temporal_access', 'granted');
+    fetch('assets/panel-admin-universo/api_estado_sitio.php')
+        .then(response => response.json())
+        .then(config => {
+            if (!config.privado_activo) {
+                shield.remove();
+                return;
+            }
+            
+            document.getElementById('shield-loading').style.display = 'none';
+            document.getElementById('shield-content').style.display = 'block';
+
+            const verifyPass = () => {
+                const pass = document.getElementById('shield-pass').value;
+                const btn = document.getElementById('shield-btn');
+                const originalText = btn.innerText;
+                btn.innerText = 'VERIFICANDO...';
+                btn.disabled = true;
+                
+                const fd = new URLSearchParams();
+                fd.append('pass', pass);
+
+                fetch('assets/panel-admin-universo/api_estado_sitio.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: fd
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.ok) {
+                        sessionStorage.setItem('temporal_access', 'granted');
+                        shield.remove();
+                        fetch('assets/panel-admin-universo/log_access.php', { method: 'POST' }).catch(() => {});
+                    } else {
+                        document.getElementById('shield-error').style.display = 'block';
+                        document.getElementById('shield-pass').style.outline = '2px solid #ff6b6b';
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                }).catch(() => {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+            };
+            
+            setTimeout(() => {
+                document.getElementById('shield-btn').addEventListener('click', verifyPass);
+                document.getElementById('shield-pass').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') verifyPass();
+                });
+                document.getElementById('shield-pass').focus();
+            }, 50);
+        })
+        .catch(err => {
+            console.error('Error cargando config del escudo:', err);
             shield.remove();
-            // Enviar un aviso silencioso al servidor para registrar la IP
-            fetch('/assets/panel-admin-universo/log_access.php', { method: 'POST' }).catch(() => {});
-        } else {
-            document.getElementById('shield-error').style.display = 'block';
-            document.getElementById('shield-pass').style.outline = '2px solid #ff6b6b';
-        }
-    };
-    
-    // Esperar unos milisegundos a que los elementos estén insertados para activar botones
-    setTimeout(() => {
-        document.getElementById('shield-btn').addEventListener('click', verifyPass);
-        document.getElementById('shield-pass').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') verifyPass();
         });
-    }, 50);
 }
 checkTemporalAccess();
 
