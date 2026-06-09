@@ -2,7 +2,7 @@
 DirectoryIndex index.html index.php
 
 <IfModule mod_headers.c>
-    # Cabeceras de Seguridad (Fase 3: CSP Activa)
+    # Cabeceras de Seguridad (Fase 2B: CSP Activa)
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
