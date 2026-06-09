@@ -5,39 +5,34 @@ function checkTemporalAccess() {
     // Si ya ingresaron la contraseña en esta sesión, los dejamos pasar
     if (sessionStorage.getItem('temporal_access') === 'granted') return;
 
-    // Crear pantalla de bloqueo a pantalla completa
-    const shield = document.createElement('div');
-    shield.id = 'temporal-shield';
-    shield.style.cssText = `
-        position: fixed; inset: 0; width: 100vw; height: 100vh;
-        background: rgba(20, 20, 20, 0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        z-index: 9999999999; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
-    `;
-    shield.innerHTML = `
-        <div id="shield-loading" style="color: #ffc300; font-size: 20px; letter-spacing: 2px;">CARGANDO...</div>
-        <div id="shield-content" style="display: none; background: #801039; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border: 2px solid #ffc300; max-width: 90%; width: 350px;">
-            <h2 style="color: #ffc300; margin: 0 0 10px 0; font-size: 1.5rem; text-transform: uppercase;">ACCESO PRIVADO</h2>
-            <p style="color: #fff; font-family: system-ui, sans-serif; font-size: 0.9rem; margin-bottom: 25px; font-weight: 300;">Sitio en fase de revisión. Ingrese la contraseña:</p>
-            <input type="password" id="shield-pass" style="padding: 12px; border: none; border-radius: 8px; margin-bottom: 15px; width: 100%; box-sizing: border-box; font-size: 16px; text-align: center; outline: 2px solid transparent; transition: outline 0.3s;" placeholder="Contraseña">
-            <button id="shield-btn" style="background: #ffc300; color: #801039; border: none; padding: 12px 20px; font-family: 'Arial Black Web', 'Arial Black', sans-serif; font-weight: 900; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; transition: transform 0.2s;">ENTRAR</button>
-            <p id="shield-error" style="color: #ff6b6b; display: none; margin-top: 15px; font-family: system-ui, sans-serif; font-size: 13px; margin-bottom: 0;">Contraseña incorrecta</p>
-        </div>
-    `;
-    
-    // Se inyecta en lo más alto del documento antes de que cargue el resto de la web
-    document.documentElement.appendChild(shield);
-    
+    // Primero preguntamos al servidor de forma invisible
     fetch('assets/panel-admin-universo/api_estado_sitio.php')
         .then(response => response.json())
         .then(config => {
             if (!config.privado_activo) {
-                shield.remove();
-                return;
+                return; // Si es público, no hacemos nada. Adiós pestañeo negro.
             }
             
-            document.getElementById('shield-loading').style.display = 'none';
-            document.getElementById('shield-content').style.display = 'block';
+            // Crear pantalla de bloqueo SOLO si está privado
+            const shield = document.createElement('div');
+            shield.id = 'temporal-shield';
+            shield.style.cssText = `
+                position: fixed; inset: 0; width: 100vw; height: 100vh;
+                background: rgba(20, 20, 20, 0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+                z-index: 9999999999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+            `;
+            shield.innerHTML = `
+                <div id="shield-content" style="background: #801039; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border: 2px solid #ffc300; max-width: 90%; width: 350px;">
+                    <h2 style="color: #ffc300; margin: 0 0 10px 0; font-size: 1.5rem; text-transform: uppercase;">ACCESO PRIVADO</h2>
+                    <p style="color: #fff; font-family: system-ui, sans-serif; font-size: 0.9rem; margin-bottom: 25px; font-weight: 300;">Sitio en fase de revisión. Ingrese la contraseña:</p>
+                    <input type="password" id="shield-pass" style="padding: 12px; border: none; border-radius: 8px; margin-bottom: 15px; width: 100%; box-sizing: border-box; font-size: 16px; text-align: center; outline: 2px solid transparent; transition: outline 0.3s;" placeholder="Contraseña">
+                    <button id="shield-btn" style="background: #ffc300; color: #801039; border: none; padding: 12px 20px; font-family: 'Arial Black Web', 'Arial Black', sans-serif; font-weight: 900; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; transition: transform 0.2s;">ENTRAR</button>
+                    <p id="shield-error" style="color: #ff6b6b; display: none; margin-top: 15px; font-family: system-ui, sans-serif; font-size: 13px; margin-bottom: 0;">Contraseña incorrecta</p>
+                </div>
+            `;
+            
+            document.documentElement.appendChild(shield);
 
             const verifyPass = () => {
                 const pass = document.getElementById('shield-pass').value;
@@ -82,7 +77,6 @@ function checkTemporalAccess() {
         })
         .catch(err => {
             console.error('Error cargando config del escudo:', err);
-            shield.remove();
         });
 }
 checkTemporalAccess();
