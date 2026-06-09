@@ -291,7 +291,11 @@ window.initMapEngine = async function(container) {
     // Apuntamos a una copia local del worker para evitar que el navegador bloquee
     // la carga desde un dominio externo (unpkg.com).
     // =================================================================================
-    if (window.maplibregl) maplibregl.workerUrl = '../js/maplibre-gl-worker.js';
+    if (window.maplibregl) {
+        const mapScript = document.querySelector('script[src*="mapa-obras.js"]');
+        // Calculamos la ruta absoluta al worker para evitar errores 404 por culpa de Barba.js
+        maplibregl.workerUrl = mapScript ? mapScript.src.replace('mapa-obras.js', 'maplibre-gl-worker.js') : '/assets/js/maplibre-gl-worker.js';
+    }
 
     const map = new maplibregl.Map({
         container: mapEl,
@@ -639,28 +643,39 @@ window.initMapEngine = async function(container) {
 
         const obras = window.SHEET_CACHE[segmento] || [];
         const toNum = v => { 
-            if (v == null) return NaN; 
+            if (v == null || v === '') return NaN; 
             const str = String(v).trim().replace(',', '.');
             let n = parseFloat(str.replace('%','')); 
             if (!Number.isFinite(n)) return NaN;
-            if (str.includes('%') || n > 1) n = n / 100;
+            if (str.includes('%') || Math.abs(n) > 5) n = n / 100;
             return n; 
         };
         
         window.__OBRA_DATA.clear();
         const validas = [];
         
-        for (const o of obras){
-            const nombre = (o.nombre || '').trim();
-            const x = toNum(o.x), y = toNum(o.y);
-            if (!nombre || isNaN(x) || isNaN(y) || x < 0 || x > 1 || y < 0 || y > 1) continue;
-            // Ignorar obras ocultas
-            const estado = (o.estado || '').trim();
-            if (estado.includes('Oculto')) continue;
+        console.log(`[Mapa] Procesando ${obras.length} filas del Excel para el segmento: ${segmento}`);
 
-            const rawCarp = (o.carpeta ?? '').toString().trim();
-            validas.push({ ...o, x, y, carpeta: (rawCarp && rawCarp.toLowerCase() !== 'null' && rawCarp !== '-') ? rawCarp : null });
+        for (const o of obras){
+            // FIX: Soporte a prueba de fallos para nombres de columnas en mayúscula (Nombre, X, Y)
+            const nombre = String(o.nombre ?? o.Nombre ?? o.NOMBRE ?? '').trim();
+            const rawX = o.x ?? o.X ?? o.lng ?? o.Lng;
+            const rawY = o.y ?? o.Y ?? o.lat ?? o.Lat;
+            const x = toNum(rawX), y = toNum(rawY);
+            
+            if (!nombre) continue;
+            if (isNaN(x) || isNaN(y)) {
+                console.warn(`[Mapa] Fila omitida (Coordenadas inválidas): ${nombre} -> X: ${rawX}, Y: ${rawY}`);
+                continue;
+            }
+            
+            const estado = String(o.estado ?? o.Estado ?? o.ESTADO ?? '').trim();
+            if (estado.toLowerCase().includes('oculto')) continue;
+
+            const rawCarp = String(o.carpeta ?? o.Carpeta ?? o.CARPETA ?? '').trim();
+            validas.push({ ...o, nombre, estado, x, y, carpeta: (rawCarp && rawCarp.toLowerCase() !== 'null' && rawCarp !== '-') ? rawCarp : null });
         }
+        console.log(`[Mapa] Pines listos para renderizar: ${validas.length}`);
 
         // FASE 2: Empaquetado puro de datos, sin distorsionar coordenadas (Modo Google Maps)
         let featureNumId = 1; // Generador de IDs puros para WebGL
@@ -668,9 +683,8 @@ window.initMapEngine = async function(container) {
             const finalLng = o.x * mapLon;
             const finalLat = o.y * mapLat; 
 
-            const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
             const isHistoricoMode = document.body.classList.contains('tema-historico');
-            const color = isHistoricoMode ? '#8b7355' : (typeof window.colorPinPorEstado === 'function' ? window.colorPinPorEstado(estado) : '#801039');
+            const color = isHistoricoMode ? '#8b7355' : ((typeof window.colorPinPorEstado === 'function' ? window.colorPinPorEstado(o.estado) : null) || '#801039');
             const k = typeof window._obraKey === 'function' ? window._obraKey(o) : `${o.x}_${o.y}`;
             const numId = featureNumId++;
             
@@ -680,7 +694,7 @@ window.initMapEngine = async function(container) {
                 type: 'Feature',
                 id: numId, // FIX: ID numérico obligatorio para Feature-State en MapLibre
                 geometry: { type: 'Point', coordinates: [finalLng, finalLat] },
-                properties: { id: k, nombre, estado, color }
+                properties: { id: k, nombre: o.nombre, estado: o.estado, color }
             };
         });
 
