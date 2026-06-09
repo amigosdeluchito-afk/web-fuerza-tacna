@@ -682,8 +682,8 @@ window.initMapEngine = async function(container) {
         let featureNumId = 1; // Generador de IDs puros para WebGL
         const geojsonFeatures = validas.map((o) => {
             const finalLng = o.x * mapLon;
-            // FIX 1: Eje Y Invertido (SVG vs WebGL). Forzamos a que los pines caigan DENTRO del mapa visual.
-            const finalLat = mapLat - (o.y * mapLat); 
+            // FIX 1: Eje Y Cartesiano. Dejamos que MapLibre procese el eje Y tal como viene en el Excel.
+            const finalLat = o.y * mapLat; 
 
             const isHistoricoMode = document.body.classList.contains('tema-historico');
             const color = isHistoricoMode ? '#8b7355' : ((typeof window.colorPinPorEstado === 'function' ? window.colorPinPorEstado(o.estado) : null) || '#801039');
