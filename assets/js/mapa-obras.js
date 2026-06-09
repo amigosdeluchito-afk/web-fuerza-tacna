@@ -681,7 +681,8 @@ window.initMapEngine = async function(container) {
         let featureNumId = 1; // Generador de IDs puros para WebGL
         const geojsonFeatures = validas.map((o) => {
             const finalLng = o.x * mapLon;
-            const finalLat = o.y * mapLat; 
+            // FIX 1: Eje Y Invertido (SVG vs WebGL). Forzamos a que los pines caigan DENTRO del mapa visual.
+            const finalLat = mapLat - (o.y * mapLat); 
 
             const isHistoricoMode = document.body.classList.contains('tema-historico');
             const color = isHistoricoMode ? '#8b7355' : ((typeof window.colorPinPorEstado === 'function' ? window.colorPinPorEstado(o.estado) : null) || '#801039');
@@ -755,7 +756,7 @@ window.initMapEngine = async function(container) {
             paint: {
                 'circle-radius': [
                     'case',
-                    ['boolean', ['feature-state', 'hover'], false],
+                    ['==', ['feature-state', 'hover'], true], // FIX 2: Sintaxis WebGL 100% estricta
                     12, // Crece magnéticamente a 12px
                     8   // Tamaño normal de 8px
                 ],
@@ -763,20 +764,20 @@ window.initMapEngine = async function(container) {
                 'circle-color': ['get', 'color'],
                 'circle-stroke-width': [
                     'case',
-                    ['boolean', ['feature-state', 'hover'], false],
+                    ['==', ['feature-state', 'hover'], true],
                     6, // El borde se ensancha para crear el halo
                     2  // Borde blanco estándar
                 ],
                 'circle-stroke-width-transition': { duration: 350 },
                 'circle-stroke-color': [
                     'case',
-                    ['boolean', ['feature-state', 'hover'], false],
+                    ['==', ['feature-state', 'hover'], true],
                     ['get', 'color'], // El halo adquiere dinámicamente el color del pin
                     '#ffffff'         // Color normal del borde
                 ],
                 'circle-stroke-opacity': [
                     'case',
-                    ['boolean', ['feature-state', 'hover'], false],
+                    ['==', ['feature-state', 'hover'], true],
                     0.4, // Halo translúcido e iluminado
                     1.0  // Borde blanco sólido 
                 ],
@@ -785,6 +786,9 @@ window.initMapEngine = async function(container) {
         });
 
         // DIBUJADO GPU 3: Etiquetas Inteligentes Vectoriales (Anti-colisiones y Halo)
+        // FIX 3: Desactivado por seguridad. Si MapLibre falla al descargar la fuente externa 
+        // para las letras, colapsará los círculos en silencio. (Lo activaremos luego si hace falta).
+        /*
         map.addLayer({
             id: 'obras-labels-layer',
             type: 'symbol',
@@ -813,6 +817,7 @@ window.initMapEngine = async function(container) {
                 'text-halo-blur': 1
             }
         });
+        */
 
         PINS_LOADING.delete(segmento);
     }
