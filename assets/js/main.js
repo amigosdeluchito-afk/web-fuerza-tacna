@@ -842,6 +842,10 @@ async function initCandidatos(container) {
 
     // --- NUEVO: FASE 5 - OBTENER CANDIDATOS DESDE LA BASE DE DATOS ---
     if (marqueeContent.getAttribute('data-loaded') !== 'true') {
+        // 1. Limpiamos INMEDIATAMENTE las tarjetas estáticas viejas antes de hacer el fetch.
+        // Esto evita el "pestañeo" de los candidatos que ya habías borrado en el panel.
+        marqueeContent.innerHTML = '';
+
         try {
             // Llamamos a la API que construimos en la Fase 1
             const resp = await fetch('assets/panel-admin-universo/api_candidatos.php?action=listar');
@@ -851,15 +855,14 @@ async function initCandidatos(container) {
                 // Filtramos solo los visibles y los guardamos en memoria global
                 window.CANDIDATOS_LIST = data.candidatos.filter(c => c.estado == 1);
                 
-                marqueeContent.innerHTML = ''; // Limpiamos las tarjetas estáticas del HTML
-                
                 window.CANDIDATOS_LIST.forEach(c => {
                     const fotoUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
                     const fotoHover = c.foto_portada ? `assets/universoobras/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
-                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" loading="lazy" decoding="async">
-                            <img src="${fotoHover}" alt="${c.nombres}" class="img-hover" loading="lazy" decoding="async">
+                            <!-- 2. Quitamos loading="lazy" y ponemos fetchpriority="high" para que la foto cargue al instante -->
+                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" fetchpriority="high" decoding="async">
+                            <img src="${fotoHover}" alt="${c.nombres}" class="img-hover" fetchpriority="high" decoding="async">
                             <div class="candidate-info">
                                 <h3>${c.nombres}</h3>
                                 <p>${c.cargo_flotante}</p>
