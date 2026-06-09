@@ -787,9 +787,6 @@ window.initMapEngine = async function(container) {
         });
 
         // DIBUJADO GPU 3: Etiquetas Inteligentes Vectoriales (Anti-colisiones y Halo)
-        // FIX 3: Desactivado por seguridad. Si MapLibre falla al descargar la fuente externa 
-        // para las letras, colapsará los círculos en silencio. (Lo activaremos luego si hace falta).
-        /*
         map.addLayer({
             id: 'obras-labels-layer',
             type: 'symbol',
@@ -818,7 +815,6 @@ window.initMapEngine = async function(container) {
                 'text-halo-blur': 1
             }
         });
-        */
 
         PINS_LOADING.delete(segmento);
     }
