@@ -245,8 +245,10 @@ window.initMapEngine = async function(container) {
                 const pattern = document.createElement('div');
                 pattern.className = 'map-pattern-layer';
                 
-                // 3 rutas de respaldo por seguridad
-                const paths = "url('assets/img/pattern.svg'), url('../img/pattern.svg'), url('/fuerza_tacna/assets/img/pattern.svg')";
+                // FIX: Se calcula la ruta al fondo 'pattern.svg' dinámicamente.
+                // Esto evita errores 404 al usar una única ruta correcta en lugar de fallbacks.
+                const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
+                const paths = `url('${basePath}assets/img/pattern.svg')`;
                 
                 pattern.style.cssText = `
                     position: absolute;

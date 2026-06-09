@@ -95,6 +95,13 @@ function injectGlobalAssets() {
     if (!document.getElementById('le-lab-dynamic-styles')) {
         const style = document.createElement('style');
         style.id = 'le-lab-dynamic-styles';
+
+        // FIX: Se calcula la ruta al fondo 'pattern.svg' dinámicamente.
+        // Esto evita errores 404 al navegar a páginas en subcarpetas (como el mapa de obras),
+        // ya que la ruta relativa se ajusta automáticamente.
+        const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
+        const patternUrl = `${basePath}assets/img/pattern.svg`;
+
         style.innerHTML = `
             .menu-links a, #hero-header ul li a { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-weight: 900 !important; }
             .magnetic .wrap .span { background-color: #25D366 !important; }
@@ -113,7 +120,7 @@ function injectGlobalAssets() {
                 transition: opacity 0.3s ease, visibility 0.3s ease !important;
             }
             main { position: relative; z-index: 0; }
-            main::before { content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('assets/img/pattern.svg'); background-repeat: no-repeat; background-size: cover; background-position: center; pointer-events: none; z-index: -1; transform: translateZ(0); will-change: transform; }
+            main::before { content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('${patternUrl}'); background-repeat: no-repeat; background-size: cover; background-position: center; pointer-events: none; z-index: -1; transform: translateZ(0); will-change: transform; }
             
             /* --- Flechas Flotantes Globales --- */
             .mobile-arrows { display: flex !important; flex-direction: column; align-items: center; position: absolute; bottom: 10vh; z-index: 99999; text-decoration: none; margin: 0 !important; padding: 0 !important; }
