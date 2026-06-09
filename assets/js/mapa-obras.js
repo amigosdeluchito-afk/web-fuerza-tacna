@@ -278,6 +278,14 @@ window.initMapEngine = async function(container) {
 
     await loadMapLibre();
 
+    // =================================================================================
+    // FIX: ERROR DE CONTENT SECURITY POLICY (CSP)
+    // Al especificar la URL del worker, evitamos que MapLibre lo cree desde un 'blob',
+    // lo cual era bloqueado por la política de seguridad del servidor y causaba que
+    // el mapa no cargara los pines.
+    // =================================================================================
+    if (window.maplibregl) maplibregl.workerUrl = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl-worker.js';
+
     const map = new maplibregl.Map({
         container: mapEl,
         style: { 
