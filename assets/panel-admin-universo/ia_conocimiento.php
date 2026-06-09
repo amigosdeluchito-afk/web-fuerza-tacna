@@ -170,6 +170,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['ok' => false, 'error' => $ia_result['error']]);
         }
         exit;
+    } elseif ($action === 'extract_url_ajax') {
+        header('Content-Type: application/json');
+        $url = trim($_POST['url'] ?? '');
+        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) { echo json_encode(['ok' => false, 'error' => 'URL inválida']); exit; }
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+        $html = curl_exec($ch); curl_close($ch);
+
+        if (!$html) { echo json_encode(['ok' => false, 'error' => 'No se pudo descargar la web']); exit; }
+
+        $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
+        $dom = new DOMDocument(); libxml_use_internal_errors(true); @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8')); libxml_clear_errors();
+        $xpath = new DOMXPath($dom);
+        $nodosEliminar = $xpath->query("//nav | //footer | //aside | //header | //form | //*[contains(@class, 'comments')]");
+        foreach ($nodosEliminar as $node) { if ($node->parentNode) $node->parentNode->removeChild($node); }
+
+        $htmlLimpio = $dom->saveHTML();
+        $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '<br>', '</div>'], "\n", $htmlLimpio);
+        $text = trim(preg_replace("/\n{3,}/", "\n\n", preg_replace("/\n\s+/", "\n", preg_replace('/[ \t]+/', ' ', html_entity_decode(strip_tags($htmlLimpio), ENT_QUOTES | ENT_HTML5, 'UTF-8')))));
+
+        $titulo = "Extraído de Web";
+        if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $matches)) { $titulo = mb_strimwidth(trim(strip_tags($matches[1])), 0, 100, '...'); }
+        echo json_encode(['ok' => true, 'titulo' => $titulo, 'texto' => $text]); exit;
     } elseif ($action === 'delete') {
         $id = $_POST['id'] ?? '';
         if ($id) {
@@ -284,8 +313,9 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         <!-- Columna Formulario -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header text-white" style="background-color: #020617;" id="form-title">
-                    ➕ Agregar Documento
+                <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #020617;">
+                    <span id="form-title">➕ Agregar Documento</span>
+                    <button type="button" class="btn btn-sm btn-outline-info font-weight-bold" onclick="abrirExtractorUrl()">🌐 Extraer de Link</button>
                 </div>
                 <div class="card-body">
                     <form method="POST" id="conocimiento-form">
@@ -475,6 +505,33 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
 
         document.getElementById('btn-cancelar').style.display = "block";
         window.scrollTo(0, 0);
+    }
+
+    async function abrirExtractorUrl() {
+        const url = prompt("Pega aquí el enlace de la noticia o página web:");
+        if (!url) return;
+        
+        const formTitle = document.getElementById('form-title');
+        const originalText = formTitle.innerText;
+        formTitle.innerText = "⏳ Extrayendo...";
+        
+        const fd = new FormData(); fd.append('action', 'extract_url_ajax'); fd.append('url', url);
+        
+        try {
+            const resp = await fetch('ia_conocimiento.php', {method: 'POST', body: fd});
+            const data = await resp.json();
+            if (data.ok) {
+                resetForm();
+                document.getElementById('input-titulo').value = data.titulo;
+                document.getElementById('input-contenido').value = data.texto;
+                document.getElementById('input-fuente').value = "Web Extraída";
+                document.getElementById('input-url').value = url;
+                formTitle.innerText = "✨ ¡Extraído! Edita y guarda.";
+                document.getElementById('btn-cancelar').style.display = "block";
+            } else { alert("Error: " + data.error); formTitle.innerText = originalText; }
+        } catch(e) {
+            alert("Error de red"); formTitle.innerText = originalText;
+        }
     }
 
     async function sugerirPalabrasClave(btn) {

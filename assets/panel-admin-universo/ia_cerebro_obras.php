@@ -152,12 +152,11 @@ try {
         <a href="editar_candidato.php">👥 Candidatos</a>
         
         <div class="dropdown">
-          <button class="dropbtn active">🧠 IA y Conocimiento ▾</button>
+          <button class="dropbtn <?= in_array(basename($_SERVER['PHP_SELF']), ['ia_respuestas.php', 'ia_cerebro_obras.php', 'ia_conocimiento.php', 'ia_estadisticas.php']) ? 'active' : '' ?>">🧠 IA y Conocimiento ▾</button>
           <div class="dropdown-content">
             <a href="ia_respuestas.php">🧠 Cerebro IA</a>
             <a href="ia_cerebro_obras.php" class="active">🏗️ Cerebro Obras</a>
             <a href="ia_conocimiento.php">📚 Base Conocimiento</a>
-            <a href="ia_fuentes.php">🔗 Fuentes Externas</a>
             <a href="ia_estadisticas.php">📊 Estadísticas IA</a>
           </div>
         </div>
