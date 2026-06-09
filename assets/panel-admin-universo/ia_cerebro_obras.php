@@ -212,14 +212,18 @@ try {
                                 <div id="lblEstado">En Construcción</div>
                             </div>
                         </div>
+                        <div class="data-item" style="margin-top: 15px;">
+                            <label>Descripción Oficial (Resumen público)</label>
+                            <div id="lblDescExcel" style="font-weight: normal; color: #cbd5e1; line-height: 1.5; font-size: 13px;"></div>
+                        </div>
                     </div>
 
                     <div class="textarea-wrap">
                         <label>
-                            Historia y Contexto para Luchito (IA)
+                            Contexto Adicional Confidencial (Opcional)
                             <span id="aiStatusBadge">🟢 Ya en Cerebro</span>
                         </label>
-                        <textarea id="aiContextText" placeholder="Pega aquí discursos, anécdotas, peticiones de vecinos o historia de esta obra. Luchito usará esto para responder cuando le pregunten."></textarea>
+                        <textarea id="aiContextText" placeholder="Pega aquí discursos, anécdotas, peticiones de vecinos o información extraída de documentos. Luchito usará esto para dar respuestas más completas e inteligentes."></textarea>
                     </div>
 
                     <button class="btn-save-obra" id="btnSaveObra">🧠 Alimentar Cerebro con esta Obra</button>
@@ -344,6 +348,7 @@ try {
             document.getElementById('lblMonto').textContent = displayMonto;
             document.getElementById('lblUbicacion').textContent = `${obra.distrito}, ${obra.provincia}`;
             document.getElementById('lblEstado').textContent = obra.estado;
+            document.getElementById('lblDescExcel').textContent = obra.descripcion_excel || "Sin descripción oficial.";
 
             // Jalar texto de la IA si existe
             const textarea = document.getElementById('aiContextText');
@@ -351,18 +356,19 @@ try {
             let textoIA = CEREBRO_IA[obra.tituloClave];
 
             if (textoIA) {
-                // Limpiar los datos estructurados antiguos para dejar solo la descripción pura
-                const separador = "Descripción: ";
+                // Buscar si existe contexto adicional guardado
+                const separador = "Contexto adicional: ";
                 if (textoIA.includes(separador)) {
                     textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
-                    textoIA = textoIA.replace(" (Tiene galería de fotos).", "").trim();
+                } else {
+                    textoIA = ""; // Si no hay contexto extra, la caja se muestra limpia
                 }
 
                 textarea.value = textoIA;
                 badge.textContent = "🟢 Ya en Cerebro";
                 badge.style.color = "#10b981";
             } else {
-                textarea.value = obra.descripcion_excel; // Fallback: sugerir la desc. del excel
+                textarea.value = ""; // Totalmente limpio para empezar a escribir
                 badge.textContent = "🔴 Nuevo para IA";
                 badge.style.color = "#ef4444";
             }
@@ -396,8 +402,13 @@ try {
             let displayMonto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : 'S/ 0';
             texto += `Monto referencial: ${displayMonto}. `;
             
-            texto += `Descripción: ${contextoLibre}`;
-            return texto;
+            if (obra.descripcion_excel) {
+                texto += `Descripción oficial: ${obra.descripcion_excel}. `;
+            }
+            if (contextoLibre) {
+                texto += `Contexto adicional: ${contextoLibre}`;
+            }
+            return texto.trim();
         }
 
         // ==========================================================
@@ -447,17 +458,24 @@ try {
 
             const payload = todasLasObras.map(obra => {
                 let contextoIA = CEREBRO_IA[obra.tituloClave];
-                let contextoLimpio = obra.descripcion_excel; // Fallback al excel
+                let contextoManual = ""; 
 
-                // Si ya estaba en la IA, rescatamos la historia pura
                 if (contextoIA) {
-                    const sep = "Descripción: ";
-                    if (contextoIA.includes(sep)) {
-                        contextoLimpio = contextoIA.substring(contextoIA.indexOf(sep) + sep.length).trim();
-                        contextoLimpio = contextoLimpio.replace(" (Tiene galería de fotos).", "").trim();
+                    const sepModerno = "Contexto adicional: ";
+                    const sepAntiguo = "Descripción: ";
+                    
+                    if (contextoIA.includes(sepModerno)) {
+                        contextoManual = contextoIA.substring(contextoIA.indexOf(sepModerno) + sepModerno.length).trim();
+                    } else if (contextoIA.includes(sepAntiguo)) {
+                        // Rescatar textos antiguos por si acaso
+                        let viejo = contextoIA.substring(contextoIA.indexOf(sepAntiguo) + sepAntiguo.length).trim();
+                        viejo = viejo.replace(" (Tiene galería de fotos).", "").trim();
+                        if (viejo && viejo !== obra.descripcion_excel) {
+                            contextoManual = viejo;
+                        }
                     }
                 }
-                return { titulo: obra.tituloClave, palabras: `${obra.nombre}, ${obra.distrito}, ${obra.segmento}`, contenido: generarSuperParrafo(obra, contextoLimpio) };
+                return { titulo: obra.tituloClave, palabras: `${obra.nombre}, ${obra.distrito}, ${obra.segmento}`, contenido: generarSuperParrafo(obra, contextoManual) };
             });
 
             const fd = new FormData(); fd.append('action', 'save_batch'); fd.append('obras', JSON.stringify(payload));
