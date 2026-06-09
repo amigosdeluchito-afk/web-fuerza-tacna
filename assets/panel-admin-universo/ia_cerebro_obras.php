@@ -53,9 +53,10 @@ try {
         
         /* Columna Izquierda: Lista de Obras */
         .col-lista { width: 350px; background: #0f172a; border-radius: 12px; border: 1px solid #1f2937; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
-        .search-box { padding: 15px; border-bottom: 1px solid #1f2937; }
-        .search-box input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; outline: none; }
-        .search-box input:focus { border-color: #3b82f6; }
+        .search-box { padding: 15px; border-bottom: 1px solid #1f2937; display: flex; flex-direction: column; gap: 10px; }
+        .search-box select, .search-box input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; outline: none; }
+        .search-box select:focus, .search-box input:focus { border-color: #3b82f6; }
+        .search-box select option { background: #0f172a; }
         
         .lista-obras { flex: 1; overflow-y: auto; padding: 10px; margin: 0; list-style: none; }
         .lista-obras::-webkit-scrollbar { width: 6px; }
@@ -130,6 +131,9 @@ try {
             <!-- Lista Izquierda -->
             <div class="col-lista">
                 <div class="search-box">
+                    <select id="selectSegmento">
+                        <option value="">📁 Todos los segmentos</option>
+                    </select>
                     <input type="text" id="searchInput" placeholder="Buscar obra...">
                 </div>
                 <ul class="lista-obras" id="obrasList">
@@ -200,8 +204,16 @@ try {
                 const respSeg = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=SEGMENTOS&range=A:D&headers=1`);
                 const jsonSeg = parseGviz(await respSeg.text());
                 const segmentos = (jsonSeg.table.rows || [])
-                    .map(r => ({ key: r.c[2]?.v, activo: String(r.c[3]?.v||'').toUpperCase() }))
+                    .map(r => ({ key: r.c[2]?.v, nombre: r.c[1]?.v, activo: String(r.c[3]?.v||'').toUpperCase() }))
                     .filter(s => s.key && (s.activo === 'SI' || s.activo === '1' || s.activo === 'TRUE'));
+                    
+                const selectSeg = document.getElementById('selectSegmento');
+                segmentos.forEach(seg => {
+                    const opt = document.createElement('option');
+                    opt.value = seg.nombre || seg.key;
+                    opt.textContent = `📁 ${seg.nombre || seg.key}`;
+                    selectSeg.appendChild(opt);
+                });
 
                 // 2. Cargar obras de cada segmento
                 for (const seg of segmentos) {
@@ -303,12 +315,21 @@ try {
             }
         }
 
-        // Buscador
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const q = e.target.value.toLowerCase();
-            const filtradas = todasLasObras.filter(o => o.nombre.toLowerCase().includes(q) || o.distrito.toLowerCase().includes(q));
+        // Buscador y Filtro por Segmento
+        function filtrarObras() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const seg = document.getElementById('selectSegmento').value;
+            
+            const filtradas = todasLasObras.filter(o => {
+                const matchSearch = o.nombre.toLowerCase().includes(q) || o.distrito.toLowerCase().includes(q);
+                const matchSegmento = seg === "" || o.segmento === seg;
+                return matchSearch && matchSegmento;
+            });
             renderLista(filtradas);
-        });
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', filtrarObras);
+        document.getElementById('selectSegmento').addEventListener('change', filtrarObras);
 
         // Iniciar carga
         document.addEventListener("DOMContentLoaded", cargarObrasDesdeExcel);
