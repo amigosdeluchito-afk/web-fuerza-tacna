@@ -129,6 +129,12 @@ async function _getUniverseData() {
                 await window.SHEET_FETCH_PROMISES[seg];
             }
             allData.push(...(window.SHEET_CACHE[seg] || []).map(o => ({ ...o, seg })));
+            // Normalizar keys a minúsculas para evitar errores si las columnas en Excel tienen mayúsculas (ej. 'Nombre' vs 'nombre')
+            allData.push(...(window.SHEET_CACHE[seg] || []).map(rawO => {
+                const o = {};
+                for (let k in rawO) { if (k !== undefined) o[k.toLowerCase()] = rawO[k]; }
+                return { ...o, seg };
+            }));
         }
     }
     return allData;

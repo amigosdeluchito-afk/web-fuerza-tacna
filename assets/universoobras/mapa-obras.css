@@ -222,7 +222,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 .card-content h3 {
     margin: 0 0 8px; font-size: 1.9rem; font-weight: 900; /* Aumentado para igualar el ancho de la primera línea */
     background: linear-gradient(to right, #fff, #bbb, #fff);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
     text-transform: uppercase; line-height: 1.0; letter-spacing: 0px;
     transition: transform 0.3s ease;
 }
