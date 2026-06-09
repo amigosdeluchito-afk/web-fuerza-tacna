@@ -540,9 +540,9 @@ window.initMapEngine = async function(container) {
                         monto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : '';
                     }
                     
-                    const pill = typeof estadoToPill === 'function' ? estadoToPill(estado) : {cls:'', txt:estado};
+                    const pill = typeof window.estadoToPill === 'function' ? window.estadoToPill(estado) : {cls:'', txt:estado};
                     
-                    let fragHTML = typeof imgFragmentFor === 'function' ? imgFragmentFor(currentKey, o.carpeta, nombre) : '';
+                    let fragHTML = typeof window.imgFragmentFor === 'function' ? window.imgFragmentFor(currentKey, o.carpeta, nombre) : '';
                     if (fragHTML && fragHTML.includes('1.thumb.webp')) fragHTML = fragHTML.replace(/1\.thumb\.webp/g, `1.thumb.webp?v=${sessionTs}`);
                     
                     const ghostHTML = `<div class="ghost-card" style="margin: 0;">${fragHTML}<div class="ghost-card__body"><div class="ghost-card__kicker">Obra <span class="pill ${pill.cls}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg> ${pill.txt}</span></div><div class="ghost-card__title">${nombre}</div><div class="ghost-card__meta">${monto}</div><div class="ghost-card__divider"></div><div class="meta-row">${(o.distrito||'-')} · ${(o.provincia||'-')}</div></div></div>`;
@@ -605,7 +605,7 @@ window.initMapEngine = async function(container) {
                 window.SHEET_FETCH_PROMISES[segmento] = fetch(url).then(r => r.text()).then(txt => {
                     const match = txt.match(/setResponse\(([\s\S]+)\);?/);
                     if (!match) throw new Error("Error GViz");
-                    window.SHEET_CACHE[segmento] = gvizToObjects(JSON.parse(match[1]));
+                    window.SHEET_CACHE[segmento] = window.gvizToObjects(JSON.parse(match[1]));
                 });
             }
             if (window.SHEET_FETCH_PROMISES[segmento]) {
@@ -623,7 +623,14 @@ window.initMapEngine = async function(container) {
         }
 
         const obras = window.SHEET_CACHE[segmento] || [];
-        const toNum = v => { if (v == null) return NaN; const n = parseFloat(String(v).trim().replace(',', '.').replace('%','')); return Number.isFinite(n) ? n : NaN; };
+        const toNum = v => { 
+            if (v == null) return NaN; 
+            const str = String(v).trim().replace(',', '.');
+            let n = parseFloat(str.replace('%','')); 
+            if (!Number.isFinite(n)) return NaN;
+            if (str.includes('%') || n > 1) n = n / 100;
+            return n; 
+        };
         
         window.__OBRA_DATA.clear();
         const validas = [];
@@ -648,8 +655,8 @@ window.initMapEngine = async function(container) {
 
             const nombre = (o.nombre || '').trim(), estado = (o.estado || '').trim();
             const isHistoricoMode = document.body.classList.contains('tema-historico');
-            const color = isHistoricoMode ? '#8b7355' : (typeof colorPinPorEstado === 'function' ? colorPinPorEstado(estado) : '#801039');
-            const k = typeof _obraKey === 'function' ? _obraKey(o) : `${o.x}_${o.y}`;
+            const color = isHistoricoMode ? '#8b7355' : (typeof window.colorPinPorEstado === 'function' ? window.colorPinPorEstado(estado) : '#801039');
+            const k = typeof window._obraKey === 'function' ? window._obraKey(o) : `${o.x}_${o.y}`;
             const numId = featureNumId++;
             
             window.__OBRA_DATA.set(k, { o, lat: finalLat, lng: finalLng });
