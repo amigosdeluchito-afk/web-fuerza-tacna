@@ -5,6 +5,52 @@ require_login();
 $db = get_db_connection();
 $mensaje = '';
 
+// ==========================================================
+// LÓGICA DE GUARDADO (INDIVIDUAL Y EN LOTE)
+// ==========================================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json; charset=utf-8');
+    $action = $_POST['action'] ?? '';
+
+    try {
+        $stmtCheck = $db->prepare("SELECT id FROM panel_ia_conocimiento WHERE titulo = ?");
+        $stmtInsert = $db->prepare("INSERT INTO panel_ia_conocimiento (categoria, titulo, contenido, palabras_clave, prioridad, estado, fuente, fecha_actualizacion) VALUES ('Obras', ?, ?, ?, 5, 1, 'Google Sheets - Obras', NOW())");
+        $stmtUpdate = $db->prepare("UPDATE panel_ia_conocimiento SET contenido = ?, palabras_clave = ?, fecha_actualizacion = NOW() WHERE id = ?");
+
+        if ($action === 'save_single') {
+            $titulo = $_POST['titulo'];
+            $contenido = $_POST['contenido'];
+            $palabras = $_POST['palabras'];
+
+            $stmtCheck->execute([$titulo]);
+            $row = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+            if ($row) { $stmtUpdate->execute([$contenido, $palabras, $row['id']]); } 
+            else { $stmtInsert->execute([$titulo, $contenido, $palabras]); }
+            
+            echo json_encode(['ok' => true]);
+            exit;
+        }
+
+        if ($action === 'save_batch') {
+            $obras = json_decode($_POST['obras'], true);
+            $db->beginTransaction();
+            foreach ($obras as $o) {
+                $stmtCheck->execute([$o['titulo']]);
+                $row = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+                if ($row) { $stmtUpdate->execute([$o['contenido'], $o['palabras'], $row['id']]); } 
+                else { $stmtInsert->execute([$o['titulo'], $o['contenido'], $o['palabras']]); }
+            }
+            $db->commit();
+            echo json_encode(['ok' => true, 'mensaje' => "¡Éxito! Se sincronizaron " . count($obras) . " obras con el Cerebro de la IA."]);
+            exit;
+        }
+    } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+        exit;
+    }
+}
+
 // Obtenemos los textos que la IA ya conoce actualmente para cruzarlos con el Excel
 $conocimiento_ia = [];
 try {
@@ -302,9 +348,16 @@ try {
             // Jalar texto de la IA si existe
             const textarea = document.getElementById('aiContextText');
             const badge = document.getElementById('aiStatusBadge');
-            const textoIA = CEREBRO_IA[obra.tituloClave];
+            let textoIA = CEREBRO_IA[obra.tituloClave];
 
             if (textoIA) {
+                // Limpiar los datos estructurados antiguos para dejar solo la descripción pura
+                const separador = "Descripción: ";
+                if (textoIA.includes(separador)) {
+                    textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
+                    textoIA = textoIA.replace(" (Tiene galería de fotos).", "").trim();
+                }
+
                 textarea.value = textoIA;
                 badge.textContent = "🟢 Ya en Cerebro";
                 badge.style.color = "#10b981";
@@ -330,6 +383,92 @@ try {
         
         document.getElementById('searchInput').addEventListener('input', filtrarObras);
         document.getElementById('selectSegmento').addEventListener('change', filtrarObras);
+
+        // ==========================================================
+        // GENERADOR DEL SÚPER PÁRRAFO
+        // ==========================================================
+        function generarSuperParrafo(obra, contextoLibre) {
+            let texto = `La obra '${obra.nombre}' pertenece al sector ${obra.segmento}. `;
+            if (obra.distrito || obra.provincia) texto += `Ubicada en ${obra.distrito}, ${obra.provincia}. `;
+            if (obra.estado) texto += `Estado actual: '${obra.estado}'. `;
+            
+            let rawMonto = String(obra.monto).trim();
+            let displayMonto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : 'S/ 0';
+            texto += `Monto referencial: ${displayMonto}. `;
+            
+            texto += `Descripción: ${contextoLibre}`;
+            return texto;
+        }
+
+        // ==========================================================
+        // GUARDADO INDIVIDUAL (Botón Verde)
+        // ==========================================================
+        document.getElementById('btnSaveObra').addEventListener('click', async () => {
+            if(!obraSeleccionada) return;
+            const btn = document.getElementById('btnSaveObra');
+            const txtOriginal = btn.innerHTML;
+            btn.innerHTML = "⏳ Inyectando a la IA...";
+            btn.disabled = true;
+
+            const contextoManual = document.getElementById('aiContextText').value.trim();
+            const superContenido = generarSuperParrafo(obraSeleccionada, contextoManual);
+            const palabrasClave = `${obraSeleccionada.nombre}, ${obraSeleccionada.distrito}, ${obraSeleccionada.segmento}`;
+
+            const fd = new FormData();
+            fd.append('action', 'save_single');
+            fd.append('titulo', obraSeleccionada.tituloClave);
+            fd.append('contenido', superContenido);
+            fd.append('palabras', palabrasClave);
+
+            try {
+                const resp = await fetch('ia_cerebro_obras.php', { method: 'POST', body: fd });
+                const data = await resp.json();
+                if(data.ok) {
+                    CEREBRO_IA[obraSeleccionada.tituloClave] = superContenido; // Actualizar memoria local
+                    document.getElementById('aiStatusBadge').textContent = "🟢 Ya en Cerebro";
+                    document.getElementById('aiStatusBadge').style.color = "#10b981";
+                    filtrarObras(); // Repintar lista para poner el punto verde
+                    alert("🧠 ¡La IA acaba de aprenderse esta obra de memoria!");
+                } else { alert("Error: " + data.error); }
+            } catch(e) { alert("Error de conexión"); } 
+            finally { btn.innerHTML = txtOriginal; btn.disabled = false; }
+        });
+
+        // ==========================================================
+        // GUARDADO EN LOTE / BATCH (Botón Azul)
+        // ==========================================================
+        document.getElementById('btnSyncExcel').addEventListener('click', async () => {
+            if(!confirm("¿Sincronizar TODAS las obras con la IA en este instante?\n\nEl sistema tomará los montos y estados frescos del Excel, y los fusionará cuidadosamente con las historias que ya hayas escrito a mano. Ninguna historia se perderá.")) return;
+            
+            const btn = document.getElementById('btnSyncExcel');
+            const txtOriginal = btn.innerHTML;
+            btn.innerHTML = "⏳ Sincronizando en lote...";
+            btn.disabled = true;
+
+            const payload = todasLasObras.map(obra => {
+                let contextoIA = CEREBRO_IA[obra.tituloClave];
+                let contextoLimpio = obra.descripcion_excel; // Fallback al excel
+
+                // Si ya estaba en la IA, rescatamos la historia pura
+                if (contextoIA) {
+                    const sep = "Descripción: ";
+                    if (contextoIA.includes(sep)) {
+                        contextoLimpio = contextoIA.substring(contextoIA.indexOf(sep) + sep.length).trim();
+                        contextoLimpio = contextoLimpio.replace(" (Tiene galería de fotos).", "").trim();
+                    }
+                }
+                return { titulo: obra.tituloClave, palabras: `${obra.nombre}, ${obra.distrito}, ${obra.segmento}`, contenido: generarSuperParrafo(obra, contextoLimpio) };
+            });
+
+            const fd = new FormData(); fd.append('action', 'save_batch'); fd.append('obras', JSON.stringify(payload));
+            try {
+                const resp = await fetch('ia_cerebro_obras.php', { method: 'POST', body: fd });
+                const data = await resp.json();
+                if(data.ok) { alert(data.mensaje); location.reload(); } 
+                else { alert("Error: " + data.error); }
+            } catch(e) { alert("Error de conexión"); } 
+            finally { btn.innerHTML = txtOriginal; btn.disabled = false; }
+        });
 
         // Iniciar carga
         document.addEventListener("DOMContentLoaded", cargarObrasDesdeExcel);
