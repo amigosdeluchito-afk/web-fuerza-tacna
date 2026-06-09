@@ -61,6 +61,7 @@ try {
         .lista-obras::-webkit-scrollbar { width: 6px; }
         .lista-obras::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         
+        .segment-header { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; padding: 10px 15px 5px; letter-spacing: 0.5px; background: #0f172a; position: sticky; top: 0; z-index: 10; margin-top: 5px; }
         .obra-item { padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: background 0.2s; border: 1px solid transparent; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: flex-start; }
         .obra-item:hover { background: #1e293b; }
         .obra-item.active { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }
@@ -213,6 +214,7 @@ try {
                         const nombre = (r.c[0]?.v || "").trim();
                         if (nombre && !(r.c[1]?.v || "").includes('Oculto')) {
                             todasLasObras.push({
+                                segmento: seg.nombre || seg.key,
                                 tituloClave: "Obra: " + nombre, // Así lo guardaremos en la BD para evitar cruces
                                 nombre: nombre,
                                 estado: r.c[1]?.v || "Sin estado",
@@ -234,26 +236,41 @@ try {
             const ul = document.getElementById('obrasList');
             ul.innerHTML = '';
             
-            lista.forEach((obra, index) => {
-                // Verificamos si la obra ya está en la memoria de la IA
-                const yaEnCerebro = CEREBRO_IA[obra.tituloClave] !== undefined;
+            // Agrupar obras por su segmento
+            const agrupado = {};
+            lista.forEach(obra => {
+                if (!agrupado[obra.segmento]) agrupado[obra.segmento] = [];
+                agrupado[obra.segmento].push(obra);
+            });
+            
+            Object.keys(agrupado).forEach(segNombre => {
+                // Crear la etiqueta del segmento
+                const header = document.createElement('div');
+                header.className = 'segment-header';
+                header.textContent = `📁 ${segNombre}`;
+                ul.appendChild(header);
                 
-                const li = document.createElement('li');
-                li.className = 'obra-item';
-                li.innerHTML = `
-                    <div>
-                        <div class="obra-item-title">${obra.nombre}</div>
-                        <div class="obra-item-meta">${obra.distrito} - ${obra.monto}</div>
-                    </div>
-                    <div class="status-dot ${yaEnCerebro ? 'dot-green' : 'dot-red'}" title="${yaEnCerebro ? 'IA Conoce esta obra' : 'IA No conoce esta obra'}"></div>
-                `;
-                
-                li.addEventListener('click', () => {
-                    document.querySelectorAll('.obra-item').forEach(el => el.classList.remove('active'));
-                    li.classList.add('active');
-                    abrirEditor(obra);
+                // Pintar las obras debajo de su segmento
+                agrupado[segNombre].forEach((obra) => {
+                    const yaEnCerebro = CEREBRO_IA[obra.tituloClave] !== undefined;
+                    
+                    const li = document.createElement('li');
+                    li.className = 'obra-item';
+                    li.innerHTML = `
+                        <div>
+                            <div class="obra-item-title">${obra.nombre}</div>
+                            <div class="obra-item-meta">${obra.distrito} - ${obra.monto}</div>
+                        </div>
+                        <div class="status-dot ${yaEnCerebro ? 'dot-green' : 'dot-red'}" title="${yaEnCerebro ? 'IA Conoce esta obra' : 'IA No conoce esta obra'}"></div>
+                    `;
+                    
+                    li.addEventListener('click', () => {
+                        document.querySelectorAll('.obra-item').forEach(el => el.classList.remove('active'));
+                        li.classList.add('active');
+                        abrirEditor(obra);
+                    });
+                    ul.appendChild(li);
                 });
-                ul.appendChild(li);
             });
         }
 

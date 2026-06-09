@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // 3. Obtener listado de conocimiento
-$stmt = $db->query("SELECT * FROM panel_ia_conocimiento ORDER BY prioridad ASC, id DESC");
+$stmt = $db->query("SELECT * FROM panel_ia_conocimiento WHERE categoria != 'Obras' AND fuente != 'Google Sheets - Obras' ORDER BY prioridad ASC, id DESC");
 $conocimientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Categorías por defecto
@@ -360,22 +360,6 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         <!-- Columna Listado -->
         <div class="col-lg-8">
             
-            <!-- Nueva Card de Sincronización Automática -->
-            <div class="card shadow-sm mb-4" style="border: 1px solid #10b981;">
-                <div class="card-header text-white" style="background-color: #10b981;">
-                    🔄 Sincronizar Obras desde Excel
-                </div>
-                <div class="card-body">
-                    <p class="text-muted" style="font-size:13px;">Esto conectará con tu Google Sheets, leerá todas las pestañas activas y generará un documento de conocimiento por cada obra encontrada. <strong class="text-danger">Nunca borrará los documentos ingresados manualmente.</strong></p>
-                    <button type="button" class="btn btn-outline-success font-weight-bold" onclick="previewSyncObras()" id="btn-preview-sync">🔍 Previsualizar Sincronización de Obras</button>
-                    
-                    <div id="sync-preview-container" style="display:none; margin-top:15px; padding:15px; background:#f0fdf4; border-radius:8px; border:1px solid #a7f3d0;">
-                        <div id="sync-preview-content" style="font-size:13px; color:#064e3b;"></div>
-                        <button type="button" class="btn btn-success font-weight-bold mt-3" onclick="confirmSyncObras()" id="btn-confirm-sync">✅ Confirmar y Sincronizar</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <span>Documentos Cargados (<?= count($conocimientos) ?>)</span>
