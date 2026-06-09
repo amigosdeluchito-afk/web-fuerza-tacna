@@ -281,13 +281,19 @@ window.initMapEngine = async function(container) {
     await loadMapLibre();
 
     // =================================================================================
-    // FIX DEFINITIVO: WORKER DE MAPLIBRE Y CSP
-    // El código anterior intentaba cargar un archivo local "maplibre-gl-worker.js" 
-    // que no existe en tu carpeta, lo que provocaba un error 404 silencioso 
-    // y apagaba el motor gráfico. Usaremos el Worker seguro oficial.
+    // FIX SUPREMO: CROSS-ORIGIN WORKER (SECURITY ERROR)
+    // Los navegadores bloquean la creación directa de Workers desde dominios externos (unpkg).
+    // Creamos un archivo "virtual" local en la memoria del navegador (Blob) 
+    // que importe el código externo de forma 100% legal y permitida por el navegador.
     // =================================================================================
     if (window.maplibregl) {
-        maplibregl.workerUrl = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl-worker.js';
+        try {
+            const workerCode = "importScripts('https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl-worker.js');";
+            const workerBlob = new Blob([workerCode], { type: 'text/javascript' });
+            maplibregl.workerUrl = URL.createObjectURL(workerBlob);
+        } catch (e) {
+            console.warn("[Mapa] Fallo al crear el Blob Worker. Dependiendo del motor interno.");
+        }
     }
 
     const map = new maplibregl.Map({
