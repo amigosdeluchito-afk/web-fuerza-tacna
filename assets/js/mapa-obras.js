@@ -281,20 +281,13 @@ window.initMapEngine = async function(container) {
     await loadMapLibre();
 
     // =================================================================================
-    // FIX: ERROR DE CONTENT SECURITY POLICY (CSP)
-    // Al especificar la URL del worker, evitamos que MapLibre lo cree desde un 'blob',
-    // lo cual era bloqueado por la política de seguridad del servidor y causaba que
-    // el mapa no cargara los pines.
-    // =================================================================================
-    // =================================================================================
-    // FIX 2: ERROR DE CORS (Cross-Origin)
-    // Apuntamos a una copia local del worker para evitar que el navegador bloquee
-    // la carga desde un dominio externo (unpkg.com).
+    // FIX DEFINITIVO: WORKER DE MAPLIBRE Y CSP
+    // El código anterior intentaba cargar un archivo local "maplibre-gl-worker.js" 
+    // que no existe en tu carpeta, lo que provocaba un error 404 silencioso 
+    // y apagaba el motor gráfico. Usaremos el Worker seguro oficial.
     // =================================================================================
     if (window.maplibregl) {
-        const mapScript = document.querySelector('script[src*="mapa-obras.js"]');
-        // Calculamos la ruta absoluta al worker para evitar errores 404 por culpa de Barba.js
-        maplibregl.workerUrl = mapScript ? mapScript.src.replace('mapa-obras.js', 'maplibre-gl-worker.js') : '/assets/js/maplibre-gl-worker.js';
+        maplibregl.workerUrl = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl-worker.js';
     }
 
     const map = new maplibregl.Map({
