@@ -251,6 +251,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['ia_msg'] = "Error: Faltan datos para mover.";
         }
+    } elseif ($action === 'unificar_fragmentados') {
+        header('Content-Type: application/json');
+        if (!is_admin()) { echo json_encode(['ok'=>false, 'error'=>'Acceso denegado']); exit; }
+        
+        $db->beginTransaction();
+        try {
+            // Buscar todos los documentos fragmentados y ordenarlos para que el texto se una en el orden correcto
+            $stmt = $db->query("SELECT * FROM panel_ia_conocimiento WHERE titulo LIKE '% (Parte %' ORDER BY titulo ASC, id ASC");
+            $parts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (count($parts) === 0) {
+                echo json_encode(['ok' => false, 'error' => "No se encontraron documentos fragmentados."]);
+                $db->rollBack();
+                exit;
+            }
+
+            $groups = [];
+            foreach ($parts as $p) {
+                // Extraer el título original quitando el " (Parte X)"
+                $base_title = preg_replace('/ \(Parte \d+\)$/', '', $p['titulo']);
+                if (!isset($groups[$base_title])) {
+                    $groups[$base_title] = [
+                        'categoria' => $p['categoria'],
+                        'titulo' => $base_title,
+                        'contenido' => '',
+                        'palabras_clave' => $p['palabras_clave'],
+                        'prioridad' => $p['prioridad'],
+                        'estado' => $p['estado'],
+                        'fuente' => $p['fuente'],
+                        'url' => $p['url'],
+                        'ids' => []
+                    ];
+                }
+                // Unir los textos
+                $groups[$base_title]['contenido'] .= $p['contenido'] . "\n\n";
+                $groups[$base_title]['ids'][] = $p['id'];
+            }
+            
+            $stmtIns = $db->prepare("INSERT INTO panel_ia_conocimiento (categoria, titulo, contenido, palabras_clave, prioridad, estado, fuente, url, fecha_actualizacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+            $stmtDel = $db->prepare("DELETE FROM panel_ia_conocimiento WHERE id = ?");
+            
+            foreach ($groups as $g) {
+                $stmtIns->execute([$g['categoria'], $g['titulo'], trim($g['contenido']), $g['palabras_clave'], $g['prioridad'], $g['estado'], $g['fuente'], $g['url']]);
+                foreach ($g['ids'] as $id) { $stmtDel->execute([$id]); }
+            }
+            $db->commit();
+            echo json_encode(['ok'=>true, 'mensaje'=>"Limpieza exitosa. Se fusionaron " . count($parts) . " fragmentos en " . count($groups) . " documentos completos."]);
+        } catch (Exception $e) { $db->rollBack(); echo json_encode(['ok'=>false, 'error'=>$e->getMessage()]); }
+        exit;
     }
     
     header("Location: ia_conocimiento.php");
@@ -454,6 +503,9 @@ sort($segmentos_unicos);
                             <option value="">📁 Todas las categorías</option>
                             <?php foreach($categorias_comunes as $cat): ?><option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option><?php endforeach; ?>
                         </select>
+                        <?php if (is_admin()): ?>
+                        <button class="btn btn-sm btn-warning font-weight-bold" style="white-space: nowrap; font-size: 12px; padding: 6px 12px; color: #801039;" onclick="unificarFragmentados()" id="btnUnificar" title="Une todas las '(Parte X)' en un solo documento">🧩 Unificar Partes</button>
+                        <?php endif; ?>
                     </div>
                     <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
                         <table id="tablaDocsCargados" class="table table-sm table-hover mb-0" style="font-size: 12px;">
@@ -816,6 +868,19 @@ sort($segmentos_unicos);
 
             fila.style.display = (matchTxt && matchCat) ? "" : "none";
         });
+    }
+
+    async function unificarFragmentados() {
+        if (!confirm('¿Fusionar todos los documentos que tienen "(Parte X)" en su título?\n\nEl sistema agrupará el texto y borrará los fragmentos antiguos. Esto dejará tu lista mucho más limpia y corta.')) return;
+        const btn = document.getElementById('btnUnificar');
+        const txtOriginal = btn.innerHTML;
+        btn.innerHTML = '⏳ Unificando...'; btn.disabled = true;
+        const fd = new FormData(); fd.append('action', 'unificar_fragmentados');
+        try {
+            const resp = await fetch('ia_conocimiento.php', { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (data.ok) { alert(data.mensaje); location.reload(); } else { alert('Error: ' + data.error); btn.innerHTML = txtOriginal; btn.disabled = false; }
+        } catch (err) { alert('Error de conexión.'); btn.innerHTML = txtOriginal; btn.disabled = false; }
     }
 </script>
 </body>
