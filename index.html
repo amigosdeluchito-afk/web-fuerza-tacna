@@ -1694,7 +1694,7 @@
         <!-- REPRODUCTOR DE MÚSICA WOW (Flotante)       -->
         <!-- ========================================== -->
         <div id="premium-music-player" class="music-paused">
-            <audio id="bg-audio"></audio>
+            <audio id="bg-audio" preload="none"></audio>
             
             <!-- Botón circular (Estado colapsado) -->
             <div class="player-toggle-btn" id="player-toggle-btn">
@@ -1946,6 +1946,9 @@
                 
                 const togglePlay = () => {
                     if (bgAudio.paused) {
+                    if (!bgAudio.getAttribute('src')) {
+                        bgAudio.src = playlist[currentTrack].src;
+                    }
                         bgAudio.play();
                         playerWidget.classList.remove('music-paused');
                         playerWidget.classList.add('music-playing');
@@ -1977,7 +1980,9 @@
 
                 if(playerWidget && bgAudio) {
                     const loadTrack = (index, forcePlay = false) => {
+                    if (forcePlay || playerWidget.classList.contains('music-playing')) {
                         bgAudio.src = playlist[index].src;
+                    }
                         trackDisplay.innerHTML = `${playlist[index].title} &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; ${playlist[index].title}`;
                         if(playerWidget.classList.contains('music-playing') || forcePlay) attemptAutoplay();
                     };
@@ -2025,7 +2030,7 @@
         <!-- ========================================== -->
 
         <!-- Audio para el efecto de sable de luz -->
-        <audio id="saber-sound" src="assets/img/SONIDO%20SABLE.mp3" preload="auto"></audio>
+        <audio id="saber-sound" src="assets/img/SONIDO%20SABLE.mp3" preload="none"></audio>
 
         <script>
             (function() {

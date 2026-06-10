@@ -64,7 +64,7 @@ function initChatIA() {
 
     // CARGA DINÁMICA: Intentar traer las respuestas desde el JSON
     const jsonUrl = projectRoot + 'assets/ia_luchito/cache/quick_responses.json';
-    const fetchUrl = jsonUrl + '?v=' + new Date().getTime(); // Evitar caché antigua
+    const fetchUrl = jsonUrl + '?v=4'; // Evitar caché antigua
 
     fetch(fetchUrl)
         .then(response => {
