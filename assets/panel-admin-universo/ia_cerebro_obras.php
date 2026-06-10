@@ -335,6 +335,19 @@ try {
             });
         }
 
+        function agregarContexto(titulo = "", texto = "") {
+            const list = document.getElementById('contextosList');
+            const div = document.createElement('div');
+            div.className = 'contexto-item';
+            div.innerHTML = `
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Eliminar bloque">X</button>
+                <input type="text" class="ctx-titulo" placeholder="Título de esta fuente (Ej. Noticia, Discurso, Expediente...)" value="${titulo}">
+                <textarea class="ctx-texto" placeholder="Pega aquí el contenido...">${texto}</textarea>
+            `;
+            list.appendChild(div);
+            setTimeout(() => list.scrollTop = list.scrollHeight, 50); // Auto-scroll al nuevo bloque
+        }
+
         function abrirEditor(obra) {
             obraSeleccionada = obra;
             document.getElementById('editorPlaceholder').style.display = 'none';
@@ -350,24 +363,37 @@ try {
             document.getElementById('lblDescExcel').textContent = obra.descripcion_excel || "Sin descripción oficial.";
 
             // Jalar texto de la IA si existe
-            const textarea = document.getElementById('aiContextText');
+            const list = document.getElementById('contextosList');
+            list.innerHTML = ''; // Limpiar lista
             const badge = document.getElementById('aiStatusBadge');
             let textoIA = CEREBRO_IA[obra.tituloClave];
 
             if (textoIA) {
                 // Buscar si existe contexto adicional guardado
-                const separador = "Contexto adicional: ";
+                const separador = "Contexto adicional:";
                 if (textoIA.includes(separador)) {
                     textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
+                    
+                    if (textoIA.includes('--- ')) {
+                        // Si ya tiene el nuevo formato, separamos por bloques usando un patrón inteligente
+                        const bloques = textoIA.split(/--- (.*?) ---/g);
+                        for (let i = 1; i < bloques.length; i += 2) {
+                            const t = bloques[i].trim();
+                            const c = (bloques[i+1] || "").trim();
+                            if (c !== "") agregarContexto(t, c);
+                        }
+                    } else if (textoIA !== "") {
+                        // Si es un texto de la versión antigua, lo ponemos en un bloque único
+                        agregarContexto("Contexto General", textoIA);
+                    }
                 } else {
-                    textoIA = ""; // Si no hay contexto extra, la caja se muestra limpia
+                    agregarContexto(); // Si no hay contexto extra, creamos caja vacía
                 }
 
-                textarea.value = textoIA;
                 badge.textContent = "🟢 Ya en Cerebro";
                 badge.style.color = "#10b981";
             } else {
-                textarea.value = ""; // Totalmente limpio para empezar a escribir
+                agregarContexto(); // Crear primer bloque vacío
                 badge.textContent = "🔴 Nuevo para IA";
                 badge.style.color = "#ef4444";
             }
@@ -420,7 +446,19 @@ try {
             btn.innerHTML = "⏳ Inyectando a la IA...";
             btn.disabled = true;
 
-            const contextoManual = document.getElementById('aiContextText').value.trim();
+            // Recopilar todos los bloques creados por el usuario
+            const contextosElements = document.querySelectorAll('.contexto-item');
+            let contextoManual = "";
+            contextosElements.forEach(el => {
+                const tit = el.querySelector('.ctx-titulo').value.trim();
+                const txt = el.querySelector('.ctx-texto').value.trim();
+                if (txt) {
+                    if (tit) contextoManual += `--- ${tit} ---\n${txt}\n\n`;
+                    else contextoManual += `--- Fragmento ---\n${txt}\n\n`;
+                }
+            });
+            contextoManual = contextoManual.trim();
+            
             const superContenido = generarSuperParrafo(obraSeleccionada, contextoManual);
             const palabrasClave = `${obraSeleccionada.nombre}, ${obraSeleccionada.distrito}, ${obraSeleccionada.segmento}`;
 
