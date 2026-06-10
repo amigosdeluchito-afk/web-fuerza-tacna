@@ -7,10 +7,10 @@ async function loadMapLibre() {
     return new Promise((resolve) => {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css';
+            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/3.6.2/maplibre-gl.css';
         document.head.appendChild(link);
         const script = document.createElement('script');
-        script.src = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js';
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/3.6.2/maplibre-gl.js';
         script.onload = resolve;
         script.onerror = resolve; // Failsafe para redes inestables
         document.head.appendChild(script);
@@ -746,7 +746,7 @@ window.initMapEngine = async function(container) {
             const dock = getEl('filtersDock');
             if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
 
-            setTimeout(revealUI, 1500);      // Los chips y el footer aparecen a los 1.5s
+            revealUI(); // SIN ESPERAS: Los chips y el footer aparecen instantáneamente
             return;
         }
 

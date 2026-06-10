@@ -621,7 +621,8 @@ function injectGlobalAssets() {
             if (performance.getEntriesByType && performance.getEntriesByType("navigation").length > 0) isReload = performance.getEntriesByType("navigation")[0].type === "reload";
             else if (performance.navigation && performance.navigation.type === 1) isReload = true;
         }
-        if (isReload) sessionStorage.removeItem('fuerzaTacnaLoaderPlayed');
+        // ELIMINADO: Ya no obligamos al usuario a comerse la intro de 5s en cada recarga
+        // if (isReload) sessionStorage.removeItem('fuerzaTacnaLoaderPlayed');
 
         // Ocultar antes de inyectar si ya se reprodujo, evita el pestañeo
         if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) {

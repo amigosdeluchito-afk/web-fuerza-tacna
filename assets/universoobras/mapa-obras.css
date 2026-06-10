@@ -399,8 +399,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     stroke-width: 3.5px !important; /* Borde más grueso por defecto */
     transition: filter 0.3s ease, stroke-width 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
     /* NUEVO: Efecto Dibujo de Autocad (Holograma) */
-    stroke-dasharray: 200 30 !important; /* Crea trazos de 200px con cortes vacíos de 30px */
-    animation: hologram-draw 6s linear infinite; /* Movimiento lento y continuo */
+    /* stroke-dasharray: 200 30 !important; OPTIMIZADO: Causa lag gráfico */
+    /* animation: hologram-draw 6s linear infinite; OPTIMIZADO: Causa lag gráfico */
 }
 
 @keyframes hologram-draw {
