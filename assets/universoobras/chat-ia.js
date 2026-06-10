@@ -16,6 +16,17 @@ function initChatIA() {
 
     chatContainer.dataset.initialized = 'true';
 
+    // --- CÁLCULO DE LA RAÍZ DEL PROYECTO (Anti-Bug de Rutas y Etiquetas Base) ---
+    let projectRoot = window.location.href.split('?')[0].split('#')[0];
+    if (projectRoot.includes('/assets/')) {
+        projectRoot = projectRoot.substring(0, projectRoot.indexOf('/assets/'));
+    } else if (projectRoot.endsWith('/obras') || projectRoot.endsWith('/obras/')) {
+        projectRoot = projectRoot.replace(/\/obras\/?$/, '');
+    } else {
+        projectRoot = projectRoot.substring(0, projectRoot.lastIndexOf('/'));
+    }
+    if (!projectRoot.endsWith('/')) projectRoot += '/';
+
     const escapeHTML = (str) => {
         return str.replace(/[&<>'"]/g, tag => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -52,8 +63,7 @@ function initChatIA() {
     ];
 
     // CARGA DINÁMICA: Intentar traer las respuestas desde el JSON
-    const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
-    const jsonUrl = basePath + 'assets/ia_luchito/cache/quick_responses.json';
+    const jsonUrl = projectRoot + 'assets/ia_luchito/cache/quick_responses.json';
     const fetchUrl = jsonUrl + '?v=' + new Date().getTime(); // Evitar caché antigua
 
     fetch(fetchUrl)
@@ -80,11 +90,11 @@ function initChatIA() {
 
     const navigateTo = (actionType) => {
         const routes = {
-            'ir_a_obras': 'assets/universoobras/mapa-obras.html',
-            'ir_a_candidatos': 'candidatos.html',
-            'ir_a_propuestas': 'candidatos.html#sec-propuestas',
-            'ir_a_sumate': 'sumate.html',
-            'ir_a_contacto': 'contacto.html'
+            'ir_a_obras': projectRoot + 'assets/universoobras/mapa-obras.html',
+            'ir_a_candidatos': projectRoot + 'candidatos.html',
+            'ir_a_propuestas': projectRoot + 'candidatos.html#sec-propuestas',
+            'ir_a_sumate': projectRoot + 'sumate.html',
+            'ir_a_contacto': projectRoot + 'contacto.html'
         };
 
         const dest = routes[actionType];
@@ -93,12 +103,10 @@ function initChatIA() {
         chatContainer.classList.remove('ft-chat-open');
         chatContainer.classList.add('ft-chat-closed');
 
-        const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
-
         if (typeof barba !== 'undefined' && barba.go) {
-            barba.go(basePath + dest);
+            barba.go(dest);
         } else {
-            window.location.href = basePath + dest;
+            window.location.href = dest;
         }
     };
 
@@ -212,8 +220,7 @@ function initChatIA() {
             }, typingDelay);
         } else {
             // No hay respuesta local -> Derivar al Router (Capa 2)
-            const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
-            const routerUrl = basePath + 'assets/ia_luchito/router.php';
+            const routerUrl = projectRoot + 'assets/ia_luchito/router.php';
             
             fetch(routerUrl, {
                 method: 'POST',
