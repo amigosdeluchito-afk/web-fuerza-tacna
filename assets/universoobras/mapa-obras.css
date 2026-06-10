@@ -94,9 +94,6 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   overflow: visible !important;
 }
 
- .chips.is-glass .chip { color: #801039 !important; }
-.chips.is-glass .chip.is-active { background: #fff !important; color: #801039 !important; }
-.chips.is-glass .divider-v { background: rgba(255, 255, 255, 0.3); }
 
 @media (max-width: 700px) {
   .chips-group { overflow-x: auto !important; } /* En móvil mantenemos scroll si es necesario */
