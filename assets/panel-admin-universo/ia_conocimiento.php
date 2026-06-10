@@ -214,6 +214,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$nuevo_estado, $id]);
             $_SESSION['ia_msg'] = "Estado actualizado.";
         }
+    } elseif ($action === 'move_to_obra') {
+        $id_doc = $_POST['id_doc'] ?? '';
+        $id_obra = $_POST['id_obra'] ?? '';
+        
+        if ($id_doc && $id_obra) {
+            $stmtDoc = $db->prepare("SELECT titulo, contenido FROM panel_ia_conocimiento WHERE id = ?");
+            $stmtDoc->execute([$id_doc]);
+            $doc = $stmtDoc->fetch(PDO::FETCH_ASSOC);
+            
+            $stmtObra = $db->prepare("SELECT id, contenido FROM panel_ia_conocimiento WHERE id = ?");
+            $stmtObra->execute([$id_obra]);
+            $obra = $stmtObra->fetch(PDO::FETCH_ASSOC);
+            
+            if ($doc && $obra) {
+                $separador = "Contexto adicional:";
+                $titulo_limpio = str_replace('---', '-', $doc['titulo']); // Evitar romper el separador de pestañas
+                $tab_content = "--- " . $titulo_limpio . " ---\n" . $doc['contenido'];
+                
+                if (strpos($obra['contenido'], $separador) !== false) {
+                    $nuevo_contenido = $obra['contenido'] . "\n\n" . $tab_content;
+                } else {
+                    $nuevo_contenido = trim($obra['contenido']) . " Contexto adicional: \n" . $tab_content;
+                }
+                
+                $stmtUpdate = $db->prepare("UPDATE panel_ia_conocimiento SET contenido = ?, fecha_actualizacion = NOW() WHERE id = ?");
+                $stmtUpdate->execute([$nuevo_contenido, $id_obra]);
+                
+                $stmtDelete = $db->prepare("DELETE FROM panel_ia_conocimiento WHERE id = ?");
+                $stmtDelete->execute([$id_doc]);
+                
+                $_SESSION['ia_msg'] = "Documento movido exitosamente como una pestaña a la obra seleccionada.";
+            } else {
+                $_SESSION['ia_msg'] = "Error: Documento u obra no encontrados.";
+            }
+        } else {
+            $_SESSION['ia_msg'] = "Error: Faltan datos para mover.";
+        }
     }
     
     header("Location: ia_conocimiento.php");
@@ -226,6 +263,10 @@ $conocimientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Categorías por defecto
 $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto', 'Historia'];
+
+// Obtener lista de obras para el modal de mover
+$stmtObras = $db->query("SELECT id, titulo FROM panel_ia_conocimiento WHERE categoria = 'Obras' AND fuente = 'Google Sheets - Obras' ORDER BY titulo ASC");
+$obras_disponibles = $stmtObras->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -438,20 +479,26 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
                                                   data-fue="<?= htmlspecialchars($row['fuente']) ?>"
                                                   data-url="<?= htmlspecialchars($row['url']) ?>"></span>
                                             
-                                            <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editRow(<?= $row['id'] ?>)">Editar</button>
-                                            
-                                            <form method="POST" style="display:inline;" onsubmit="return confirm('¿Cambiar estado de este documento?');">
-                                                <input type="hidden" name="action" value="toggle">
-                                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                                <input type="hidden" name="nuevo_estado" value="<?= $row['estado'] == 1 ? 0 : 1 ?>">
-                                                <button class="btn btn-sm btn-outline-secondary py-0 px-2">On/Off</button>
-                                            </form>
-                                            
-                                            <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar definitivamente este documento de conocimiento?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                                <button class="btn btn-sm btn-outline-danger py-0 px-2">X</button>
-                                            </form>
+                                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                                <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editRow(<?= $row['id'] ?>)">Editar</button>
+                                                
+                                                <form method="POST" style="display:inline;" onsubmit="return confirm('¿Cambiar estado de este documento?');">
+                                                    <input type="hidden" name="action" value="toggle">
+                                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                    <input type="hidden" name="nuevo_estado" value="<?= $row['estado'] == 1 ? 0 : 1 ?>">
+                                                    <button class="btn btn-sm btn-outline-secondary py-0 px-2">On/Off</button>
+                                                </form>
+                                                
+                                                <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar definitivamente este documento de conocimiento?');">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                    <button class="btn btn-sm btn-outline-danger py-0 px-2">X</button>
+                                                </form>
+                                                
+                                                <?php if (is_admin()): ?>
+                                                <button class="btn btn-sm btn-outline-warning py-0 px-2" onclick="abrirModalMover(<?= $row['id'] ?>)" style="width: 100%; border-color: #d97706; color: #fbbf24;">📦 Mover a Obra</button>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -464,6 +511,43 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         </div>
     </div>
 </div>
+
+<?php if (is_admin()): ?>
+<!-- Modal Mover a Obra -->
+<div class="modal-overlay" id="modalMoverObra" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+    <div style="background: #0f172a; width: 100%; max-width: 450px; border-radius: 12px; border: 1px solid #1f2937; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden;">
+        <div style="padding: 15px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+            <h5 style="margin: 0; color: #f8fafc; font-size: 16px; font-weight: bold;">📦 Mover a Cerebro Obras</h5>
+            <button type="button" onclick="cerrarModalMover()" style="background: transparent; border: none; color: #ef4444; font-size: 20px; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+        <div style="padding: 20px;">
+            <p style="color: #94a3b8; font-size: 13px; margin-top: 0; margin-bottom: 15px;">Este documento se convertirá en una nueva pestaña de la obra seleccionada y desaparecerá de esta lista.</p>
+            <form method="POST" id="formMoverObra">
+                <input type="hidden" name="action" value="move_to_obra">
+                <input type="hidden" name="id_doc" id="mover_id_doc" value="">
+                
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="color: #cbd5e1; font-weight: 600; font-size: 13px; margin-bottom: 8px; display: block;">Selecciona la Obra destino:</label>
+                    <select name="id_obra" class="form-control" style="background: #020617; border: 1px solid #334155; color: #fff; width: 100%; padding: 10px; border-radius: 6px; outline: none;" required>
+                        <?php if (empty($obras_disponibles)): ?>
+                            <option value="" disabled>No hay obras en el Cerebro. Sincroniza desde el Excel primero.</option>
+                        <?php else: ?>
+                            <option value="">-- Buscar obra --</option>
+                            <?php foreach($obras_disponibles as $od): ?>
+                                <option value="<?= $od['id'] ?>"><?= htmlspecialchars(str_replace('Obra: ', '', $od['titulo'])) ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div style="padding: 15px 20px; border-top: 1px solid #1e293b; display: flex; justify-content: flex-end; gap: 10px; background: #020617;">
+            <button type="button" onclick="cerrarModalMover()" class="btn btn-sm" style="background: #334155; color: white; border: none; font-weight: bold; padding: 8px 15px; border-radius: 6px;">Cancelar</button>
+            <button type="button" onclick="document.getElementById('formMoverObra').submit();" class="btn btn-sm" style="background: #3b82f6; color: white; border: none; font-weight: bold; padding: 8px 15px; border-radius: 6px;">Mover y Fusionar</button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <script>
     function resetForm() {
@@ -504,6 +588,16 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
 
         document.getElementById('btn-cancelar').style.display = "block";
         window.scrollTo(0, 0);
+    }
+
+    function abrirModalMover(id) {
+        document.getElementById('mover_id_doc').value = id;
+        document.getElementById('modalMoverObra').style.display = 'flex';
+    }
+    
+    function cerrarModalMover() {
+        document.getElementById('modalMoverObra').style.display = 'none';
+        document.getElementById('mover_id_doc').value = '';
     }
 
     async function abrirExtractorUrl() {
