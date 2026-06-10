@@ -1702,6 +1702,7 @@ function initMapaTacna(container) {
                     
                     // --- NUEVO: Generar Puntos de Pulsación Aleatorios ---
                     setTimeout(() => {
+                        console.time("⏱️ DIAGNOSTICO: Calculo de Puntos SVG");
                         const pt = svgTag.createSVGPoint();
                         const elements = svgTag.querySelectorAll('path, polygon');
                         
@@ -1781,6 +1782,7 @@ function initMapaTacna(container) {
                                 console.warn("Puntos de pulsación omitidos:", e);
                             }
                         });
+                    console.timeEnd("⏱️ DIAGNOSTICO: Calculo de Puntos SVG");
                     }, 600); // Darle tiempo a la web de calcular la matriz exacta del mapa
                 }
                 
@@ -1877,18 +1879,34 @@ function inits(container) {
         // está cubriendo toda la pantalla de un color sólido, escondiendo cualquier caída de FPS.
         setTimeout(() => {
             requestAnimationFrame(() => {
+                console.log("=== 🔍 INICIANDO DETECTOR DE CUELLOS DE BOTELLA ===");
+                console.time("⏱️ DIAGNOSTICO: initCandidatos");
                 initCandidatos(container);
+                console.timeEnd("⏱️ DIAGNOSTICO: initCandidatos");
+                console.time("⏱️ DIAGNOSTICO: initTimelineCarousels");
                 initTimelineCarousels(container);
+                console.timeEnd("⏱️ DIAGNOSTICO: initTimelineCarousels");
+                console.time("⏱️ DIAGNOSTICO: initMapaTacna");
                 initMapaTacna(container);
+                console.timeEnd("⏱️ DIAGNOSTICO: initMapaTacna");
+                console.time("⏱️ DIAGNOSTICO: initVideoScrollFix");
                 initVideoScrollFix(container);
+                console.timeEnd("⏱️ DIAGNOSTICO: initVideoScrollFix");
+                console.time("⏱️ DIAGNOSTICO: initYouTubePlaceholder");
                 initYouTubePlaceholder(container);
+                console.timeEnd("⏱️ DIAGNOSTICO: initYouTubePlaceholder");
+                console.time("⏱️ DIAGNOSTICO: initCircularTimeline");
                 initCircularTimeline(container);
+                console.timeEnd("⏱️ DIAGNOSTICO: initCircularTimeline");
+                console.time("⏱️ DIAGNOSTICO: initMapEngine");
                 // Paso 2: Despertar el nuevo motor MapLibre cuando entramos a la página del mapa
                 if (typeof initMapEngine === 'function') initMapEngine(container);
+                console.timeEnd("⏱️ DIAGNOSTICO: initMapEngine");
                 // Paso 1: Despertar la lógica de los filtros que ahora vive en mapa-filtros.js
                 if (typeof initFilters === 'function') initFilters();
                 // Inicializador del cómic interactivo de la página de contacto
                 if (typeof initContactoComic === 'function') initContactoComic(container);
+                console.log("=== 🔍 FIN DEL DETECTOR ===");
             });
         }, 250);
 }

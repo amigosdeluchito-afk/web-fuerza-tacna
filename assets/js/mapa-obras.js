@@ -467,6 +467,7 @@ window.initMapEngine = async function(container) {
     let PINS_LOADING = new Set();
 
     async function cargarPinesDesdeSheet(segmento, mapLat, mapLon){
+        console.time("⏱️ DIAGNOSTICO: Fetch_Excel_" + segmento);
         if (PINS_LOADING.has(segmento)) return;
         PINS_LOADING.add(segmento);
 
@@ -491,6 +492,8 @@ window.initMapEngine = async function(container) {
             PINS_LOADING.delete(segmento);
             return;
         }
+        console.timeEnd("⏱️ DIAGNOSTICO: Fetch_Excel_" + segmento);
+        console.time("⏱️ DIAGNOSTICO: Dibujo_Pines_" + segmento);
 
         if (currentKey !== segmento) {
             PINS_LOADING.delete(segmento);
@@ -671,6 +674,7 @@ window.initMapEngine = async function(container) {
         });
 
         PINS_LOADING.delete(segmento);
+        console.timeEnd("⏱️ DIAGNOSTICO: Dibujo_Pines_" + segmento);
     }
 
     window.swapSegment = function(key, revealAfter = false){
