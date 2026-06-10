@@ -867,9 +867,8 @@ async function initCandidatos(container) {
                     const fotoHover = c.foto_portada ? `assets/universoobras/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
-                            <!-- 2. Quitamos loading="lazy" y ponemos fetchpriority="high" para que la foto cargue al instante -->
-                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" fetchpriority="high" decoding="async">
-                            <img src="${fotoHover}" alt="${c.nombres}" class="img-hover" fetchpriority="high" decoding="async">
+                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" loading="lazy" decoding="async">
+                            <img src="${fotoHover}" alt="${c.nombres}" class="img-hover" loading="lazy" decoding="async">
                             <div class="candidate-info">
                                 <h3>${c.nombres}</h3>
                                 <p>${c.cargo_flotante}</p>
