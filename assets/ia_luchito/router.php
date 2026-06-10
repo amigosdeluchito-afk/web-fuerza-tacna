@@ -379,7 +379,12 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                 $db->prepare("INSERT INTO panel_ia_auditoria (fecha, ip_hash, pregunta, respuesta, modelo, estado, motivo_error) VALUES (NOW(), ?, ?, ?, ?, 'error_openai', 'Error crítico: No se pudo descifrar la API Key (AES-256).')")->execute([$ip_hash, $mensaje, $texto_final, $ia_modelo]);
             } else {
                 require_once __DIR__ . '/openai_client.php';
-                $ia_result = llamar_openai_responses($ia_modelo, $prompt_maestro, $input_para_openai, $ia_temperatura, $ia_max_tokens, $decrypted_key);
+                
+                // Inyección secreta anti-monotonía (No altera tu prompt visible en el panel)
+                $instruccion_secreta = "\n\n[INSTRUCCIÓN DEL SISTEMA]: Estás repitiendo mucho las mismas muletillas. A partir de ahora, PROHIBIDO iniciar tus respuestas siempre igual. Varía tu forma de hablar, usa otros términos de vez en cuando (amigo, sobrino) o ve directamente al grano sin saludos largos para sonar 100% humano e impredecible.";
+                $prompt_final = $prompt_maestro . $instruccion_secreta;
+
+                $ia_result = llamar_openai_responses($ia_modelo, $prompt_final, $input_para_openai, $ia_temperatura, $ia_max_tokens, $decrypted_key);
 
                 if ($ia_result['ok']) {
                     $texto_final = $ia_result['texto'];
