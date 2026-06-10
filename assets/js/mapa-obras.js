@@ -964,34 +964,6 @@ window.initMapEngine = async function(container) {
     
     // Auto-arranque de Obras
     setTimeout(() => {
-        // --- EFECTO WIGGLE / PARALLAX ---
-        const vContainer = document.getElementById('video-intro-container');
-        const vImg = document.getElementById('introVideo');
-        
-        if (vContainer && vImg && typeof gsap !== 'undefined') {
-            if (window._introVideoWiggle) {
-                window.removeEventListener('mousemove', window._introVideoWiggle);
-            }
-            window._introVideoWiggle = (e) => {
-                // Solo aplicar si el video es visible
-                if (vContainer.style.opacity === '0') return;
-
-                const { clientX, clientY } = e;
-                const xPos = (clientX / window.innerWidth) - 0.5;
-                const yPos = (clientY / window.innerHeight) - 0.5;
-
-                // Movemos el video sutilmente (30px de rango)
-                gsap.to(vImg, {
-                    duration: 1.2,
-                    x: xPos * 40,
-                    y: yPos * 40,
-                    rotateX: yPos * -2, // Un toque de inclinación 3D
-                    rotateY: xPos * 2,
-                    ease: "power2.out"
-                });
-            };
-            // window.addEventListener('mousemove', window._introVideoWiggle);
-        }
 
         if (map) map.resize();
         
