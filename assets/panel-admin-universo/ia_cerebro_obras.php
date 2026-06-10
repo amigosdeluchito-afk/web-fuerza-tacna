@@ -134,19 +134,24 @@ try {
         .textarea-wrap label { font-size: 15px; color: #f9fafb; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .textarea-wrap label span { font-size: 12px; font-weight: normal; color: #9ca3af; background: #1e293b; padding: 2px 8px; border-radius: 4px; }
         
-        /* Nuevos estilos para los múltiples contextos */
-        .contextos-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; overflow-y: auto; padding-right: 5px; flex: 1; }
-        .contextos-list::-webkit-scrollbar { width: 6px; }
-        .contextos-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .contexto-item { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 15px; position: relative; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-        .contexto-item .btn-remove { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .contexto-item .btn-remove:hover { background: #dc2626; transform: scale(1.1); }
-        .contexto-item input { width: 100%; background: transparent; border: none; border-bottom: 1px solid #475569; color: #93c5fd; font-weight: bold; font-size: 13px; padding: 5px 0; outline: none; transition: 0.2s; }
-        .contexto-item input:focus { border-bottom-color: #3b82f6; }
-        .contexto-item textarea { width: 100%; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; padding: 10px; min-height: 100px; resize: vertical; outline: none; line-height: 1.5; box-sizing: border-box; }
-        .contexto-item textarea:focus { border-color: #3b82f6; }
-        .btn-add-context { background: transparent; border: 1px dashed #3b82f6; color: #3b82f6; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center; margin-top: auto; }
-        .btn-add-context:hover { background: rgba(59, 130, 246, 0.1); }
+        /* Nuevos estilos para los múltiples contextos (Pestañas tipo Navegador) */
+        .tabs-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; }
+        .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
+        .tabs-header::-webkit-scrollbar { height: 4px; }
+        .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .tab-btn { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: transparent; border: none; border-right: 1px solid #1f2937; color: #94a3b8; font-size: 13px; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; max-width: 180px; }
+        .tab-btn span.ctx-titulo-display { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+        .tab-btn:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .tab-close { background: transparent; border: none; color: #ef4444; font-size: 16px; line-height: 1; cursor: pointer; padding: 0 4px; border-radius: 4px; opacity: 0.7; }
+        .tab-close:hover { opacity: 1; background: rgba(239,68,68,0.2); }
+        .btn-add-tab { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: none; color: #10b981; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-add-tab:hover { background: rgba(16,185,129,0.1); }
+
+        .tabs-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .tab-pane { display: none; flex: 1; flex-direction: column; padding: 0; height: 100%; box-sizing: border-box; }
+        .tab-pane.active { display: flex; }
+        .tab-pane textarea { flex: 1; width: 100%; height: 100%; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         .btn-save-obra { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         .btn-save-obra:hover { background: #059669; }
@@ -234,8 +239,14 @@ try {
                             Fuentes y Contexto Adicional
                             <span id="aiStatusBadge">🟢 Ya en Cerebro</span>
                         </label>
-                        <div id="contextosList" class="contextos-list"></div>
-                        <button type="button" class="btn-add-context" onclick="agregarContexto()">➕ Agregar Nuevo Bloque de Texto</button>
+                        <div class="tabs-container">
+                            <div class="tabs-header">
+                                <div id="tabsHeaderList" style="display: flex;"></div>
+                                <button type="button" class="btn-add-tab" onclick="agregarContexto(null, '', true)" title="Añadir nueva pestaña">➕ Nueva Pestaña</button>
+                            </div>
+                            <div class="tabs-content" id="tabsContent">
+                            </div>
+                        </div>
                     </div>
 
                     <button class="btn-save-obra" id="btnSaveObra">🧠 Alimentar Cerebro con esta Obra</button>
@@ -253,6 +264,7 @@ try {
         
         let todasLasObras = [];
         let obraSeleccionada = null;
+        let tabCounter = 0;
 
         function parseGviz(text) {
             const m = text.match(/setResponse\(([\s\S]+)\);?/);
@@ -348,17 +360,80 @@ try {
             });
         }
 
-        function agregarContexto(titulo = "", texto = "") {
-            const list = document.getElementById('contextosList');
-            const div = document.createElement('div');
-            div.className = 'contexto-item';
-            div.innerHTML = `
-                <button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Eliminar bloque">X</button>
-                <input type="text" class="ctx-titulo" placeholder="Título de esta fuente (Ej. Noticia, Discurso, Expediente...)" value="${titulo}">
-                <textarea class="ctx-texto" placeholder="Pega aquí el contenido...">${texto}</textarea>
+        function agregarContexto(titulo = "", texto = "", promptUser = false) {
+            if (promptUser) {
+                titulo = prompt("Ingresa un nombre para esta pestaña (Ej. 'Noticia', 'Expediente'):");
+                if (titulo === null || titulo.trim() === "") return;
+            }
+            if (!titulo) titulo = "General";
+
+            tabCounter++;
+            const tabId = 'tab_' + tabCounter;
+
+            const tabsHeaderList = document.getElementById('tabsHeaderList');
+            const tabsContent = document.getElementById('tabsContent');
+
+            // Desactivar actuales
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            // Crear botón de pestaña
+            const tabBtn = document.createElement('button');
+            tabBtn.type = 'button';
+            tabBtn.className = 'tab-btn active';
+            tabBtn.dataset.target = tabId;
+            tabBtn.innerHTML = `
+                <span class="ctx-titulo-display">${titulo}</span>
+                <input type="hidden" class="ctx-titulo" value="${titulo}">
+                <div class="tab-close" onclick="eliminarContexto(event, '${tabId}')" title="Cerrar pestaña">&times;</div>
             `;
-            list.appendChild(div);
-            setTimeout(() => list.scrollTop = list.scrollHeight, 50); // Auto-scroll al nuevo bloque
+            tabBtn.onclick = () => activarTab(tabId);
+
+            tabsHeaderList.appendChild(tabBtn);
+
+            // Crear contenido de pestaña
+            const tabPane = document.createElement('div');
+            tabPane.className = 'tab-pane active';
+            tabPane.id = tabId;
+            tabPane.innerHTML = `
+                <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'...">${texto}</textarea>
+            `;
+            
+            tabsContent.appendChild(tabPane);
+            
+            // Hacer scroll a la nueva pestaña en el header si hay muchas
+            tabsHeaderList.parentElement.scrollLeft = tabsHeaderList.parentElement.scrollWidth;
+        }
+
+        function activarTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.target === tabId);
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.toggle('active', pane.id === tabId);
+            });
+        }
+
+        function eliminarContexto(event, tabId) {
+            event.stopPropagation(); // Evitar que active el tab click
+            if (!confirm("¿Seguro que deseas eliminar esta pestaña y todo su contenido?")) return;
+            
+            const btn = document.querySelector(`.tab-btn[data-target="${tabId}"]`);
+            const pane = document.getElementById(tabId);
+            
+            const wasActive = btn.classList.contains('active');
+            
+            btn.remove();
+            pane.remove();
+
+            // Si cerramos la pestaña activa, activamos la última disponible
+            if (wasActive) {
+                const remainingTabs = document.querySelectorAll('.tab-btn');
+                if (remainingTabs.length > 0) {
+                    const lastTab = remainingTabs[remainingTabs.length - 1];
+                    activarTab(lastTab.dataset.target);
+                }
+            }
         }
 
         function abrirEditor(obra) {
@@ -376,8 +451,10 @@ try {
             document.getElementById('lblDescExcel').textContent = obra.descripcion_excel || "Sin descripción oficial.";
 
             // Jalar texto de la IA si existe
-            const list = document.getElementById('contextosList');
-            list.innerHTML = ''; // Limpiar lista
+            const tabsHeaderList = document.getElementById('tabsHeaderList');
+            const tabsContent = document.getElementById('tabsContent');
+            tabsHeaderList.innerHTML = '';
+            tabsContent.innerHTML = '';
             const badge = document.getElementById('aiStatusBadge');
             let textoIA = CEREBRO_IA[obra.tituloClave];
 
@@ -400,13 +477,13 @@ try {
                         agregarContexto("Contexto General", textoIA);
                     }
                 } else {
-                    agregarContexto(); // Si no hay contexto extra, creamos caja vacía
+                    agregarContexto("Principal"); // Si no hay contexto extra, creamos caja vacía
                 }
 
                 badge.textContent = "🟢 Ya en Cerebro";
                 badge.style.color = "#10b981";
             } else {
-                agregarContexto(); // Crear primer bloque vacío
+                agregarContexto("Principal"); // Crear primer bloque vacío
                 badge.textContent = "🔴 Nuevo para IA";
                 badge.style.color = "#ef4444";
             }
@@ -459,15 +536,19 @@ try {
             btn.innerHTML = "⏳ Inyectando a la IA...";
             btn.disabled = true;
 
-            // Recopilar todos los bloques creados por el usuario
-            const contextosElements = document.querySelectorAll('.contexto-item');
+            // Recopilar todos los bloques creados por el usuario (Pestañas)
+            const tabs = document.querySelectorAll('.tab-btn');
             let contextoManual = "";
-            contextosElements.forEach(el => {
-                const tit = el.querySelector('.ctx-titulo').value.trim();
-                const txt = el.querySelector('.ctx-texto').value.trim();
-                if (txt) {
-                    if (tit) contextoManual += `--- ${tit} ---\n${txt}\n\n`;
-                    else contextoManual += `--- Fragmento ---\n${txt}\n\n`;
+            tabs.forEach(btn => {
+                const tabId = btn.dataset.target;
+                const tit = btn.querySelector('.ctx-titulo').value.trim();
+                const pane = document.getElementById(tabId);
+                if (pane) {
+                    const txt = pane.querySelector('.ctx-texto').value.trim();
+                    if (txt) {
+                        if (tit) contextoManual += `--- ${tit} ---\n${txt}\n\n`;
+                        else contextoManual += `--- Fragmento ---\n${txt}\n\n`;
+                    }
                 }
             });
             contextoManual = contextoManual.trim();
