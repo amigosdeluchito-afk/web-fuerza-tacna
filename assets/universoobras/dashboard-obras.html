@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiografía de Tacna - Dashboard de Obras</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js (@�4) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CSS del Dashboard -->
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Capa de fondo animada/Oscura -->
+    <div class="dashboard-bg">
+        <div class="glow-orb" style="top: -10%; left: -10%;"></div>
+        <div class="glow-orb" style="bottom: -20%; right: -10%; background: radial-gradient(circle, rgba(0,255,200,0.3) 0%, rgba(0,0,0,0) 70%);"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div>
+                <h1>Radiografía de Tacna</h1>
+                <p>El pulso de la inversión y el progreso en tiempo real.</p>
+            </div>
+            <a href="mapa-obras.html" class="btn-volver">Volver al Mapa</a>
+        </header>
+
+        <!-- Grilla Bento Box -->
+        <main class="bento-grid">
+            
+            <!-- Fila 1: Impacto Rápido -->
+            <div class="bento-item impact-card">
+                <h3>Total Obras Analizadas</h3>
+                <div class="impact-value" id="val-total-obras">0</div>
+            </div>
+            <div class="bento-item impact-card accent-green">
+                <h3>Inversión Total (S/)</h3>
+                <div class="impact-value" id="val-total-inversion">0</div>
+            </div>
+            <div class="bento-item impact-card accent-red">
+                <h3>Obras en Riesgo / Paralizadas</h3>
+                <div class="impact-value" id="val-total-riesgo">0</div>
+            </div>
+            <div class="bento-item impact-card accent-blue">
+                <h3>Obras Culminadas</h3>
+                <div class="impact-value" id="val-total-culminadas">0</div>
+            </div>
+
+            <!-- Columna Izquierda: Top 5 y Semáforo -->
+            <div class="bento-item bento-tall col-span-2">
+                <h2>El Top 5: Mega Inversiones</h2>
+                <div class="chart-container" style="position: relative; height:250px; width:100%">
+                    <canvas id="chart-top5"></canvas>
+                </div>
+            </div>
+            
+            <div class="bento-item col-span-1">
+                <h2>Semáforo de Obras</h2>
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <canvas id="chart-semaforo"></canvas>
+                </div>
+                <div id="semaforo-legend" class="custom-legend"></div>
+            </div>
+
+
+            <!-- Columna Central: Radar de Distritos -->
+            <div class="bento-item bento-tall col-span-2">
+                <h2>Inversión por Distrito (S/)</h2>
+                <div class="chart-container" style="position: relative; height:250px; width:100%">
+                    <canvas id="chart-distritos"></canvas>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Feed de Obras -->
+            <div class="bento-item bento-tall col-span-1 feed-container">
+                <h2>Directorio de Obras</h2>
+                <input type="text" id="feed-search" placeholder="Buscar obra..." class="glass-input">
+                <div class="feed-list" id="feed-list">
+                    <div class="feed-loading">Analizando universo de obras...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts Propios -->
+    <script src="mapa-utils.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
