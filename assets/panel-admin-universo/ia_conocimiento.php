@@ -265,8 +265,20 @@ $conocimientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto', 'Historia'];
 
 // Obtener lista de obras para el modal de mover
-$stmtObras = $db->query("SELECT id, titulo FROM panel_ia_conocimiento WHERE categoria = 'Obras' AND fuente = 'Google Sheets - Obras' ORDER BY titulo ASC");
+$stmtObras = $db->query("SELECT id, titulo, palabras_clave FROM panel_ia_conocimiento WHERE categoria = 'Obras' AND fuente = 'Google Sheets - Obras' ORDER BY titulo ASC");
 $obras_disponibles = $stmtObras->fetchAll(PDO::FETCH_ASSOC);
+
+$todas_obras = [];
+$segmentos_unicos = [];
+foreach($obras_disponibles as $od) {
+    $parts = explode(',', $od['palabras_clave']);
+    $segmento = trim(end($parts));
+    if (empty($segmento)) $segmento = "Otros";
+    $segmentos_unicos[$segmento] = true;
+    $todas_obras[] = array_merge($od, ['segmento' => $segmento]);
+}
+$segmentos_unicos = array_keys($segmentos_unicos);
+sort($segmentos_unicos);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -527,14 +539,22 @@ $obras_disponibles = $stmtObras->fetchAll(PDO::FETCH_ASSOC);
                 <input type="hidden" name="id_doc" id="mover_id_doc" value="">
                 
                 <div class="form-group" style="margin-bottom: 0;">
+                    <input type="text" id="buscarObraMover" class="form-control mb-2" placeholder="🔍 Buscar por nombre de obra..." style="background: #020617; border: 1px solid #334155; color: #fff; width: 100%; padding: 8px 10px; border-radius: 6px; outline: none; font-size: 13px;" onkeyup="filtrarObrasMover()">
+                    
+                    <select id="filtroSegmentoMover" class="form-control mb-3" style="background: #0f172a; border: 1px solid #334155; color: #94a3b8; width: 100%; padding: 8px 10px; border-radius: 6px; outline: none; font-size: 13px;" onchange="filtrarObrasMover()">
+                        <option value="">📁 Todos los segmentos</option>
+                        <?php foreach($segmentos_unicos as $seg): ?>
+                            <option value="<?= htmlspecialchars($seg) ?>"><?= htmlspecialchars($seg) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
                     <label style="color: #cbd5e1; font-weight: 600; font-size: 13px; margin-bottom: 8px; display: block;">Selecciona la Obra destino:</label>
-                    <select name="id_obra" class="form-control" style="background: #020617; border: 1px solid #334155; color: #fff; width: 100%; padding: 10px; border-radius: 6px; outline: none;" required>
-                        <?php if (empty($obras_disponibles)): ?>
+                    <select name="id_obra" id="selectObraMover" class="form-control" style="background: #020617; border: 1px solid #334155; color: #fff; width: 100%; padding: 10px; border-radius: 6px; outline: none;" required size="6">
+                        <?php if (empty($todas_obras)): ?>
                             <option value="" disabled>No hay obras en el Cerebro. Sincroniza desde el Excel primero.</option>
                         <?php else: ?>
-                            <option value="">-- Buscar obra --</option>
-                            <?php foreach($obras_disponibles as $od): ?>
-                                <option value="<?= $od['id'] ?>"><?= htmlspecialchars(str_replace('Obra: ', '', $od['titulo'])) ?></option>
+                            <?php foreach($todas_obras as $od): ?>
+                                <option value="<?= $od['id'] ?>" data-seg="<?= htmlspecialchars($od['segmento']) ?>" data-nom="<?= htmlspecialchars(strtolower(str_replace('Obra: ', '', $od['titulo']))) ?>"><?= htmlspecialchars(str_replace('Obra: ', '', $od['titulo'])) ?></option>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </select>
@@ -598,6 +618,31 @@ $obras_disponibles = $stmtObras->fetchAll(PDO::FETCH_ASSOC);
     function cerrarModalMover() {
         document.getElementById('modalMoverObra').style.display = 'none';
         document.getElementById('mover_id_doc').value = '';
+        
+        // Resetear filtros al cerrar
+        document.getElementById('buscarObraMover').value = '';
+        document.getElementById('filtroSegmentoMover').value = '';
+        filtrarObrasMover();
+    }
+
+    function filtrarObrasMover() {
+        const txt = document.getElementById('buscarObraMover').value.toLowerCase();
+        const seg = document.getElementById('filtroSegmentoMover').value;
+        const select = document.getElementById('selectObraMover');
+        const options = select.options;
+        
+        for (let i = 0; i < options.length; i++) {
+            const opt = options[i];
+            if (opt.disabled) continue;
+            
+            const optSeg = opt.getAttribute('data-seg');
+            const optNom = opt.getAttribute('data-nom');
+            
+            const matchTxt = optNom.includes(txt);
+            const matchSeg = seg === "" || optSeg === seg;
+            
+            opt.style.display = (matchTxt && matchSeg) ? "" : "none";
+        }
     }
 
     async function abrirExtractorUrl() {
