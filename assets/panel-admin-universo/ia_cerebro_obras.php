@@ -249,7 +249,10 @@ try {
                         </div>
                     </div>
 
-                    <button class="btn-save-obra" id="btnSaveObra">🧠 Alimentar Cerebro con esta Obra</button>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn-save-obra" id="btnSaveObra" style="flex: 2;">🧠 Alimentar Cerebro con esta Obra</button>
+                        <button class="btn-save-obra" id="btnExportWord" style="flex: 1; background: #4f46e5; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);" onclick="exportarFichaWord()">⬇️ Exportar Ficha a Word</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -265,6 +268,23 @@ try {
         let todasLasObras = [];
         let obraSeleccionada = null;
         let tabCounter = 0;
+
+        // Formateador amigable de montos (Ej. 15000000 -> S/ 15 Millones)
+        function formatMontoFriendly(val) {
+            let str = String(val).trim();
+            if (/[a-zA-Z]/.test(str) && !str.toLowerCase().startsWith('s/')) return str; 
+            
+            let num = parseFloat(str.replace(/[^\d.-]/g, '')) || 0;
+            if (num === 0) return 'S/ 0';
+            if (num >= 1000000) {
+                let m = num / 1000000;
+                return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Millones';
+            } else if (num >= 1000) {
+                let m = num / 1000;
+                return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Mil';
+            }
+            return 'S/ ' + num.toLocaleString('en-US');
+        }
 
         function parseGviz(text) {
             const m = text.match(/setResponse\(([\s\S]+)\);?/);
@@ -443,7 +463,7 @@ try {
             
             // Llenar datos bloqueados
             let rawMonto = String(obra.monto).trim();
-            let displayMonto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : 'S/ 0';
+            let displayMonto = formatMontoFriendly(rawMonto);
             
             document.getElementById('lblMonto').textContent = displayMonto;
             document.getElementById('lblUbicacion').textContent = `${obra.distrito}, ${obra.provincia}`;
@@ -514,7 +534,7 @@ try {
             if (obra.estado) texto += `Estado actual: '${obra.estado}'. `;
             
             let rawMonto = String(obra.monto).trim();
-            let displayMonto = rawMonto ? (/^\s*S\//i.test(rawMonto) ? rawMonto : 'S/ ' + rawMonto) : 'S/ 0';
+            let displayMonto = formatMontoFriendly(rawMonto);
             texto += `Monto referencial: ${displayMonto}. `;
             
             if (obra.descripcion_excel) {
@@ -618,6 +638,63 @@ try {
             } catch(e) { alert("Error de conexión"); } 
             finally { btn.innerHTML = txtOriginal; btn.disabled = false; }
         });
+
+        // ==========================================================
+        // EXPORTAR A WORD (DOC)
+        // ==========================================================
+        function exportarFichaWord() {
+            if (!obraSeleccionada) return;
+
+            const btn = document.getElementById('btnExportWord');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ Generando Word...";
+            btn.disabled = true;
+
+            let displayMonto = document.getElementById('lblMonto').textContent;
+            let tabs = document.querySelectorAll('.tab-btn');
+            let contextoHtml = "";
+
+            tabs.forEach(tabBtn => {
+                const tabId = tabBtn.dataset.target;
+                const tit = tabBtn.querySelector('.ctx-titulo').value.trim();
+                const pane = document.getElementById(tabId);
+                if (pane) {
+                    const txt = pane.querySelector('.ctx-texto').value.trim();
+                    if (txt) {
+                        contextoHtml += `<h3 style="color: #801039; font-family: Arial, sans-serif;">${tit || 'Contexto Adicional'}</h3>`;
+                        contextoHtml += `<p style="font-family: Arial, sans-serif; line-height: 1.5;">${txt.replace(/\n/g, '<br>')}</p>`;
+                    }
+                }
+            });
+
+            let htmlContent = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="utf-8"><title>Ficha de Obra - ${obraSeleccionada.nombre}</title>
+            <style>body{font-family:Arial,sans-serif;color:#333;}h1{color:#801039;border-bottom:2px solid #ffc300;padding-bottom:5px;}h3{color:#801039;margin-top:20px;}.info-table{width:100%;border-collapse:collapse;margin-bottom:20px;}.info-table th{text-align:left;padding:10px;background-color:#f4f6f9;border:1px solid #ddd;width:30%;color:#555;}.info-table td{padding:10px;border:1px solid #ddd;}</style>
+            </head>
+            <body>
+                <h1>${obraSeleccionada.nombre}</h1>
+                <table class="info-table">
+                    <tr><th>Segmento</th><td>${obraSeleccionada.segmento}</td></tr>
+                    <tr><th>Ubicación</th><td>${obraSeleccionada.distrito}, ${obraSeleccionada.provincia}</td></tr>
+                    <tr><th>Estado</th><td>${obraSeleccionada.estado}</td></tr>
+                    <tr><th>Monto de Inversión</th><td>${displayMonto}</td></tr>
+                </table>
+                <h3>Descripción Oficial (Excel)</h3>
+                <p style="line-height: 1.5;">${obraSeleccionada.descripcion_excel ? obraSeleccionada.descripcion_excel.replace(/\n/g, '<br>') : 'Sin descripción oficial.'}</p>
+                ${contextoHtml}
+                <br><br><hr style="border: 0; border-top: 1px solid #ddd;">
+                <p style="text-align: center; color: #888; font-size: 12px;">Generado desde el Cerebro de Obras - Fuerza Tacna</p>
+            </body>
+            </html>`;
+
+            let blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement('a');
+            link.href = url; link.download = `Ficha_Obra_${obraSeleccionada.nombre.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.doc`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 1000);
+        }
 
         // Iniciar carga
         document.addEventListener("DOMContentLoaded", cargarObrasDesdeExcel);
