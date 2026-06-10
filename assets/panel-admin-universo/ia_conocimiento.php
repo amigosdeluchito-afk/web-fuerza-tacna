@@ -447,8 +447,16 @@ sort($segmentos_unicos);
                     <span>Documentos Cargados (<?= count($conocimientos) ?>)</span>
                 </div>
                 <div class="card-body p-0">
+                    <!-- NUEVO: Buscador y Filtro Visual -->
+                    <div style="padding: 12px; background: #0f172a; border-bottom: 1px solid #1e293b; display: flex; gap: 10px;">
+                        <input type="text" id="searchListaDocs" class="form-control" placeholder="🔍 Buscar por título o contenido..." style="background: #020617; border: 1px solid #334155; color: #fff; width: 60%; padding: 6px 10px; border-radius: 6px; font-size: 13px; outline: none;" onkeyup="filtrarListaDocs()">
+                        <select id="filtroCatDocs" class="form-control" style="background: #020617; border: 1px solid #334155; color: #94a3b8; width: 40%; padding: 6px 10px; border-radius: 6px; font-size: 13px; outline: none;" onchange="filtrarListaDocs()">
+                            <option value="">📁 Todas las categorías</option>
+                            <?php foreach($categorias_comunes as $cat): ?><option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option><?php endforeach; ?>
+                        </select>
+                    </div>
                     <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
-                        <table class="table table-sm table-hover mb-0" style="font-size: 12px;">
+                        <table id="tablaDocsCargados" class="table table-sm table-hover mb-0" style="font-size: 12px;">
                             <thead class="thead-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th style="width: 5%;">Pri.</th>
@@ -786,6 +794,28 @@ sort($segmentos_unicos);
             else { alert('Error: ' + data.error); }
         } catch (err) { alert('Error de conexión al guardar.'); } 
         finally { btn.disabled = false; btn.innerText = '✅ Confirmar y Sincronizar'; }
+    }
+
+    function filtrarListaDocs() {
+        const txt = document.getElementById('searchListaDocs').value.toLowerCase();
+        const cat = document.getElementById('filtroCatDocs').value.toLowerCase();
+        const filas = document.querySelectorAll('#tablaDocsCargados tbody tr');
+
+        filas.forEach(fila => {
+            if (fila.children.length === 1) return; // Fila vacía
+            
+            const spanDatos = fila.querySelector('span[id^="data-"]');
+            if (!spanDatos) return;
+
+            const filaCat = spanDatos.getAttribute('data-cat').toLowerCase();
+            const filaTit = spanDatos.getAttribute('data-tit').toLowerCase();
+            const filaCon = spanDatos.getAttribute('data-con').toLowerCase();
+
+            const matchTxt = filaTit.includes(txt) || filaCon.includes(txt);
+            const matchCat = cat === "" || filaCat === cat;
+
+            fila.style.display = (matchTxt && matchCat) ? "" : "none";
+        });
     }
 </script>
 </body>

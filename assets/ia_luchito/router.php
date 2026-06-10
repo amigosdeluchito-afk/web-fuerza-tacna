@@ -341,7 +341,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                     $contexto_texto = "[INFORMACIÓN OFICIAL]\nRegla: Usa esta información solo si responde directamente a la pregunta. Si el contexto no contiene la respuesta, no inventes y dilo con naturalidad.\n\n";
                     $main_topic_title = $documentos[0]['titulo']; // Guardamos el título del documento más relevante
                     foreach ($documentos as $doc) {
-                        $cont = mb_strimwidth(trim($doc['contenido']), 0, 800, '...');
+                        $cont = mb_strimwidth(trim($doc['contenido']), 0, 15000, '...');
                         $contexto_texto .= "- Fuente: {$doc['titulo']} | Datos: $cont\n";
                     }
                     $contexto_texto .= "[/INFORMACIÓN OFICIAL]\n\nPregunta del usuario: " . $mensaje;
