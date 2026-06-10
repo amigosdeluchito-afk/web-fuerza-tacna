@@ -762,6 +762,10 @@ function initialLoadAnimation() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    // FIX: Despertamos AOS de inmediato para que el menú aparezca 
+    // sin esperar a que Barba.js termine de hacer sus cálculos.
+    AOS.init({ duration: 1000, easing: 'ease', once: true });
+    
     barba.init({
         sync: true,
 
@@ -811,18 +815,6 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         ],
     });
-});
-barba.hooks.enter(() => {
-
-  function load_js()
-           {
-              var head= document.getElementsByTagName('head')[0];
-              var script= document.createElement('script');
-              script.src= 'assets/js/button.js';
-              head.appendChild(script);
-           }
-
-
 });
 
 async function initCandidatos(container) {
@@ -1778,12 +1770,6 @@ function initMapaTacna(container) {
 }
 
 function inits(container) {
-    AOS.init({
-        duration: 1000,
-        easing: 'ease',
-        once: true
-    });
-    // Refresco forzado de AOS milisegundos después para detectar nuevo HTML de Barba
     setTimeout(() => AOS.refreshHard(), 100);
     setTimeout(() => AOS.refreshHard(), 500); // Segundo refresco de seguridad
         
