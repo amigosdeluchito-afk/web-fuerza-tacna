@@ -310,7 +310,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
 
     <div class="row">
         <!-- Columna Formulario -->
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-5 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #020617;">
                     <span id="form-title">➕ Agregar Documento</span>
@@ -338,7 +338,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
 
                         <div class="form-group">
                             <label class="font-weight-bold">Contenido (Lo que la IA leerá)</label>
-                            <textarea name="contenido" id="input-contenido" class="form-control" rows="5" required placeholder="Fuerza Tacna es un movimiento regional fundado en..."></textarea>
+                            <textarea name="contenido" id="input-contenido" class="form-control" rows="14" required placeholder="Fuerza Tacna es un movimiento regional fundado en..."></textarea>
                         </div>
 
                         <div class="form-group">
@@ -387,7 +387,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
         </div>
 
         <!-- Columna Listado -->
-        <div class="col-lg-8">
+        <div class="col-lg-7">
             
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
@@ -395,7 +395,7 @@ $categorias_comunes = ['General', 'Candidatos', 'Obras', 'Propuestas', 'Contacto
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
-                        <table class="table table-hover mb-0" style="font-size: 13px;">
+                        <table class="table table-sm table-hover mb-0" style="font-size: 12px;">
                             <thead class="thead-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th style="width: 5%;">Pri.</th>
