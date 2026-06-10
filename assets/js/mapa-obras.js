@@ -258,7 +258,7 @@ window.initMapEngine = async function(container) {
                     background-position: center;
                     background-repeat: no-repeat;
                     opacity: 0.35; /* <-- Bájalo a 0.15 si lo ves muy fuerte */
-                    mix-blend-mode: multiply; /* <-- CRUCIAL: Fuerza a que el naranja contraste con el amarillo */
+                    /* mix-blend-mode: multiply; OPTIMIZADO: Asfixiaba el Main Thread en combinación con el video */
                     pointer-events: none; /* No bloquea los clics del mapa */
                     z-index: 1;
                 `;

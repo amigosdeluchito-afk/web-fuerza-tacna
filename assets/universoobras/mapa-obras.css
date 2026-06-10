@@ -58,7 +58,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   align-items: center;
   justify-content: center;
   z-index: 12;
-  filter: url(#threshold);
+  /* filter: url(#threshold); OPTIMIZADO: Colapsaba la tarjeta gráfica a pantalla completa */
   pointer-events: none;
   opacity: 1;
   visibility: visible;
@@ -84,7 +84,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     top: 75%; /* Subimos el punto de partida para que no se vea tan pegado abajo */
     left: 50%;
     transform: translate(-50%, -50%); /* Centrado total para facilitar la subida */
-    display: none !important; /* <--- DESACTIVACIÓN TEMPORAL DEL DASHBOARD PARA PRUEBAS DE RENDIMIENTO */
+    display: flex !important; /* <-- RESTAURADO: El dashboard es inocente */
     gap: 12px; /* Espacio reducido entre tarjetas para una vista más compacta */
     z-index: 15;
     opacity: 1 !important; /* El grid padre siempre es opaco para no matar el blur de los hijos */
