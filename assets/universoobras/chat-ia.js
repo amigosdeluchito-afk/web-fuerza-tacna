@@ -110,7 +110,7 @@ function initChatIA() {
         }
     };
 
-    const addMessage = (text, type, actions = []) => {
+    const renderMessage = (text, type, actions = []) => {
         let finalActions = actions ? [...actions] : [];
         let finalText = text;
 
@@ -157,6 +157,13 @@ function initChatIA() {
         setTimeout(() => {
             messagesBody.scrollTop = messagesBody.scrollHeight;
         }, 10);
+    };
+
+    const addMessage = (text, type, actions = []) => {
+        renderMessage(text, type, actions);
+        let history = JSON.parse(sessionStorage.getItem('ft_chat_history') || '[]');
+        history.push({ text, type, actions });
+        sessionStorage.setItem('ft_chat_history', JSON.stringify(history));
     };
 
     const showTypingIndicator = () => {
@@ -246,18 +253,30 @@ function initChatIA() {
     fabBtn.addEventListener('click', () => {
         chatContainer.classList.remove('ft-chat-closed');
         chatContainer.classList.add('ft-chat-open');
+        sessionStorage.setItem('ft_chat_state', 'open');
         setTimeout(() => inputField.focus(), 400);
     });
 
     closeBtn.addEventListener('click', () => {
         chatContainer.classList.remove('ft-chat-open');
         chatContainer.classList.add('ft-chat-closed');
+        sessionStorage.setItem('ft_chat_state', 'closed');
     });
 
     sendBtn.addEventListener('click', sendMessage);
     inputField.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
+
+    // --- RECUPERAR HISTORIAL Y ESTADO DEL CHAT ---
+    const history = JSON.parse(sessionStorage.getItem('ft_chat_history') || 'null');
+    if (history && history.length > 0) {
+        history.forEach(msg => renderMessage(msg.text, msg.type, msg.actions));
+    }
+    if (sessionStorage.getItem('ft_chat_state') === 'open') {
+        chatContainer.classList.remove('ft-chat-closed');
+        chatContainer.classList.add('ft-chat-open');
+    }
 }
 
 initChatIA();
