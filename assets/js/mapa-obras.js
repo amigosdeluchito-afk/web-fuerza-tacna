@@ -1052,7 +1052,7 @@ window.initMapEngine = async function(container) {
                     ease: "power2.out"
                 });
             };
-            window.addEventListener('mousemove', window._introVideoWiggle);
+            // window.addEventListener('mousemove', window._introVideoWiggle);
         }
 
         if (map) map.resize();
