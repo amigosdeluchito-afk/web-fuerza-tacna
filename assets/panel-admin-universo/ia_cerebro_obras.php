@@ -133,8 +133,20 @@ try {
         .textarea-wrap { flex: 1; display: flex; flex-direction: column; min-height: 250px; margin-bottom: 20px; }
         .textarea-wrap label { font-size: 15px; color: #f9fafb; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .textarea-wrap label span { font-size: 12px; font-weight: normal; color: #9ca3af; background: #1e293b; padding: 2px 8px; border-radius: 4px; }
-        textarea { flex: 1; width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #334155; background: #020617; color: #e2e8f0; font-size: 14px; resize: none; outline: none; line-height: 1.6; font-family: system-ui; }
-        textarea:focus { border-color: #3b82f6; }
+        
+        /* Nuevos estilos para los múltiples contextos */
+        .contextos-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; overflow-y: auto; padding-right: 5px; flex: 1; }
+        .contextos-list::-webkit-scrollbar { width: 6px; }
+        .contextos-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .contexto-item { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 15px; position: relative; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .contexto-item .btn-remove { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .contexto-item .btn-remove:hover { background: #dc2626; transform: scale(1.1); }
+        .contexto-item input { width: 100%; background: transparent; border: none; border-bottom: 1px solid #475569; color: #93c5fd; font-weight: bold; font-size: 13px; padding: 5px 0; outline: none; transition: 0.2s; }
+        .contexto-item input:focus { border-bottom-color: #3b82f6; }
+        .contexto-item textarea { width: 100%; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; padding: 10px; min-height: 100px; resize: vertical; outline: none; line-height: 1.5; box-sizing: border-box; }
+        .contexto-item textarea:focus { border-color: #3b82f6; }
+        .btn-add-context { background: transparent; border: 1px dashed #3b82f6; color: #3b82f6; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center; margin-top: auto; }
+        .btn-add-context:hover { background: rgba(59, 130, 246, 0.1); }
 
         .btn-save-obra { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         .btn-save-obra:hover { background: #059669; }
@@ -217,12 +229,13 @@ try {
                         </div>
                     </div>
 
-                    <div class="textarea-wrap">
+                    <div class="textarea-wrap" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
                         <label>
-                            Contexto Adicional Confidencial (Opcional)
+                            Fuentes y Contexto Adicional
                             <span id="aiStatusBadge">🟢 Ya en Cerebro</span>
                         </label>
-                        <textarea id="aiContextText" placeholder="Pega aquí discursos, anécdotas, peticiones de vecinos o información extraída de documentos. Luchito usará esto para dar respuestas más completas e inteligentes."></textarea>
+                        <div id="contextosList" class="contextos-list"></div>
+                        <button type="button" class="btn-add-context" onclick="agregarContexto()">➕ Agregar Nuevo Bloque de Texto</button>
                     </div>
 
                     <button class="btn-save-obra" id="btnSaveObra">🧠 Alimentar Cerebro con esta Obra</button>
