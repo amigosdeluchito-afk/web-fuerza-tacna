@@ -32,14 +32,6 @@ window.initMapEngine = async function(container) {
     let pendingKey = null;
     let isAutoCenterBlocked = false;
 
-    // --- NUEVO: Detector universal del segmento histórico ---
-    // Puedes poner el ID interno (ej: seg_004) para que sea a prueba de balas
-    const checkIsHistorico = (seg) => {
-        if (!seg) return false;
-        const esIdExacto = seg.id === 'seg_007'; // <-- REEMPLAZA 'seg_00X' por tu ID real del panel (ej: 'seg_004')
-        const esNombreValido = seg.nombre && seg.nombre.toUpperCase().includes('ALCALDE PROVINCIAL');
-        return esIdExacto || esNombreValido;
-    };
 
     // Limpieza de mapa previo para que no choque con Barba.js
     if (window.mapInstance) {
@@ -50,38 +42,6 @@ window.initMapEngine = async function(container) {
     // Función auxiliar para buscar elementos solo dentro del nuevo contenedor
     const getEl = (id) => target.querySelector('#' + id) || document.getElementById(id);
 
-    // =================================================================================
-    // INICIALIZADOR DINÁMICO DE SEGMENTOS
-    // =================================================================================
-    if (typeof window.initGlobalConfig === 'function') {
-        await window.initGlobalConfig();
-    }
-
-    // =================================================================================
-    // AUTO-GENERACIÓN DE BOTONES (Dinámico desde Excel)
-    // =================================================================================
-    const chipsContainer = target.querySelector('.chips-group') || target.querySelector('.chips');
-    if (chipsContainer) {
-        // 1. Limpiamos SOLO los botones de segmentos viejos (respetando Inicio y el Buscador)
-        chipsContainer.querySelectorAll('.chip[data-map]').forEach(chip => {
-            if (chip.getAttribute('data-map') !== 'base') chip.remove();
-        });
-        
-        // 2. Insertamos los botones dinámicos que vienen desde Excel
-        (window.SEGMENTOS_DATA || []).forEach(seg => {
-            const btn = document.createElement('button');
-            btn.className = 'chip';
-            
-            // --- NUEVO: Dar look distinto al segmento histórico usando el detector seguro ---
-            if (checkIsHistorico(seg)) {
-                btn.classList.add('chip-especial-historico');
-            }
-            
-            btn.setAttribute('data-map', seg.id);
-            btn.innerHTML = `<span>${seg.nombre}</span>`;
-            chipsContainer.appendChild(btn);
-        });
-    }
 
     const revealUI = () => {
         const chips = target.querySelector('.chips') || document.querySelector('.chips');
@@ -92,7 +52,6 @@ window.initMapEngine = async function(container) {
         if (chips) { 
             chips.style.opacity = '1'; 
             chips.style.visibility = 'visible'; 
-            chips.classList.add('is-glass');
         }
         if (footer && currentKey === 'base') {
             footer.classList.add('is-visible');
@@ -581,8 +540,7 @@ window.initMapEngine = async function(container) {
             // FIX 1: Eje Y Cartesiano. Dejamos que MapLibre procese el eje Y tal como viene en el Excel.
             const finalLat = o.y * mapLat; 
 
-            const isHistoricoMode = document.body.classList.contains('tema-historico');
-            const color = isHistoricoMode ? '#8b7355' : ((typeof window.colorPinPorEstado === 'function' ? window.colorPinPorEstado(o.estado) : null) || '#801039');
+            const color = (typeof window.colorPinPorEstado === 'function' ? window.colorPinPorEstado(o.estado) : null) || '#801039';
             const k = typeof window._obraKey === 'function' ? window._obraKey(o) : `${o.x}_${o.y}`;
             const numId = featureNumId++;
             
@@ -795,18 +753,9 @@ window.initMapEngine = async function(container) {
         isSwapping = true; 
         currentKey = key; // Definimos el intento de navegación inmediatamente
         
-        // --- NUEVO: Activar Tema Histórico en todo el mapa ---
-        const segDataObj = (window.SEGMENTOS_DATA || []).find(s => s.id === key);
-        if (checkIsHistorico(segDataObj)) {
-            document.body.classList.add('tema-historico');
-        } else {
-            document.body.classList.remove('tema-historico');
-        }
         
         setBackgroundFor(key);
 
-        // Quitar efecto glass al entrar a cualquier mapa
-        if (chips) chips.classList.remove('is-glass');
 
         // --- NUEVO: Si entramos a un segmento de mapa, ocultamos el video ---
         const isFromBase = (prevKey === 'base' || !prevKey);
@@ -859,13 +808,6 @@ window.initMapEngine = async function(container) {
 
             let [gFx, gFy] = FOCUS[key] || [0.5, 0.5];
             
-            // --- NUEVO: Centrar en el cuadrante inferior (Provincia Tacna) en modo histórico ---
-            let isHistoricoMode = checkIsHistorico(segDataObj);
-            if (isHistoricoMode) {
-                gFx = 0.50; // Mantenemos el centro horizontal
-                // OJO: En este mapa Y=0 es el Sur. Al usar 0.28 la cámara sube un poco y el mapa baja visualmente.
-                gFy = 0.28; 
-            }
             
             const cx = lon * gFx;
             const cy = lat * gFy; 
@@ -875,10 +817,6 @@ window.initMapEngine = async function(container) {
                 map.setMaxBounds([ [-lon*0.5, -lat*0.5], [lon*1.5, lat*1.5] ]);
                 map.setCenter([cx, cy]);
                 
-                // --- NUEVO: Acercar la cámara para destacar la provincia del sur ---
-                if (isHistoricoMode) {
-                    map.setZoom(map.getZoom() + 0.3); // Menos zoom para que se vea más pequeño
-                }
             }
 
             target.querySelectorAll('.chips, .fp').forEach(el => {

@@ -378,22 +378,6 @@
       initFilters();
     }
 
-    // --- NUEVO: Mostrar tarjetas exactamente 1 segundo después de que termine la intro de texto ---
-    window.addEventListener('gooeyTextFinished', () => {
-        console.log("Evento recibido: Iniciando conteo de 1s para las tarjetas.");
-        setTimeout(() => {
-            const kpiGrid = document.getElementById('intro-kpi-grid');
-            
-            if (kpiGrid) {
-                kpiGrid.classList.add('is-visible');
-                
-                // Esperamos a que terminen de aparecer (stagger) para iniciar la subida al centro
-                setTimeout(() => {
-                    kpiGrid.classList.add('is-centered');
-                }, 1500);
-            }
-        }, 1000); 
-    });
   });
   
   // 4. Precarga de datos para el buscador global (Ahora se ejecuta en el evento 'load')
@@ -408,52 +392,6 @@
     });
   });
 </script>
-
-<!-- Filtro SVG para el efecto Gooey (Texto viscoso) -->
-<svg style="display: none;">
-  <defs>
-    <filter id="threshold">
-      <feColorMatrix
-        in="SourceGraphic"
-        type="matrix"
-        values="1 0 0 0 0
-                0 1 0 0 0
-                0 0 1 0 0
-                0 0 0 255 -140" />
-    </filter>
-  </defs>
-</svg>
-
-<!-- Filtro SVG de Vidrio Líquido (Fidelidad React) -->
-<svg style="display: none;">
-  <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
-    <!-- Generación del ruido para la distorsión orgánica -->
-    <feTurbulence type="fractalNoise" baseFrequency="0.001 0.005" numOctaves="1" seed="17" result="turbulence"/>
-    
-    <!-- Mapeo de colores para la refracción -->
-    <feComponentTransfer in="turbulence" result="mapped">
-      <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5"/>
-      <feFuncG type="gamma" amplitude="0" exponent="1" offset="0"/>
-      <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5"/>
-    </feComponentTransfer>
-    
-    <!-- Suavizado del mapa para evitar pixelado en los bordes -->
-    <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap"/>
-    
-    <!-- Iluminación especular (el brillo del vidrio) -->
-    <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lightingColor="white" result="specLight">
-      <fePointLight x="-200" y="-200" z="300"/>
-    </feSpecularLighting>
-    
-    <!-- Combinación de la luz con la imagen -->
-    <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage"/>
-    
-    <!-- Desplazamiento final. 
-         Nota: Bajamos de 200 a 60 para evitar bordes pixelados en navegadores desktop, 
-         manteniendo el efecto líquido. -->
-    <feDisplacementMap in="SourceGraphic" in2="softMap" scale="60" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
 
 </body>
 </html>

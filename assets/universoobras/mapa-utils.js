@@ -3,50 +3,24 @@
 // --- CONSTANTES GLOBALES DEL MAPA (Centralizadas aquí para asegurar disponibilidad temprana) ---
 window.SHEET_ID = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
 window.SHEETS = { 
-    base: null
+    base: null,
+    educacion: 'EDUCACIÓN',
+    vias: 'VÍAS',
+    agua: 'AGUA',
+    transporte: 'TRANSPORTE',
+    agricultura: 'AGRICULTURA',
+    social: 'SOCIAL'
 };
-window.FOTOS_DIR = {};
-window.SEGMENTOS_DATA = [];
-
-window.initGlobalConfig = async function() {
-    try {
-        const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json&sheet=SEGMENTOS`;
-        const res = await fetch(url, { cache: 'no-store' });
-        const raw = await res.text();
-        const jsonText = raw.match(/setResponse\(([\s\S]+)\);?/)[1];
-        const data = JSON.parse(jsonText);
-
-        const segmentosTemp = [];
-        (data.table.rows || []).forEach(r => {
-            if (!r.c) return;
-            const id = r.c[0]?.v;             // id_segmento
-            const nombre = r.c[1]?.v;         // nombre_visible
-            const tab = r.c[2]?.v;            // nombre_pestana
-            const activo = String(r.c[3]?.v || '').toUpperCase(); // activo
-            const orden = r.c[4]?.v || 999;   // orden
-            
-            if (id && tab && (activo === 'SI' || activo === '1' || activo === 'TRUE')) {
-                segmentosTemp.push({ id, nombre, tab, orden });
-            }
-        });
-
-        // Ordenar por la columna 'orden'
-        segmentosTemp.sort((a, b) => a.orden - b.orden);
-
-        // Poblar las variables globales con los datos ordenados
-        segmentosTemp.forEach(seg => {
-            window.SHEETS[seg.id] = seg.tab;
-            window.FOTOS_DIR[seg.id] = seg.tab; // Usamos el nombre de la pestaña (ej: 'educacion') para las carpetas
-            window.SEGMENTOS_DATA.push({ id: seg.id, nombre: seg.nombre, tab: seg.tab });
-        });
-    } catch(e) { console.error("Error cargando configuración desde Excel:", e); }
+window.FOTOS_DIR = {
+    educacion: 'EDUCACIÓN',
+    vias: 'VÍAS',
+    agua: 'AGUA',
+    transporte: 'TRANSPORTE',
+    agricultura: 'AGRICULTURA',
+    social: 'SOCIAL'
 };
 
 window.getSegmentName = function(segId) {
-    if (window.SEGMENTOS_DATA) {
-        const seg = window.SEGMENTOS_DATA.find(s => s.id === segId || s.tab === segId);
-        if (seg) return seg.nombre;
-    }
     return segId;
 };
 
