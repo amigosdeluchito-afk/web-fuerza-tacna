@@ -274,8 +274,15 @@ function initChatIA() {
         history.forEach(msg => renderMessage(msg.text, msg.type, msg.actions));
     }
     if (sessionStorage.getItem('ft_chat_state') === 'open') {
-        chatContainer.classList.remove('ft-chat-closed');
-        chatContainer.classList.add('ft-chat-open');
+        // Si detectamos que entramos a la sección de Obras, forzamos al chat a minimizarse
+        const isMapaObras = window.location.pathname.includes('mapa-obras.html') || window.location.pathname.endsWith('/obras') || window.location.pathname.endsWith('/obras/');
+        
+        if (isMapaObras) {
+            sessionStorage.setItem('ft_chat_state', 'closed');
+        } else {
+            chatContainer.classList.remove('ft-chat-closed');
+            chatContainer.classList.add('ft-chat-open');
+        }
     }
 }
 
