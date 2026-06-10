@@ -697,6 +697,8 @@ function delay(n) {
 }
 
 function pageTransition() {
+    // --- PRUEBA DE AISLAMIENTO EXTREMA: Desactivado GSAP ---
+    /*
     var tl = new TimelineMax(); 
     tl.set(".loading-screen", { yPercent: 100, top: 0, bottom: "auto", height: "100%" });
     tl.to(".loading-screen", 1.2, {
@@ -712,21 +714,23 @@ function pageTransition() {
         delay: 0.3,
     });
     tl.set(".loading-screen", { yPercent: 100 });
-
+    */
 }
 
 function contentAnimation() {
+    // --- PRUEBA DE AISLAMIENTO EXTREMA: Desactivado GSAP ---
+    /*
     var tl = new TimelineMax();
     tl.staggerFrom(".animate-this", 1, { opacity: 0, delay: 0.2 }, 0.4);
+    */
 }
 
 function initialLoadAnimation() {
-    // Failsafe de seguridad extrema: si por algún motivo la animación falla, forzamos ocultarla tras 6.5s
-    setTimeout(() => {
-        const loader = document.querySelector('.initial-loader');
-        if (loader) loader.style.display = 'none';
-    }, 6500);
-
+    // --- PRUEBA DE AISLAMIENTO EXTREMA: Desactivado GSAP ---
+    const loader = document.querySelector('.initial-loader');
+    if (loader) loader.style.display = 'none';
+    
+    /*
     try {
         var tl = new TimelineMax();
         
@@ -759,12 +763,12 @@ function initialLoadAnimation() {
         console.error("Error en animación GSAP, cerrando loader a la fuerza:", e);
         document.querySelector('.initial-loader').style.display = 'none';
     }
+    */
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // FIX: Despertamos AOS de inmediato para que el menú aparezca 
-    // sin esperar a que Barba.js termine de hacer sus cálculos.
-    AOS.init({ duration: 1000, easing: 'ease', once: true });
+    // --- PRUEBA DE AISLAMIENTO EXTREMA ---
+    // AOS.init({ duration: 1000, easing: 'ease', once: true });
     
     barba.init({
         sync: true,
@@ -786,8 +790,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Limpieza de seguridad para los pines del mapa de Universo de Obras
                         document.querySelectorAll('.maplibregl-popup, .ghost-card-popup').forEach(el => el.remove());
 
-                    pageTransition();
-                    await delay(1000);
+                    // --- PRUEBA DE AISLAMIENTO EXTREMA: Transición instantánea ---
+                    // pageTransition();
+                    // await delay(1000);
                     done();
                 },
 
@@ -1770,8 +1775,9 @@ function initMapaTacna(container) {
 }
 
 function inits(container) {
-    setTimeout(() => AOS.refreshHard(), 100);
-    setTimeout(() => AOS.refreshHard(), 500); // Segundo refresco de seguridad
+    // --- PRUEBA DE AISLAMIENTO EXTREMA ---
+    // setTimeout(() => AOS.refreshHard(), 100);
+    // setTimeout(() => AOS.refreshHard(), 500);
         
         // Inicializaciones Ligeras
     initSafeMagneticScroll();
