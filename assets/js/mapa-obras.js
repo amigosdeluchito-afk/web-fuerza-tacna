@@ -83,110 +83,6 @@ window.initMapEngine = async function(container) {
         });
     }
 
-    // --- NUEVO: Lógica Gooey Text (Opción 1) ---
-    const initGooeyText = () => {
-        // FIX SUPREMO: Usamos querySelectorAll y tomamos siempre el último elemento.
-        // Esto garantiza encontrar los textos aunque vivan fuera del <main>, 
-        // y a la vez evita animar la página vieja de Barba.js.
-        const cList = document.querySelectorAll('#gooey-text-container');
-        const container = cList.length > 0 ? cList[cList.length - 1] : null;
-        
-        const e1List = document.querySelectorAll('#gooey-text-1');
-        const el1 = e1List.length > 0 ? e1List[e1List.length - 1] : null;
-        
-        const e2List = document.querySelectorAll('#gooey-text-2');
-        const el2 = e2List.length > 0 ? e2List[e2List.length - 1] : null;
-
-        if (!el1 || !el2 || !container) return;
-        
-        if (container._gooeyActive) return; // Evitar que se duplique el bucle
-        container._gooeyActive = true;
-
-        // INYECCIÓN DE SEGURIDAD: Si no existe el filtro SVG en el HTML, el navegador 
-        // oculta todo el texto al aplicar url(#threshold). Esto garantiza que siempre exista.
-        if (!document.getElementById('threshold')) {
-            document.body.insertAdjacentHTML('beforeend', '<svg style="display:none"><defs><filter id="threshold"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" /><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140" /></filter></defs></svg>');
-        }
-
-        const texts = [
-            "BIENVENIDO A TACNA",
-            "EL FUTURO SE CONSTRUYE HOY",
-            "OBRAS FUERZA TACNA"
-        ];
-
-        container.style.setProperty('display', 'flex', 'important');
-        container.style.setProperty('opacity', '1', 'important');
-        container.style.setProperty('visibility', 'visible', 'important');
-        container.style.filter = 'url(#threshold)';
-
-        let textIndex = 0;
-        let time = new Date();
-        let morph = 0;
-        const morphTime = 2.0; 
-        const cooldownTime = 1.2; 
-        let cooldown = cooldownTime;
-
-        // Colocamos el primer texto de forma inicial
-        el1.textContent = texts[0];
-        el2.textContent = "";
-
-        const setMorph = (fraction) => {
-            const blurIn = Math.min(8 / fraction - 8, 100);
-            el2.style.filter = `blur(${blurIn}px)`;
-            el2.style.opacity = Math.pow(fraction, 0.4).toFixed(3);
-
-            const f1 = 1 - fraction;
-            const blurOut = Math.min(8 / f1 - 8, 100);
-            el1.style.filter = `blur(${blurOut}px)`;
-            el1.style.opacity = Math.pow(f1, 0.4).toFixed(3);
-        };
-
-        function animate() {
-            if (!document.body.contains(container) || !container._gooeyActive) return;
-
-            const newTime = new Date();
-            const dt = (newTime.getTime() - time.getTime()) / 1000;
-            time = newTime;
-
-            const shouldIncrementIndex = cooldown > 0;
-            cooldown -= dt;
-
-            if (cooldown <= 0) {
-                if (shouldIncrementIndex) {
-                    // Si ya mostramos todos los textos, apagamos y revelamos los KPIs
-                    if (textIndex >= texts.length - 1) {
-                        container.style.opacity = '0';
-                        container._gooeyActive = false;
-                        setTimeout(() => { container.style.display = 'none'; }, 2000);
-                        
-                        console.log("Gooey: Secuencia completada. Iniciando KPIs...");
-                        window.dispatchEvent(new CustomEvent('gooeyTextFinished'));
-                        return;
-                    }
-
-                    textIndex++;
-                    el1.textContent = texts[textIndex - 1];
-                    el2.textContent = texts[textIndex];
-                }
-
-                morph -= cooldown;
-                cooldown = 0;
-                let fraction = morph / morphTime;
-                if (fraction > 1) {
-                    cooldown = cooldownTime;
-                    fraction = 1;
-                }
-                setMorph(fraction);
-            } else {
-                morph = 0;
-                if (textIndex === 0) setMorph(0);
-                else setMorph(1);
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-    };
-
     const revealUI = () => {
         const chips = target.querySelector('.chips') || document.querySelector('.chips');
         const dock = getEl('filtersDock');
@@ -844,9 +740,6 @@ window.initMapEngine = async function(container) {
             pendingKey = null;
             isAutoCenterBlocked = false; // Resetear bandera al volver a inicio
 
-            const allGooey = document.querySelectorAll('#gooey-text-container');
-            if (allGooey.length > 0) allGooey[allGooey.length - 1]._gooeyActive = false; // Reset real del texto
-
             // Cerrar ficha de obra si está abierta para limpiar la pantalla
             try {
                 if (window.PanelObra && typeof window.PanelObra.close === 'function') {
@@ -891,13 +784,7 @@ window.initMapEngine = async function(container) {
             const dock = getEl('filtersDock');
             if (dock) { dock.style.opacity = '0'; dock.style.visibility = 'hidden'; }
 
-            const kpiGrid = target.querySelector('#intro-kpi-grid') || document.getElementById('intro-kpi-grid');
-            if (kpiGrid) {
-                kpiGrid.classList.remove('is-visible', 'is-centered');
-            }
-
             setTimeout(revealUI, 1500);      // Los chips y el footer aparecen a los 1.5s
-            setTimeout(initGooeyText, 3500); // El texto inicia DESPUÉS del menú a los 3.5s
             return;
         }
 
