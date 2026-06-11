@@ -461,8 +461,9 @@ window.initMapEngine = async function(container) {
                     
                     const pill = typeof window.estadoToPill === 'function' ? window.estadoToPill(estado) : {cls:'', txt:estado};
                     
-                    // FIX: Construcción directa de la imagen, sin depender de la función externa eliminada
-                    const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || currentKey).toLowerCase();
+                    // FIX: Enlace directo al nombre de pestaña en Excel para extraer la foto de la carpeta correcta
+                    const realTab = window.SHEETS ? window.SHEETS[currentKey] : currentKey;
+                    const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || realTab || currentKey).toLowerCase();
                     const imgUrl = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}/1.thumb.webp?v=${sessionTs}` : 'https://via.placeholder.com/300x150/801039/ffc300?text=Fuerza+Tacna';
                     let fragHTML = `<div class="ghost-card__img" style="width: 100%; height: 140px; overflow: hidden; border-radius: 8px 8px 0 0;"><img src="${imgUrl}" alt="${nombre}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x150/801039/ffc300?text=Sin+Foto';"></div>`;
                     
@@ -484,7 +485,8 @@ window.initMapEngine = async function(container) {
         
         if (data && data.o) {
             const o = data.o;
-            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || currentKey).toLowerCase();
+            const realTab = window.SHEETS ? window.SHEETS[currentKey] : currentKey;
+            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || realTab || currentKey).toLowerCase();
             const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
             const dinBuster = "?v=" + new Date().getTime();
             const rawMonto = (o.monto || '').trim();
@@ -1104,7 +1106,8 @@ window.initMapEngine = async function(container) {
 
             // Abrir el Panel de Obra
             const o = d.o;
-            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || currentKey).toLowerCase();
+            const realTab = window.SHEETS ? window.SHEETS[currentKey] : currentKey;
+            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || realTab || currentKey).toLowerCase();
             const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
             const dinBuster = "?v=" + new Date().getTime();
             const rawMonto = (o.monto || '').trim();
