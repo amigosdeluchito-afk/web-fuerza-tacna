@@ -758,8 +758,7 @@ function initialLoadAnimation() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // --- PRUEBA DE AISLAMIENTO EXTREMA ---
-    // AOS.init({ duration: 1000, easing: 'ease', once: true });
+    AOS.init({ duration: 1000, easing: 'ease', once: true });
     
     barba.init({
         sync: true,
@@ -781,9 +780,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Limpieza de seguridad para los pines del mapa de Universo de Obras
                         document.querySelectorAll('.maplibregl-popup, .ghost-card-popup').forEach(el => el.remove());
 
-                    // --- PRUEBA DE AISLAMIENTO EXTREMA: Transición instantánea ---
-                    // pageTransition();
-                    // await delay(1000);
+                    pageTransition();
+                    await delay(1000);
                     done();
                 },
 
@@ -1766,9 +1764,8 @@ function initMapaTacna(container) {
 }
 
 function inits(container) {
-    // --- PRUEBA DE AISLAMIENTO EXTREMA ---
-    // setTimeout(() => AOS.refreshHard(), 100);
-    // setTimeout(() => AOS.refreshHard(), 500);
+    setTimeout(() => AOS.refreshHard(), 100);
+    setTimeout(() => AOS.refreshHard(), 500);
         
         // Inicializaciones Ligeras
     initSafeMagneticScroll();
