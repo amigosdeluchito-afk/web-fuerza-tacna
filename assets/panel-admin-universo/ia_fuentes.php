@@ -204,10 +204,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 if ($node->parentNode) $node->parentNode->removeChild($node);
                             }
 
-                            // 3. Obtener el contenedor principal (Suave)
-                            $mainNode = $dom->getElementsByTagName('article')->item(0);
-                            if (!$mainNode) $mainNode = $dom->getElementsByTagName('main')->item(0);
-                            if (!$mainNode) $mainNode = $dom->getElementsByTagName('body')->item(0);
+                            // 3. Obtener TODO el contenido restante para no perder ni una sola letra
+                            $mainNode = $dom->getElementsByTagName('body')->item(0);
 
                             if ($mainNode) {
                                 $htmlLimpio = $dom->saveHTML($mainNode);

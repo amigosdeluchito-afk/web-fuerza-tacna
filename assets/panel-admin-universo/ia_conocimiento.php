@@ -193,9 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nodosEliminar = $xpath->query("//nav | //footer | //header | //aside | //form | //*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'menu')] | //*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'sidebar')] | //*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'menu')] | //*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'sidebar')]");
         foreach ($nodosEliminar as $node) { if ($node->parentNode) $node->parentNode->removeChild($node); }
 
-        $mainNode = $dom->getElementsByTagName('article')->item(0);
-        if (!$mainNode) $mainNode = $dom->getElementsByTagName('main')->item(0);
-        if (!$mainNode) $mainNode = $dom->getElementsByTagName('body')->item(0);
+        $mainNode = $dom->getElementsByTagName('body')->item(0);
 
         if ($mainNode) {
             $htmlLimpio = $dom->saveHTML($mainNode);
