@@ -95,7 +95,7 @@ if (isset($_GET['success'])) {
 
         /* Estilos Pestañas Cerebro IA */
         .tabs-container { display: flex; flex-direction: column; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; margin-top: 10px; }
-        .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; flex-shrink: 0; }
+        .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
         .tabs-header::-webkit-scrollbar { height: 4px; }
         .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         .tab-btn { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: transparent; border: none; border-right: 1px solid #1f2937; color: #94a3b8; font-size: 13px; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; max-width: 180px; }
@@ -109,7 +109,7 @@ if (isset($_GET['success'])) {
         .tabs-content { display: flex; flex-direction: column; position: relative; }
         .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
         .tab-pane.active { display: flex; }
-        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; transition: height 0.1s; }
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }
@@ -640,7 +640,7 @@ if (isset($_GET['success'])) {
             tabPane.className = 'tab-pane active';
             tabPane.id = tabId;
             tabPane.innerHTML = `
-                <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box; flex-shrink: 0;">
+                <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box;">
                 <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'..." oninput="this.style.height = '350px'; this.style.height = this.scrollHeight + 'px'">${texto}</textarea>
             `;
             tabsContent.appendChild(tabPane);

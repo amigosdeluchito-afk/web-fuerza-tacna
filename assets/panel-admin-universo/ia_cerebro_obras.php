@@ -123,20 +123,20 @@ try {
         .editor-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b; }
         .editor-placeholder svg { width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5; }
         
-        .editor-content { display: none; flex-direction: column; min-height: 100%; }
+        .editor-content { display: none; flex-direction: column; height: 100%; }
         .excel-data-card { background: #020617; border: 1px solid #1e293b; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
         .excel-data-card h3 { margin: 0 0 10px 0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
         .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .data-item label { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; }
         .data-item div { font-size: 14px; font-weight: 600; color: #e2e8f0; }
         
-        .textarea-wrap { display: flex; flex-direction: column; min-height: 450px; margin-bottom: 20px; }
+        .textarea-wrap { flex: 1; display: flex; flex-direction: column; min-height: 450px; margin-bottom: 20px; }
         .textarea-wrap label { font-size: 15px; color: #f9fafb; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .textarea-wrap label span { font-size: 12px; font-weight: normal; color: #9ca3af; background: #1e293b; padding: 2px 8px; border-radius: 4px; }
         
         /* Nuevos estilos para los múltiples contextos (Pestañas tipo Navegador) */
-        .tabs-container { display: flex; flex-direction: column; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; }
-        .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; flex-shrink: 0; }
+        .tabs-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; }
+        .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
         .tabs-header::-webkit-scrollbar { height: 4px; }
         .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         .tab-btn { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: transparent; border: none; border-right: 1px solid #1f2937; color: #94a3b8; font-size: 13px; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; max-width: 180px; }
@@ -148,10 +148,10 @@ try {
         .btn-add-tab { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: none; color: #10b981; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-add-tab:hover { background: rgba(16,185,129,0.1); }
 
-        .tabs-content { display: flex; flex-direction: column; position: relative; }
-        .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
+        .tabs-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .tab-pane { display: none; flex: 1; flex-direction: column; padding: 0; height: 100%; box-sizing: border-box; }
         .tab-pane.active { display: flex; }
-        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; transition: height 0.1s; }
 
         .btn-save-obra { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         .btn-save-obra:hover { background: #059669; }
@@ -242,7 +242,7 @@ try {
                         </label>
                         <div class="tabs-container">
                             <div class="tabs-header">
-                                <div id="tabsHeaderList" style="display: flex; flex: 0 0 auto;"></div>
+                                <div id="tabsHeaderList" style="display: flex;"></div>
                                 <button type="button" class="btn-add-tab" onclick="agregarContexto(null, '', true)" title="Añadir nueva pestaña">➕ Nueva Pestaña</button>
                                 <button type="button" class="btn-add-tab" onclick="abrirExtractorUrl()" title="Extraer texto de un enlace web" style="color: #3b82f6;">🌐 Extraer Link</button>
                             </div>
@@ -421,7 +421,7 @@ try {
             tabPane.className = 'tab-pane active';
             tabPane.id = tabId;
             tabPane.innerHTML = `
-                <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box; flex-shrink: 0;">
+                <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box;">
                 <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'..." oninput="this.style.height = '350px'; this.style.height = this.scrollHeight + 'px'">${texto}</textarea>
             `;
             
@@ -432,15 +432,16 @@ try {
 
             const textarea = tabPane.querySelector('.ctx-texto');
             if (textarea) {
-                setTimeout(() => { textarea.style.height = ''; textarea.style.height = textarea.scrollHeight + 'px'; }, 10);
+                setTimeout(() => { textarea.style.height = '350px'; textarea.style.height = textarea.scrollHeight + 'px'; }, 10);
             }
         }
 
         function activarTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.target === tabId));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.target === tabId);
+            });
             document.querySelectorAll('.tab-pane').forEach(pane => {
-                const isActive = pane.id === tabId;
-                pane.classList.toggle('active', isActive);
+                pane.classList.toggle('active', pane.id === tabId);
                 if (isActive) {
                     const textarea = pane.querySelector('.ctx-texto');
                     if (textarea) { textarea.style.height = '350px'; textarea.style.height = textarea.scrollHeight + 'px'; }
