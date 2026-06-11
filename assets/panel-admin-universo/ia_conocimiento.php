@@ -186,15 +186,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$html) { echo json_encode(['ok' => false, 'error' => 'No se pudo descargar la web']); exit; }
 
-        $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
+        $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas|nav|footer|aside|header|form|menu)[^>]*?>.*?</\1>@si', ' ', $html);
         $dom = new DOMDocument(); libxml_use_internal_errors(true); @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8')); libxml_clear_errors();
         $xpath = new DOMXPath($dom);
-        $nodosEliminar = $xpath->query("//nav | //footer | //aside | //header | //form | //*[contains(@class, 'comments')]");
+        
+        $basura = ['comment', 'sidebar', 'menu', 'footer', 'widget', 'cookie', 'popup', 'share', 'social', 'advert', 'promo', 'related', 'nav', 'author'];
+        $xpath_query = [];
+        foreach ($basura as $b) {
+            $xpath_query[] = "//*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
+            $xpath_query[] = "//*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
+        }
+        $nodosEliminar = $xpath->query(implode(' | ', $xpath_query));
         foreach ($nodosEliminar as $node) { if ($node->parentNode) $node->parentNode->removeChild($node); }
 
-        $htmlLimpio = $dom->saveHTML();
-        $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '<br>', '</div>'], "\n", $htmlLimpio);
-        $text = trim(preg_replace("/\n{3,}/", "\n\n", preg_replace("/\n\s+/", "\n", preg_replace('/[ \t]+/', ' ', html_entity_decode(strip_tags($htmlLimpio), ENT_QUOTES | ENT_HTML5, 'UTF-8')))));
+        $mainNode = $dom->getElementsByTagName('article')->item(0);
+        if (!$mainNode) $mainNode = $dom->getElementsByTagName('main')->item(0);
+        if (!$mainNode) {
+            $divs = $dom->getElementsByTagName('div');
+            $maxP = 0;
+            foreach ($divs as $div) {
+                $pCount = $xpath->evaluate('count(.//p)', $div);
+                if ($pCount > $maxP) { $maxP = $pCount; $mainNode = $div; }
+            }
+        }
+        if (!$mainNode) $mainNode = $dom->getElementsByTagName('body')->item(0);
+
+        if ($mainNode) {
+            $htmlLimpio = $dom->saveHTML($mainNode);
+            $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>', '</div>'], "\n", $htmlLimpio);
+            $text = strip_tags($htmlLimpio);
+        } else {
+            $text = "";
+        }
+        
+        $text = trim(preg_replace("/\n{3,}/", "\n\n", preg_replace("/\n\s+/", "\n", preg_replace('/[ \t]+/', ' ', html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8')))));
 
         $titulo = "Extraído de Web";
         if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $matches)) { $titulo = mb_strimwidth(trim(strip_tags($matches[1])), 0, 100, '...'); }

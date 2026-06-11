@@ -185,10 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (!$html) {
                             $_SESSION['ia_msg'] = "Error: No se pudo descargar el contenido de la URL o tardó demasiado. ($curl_err)";
                         } else {
-                            // 1. Limpieza inicial: Quitar scripts, estilos e iframes para no romper el DOM
-                            $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
+                            // 1. Limpieza inicial profunda: Quitar elementos estructurales inútiles
+                            $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas|nav|footer|aside|header|form|menu)[^>]*?>.*?</\1>@si', ' ', $html);
                             
-                            // 2. Limpieza Inteligente con DOMDocument (Francotirador anti-basura)
                             $dom = new DOMDocument();
                             libxml_use_internal_errors(true);
                             @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
@@ -196,8 +195,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             $xpath = new DOMXPath($dom);
                             
-                            // Cazamos solo etiquetas semánticas seguras y clases muy específicas (sin usar 'contains' de forma agresiva)
-                            $nodosEliminar = $xpath->query("//nav | //footer | //aside | //header | //form | //*[contains(concat(' ', normalize-space(@class), ' '), ' comments ')] | //*[contains(concat(' ', normalize-space(@class), ' '), ' social ')]");
+                            // 2. Limpieza por Clases e IDs (Francotirador anti-basura)
+                            $basura = ['comment', 'sidebar', 'menu', 'footer', 'widget', 'cookie', 'popup', 'share', 'social', 'advert', 'promo', 'related', 'nav', 'author'];
+                            $xpath_query = [];
+                            foreach ($basura as $b) {
+                                $xpath_query[] = "//*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
+                                $xpath_query[] = "//*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
+                            }
+                            $nodosEliminar = $xpath->query(implode(' | ', $xpath_query));
                             
                             $nodos = [];
                             foreach ($nodosEliminar as $node) { $nodos[] = $node; }
@@ -205,11 +210,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 if ($node->parentNode) $node->parentNode->removeChild($node);
                             }
 
-                            $htmlLimpio = $dom->saveHTML();
-                            
-                            // 3. Forzar saltos de línea reales para que el texto se lea como párrafos
-                            $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>', '</div>'], "\n", $htmlLimpio);
-                            $text = strip_tags($htmlLimpio);
+                            // 3. Algoritmo de "Centro de Gravedad" (Buscar el artículo real)
+                            $mainNode = $dom->getElementsByTagName('article')->item(0);
+                            if (!$mainNode) $mainNode = $dom->getElementsByTagName('main')->item(0);
+                            if (!$mainNode) {
+                                $divs = $dom->getElementsByTagName('div');
+                                $maxP = 0;
+                                foreach ($divs as $div) {
+                                    $pCount = $xpath->evaluate('count(.//p)', $div);
+                                    if ($pCount > $maxP) {
+                                        $maxP = $pCount;
+                                        $mainNode = $div;
+                                    }
+                                }
+                            }
+                            if (!$mainNode) $mainNode = $dom->getElementsByTagName('body')->item(0);
+
+                            if ($mainNode) {
+                                $htmlLimpio = $dom->saveHTML($mainNode);
+                                // 4. Forzar saltos de línea reales para que el texto se lea como párrafos
+                                $htmlLimpio = str_replace(['</p>', '</h1>', '</h2>', '</h3>', '</h4>', '</li>', '<br>', '<br/>', '</div>'], "\n", $htmlLimpio);
+                                $text = strip_tags($htmlLimpio);
+                            } else {
+                                $text = "";
+                            }
                             
                             // Decodificar entidades (&nbsp;, &aacute;, etc)
                             $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
