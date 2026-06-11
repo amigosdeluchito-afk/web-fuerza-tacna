@@ -1044,29 +1044,118 @@ window.initMapEngine = async function(container) {
 
     // El buscador, filtros y docks ahora se manejan en sus respectivos archivos .js
 
-    // Clicks en los chips
-    target.querySelectorAll('.chip[data-map]').forEach(chip => {
-        chip.addEventListener('click', () => {
-            const key = chip.getAttribute('data-map');
+    // ==============================================================================
+    // GENERACIÓN DINÁMICA DEL MENÚ DE SEGMENTOS
+    // ==============================================================================
+    function attachChipListeners() {
+        target.querySelectorAll('.chip[data-map]').forEach(chip => {
+            // Clonar para evitar listeners duplicados al reconstruir
+            const newChip = chip.cloneNode(true);
+            chip.parentNode.replaceChild(newChip, chip);
             
-            // --- NUEVO: Comportamiento Inteligente del botón Inicio ---
-            // Si se presiona "Inicio" (base) y ya estamos en esa pantalla, regresamos a la Matriz Principal.
-            if (key === 'base' && (currentKey === 'base' || currentKey === null)) {
-                // Método infalible para encontrar la raíz del proyecto y redirigir
-                let rootUrl = window.location.href.split('?')[0].split('#')[0];
-                if (rootUrl.includes('/assets/')) rootUrl = rootUrl.substring(0, rootUrl.indexOf('/assets/'));
-                else if (rootUrl.match(/\/obras\/?$/)) rootUrl = rootUrl.replace(/\/obras\/?$/, '');
+            newChip.addEventListener('click', () => {
+                const key = newChip.getAttribute('data-map');
                 
-                window.location.href = rootUrl + '/index.html';
-                return;
+                // Comportamiento Inteligente del botón Inicio
+                if (key === 'base' && (currentKey === 'base' || currentKey === null)) {
+                    let rootUrl = window.location.href.split('?')[0].split('#')[0];
+                    if (rootUrl.includes('/assets/')) rootUrl = rootUrl.substring(0, rootUrl.indexOf('/assets/'));
+                    else if (rootUrl.match(/\/obras\/?$/)) rootUrl = rootUrl.replace(/\/obras\/?$/, '');
+                    window.location.href = rootUrl + '/index.html';
+                    return;
+                }
+
+                if (key === currentKey) return;
+                target.querySelectorAll('.chip[data-map]').forEach(c => c.classList.remove('is-active'));
+                newChip.classList.add('is-active');
+                swapSegment(key);
+            });
+        });
+    }
+    attachChipListeners();
+
+    window.loadDynamicMenu = async function() {
+        if (!window.SHEET_ID) return;
+        try {
+            console.log("[Mapa] 🔍 Construyendo menú dinámico desde 'SEGMENTOS'...");
+            let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:E&headers=1`;
+            let resp = await fetch(mapUrl);
+            let txt = await resp.text();
+            let match = txt.match(/setResponse\(([\s\S]+)\);?/);
+            
+            if (!match) {
+                mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:E&headers=1`;
+                resp = await fetch(mapUrl);
+                txt = await resp.text();
+                match = txt.match(/setResponse\(([\s\S]+)\);?/);
             }
 
-            if (key === currentKey) return;
-            target.querySelectorAll('.chip[data-map]').forEach(c => c.classList.remove('is-active'));
-            chip.classList.add('is-active');
-            swapSegment(key);
-        });
-    });
+            if (match) {
+                const rows = window.gvizToObjects(JSON.parse(match[1]));
+                window.SHEETS = { base: '' };
+                let menuItems = [];
+                
+                rows.forEach(r => {
+                    const idHtmlRaw = r.id_segmento ?? r.idsegmento ?? r.id ?? r.segmento ?? '';
+                    const nombreVisRaw = r.nombre_visible ?? r.nombrevisible ?? r.nombre ?? r.titulo ?? '';
+                    const tabExcelRaw = r.nombre_pestana ?? r.nombrepestana ?? r.pestana ?? r.tab ?? '';
+                    const activoRaw = String(r.activo ?? r.Activo ?? r.ACTIVO ?? 'NO').toUpperCase().trim();
+                    const ordenRaw = parseInt(r.orden ?? r.Orden ?? r.ORDEN ?? 0) || 0;
+                    
+                    const idHtml = String(idHtmlRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                    const nombreVis = String(nombreVisRaw).trim();
+                    const tabExcel = String(tabExcelRaw).trim();
+                    
+                    if (idHtml && tabExcel) {
+                        window.SHEETS[idHtml] = tabExcel;
+                    }
+                    if (nombreVis && tabExcel && String(nombreVis).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() !== idHtml) {
+                        window.SHEETS[String(nombreVis).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()] = tabExcel;
+                    }
+
+                    if (activoRaw === 'SI' || activoRaw === '1' || activoRaw === 'TRUE' || activoRaw === 'SÍ') {
+                        if (nombreVis && idHtml) {
+                            menuItems.push({ idHtml, nombreVis, orden: ordenRaw });
+                        }
+                    }
+                });
+                
+                window.SHEETS_MAPPED = true;
+                
+                const chipsGroup = target.querySelector('.chips-group');
+                if (chipsGroup) {
+                    const inicioBtn = chipsGroup.querySelector('.chip[data-map="base"]');
+                    const searchPill = chipsGroup.querySelector('.search-pill');
+                    
+                    chipsGroup.innerHTML = '';
+                    if (inicioBtn) chipsGroup.appendChild(inicioBtn);
+                    
+                    let div1 = document.createElement('div'); div1.className = 'divider-v'; 
+                    chipsGroup.appendChild(div1);
+                    
+                    if (searchPill) chipsGroup.appendChild(searchPill);
+                    
+                    let div2 = document.createElement('div'); div2.className = 'divider-v'; 
+                    chipsGroup.appendChild(div2);
+                    
+                    menuItems.sort((a, b) => a.orden - b.orden);
+                    
+                    menuItems.forEach(item => {
+                        const btn = document.createElement('button');
+                        btn.className = 'chip';
+                        btn.setAttribute('data-map', item.idHtml);
+                        btn.textContent = item.nombreVis;
+                        chipsGroup.appendChild(btn);
+                    });
+
+                    attachChipListeners();
+                    console.log("[Mapa] ✅ Menú visual inyectado exitosamente.");
+                }
+            }
+        } catch (e) {
+            console.warn("[Mapa] ⚠️ Error al generar menú dinámico.", e);
+        }
+    };
 
     // Resize
     if (window._mapResizeHandler) {
@@ -1076,9 +1165,13 @@ window.initMapEngine = async function(container) {
     window.addEventListener('resize', window._mapResizeHandler);
     
     // Auto-arranque de Obras
-    setTimeout(() => {
-
+    setTimeout(async () => {
         if (map) map.resize();
+        
+        // Construir menú dinámico desde la pestaña SEGMENTOS
+        if (typeof window.loadDynamicMenu === 'function') {
+            await window.loadDynamicMenu();
+        }
         
         // FORMA NATURAL RESTAURADA: Encadenamos todo desde la base de manera orgánica.
         swapSegment('base');
