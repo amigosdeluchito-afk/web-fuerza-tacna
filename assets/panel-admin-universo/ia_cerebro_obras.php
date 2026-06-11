@@ -151,7 +151,7 @@ try {
         .tabs-content { display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
         .tab-pane.active { display: flex; }
-        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; transition: height 0.1s; }
+        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: vertical; overflow-y: auto; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         .btn-save-obra { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         .btn-save-obra:hover { background: #059669; }
@@ -242,7 +242,7 @@ try {
                         </label>
                         <div class="tabs-container">
                             <div class="tabs-header">
-                                <div id="tabsHeaderList" style="display: flex;"></div>
+                                <div id="tabsHeaderList" style="display: flex; flex: 0 0 auto;"></div>
                                 <button type="button" class="btn-add-tab" onclick="agregarContexto(null, '', true)" title="Añadir nueva pestaña">➕ Nueva Pestaña</button>
                                 <button type="button" class="btn-add-tab" onclick="abrirExtractorUrl()" title="Extraer texto de un enlace web" style="color: #3b82f6;">🌐 Extraer Link</button>
                             </div>
@@ -441,10 +441,6 @@ try {
             document.querySelectorAll('.tab-pane').forEach(pane => {
                 const isActive = pane.id === tabId;
                 pane.classList.toggle('active', isActive);
-                if (isActive) {
-                    const textarea = pane.querySelector('.ctx-texto');
-                    if (textarea) { textarea.style.height = ''; textarea.style.height = textarea.scrollHeight + 'px'; }
-                }
             });
         }
 

@@ -242,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .tabs-content { display: flex; flex-direction: column; position: relative; }
         .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
         .tab-pane.active { display: flex; }
-        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; transition: height 0.1s; }
+        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: vertical; overflow-y: auto; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }
@@ -402,7 +402,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="tabs-container">
                     <div class="tabs-header">
-                        <div id="tabsHeaderList" style="display: flex;"></div>
+                        <div id="tabsHeaderList" style="display: flex; flex: 0 0 auto;"></div>
                         <button type="button" class="btn-add-tab" onclick="agregarContexto(null, '', true)" title="Añadir nueva pestaña">➕ Nueva Pestaña</button>
                         <button type="button" class="btn-add-tab" onclick="abrirExtractorUrl()" title="Extraer texto de un enlace web" style="color: #3b82f6;">🌐 Extraer Link</button>
                     </div>
@@ -501,15 +501,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             tabPane.id = tabId;
             tabPane.innerHTML = `
                 <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box;">
-                <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'..." oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'">${texto}</textarea>
+                <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'...">${texto}</textarea>
             `;
             tabsContent.appendChild(tabPane);
             tabsHeaderList.parentElement.scrollLeft = tabsHeaderList.parentElement.scrollWidth;
-
-            const textarea = tabPane.querySelector('.ctx-texto');
-            if (textarea) {
-                setTimeout(() => { textarea.style.height = ''; textarea.style.height = textarea.scrollHeight + 'px'; }, 10);
-            }
         }
 
         function activarTab(tabId) {
@@ -517,10 +512,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.querySelectorAll('.tab-pane').forEach(pane => {
                 const isActive = pane.id === tabId;
                 pane.classList.toggle('active', isActive);
-                if (isActive) {
-                    const textarea = pane.querySelector('.ctx-texto');
-                    if (textarea) { textarea.style.height = ''; textarea.style.height = textarea.scrollHeight + 'px'; }
-                }
             });
         }
 
