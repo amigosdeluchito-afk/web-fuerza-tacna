@@ -94,7 +94,7 @@ if (isset($_GET['success'])) {
         .badge-principal { position: absolute; top: 6px; left: 6px; background: #10b981; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
         /* Estilos Pestañas Cerebro IA */
-        .tabs-container { display: flex; flex-direction: column; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; margin-top: 10px; }
+        .tabs-container { display: block; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; margin-top: 10px; }
         .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
         .tabs-header::-webkit-scrollbar { height: 4px; }
         .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -106,10 +106,10 @@ if (isset($_GET['success'])) {
         .tab-close:hover { opacity: 1; background: rgba(239,68,68,0.2); }
         .btn-add-tab { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: none; color: #10b981; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-add-tab:hover { background: rgba(16,185,129,0.1); }
-        .tabs-content { display: flex; flex-direction: column; position: relative; }
-        .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
-        .tab-pane.active { display: flex; }
-        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; transition: height 0.1s; }
+        .tabs-content { display: block; position: relative; }
+        .tab-pane { display: none; padding: 0; box-sizing: border-box; }
+        .tab-pane.active { display: block; }
+        .tab-pane textarea { display: block; width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow-y: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }
@@ -612,6 +612,12 @@ if (isset($_GET['success'])) {
         }
 
         // --- LÓGICA DE PESTAÑAS CEREBRO IA ---
+        
+        function autoExpandTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
+        }
+        
         let tabCounter = 0;
         function agregarContexto(titulo = "", texto = "", promptUser = false, url = "") {
             if (promptUser) {
@@ -641,14 +647,14 @@ if (isset($_GET['success'])) {
             tabPane.id = tabId;
             tabPane.innerHTML = `
                 <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box;">
-                <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'..." oninput="this.style.height = '350px'; this.style.height = this.scrollHeight + 'px'">${texto}</textarea>
+                <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'..." oninput="autoExpandTextarea(this)">${texto}</textarea>
             `;
             tabsContent.appendChild(tabPane);
             tabsHeaderList.parentElement.scrollLeft = tabsHeaderList.parentElement.scrollWidth;
 
             const textarea = tabPane.querySelector('.ctx-texto');
             if (textarea) {
-                setTimeout(() => { textarea.style.height = '350px'; textarea.style.height = textarea.scrollHeight + 'px'; }, 10);
+                setTimeout(() => { autoExpandTextarea(textarea); }, 50);
             }
         }
 
@@ -659,7 +665,7 @@ if (isset($_GET['success'])) {
                 pane.classList.toggle('active', isActive);
                 if (isActive) {
                     const textarea = pane.querySelector('.ctx-texto');
-                    if (textarea) { textarea.style.height = '350px'; textarea.style.height = textarea.scrollHeight + 'px'; }
+                    if (textarea) { setTimeout(() => { autoExpandTextarea(textarea); }, 50); }
                 }
             });
         }
