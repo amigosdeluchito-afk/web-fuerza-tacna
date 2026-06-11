@@ -521,15 +521,18 @@ window.initMapEngine = async function(container) {
         console.log(`[Mapa] Procesando ${obras.length} filas del Excel para el segmento: ${segmento}`);
 
         for (const o of obras){
-            // FIX: Soporte a prueba de fallos para nombres de columnas en mayúscula (Nombre, X, Y)
-            const nombre = String(o.nombre ?? o.Nombre ?? o.NOMBRE ?? '').trim();
-            const rawX = o.x ?? o.X ?? o.lng ?? o.Lng;
-            const rawY = o.y ?? o.Y ?? o.lat ?? o.Lat;
+            // FIX: Soporte extendido a prueba de fallos para nombres de columnas (Dashboard)
+            const nombre = String(o.nombre ?? o.Nombre ?? o.NOMBRE ?? o.obra ?? o.Obra ?? o.titulo ?? o.Titulo ?? '').trim();
+            const rawX = o.x ?? o.X ?? o.lng ?? o.Lng ?? o.longitud ?? o.Longitud ?? o.coord_x ?? o.COORD_X ?? o['COORD X'] ?? o['coord x'];
+            const rawY = o.y ?? o.Y ?? o.lat ?? o.Lat ?? o.latitud ?? o.Latitud ?? o.coord_y ?? o.COORD_Y ?? o['COORD Y'] ?? o['coord y'];
             const x = toNum(rawX), y = toNum(rawY);
             
-            if (!nombre) continue;
+            if (!nombre) {
+                console.warn("[Mapa] Fila omitida (Falta columna de nombre):", o);
+                continue;
+            }
             if (isNaN(x) || isNaN(y)) {
-                console.warn(`[Mapa] Fila omitida (Coordenadas inválidas): ${nombre} -> X: ${rawX}, Y: ${rawY}`);
+                console.warn(`[Mapa] Fila omitida (Coordenadas X/Y inválidas o vacías): ${nombre} -> X: ${rawX}, Y: ${rawY}`, o);
                 continue;
             }
             
@@ -537,7 +540,25 @@ window.initMapEngine = async function(container) {
             if (estado.toLowerCase().includes('oculto')) continue;
 
             const rawCarp = String(o.carpeta ?? o.Carpeta ?? o.CARPETA ?? '').trim();
-            validas.push({ ...o, nombre, estado, x, y, carpeta: (rawCarp && rawCarp.toLowerCase() !== 'null' && rawCarp !== '-') ? rawCarp : null });
+            
+            // Normalizar otros campos vitales que pudieron cambiar de nombre
+            const distrito = String(o.distrito ?? o.Distrito ?? o.DISTRITO ?? '').trim();
+            const provincia = String(o.provincia ?? o.Provincia ?? o.PROVINCIA ?? '').trim();
+            const descripcion = String(o.descripcion ?? o.Descripcion ?? o.DESCRIPCION ?? '').trim();
+            const monto = String(o.monto ?? o.Monto ?? o.MONTO ?? '').trim();
+
+            validas.push({ 
+                ...o, 
+                nombre, 
+                estado, 
+                x, 
+                y, 
+                carpeta: (rawCarp && rawCarp.toLowerCase() !== 'null' && rawCarp !== '-') ? rawCarp : null,
+                distrito,
+                provincia,
+                descripcion,
+                monto
+            });
         }
         console.log(`[Mapa] Pines listos para renderizar: ${validas.length}`);
 
