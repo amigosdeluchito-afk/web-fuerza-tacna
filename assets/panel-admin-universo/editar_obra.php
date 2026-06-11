@@ -6,6 +6,16 @@ require_login();
 
 $mensaje = '';
 
+// Obtenemos los textos de la IA para cruzarlos
+$conocimiento_ia = [];
+try {
+    $db = get_db_connection();
+    $stmt = $db->query("SELECT titulo, contenido FROM panel_ia_conocimiento WHERE fuente = 'Google Sheets - Obras'");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $conocimiento_ia[trim($row['titulo'])] = $row['contenido'];
+    }
+} catch (Exception $e) {}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once __DIR__ . '/vendor/autoload.php';
     $rutaCredenciales = __DIR__ . '/data/credenciales.json';
@@ -215,6 +225,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; text-align: center; font-size: 13px;
         }
         .form-oculto .alerta-oculto { display: block; }
+        
+        /* Estilos Pestañas Cerebro IA */
+        .tabs-container { display: flex; flex-direction: column; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; margin-top: 10px; }
+        .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
+        .tabs-header::-webkit-scrollbar { height: 4px; }
+        .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .tab-btn { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: transparent; border: none; border-right: 1px solid #1f2937; color: #94a3b8; font-size: 13px; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; max-width: 180px; }
+        .tab-btn span.ctx-titulo-display { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+        .tab-btn:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .tab-close { background: transparent; border: none; color: #ef4444; font-size: 16px; line-height: 1; cursor: pointer; padding: 0 4px; border-radius: 4px; opacity: 0.7; }
+        .tab-close:hover { opacity: 1; background: rgba(239,68,68,0.2); }
+        .btn-add-tab { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: none; color: #10b981; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-add-tab:hover { background: rgba(16,185,129,0.1); }
+        .tabs-content { display: flex; flex-direction: column; position: relative; }
+        .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
+        .tab-pane.active { display: flex; }
+        .tab-pane textarea { width: 100%; min-height: 150px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }
@@ -420,6 +448,110 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "Jorge Basadre": ["Locumba", "Ilabaya", "Ite"]
         };
 
+        // Conocimiento de IA local
+        const CEREBRO_IA = <?php echo json_encode($conocimiento_ia ?? []); ?>;
+        let tabCounter = 0;
+
+        function formatMontoFriendly(val) {
+            let str = String(val).trim();
+            if (/[a-zA-Z]/.test(str) && !str.toLowerCase().startsWith('s/')) return str; 
+            let num = parseFloat(str.replace(/[^\d.-]/g, '')) || 0;
+            if (num === 0) return 'S/ 0';
+            if (num >= 1000000) { let m = num / 1000000; return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Millones'; } 
+            else if (num >= 1000) { let m = num / 1000; return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Mil'; }
+            return 'S/ ' + num.toLocaleString('en-US');
+        }
+
+        function agregarContexto(titulo = "", texto = "", promptUser = false) {
+            if (promptUser) {
+                titulo = prompt("Ingresa un nombre para esta pestaña (Ej. 'Noticia', 'Expediente'):");
+                if (titulo === null || titulo.trim() === "") return;
+            }
+            if (!titulo) titulo = "General";
+
+            tabCounter++;
+            const tabId = 'tab_' + tabCounter;
+
+            const tabsHeaderList = document.getElementById('tabsHeaderList');
+            const tabsContent = document.getElementById('tabsContent');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            const tabBtn = document.createElement('button');
+            tabBtn.type = 'button';
+            tabBtn.className = 'tab-btn active';
+            tabBtn.dataset.target = tabId;
+            tabBtn.innerHTML = `<span class="ctx-titulo-display">${titulo}</span><input type="hidden" class="ctx-titulo" value="${titulo}"><div class="tab-close" onclick="eliminarContexto(event, '${tabId}')" title="Cerrar pestaña">&times;</div>`;
+            tabBtn.onclick = () => activarTab(tabId);
+            tabsHeaderList.appendChild(tabBtn);
+
+            const tabPane = document.createElement('div');
+            tabPane.className = 'tab-pane active';
+            tabPane.id = tabId;
+            tabPane.innerHTML = `<textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'...">${texto}</textarea>`;
+            tabsContent.appendChild(tabPane);
+            tabsHeaderList.parentElement.scrollLeft = tabsHeaderList.parentElement.scrollWidth;
+        }
+
+        function activarTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.target === tabId));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.toggle('active', pane.id === tabId));
+        }
+
+        function eliminarContexto(event, tabId) {
+            event.stopPropagation();
+            if (!confirm("¿Seguro que deseas eliminar esta pestaña?")) return;
+            const btn = document.querySelector(`.tab-btn[data-target="${tabId}"]`);
+            const pane = document.getElementById(tabId);
+            const wasActive = btn.classList.contains('active');
+            btn.remove(); pane.remove();
+            if (wasActive) {
+                const remainingTabs = document.querySelectorAll('.tab-btn');
+                if (remainingTabs.length > 0) activarTab(remainingTabs[remainingTabs.length - 1].dataset.target);
+            }
+        }
+
+        function cargarDatosIA(obra) {
+            const tabsHeaderList = document.getElementById('tabsHeaderList');
+            const tabsContent = document.getElementById('tabsContent');
+            tabsHeaderList.innerHTML = '';
+            tabsContent.innerHTML = '';
+            const badge = document.getElementById('aiStatusBadge');
+            
+            const tituloClave = "Obra: " + obra.nombre;
+            let textoIA = CEREBRO_IA[tituloClave];
+
+            if (textoIA) {
+                const separador = "Contexto adicional:";
+                if (textoIA.includes(separador)) {
+                    textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
+                    if (textoIA.includes('--- ')) {
+                        const bloques = textoIA.split(/--- (.*?) ---/g);
+                        for (let i = 1; i < bloques.length; i += 2) {
+                            const t = bloques[i].trim();
+                            const c = (bloques[i+1] || "").trim();
+                            if (c !== "") agregarContexto(t, c);
+                        }
+                    } else if (textoIA !== "") {
+                        agregarContexto("Contexto General", textoIA);
+                    }
+                } else {
+                    agregarContexto("Principal");
+                }
+                badge.textContent = "🟢 Ya en Cerebro";
+                badge.style.color = "#10b981";
+                badge.style.background = "rgba(16, 185, 129, 0.1)";
+                badge.style.borderColor = "#10b981";
+            } else {
+                agregarContexto("Principal");
+                badge.textContent = "🔴 Nuevo para IA";
+                badge.style.color = "#ef4444";
+                badge.style.background = "rgba(239, 68, 68, 0.1)";
+                badge.style.borderColor = "#ef4444";
+            }
+        }
+
         const obrasPorSegmento = {};
 
         function parseGviz(text) {
@@ -506,6 +638,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (idx === "") { 
                 formEditar.style.display = 'none'; 
                 document.getElementById('fotosSection').style.display = 'none';
+                document.getElementById('iaSection').style.display = 'none';
                 document.getElementById('globalSaveSection').style.display = 'none';
                 return; 
             }
@@ -578,8 +711,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             formEditar.style.display = 'block';
             document.getElementById('fotosSection').style.display = 'block';
+            document.getElementById('iaSection').style.display = 'block';
             document.getElementById('globalSaveSection').style.display = 'block';
             cargarFotosObra(); // Llamada automática a la galería integrada
+            
+            cargarDatosIA(item); // Llamada a los datos de la IA
         });
 
         // ==========================
@@ -851,6 +987,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
+        });
+
+        // ==========================
+        //  GUARDADO EN IA DIRECTO
+        // ==========================
+        document.getElementById('btnSaveIA').addEventListener('click', async () => {
+            const btn = document.getElementById('btnSaveIA');
+            const txtOriginal = btn.innerHTML;
+            btn.innerHTML = "⏳ Inyectando a la IA...";
+            btn.disabled = true;
+
+            const idx = document.getElementById('selectObra').value;
+            const segmento = document.getElementById('selectSegmento').value;
+            
+            const formDesc = document.getElementById('inputDesc').value.trim();
+
+            const tabs = document.querySelectorAll('.tab-btn');
+            let contextoManual = "";
+            tabs.forEach(btnTab => {
+                const tabId = btnTab.dataset.target;
+                const tit = btnTab.querySelector('.ctx-titulo').value.trim();
+                const pane = document.getElementById(tabId);
+                if (pane) {
+                    const txt = pane.querySelector('.ctx-texto').value.trim();
+                    if (txt) contextoManual += `--- ${tit || 'Fragmento'} ---\n${txt}\n\n`;
+                }
+            });
+            contextoManual = contextoManual.trim();
+            
+            const tituloClave = "Obra: " + document.getElementById('inputNombre').value.trim();
+            const nombreSeg = document.querySelector('#selectSegmento option:checked').text;
+            let texto = `La obra '${document.getElementById('inputNombre').value.trim()}' pertenece al sector ${nombreSeg}. `;
+            const dist = document.getElementById('inputDistrito').value;
+            const prov = document.getElementById('inputProvincia').value;
+            if (dist || prov) texto += `Ubicada en ${dist}, ${prov}. `;
+            
+            const est = document.getElementById('inputEstado').value;
+            if (est) texto += `Estado actual: '${est}'. `;
+            
+            const baseMonto = parseFloat(document.getElementById('inputMontoBase').value) || 0;
+            const magMonto = parseFloat(document.getElementById('inputMontoMagnitud').value) || 1;
+            const realMonto = baseMonto > 0 ? (baseMonto * magMonto) : '';
+            const displayMonto = formatMontoFriendly(realMonto);
+            if (displayMonto && displayMonto !== 'S/ 0') texto += `Monto referencial: ${displayMonto}. `;
+            
+            if (formDesc) texto += `Descripción oficial: ${formDesc}. `;
+            if (contextoManual) texto += `Contexto adicional: ${contextoManual}`;
+            texto = texto.trim();
+            
+            const palabrasClave = `${document.getElementById('inputNombre').value.trim()}, ${dist}, ${nombreSeg}`;
+
+            const fd = new FormData();
+            fd.append('action', 'save_single');
+            fd.append('titulo', tituloClave);
+            fd.append('contenido', texto);
+            fd.append('palabras', palabrasClave);
+
+            try {
+                const resp = await fetch('ia_cerebro_obras.php', { method: 'POST', body: fd });
+                const data = await resp.json();
+                if(data.ok) {
+                    CEREBRO_IA[tituloClave] = texto; // Actualizar local
+                    const badge = document.getElementById('aiStatusBadge');
+                    badge.textContent = "🟢 Ya en Cerebro";
+                    badge.style.color = "#10b981";
+                    badge.style.background = "rgba(16, 185, 129, 0.1)";
+                    badge.style.borderColor = "#10b981";
+                    alert("🧠 ¡El cerebro de la IA fue actualizado con los datos de esta obra!");
+                } else { alert("Error: " + data.error); }
+            } catch(e) { alert("Error de conexión al alimentar a la IA."); } 
+            finally { btn.innerHTML = txtOriginal; btn.disabled = false; }
         });
 
         // ==========================

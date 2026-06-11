@@ -215,6 +215,11 @@ if (isset($_GET['success'])) {
                     <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-top: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">💡 <strong>Tip:</strong> Puedes cambiar el orden arrastrando las imágenes antes de guardar. La primera será la principal.</div>
                     <div id="previewContainer" class="galeria"></div>
                 </div>
+
+                <div style="margin-top: 20px; background: rgba(139, 92, 246, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                    <h3 style="margin-top: 0; color: #c4b5fd; font-size: 14px;">🧠 Cerebro IA</h3>
+                    <p style="color: #a78bfa; font-size: 12px; margin-bottom: 0;">Al guardar esta obra nueva en Excel, también podrás agregarle información extra para enseñársela a la IA directamente desde la pestaña <b>✏️ Editar Obra</b>.</p>
+                </div>
                 
                 <button type="submit" class="btn-submit">Guardar Obra en Excel</button>
             </form>
