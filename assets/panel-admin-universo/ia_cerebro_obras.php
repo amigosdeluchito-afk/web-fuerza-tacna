@@ -235,7 +235,7 @@ try {
                         </div>
                     </div>
 
-                    <div class="textarea-wrap" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                    <div class="textarea-wrap" style="display: block; width: 100%;">
                         <label>
                             Fuentes y Contexto Adicional
                             <span id="aiStatusBadge">🟢 Ya en Cerebro</span>
