@@ -484,17 +484,25 @@ try {
                 if (textoIA.includes(separador)) {
                     textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
                     
-                    if (textoIA.includes('--- ')) {
-                        // Si ya tiene el nuevo formato, separamos por bloques usando un patrón inteligente
-                        const bloques = textoIA.split(/--- (.*?) ---/g);
-                        for (let i = 1; i < bloques.length; i += 2) {
-                            const t = bloques[i].trim();
-                            const c = (bloques[i+1] || "").trim();
-                            if (c !== "") agregarContexto(t, c);
+                    // FIX: Autolimpieza de duplicados generados por el bug de sincronización
+                    let textoParaLimpia = textoIA.replace(/--- Contexto General ---/g, '').replace(/--- Fragmento ---/g, '').trim();
+                    if (textoParaLimpia === (obra.descripcion_excel || '').trim()) {
+                        textoIA = ""; // Era un clon fantasma
+                    }
+
+                    if (textoIA !== "") {
+                        if (textoIA.includes('--- ')) {
+                            const bloques = textoIA.split(/--- (.*?) ---/g);
+                            for (let i = 1; i < bloques.length; i += 2) {
+                                const t = bloques[i].trim();
+                                const c = (bloques[i+1] || "").trim();
+                                if (c !== "") agregarContexto(t, c);
+                            }
+                        } else {
+                            agregarContexto("Contexto General", textoIA);
                         }
-                    } else if (textoIA !== "") {
-                        // Si es un texto de la versión antigua, lo ponemos en un bloque único
-                        agregarContexto("Contexto General", textoIA);
+                    } else {
+                        agregarContexto("Principal");
                     }
                 } else {
                     agregarContexto("Principal"); // Si no hay contexto extra, creamos caja vacía
@@ -612,17 +620,15 @@ try {
                 let contextoManual = ""; 
 
                 if (contextoIA) {
-                    const sepModerno = "Contexto adicional: ";
-                    const sepAntiguo = "Descripción: ";
+                    const sepModerno = "Contexto adicional:";
                     
                     if (contextoIA.includes(sepModerno)) {
                         contextoManual = contextoIA.substring(contextoIA.indexOf(sepModerno) + sepModerno.length).trim();
-                    } else if (contextoIA.includes(sepAntiguo)) {
-                        // Rescatar textos antiguos por si acaso
-                        let viejo = contextoIA.substring(contextoIA.indexOf(sepAntiguo) + sepAntiguo.length).trim();
-                        viejo = viejo.replace(" (Tiene galería de fotos).", "").trim();
-                        if (viejo && viejo !== obra.descripcion_excel) {
-                            contextoManual = viejo;
+                        
+                        // FIX LIMPIEZA LOTE: Destruir clones fantasmas de la BD durante la sincronización
+                        let textoParaLimpia = contextoManual.replace(/--- Contexto General ---/g, '').replace(/--- Fragmento ---/g, '').trim();
+                        if (textoParaLimpia === (obra.descripcion_excel || '').trim()) {
+                            contextoManual = "";
                         }
                     }
                 }

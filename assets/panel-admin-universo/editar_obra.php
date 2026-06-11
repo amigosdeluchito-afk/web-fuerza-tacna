@@ -545,15 +545,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const separador = "Contexto adicional:";
                 if (textoIA.includes(separador)) {
                     textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
-                    if (textoIA.includes('--- ')) {
-                        const bloques = textoIA.split(/--- (.*?) ---/g);
-                        for (let i = 1; i < bloques.length; i += 2) {
-                            const t = bloques[i].trim();
-                            const c = (bloques[i+1] || "").trim();
-                            if (c !== "") agregarContexto(t, c);
+                    
+                    // FIX: Autolimpieza de duplicados generados por el bug de sincronización
+                    let textoParaLimpia = textoIA.replace(/--- Contexto General ---/g, '').replace(/--- Fragmento ---/g, '').trim();
+                    if (textoParaLimpia === (obra.desc || '').trim()) {
+                        textoIA = ""; // Clon fantasma detectado y purgado
+                    }
+
+                    if (textoIA !== "") {
+                        if (textoIA.includes('--- ')) {
+                            const bloques = textoIA.split(/--- (.*?) ---/g);
+                            for (let i = 1; i < bloques.length; i += 2) {
+                                const t = bloques[i].trim();
+                                const c = (bloques[i+1] || "").trim();
+                                if (c !== "") agregarContexto(t, c);
+                            }
+                        } else {
+                            agregarContexto("Contexto General", textoIA);
                         }
-                    } else if (textoIA !== "") {
-                        agregarContexto("Contexto General", textoIA);
+                    } else {
+                        agregarContexto("Principal");
                     }
                 } else {
                     agregarContexto("Principal");
