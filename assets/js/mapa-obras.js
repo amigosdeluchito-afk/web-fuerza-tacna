@@ -185,7 +185,6 @@ window.initMapEngine = async function(container) {
     // Creamos un archivo "virtual" local en la memoria del navegador (Blob) 
     // que importe el código externo de forma 100% legal y permitida por el navegador.
     // =================================================================================
-    /*
     if (window.maplibregl) {
         try {
             const workerCode = "importScripts('https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl-worker.js');";
@@ -195,7 +194,6 @@ window.initMapEngine = async function(container) {
             console.warn("[Mapa] Fallo al crear el Blob Worker. Dependiendo del motor interno.");
         }
     }
-    */
 
     const map = new maplibregl.Map({
         container: mapEl,
