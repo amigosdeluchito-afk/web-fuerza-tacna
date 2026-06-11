@@ -23,6 +23,45 @@ window.initMapEngine = async function(container) {
     if (!mapEl) return;
 
     // =================================================================================
+    // RESTAURADOR DE TEMÁTICA VHS / HOLOGRAMA (ALCALDE PROVINCIAL)
+    // Reactiva los estilos que fueron comentados en el CSS por "lag gráfico", 
+    // inyectándolos dinámicamente SOLO en este segmento para cuidar el rendimiento.
+    // =================================================================================
+    if (!document.getElementById('theme-alcalde-vhs')) {
+        const vhsStyle = document.createElement('style');
+        vhsStyle.id = 'theme-alcalde-vhs';
+        vhsStyle.innerHTML = `
+            /* Tipografía y efecto retro/VHS para el botón */
+            .chip[data-map="alcalde_provincial"] {
+                font-family: "Courier New", monospace !important;
+                letter-spacing: 1px;
+                text-shadow: 1px 0px 2px rgba(255,0,0,0.8), -1px 0px 2px rgba(0,0,255,0.8);
+                background: rgba(20, 20, 20, 0.8) !important;
+                border: 1px solid rgba(255, 195, 0, 0.5) !important;
+            }
+            .chip[data-map="alcalde_provincial"].is-active {
+                background: #801039 !important;
+                color: #ffc300 !important;
+                box-shadow: 0 0 15px rgba(255,195,0,0.6);
+                animation: vhs-glitch-text 4s infinite;
+            }
+            @keyframes vhs-glitch-text {
+                0%, 100% { transform: skewX(0deg); }
+                2% { transform: skewX(4deg); }
+                4% { transform: skewX(-4deg); }
+                6% { transform: skewX(0deg); }
+            }
+            /* Reactivación del Mapa Holograma (Animación Autocad / VHS) */
+            body.segmento-alcalde_provincial #synced-svg-container svg path {
+                stroke-dasharray: 200 30 !important;
+                animation: hologram-draw 6s linear infinite !important;
+                filter: drop-shadow(0 0 10px rgba(255, 195, 0, 0.8));
+            }
+        `;
+        document.head.appendChild(vhsStyle);
+    }
+
+    // =================================================================================
     // FIX CRÍTICO: RESTAURACIÓN DE VARIABLES DE ENTORNO
     // Al faltar estas variables, la función revealUI lanzaba un error fatal invisible 
     // y el menú jamás llegaba a aparecer.
