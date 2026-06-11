@@ -512,7 +512,13 @@ window.initMapEngine = async function(container) {
                         const v1 = row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : ''; // Nombre Visible
                         const v2 = row.c[2] && row.c[2].v ? String(row.c[2].v).trim() : ''; // Nombre Pestaña
                         
-                        const idHtml = v0 ? v0 : (v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, "_") : '');
+                        let idHtml = v0 ? v0 : (v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, "_") : '');
+
+                        // FIX ESTÉTICO (VHS): Restaurar ID legacy para Alcalde Provincial
+                        const nomLow = v1 ? String(v1).toLowerCase() : '';
+                        if (nomLow.includes('alcalde') || nomLow.includes('provincial')) {
+                            idHtml = 'alcalde_provincial';
+                        }
 
                         if (idHtml && v2) {
                             window.SHEETS[idHtml] = v2;
@@ -521,6 +527,7 @@ window.initMapEngine = async function(container) {
                             window.SHEETS[String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()] = v2;
                         }
                         if (v1 && v0) window.SHEETS_FALLBACK[v1] = v0;
+                        if (idHtml === 'alcalde_provincial' && v0) window.SHEETS_FALLBACK[idHtml] = v0;
                     });
                     window.SHEETS_MAPPED = true;
                     console.log("[Mapa] ✅ Índice de SEGMENTOS reconstruido limpiamente. Traductor:", window.SHEETS, "Fallbacks:", window.SHEETS_FALLBACK);
@@ -1013,6 +1020,16 @@ window.initMapEngine = async function(container) {
     // BUSCADOR, DOCKS Y FILTROS
     // El buscador ahora vive en mapa-buscador.js
     window.gotoObra = async function(key, seg){
+        // Traductor Inverso para temática VHS y URLs antiguas
+        if (seg) {
+            const normSeg = String(seg).toLowerCase();
+            if (normSeg.includes('alcalde') || normSeg.includes('provincial')) {
+                seg = 'alcalde_provincial';
+            } else if (window.SHEETS_FALLBACK && window.SHEETS_FALLBACK['alcalde_provincial'] === seg) {
+                seg = 'alcalde_provincial';
+            }
+        }
+
         if (seg && currentKey !== seg){
             isAutoCenterBlocked = true; // Bloqueo preventivo
             const chip = target.querySelector(`.chip[data-map="${seg}"]`);
@@ -1130,8 +1147,13 @@ window.initMapEngine = async function(container) {
                     const activoRaw = row.c[3] && row.c[3].v ? String(row.c[3].v).toUpperCase().trim() : 'NO';
                     const ordenRaw = row.c[4] && row.c[4].v ? parseInt(row.c[4].v) || 0 : 0;
                     
-                    // Usamos el ID original del Dashboard para que el CSS (VHS) no se rompa
-                    const idHtml = v0 ? v0 : (v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, "_") : '');
+                    let idHtml = v0 ? v0 : (v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, "_") : '');
+
+                    // FIX ESTÉTICO (VHS): Restaurar ID legacy para que coincida con tu CSS antiguo
+                    const nomLow = v1 ? String(v1).toLowerCase() : '';
+                    if (nomLow.includes('alcalde') || nomLow.includes('provincial')) {
+                        idHtml = 'alcalde_provincial';
+                    }
 
                     if (activoRaw === 'SI' || activoRaw === '1' || activoRaw === 'TRUE' || activoRaw === 'SÍ') {
                         if (v1 && idHtml) {
