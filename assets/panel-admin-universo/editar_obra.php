@@ -402,6 +402,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </form>
             </div>
             
+            <!-- NUEVO: SECCIÓN CEREBRO IA INTEGRADA -->
+            <div id="iaSection" style="display:none; margin-top: 30px; border-top: 1px solid #1f2937; padding-top: 20px;">
+                <h2 style="font-size: 18px; margin-top:0; color: #f9fafb; display:flex; justify-content:space-between; align-items:center;">
+                    🧠 Cerebro IA (Contexto)
+                    <span id="aiStatusBadge" style="font-size: 12px; padding: 4px 8px; border-radius: 6px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444;">🔴 Nuevo para IA</span>
+                </h2>
+                <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: #c4b5fd; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-top: 10px; margin-bottom: 10px;">💡 <strong>Tip:</strong> Puedes agregar información extra (noticias, historia, detalles) que no está en el Excel para que la IA la aprenda y pueda responder mejor.</div>
+                
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <div id="tabsHeaderList" style="display: flex;"></div>
+                        <button type="button" class="btn-add-tab" onclick="agregarContexto(null, '', true)" title="Añadir nueva pestaña">➕ Nueva Pestaña</button>
+                    </div>
+                    <div class="tabs-content" id="tabsContent"></div>
+                </div>
+                
+                <button type="button" id="btnSaveIA" class="btn-submit" style="background: #8b5cf6; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); margin-top: 15px;">🧠 Actualizar Conocimiento en la IA</button>
+            </div>
+
             <div id="globalSaveSection" style="display:none; margin-top: 30px; border-top: 1px solid #1f2937; padding-top: 20px;">
                 <div id="formMsg"></div>
                 <button type="button" id="btnGuardarGlobal" class="btn-submit" style="background: #10b981; font-size: 16px; padding: 16px; margin-top: 10px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">💾 Guardar Todos los Cambios</button>
