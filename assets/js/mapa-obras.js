@@ -476,8 +476,31 @@ window.initMapEngine = async function(container) {
         if (PINS_LOADING.has(segmento)) return;
         PINS_LOADING.add(segmento);
 
-        const TAB = window.SHEETS[segmento];
-        if (!TAB){ PINS_LOADING.delete(segmento); return; }
+        // ==============================================================================
+        // FIX ABSOLUTO: RESOLUCIÓN DE NOMBRES DE PESTAÑA (TABS)
+        // Atiende la regla: "Para pestaña el código es el verdadero nombre del segmento"
+        // ==============================================================================
+        let TAB = window.SHEETS ? window.SHEETS[segmento] : undefined;
+
+        if (!TAB && window.SHEETS) {
+            const norm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            const reqNorm = norm(segmento);
+            
+            // 1. Buscar si el botón coincide con alguna llave de la configuración
+            const foundKey = Object.keys(window.SHEETS).find(k => norm(k) === reqNorm);
+            if (foundKey) TAB = window.SHEETS[foundKey];
+            
+            // 2. Si el botón en el HTML ya está enviando el código ("ID_001"), usarlo.
+            if (!TAB) {
+                const isValue = Object.values(window.SHEETS).find(v => norm(v) === reqNorm);
+                if (isValue) TAB = isValue;
+            }
+        }
+        
+        // 3. Fallback Supremo: Usar la solicitud cruda como el nombre exacto de la pestaña.
+        if (!TAB) TAB = segmento;
+
+        console.log(`[Mapa] Solicitando pines... Botón presionado: "${segmento}" -> Pestaña a leer en Excel: "${TAB}"`);
 
         try{
             window.SHEET_FETCH_PROMISES = window.SHEET_FETCH_PROMISES || {};
@@ -485,7 +508,10 @@ window.initMapEngine = async function(container) {
                 const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:Z&headers=1`;
                 window.SHEET_FETCH_PROMISES[segmento] = fetch(url).then(r => r.text()).then(txt => {
                     const match = txt.match(/setResponse\(([\s\S]+)\);?/);
-                    if (!match) throw new Error("Error GViz");
+                    if (!match) {
+                        console.error(`[Mapa] ❌ ERROR CRÍTICO: Google Sheets rechazó la petición. La pestaña "${TAB}" no existe. Verifica los nombres exactos en tu Excel.`);
+                        throw new Error("Pestaña no encontrada o Error GViz");
+                    }
                     window.SHEET_CACHE[segmento] = window.gvizToObjects(JSON.parse(match[1]));
                 });
             }
