@@ -93,6 +93,24 @@ if (isset($_GET['success'])) {
         .foto-meta { font-size: 11px; color: #9ca3af; display: flex; justify-content: space-between; align-items: center; }
         .badge-principal { position: absolute; top: 6px; left: 6px; background: #10b981; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
+        /* Estilos Pestañas Cerebro IA */
+        .tabs-container { display: flex; flex-direction: column; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; margin-top: 10px; }
+        .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
+        .tabs-header::-webkit-scrollbar { height: 4px; }
+        .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .tab-btn { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: transparent; border: none; border-right: 1px solid #1f2937; color: #94a3b8; font-size: 13px; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; max-width: 180px; }
+        .tab-btn span.ctx-titulo-display { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+        .tab-btn:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+        .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .tab-close { background: transparent; border: none; color: #ef4444; font-size: 16px; line-height: 1; cursor: pointer; padding: 0 4px; border-radius: 4px; opacity: 0.7; }
+        .tab-close:hover { opacity: 1; background: rgba(239,68,68,0.2); }
+        .btn-add-tab { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: none; color: #10b981; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-add-tab:hover { background: rgba(16,185,129,0.1); }
+        .tabs-content { display: flex; flex-direction: column; position: relative; }
+        .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
+        .tab-pane.active { display: flex; }
+        .tab-pane textarea { width: 100%; min-height: 150px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }
         .dropdown::after { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 15px; }
@@ -216,12 +234,24 @@ if (isset($_GET['success'])) {
                     <div id="previewContainer" class="galeria"></div>
                 </div>
 
-                <div style="margin-top: 20px; background: rgba(139, 92, 246, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.2);">
-                    <h3 style="margin-top: 0; color: #c4b5fd; font-size: 14px;">🧠 Cerebro IA</h3>
-                    <p style="color: #a78bfa; font-size: 12px; margin-bottom: 0;">Al guardar esta obra nueva en Excel, también podrás agregarle información extra para enseñársela a la IA directamente desde la pestaña <b>✏️ Editar Obra</b>.</p>
+                <!-- NUEVO: SECCIÓN CEREBRO IA INTEGRADA -->
+                <div id="iaSection" style="margin-top: 30px; border-top: 1px solid #1f2937; padding-top: 20px;">
+                    <h2 style="font-size: 18px; margin-top:0; color: #f9fafb; display:flex; justify-content:space-between; align-items:center;">
+                        🧠 Cerebro IA (Contexto)
+                        <span id="aiStatusBadge" style="font-size: 12px; padding: 4px 8px; border-radius: 6px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444;">🔴 Nueva para IA</span>
+                    </h2>
+                    <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: #c4b5fd; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-top: 10px; margin-bottom: 10px;">💡 <strong>Tip:</strong> Puedes agregar información extra (noticias, historia, detalles) para que la IA se aprenda esta obra al momento de guardarla.</div>
+                    
+                    <div class="tabs-container">
+                        <div class="tabs-header">
+                            <div id="tabsHeaderList" style="display: flex;"></div>
+                            <button type="button" class="btn-add-tab" onclick="agregarContexto(null, '', true)" title="Añadir nueva pestaña">➕ Nueva Pestaña</button>
+                        </div>
+                        <div class="tabs-content" id="tabsContent"></div>
+                    </div>
                 </div>
                 
-                <button type="submit" class="btn-submit">Guardar Obra en Excel</button>
+                <button type="submit" class="btn-submit">Guardar Obra e IA en Excel</button>
             </form>
         </div>
     </main>
@@ -252,11 +282,67 @@ if (isset($_GET['success'])) {
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
         const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
         
-        // Multiplicar el monto antes de enviar el formulario a Excel
-        document.querySelector('form').addEventListener('submit', function(e) {
+        // Interceptar el guardado para enviarlo también a la IA
+        document.querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('.btn-submit');
+            
             const base = parseFloat(document.getElementById('monto_base').value) || 0;
             const mag = parseFloat(document.getElementById('monto_magnitud').value) || 1;
             document.getElementById('hidden_monto').value = base > 0 ? (base * mag) : '';
+
+            submitBtn.innerHTML = "⏳ Guardando Obra e IA...";
+            submitBtn.disabled = true;
+
+            // 1. Recopilar datos de las pestañas IA
+            const tabs = document.querySelectorAll('.tab-btn');
+            let contextoManual = "";
+            tabs.forEach(btnTab => {
+                const tabId = btnTab.dataset.target;
+                const tit = btnTab.querySelector('.ctx-titulo').value.trim();
+                const pane = document.getElementById(tabId);
+                if (pane) {
+                    const txt = pane.querySelector('.ctx-texto').value.trim();
+                    if (txt) contextoManual += `--- ${tit || 'Fragmento'} ---\n${txt}\n\n`;
+                }
+            });
+            contextoManual = contextoManual.trim();
+            
+            // 2. Construir el Super Párrafo de la IA
+            const nombreObra = form.querySelector('input[name="nombre"]').value.trim();
+            const nombreSeg = form.querySelector('#selectSegmento option:checked').text;
+            const distrito = form.querySelector('#selectDistrito').value;
+            const provincia = form.querySelector('#selectProvincia').value;
+            const estado = form.querySelector('select[name="estado"]').value;
+            const formDesc = form.querySelector('textarea[name="descripcion"]').value.trim();
+            
+            let texto = `La obra '${nombreObra}' pertenece al sector ${nombreSeg}. `;
+            if (distrito || provincia) texto += `Ubicada en ${distrito}, ${provincia}. `;
+            if (estado) texto += `Estado actual: '${estado}'. `;
+            
+            const realMonto = base > 0 ? (base * mag) : '';
+            function formatMonto(num) {
+                if (num === 0) return 'S/ 0';
+                if (num >= 1000000) { let m = num / 1000000; return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Millones'; } 
+                if (num >= 1000) { let m = num / 1000; return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Mil'; }
+                return 'S/ ' + num.toLocaleString('en-US');
+            }
+            if (realMonto) texto += `Monto referencial: ${formatMonto(realMonto)}. `;
+            
+            if (formDesc) texto += `Descripción oficial: ${formDesc}. `;
+            if (contextoManual) texto += `Contexto adicional: ${contextoManual}`;
+            
+            const fdIA = new FormData();
+            fdIA.append('action', 'save_single');
+            fdIA.append('titulo', "Obra: " + nombreObra);
+            fdIA.append('contenido', texto.trim());
+            fdIA.append('palabras', `${nombreObra}, ${distrito}, ${nombreSeg}`);
+
+            try { await fetch('ia_cerebro_obras.php', { method: 'POST', body: fdIA }); } catch(err) { console.warn(err); }
+
+            // 3. Continuar con el guardado nativo en Google Sheets
+            HTMLFormElement.prototype.submit.call(form);
         });
 
         function parseGviz(text) {
@@ -531,6 +617,58 @@ if (isset($_GET['success'])) {
                 preview.appendChild(div);
             });
         }
+
+        // --- LÓGICA DE PESTAÑAS CEREBRO IA ---
+        let tabCounter = 0;
+        function agregarContexto(titulo = "", texto = "", promptUser = false) {
+            if (promptUser) {
+                titulo = prompt("Ingresa un nombre para esta pestaña (Ej. 'Noticia', 'Expediente'):");
+                if (titulo === null || titulo.trim() === "") return;
+            }
+            if (!titulo) titulo = "General";
+
+            tabCounter++;
+            const tabId = 'tab_' + tabCounter;
+            const tabsHeaderList = document.getElementById('tabsHeaderList');
+            const tabsContent = document.getElementById('tabsContent');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            const tabBtn = document.createElement('button');
+            tabBtn.type = 'button';
+            tabBtn.className = 'tab-btn active';
+            tabBtn.dataset.target = tabId;
+            tabBtn.innerHTML = `<span class="ctx-titulo-display">${titulo}</span><input type="hidden" class="ctx-titulo" value="${titulo}"><div class="tab-close" onclick="eliminarContexto(event, '${tabId}')" title="Cerrar pestaña">&times;</div>`;
+            tabBtn.onclick = () => activarTab(tabId);
+            tabsHeaderList.appendChild(tabBtn);
+
+            const tabPane = document.createElement('div');
+            tabPane.className = 'tab-pane active';
+            tabPane.id = tabId;
+            tabPane.innerHTML = `<textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'...">${texto}</textarea>`;
+            tabsContent.appendChild(tabPane);
+            tabsHeaderList.parentElement.scrollLeft = tabsHeaderList.parentElement.scrollWidth;
+        }
+
+        function activarTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.target === tabId));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.toggle('active', pane.id === tabId));
+        }
+
+        function eliminarContexto(event, tabId) {
+            event.stopPropagation();
+            if (!confirm("¿Seguro que deseas eliminar esta pestaña?")) return;
+            const btn = document.querySelector(`.tab-btn[data-target="${tabId}"]`);
+            const pane = document.getElementById(tabId);
+            const wasActive = btn.classList.contains('active');
+            btn.remove(); pane.remove();
+            if (wasActive) {
+                const remainingTabs = document.querySelectorAll('.tab-btn');
+                if (remainingTabs.length > 0) activarTab(remainingTabs[remainingTabs.length - 1].dataset.target);
+            }
+        }
+        agregarContexto("Principal");
 
         // --- LÓGICA DE PROVINCIAS Y DISTRITOS DEPENDIENTES ---
         document.addEventListener('DOMContentLoaded', () => {
