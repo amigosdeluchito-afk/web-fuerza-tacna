@@ -7,10 +7,10 @@ async function loadMapLibre() {
     return new Promise((resolve) => {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/3.6.2/maplibre-gl.css';
+        link.href = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css';
         document.head.appendChild(link);
         const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/3.6.2/maplibre-gl.js';
+        script.src = 'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js';
         script.onload = resolve;
         script.onerror = resolve; // Failsafe para redes inestables
         document.head.appendChild(script);
@@ -134,6 +134,11 @@ window.initMapEngine = async function(container) {
     }
 
     await loadMapLibre();
+
+    if (typeof maplibregl === 'undefined') {
+        console.error("[Mapa] Error crítico: MapLibre GL no pudo cargarse desde el CDN. Verifica tu conexión a internet o bloqueadores de anuncios.");
+        return;
+    }
 
     // =================================================================================
     // FIX SUPREMO: CROSS-ORIGIN WORKER (SECURITY ERROR)
