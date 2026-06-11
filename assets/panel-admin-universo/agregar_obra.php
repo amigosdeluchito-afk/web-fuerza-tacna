@@ -109,7 +109,7 @@ if (isset($_GET['success'])) {
         .tabs-content { display: flex; flex-direction: column; position: relative; }
         .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
         .tab-pane.active { display: flex; }
-        .tab-pane textarea { width: 100%; min-height: 150px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+        .tab-pane textarea { width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }

@@ -130,7 +130,7 @@ try {
         .data-item label { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; }
         .data-item div { font-size: 14px; font-weight: 600; color: #e2e8f0; }
         
-        .textarea-wrap { flex: 1; display: flex; flex-direction: column; min-height: 250px; margin-bottom: 20px; }
+        .textarea-wrap { flex: 1; display: flex; flex-direction: column; min-height: 450px; margin-bottom: 20px; }
         .textarea-wrap label { font-size: 15px; color: #f9fafb; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .textarea-wrap label span { font-size: 12px; font-weight: normal; color: #9ca3af; background: #1e293b; padding: 2px 8px; border-radius: 4px; }
         
@@ -151,7 +151,7 @@ try {
         .tabs-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .tab-pane { display: none; flex: 1; flex-direction: column; padding: 0; height: 100%; box-sizing: border-box; }
         .tab-pane.active { display: flex; }
-        .tab-pane textarea { flex: 1; width: 100%; height: 100%; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+        .tab-pane textarea { flex: 1; width: 100%; height: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         .btn-save-obra { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         .btn-save-obra:hover { background: #059669; }
