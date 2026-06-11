@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // FIX DE RENDIMIENTO: Apagamos el motor del dashboard para matar el lag invisible
+    console.log("[Dashboard] Código neutralizado. El HTML fue removido.");
+    return;
+
     Chart.defaults.color = '#8b9bb4';
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
