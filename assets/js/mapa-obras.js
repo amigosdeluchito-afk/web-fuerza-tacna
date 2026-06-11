@@ -477,6 +477,52 @@ window.initMapEngine = async function(container) {
         PINS_LOADING.add(segmento);
 
         // ==============================================================================
+        // FIX DEFINITIVO Y PROFUNDO: LECTURA DINÁMICA DE LA PESTAÑA "SEGMENTOS"
+        // Como indicaste: "es en la pestaña de SEGMENTOS donde está el ID".
+        // Le enseñamos a la web a leer este índice primero para que sepa traducir
+        // el botón presionado (ej: "educacion") a su pestaña real en Excel (ej: "ID_001")
+        // ==============================================================================
+        if (!window.SHEETS_MAPPED && window.SHEET_ID) {
+            try {
+                console.log("[Mapa] 🔍 Leyendo la pestaña maestra 'SEGMENTOS' para enlazar los IDs...");
+                let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:Z&headers=1`;
+                let resp = await fetch(mapUrl);
+                let txt = await resp.text();
+                let match = txt.match(/setResponse\(([\s\S]+)\);?/);
+                
+                if (!match) {
+                    // Fallback de seguridad por si en el Excel la pestaña dice "Segmentos" en minúsculas
+                    mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:Z&headers=1`;
+                    resp = await fetch(mapUrl);
+                    txt = await resp.text();
+                    match = txt.match(/setResponse\(([\s\S]+)\);?/);
+                }
+
+                if (match) {
+                    const rows = window.gvizToObjects(JSON.parse(match[1]));
+                    window.SHEETS = window.SHEETS || {};
+                    rows.forEach(r => {
+                        // Rastrear la columna del nombre visual ("Educación")
+                        const nombreRaw = r.nombre ?? r.Nombre ?? r.NOMBRE ?? r.segmento ?? r.Segmento ?? r.categoria ?? r.Categoria ?? r.titulo ?? '';
+                        const nombre = String(nombreRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                        
+                        // Rastrear la columna del código real ("ID_001")
+                        const codigoRaw = r.codigo ?? r.Codigo ?? r.CODIGO ?? r.id ?? r.Id ?? r.ID ?? r.pestaña ?? r.Pestaña ?? r.tab ?? r.hoja ?? '';
+                        const codigo = String(codigoRaw).trim();
+                        
+                        if (nombre && codigo) {
+                            window.SHEETS[nombre] = codigo;
+                        }
+                    });
+                    window.SHEETS_MAPPED = true;
+                    console.log("[Mapa] ✅ ¡ÉXITO! Índice de SEGMENTOS cargado. La web ahora sabe traducir:", window.SHEETS);
+                }
+            } catch (e) {
+                console.warn("[Mapa] ⚠️ Error al intentar leer pestaña maestra 'SEGMENTOS'.", e);
+            }
+        }
+
+        // ==============================================================================
         // FIX ABSOLUTO: RESOLUCIÓN DE NOMBRES DE PESTAÑA (TABS)
         // Atiende la regla: "Para pestaña el código es el verdadero nombre del segmento"
         // ==============================================================================
