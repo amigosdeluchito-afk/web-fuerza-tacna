@@ -537,7 +537,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const resp = await fetch('ia_conocimiento.php', {method: 'POST', body: fd});
                 const data = await resp.json();
                 if (data.ok) {
-                    agregarContexto(data.titulo, data.texto);
+                    agregarContexto(data.titulo, data.texto + "\n\nEnlace de referencia: " + url);
                 } else { alert("Error: " + data.error); }
             } catch(e) {
                 alert("Error de red al extraer el link."); 
