@@ -1180,6 +1180,9 @@ window.initMapEngine = async function(container) {
                 const rows = data.table.rows || [];
                 let menuItems = [];
                 
+                window.SHEETS = { base: '' };
+                window.SHEETS_FALLBACK = window.SHEETS_FALLBACK || {};
+
                 rows.forEach((row, index) => {
                     if (!row || !row.c) return;
                     // Ignorar la cabecera
@@ -1188,6 +1191,7 @@ window.initMapEngine = async function(container) {
                     // Extracción robusta por columna (A=0, B=1, D=3, E=4)
                     const v0 = row.c[0] && row.c[0].v ? String(row.c[0].v).trim() : ''; // El ID exacto (Ej: alcalde_provincial)
                     const v1 = row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : ''; 
+                    const v2 = row.c[2] && row.c[2].v ? String(row.c[2].v).trim() : ''; // Nombre Pestaña en Excel
                     const activoRaw = row.c[3] && row.c[3].v ? String(row.c[3].v).toUpperCase().trim() : 'NO';
                     const ordenRaw = row.c[4] && row.c[4].v ? parseInt(row.c[4].v) || 0 : 0;
                     
@@ -1198,6 +1202,16 @@ window.initMapEngine = async function(container) {
                     if (nomLow.includes('alcalde') || nomLow.includes('provincial')) {
                         idHtml = 'alcalde_provincial';
                     }
+
+                    // RECONSTRUIR EL DICCIONARIO TRADUCTOR SIMULTÁNEAMENTE
+                    if (idHtml && v2) {
+                        window.SHEETS[idHtml] = v2;
+                    }
+                    if (v1 && v2 && v1 !== idHtml) {
+                        window.SHEETS[String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()] = v2;
+                    }
+                    if (v1 && v0) window.SHEETS_FALLBACK[v1] = v0;
+                    if (idHtml === 'alcalde_provincial' && v0) window.SHEETS_FALLBACK[idHtml] = v0;
 
                     if (activoRaw === 'SI' || activoRaw === '1' || activoRaw === 'TRUE' || activoRaw === 'SÍ') {
                         if (v1 && idHtml) {
