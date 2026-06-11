@@ -556,60 +556,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         function parseGviz(text) {
             const m = text.match(/setResponse\(([\s\S]+)\);?/);
-            if (!m) throw new Error("Error parseo");
-            return JSON.parse(m[1]);
+            if (!m) return { table: { rows: [] } };
+            try {
+                const parsed = JSON.parse(m[1]);
+                if (parsed.status === 'error') {
+                    console.error("Error de Google Sheets:", parsed.errors);
+                    return { table: { rows: [] } };
+                }
+                return parsed;
+            } catch (e) {
+                return { table: { rows: [] } };
+            }
         }
 
         async function cargarDataInicial() {
             const segmentoEl = document.getElementById('selectSegmento');
             
             try {
-                const respSeg = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=SEGMENTOS&range=A:D&headers=1`);
-                const jsonSeg = parseGviz(await respSeg.text());
+                let respSeg = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=SEGMENTOS&range=A:D&headers=1`);
+                let textSeg = await respSeg.text();
+                
+                if (textSeg.includes('"status":"error"')) {
+                    respSeg = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=Segmentos&range=A:D&headers=1`);
+                    textSeg = await respSeg.text();
+                }
+                
+                const jsonSeg = parseGviz(textSeg);
                 SEGMENTOS = (jsonSeg.table.rows || [])
                     .map(r => ({ id: r.c[0]?.v, nombre: r.c[1]?.v, key: r.c[2]?.v, activo: String(r.c[3]?.v||'').toUpperCase() }))
                     .filter(s => s.key && (s.activo === 'SI' || s.activo === '1' || s.activo === 'TRUE'));
-            } catch(e) { console.error("Error al cargar SEGMENTOS", e); }
-
-            for (const seg of SEGMENTOS) {
-                try {
-                    const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(seg.key)}&range=A:J&headers=1`;
-                    const resp = await fetch(url);
-                    const txt = await resp.text();
-                    const json = parseGviz(txt);
-                    
-                    const rows = json.table.rows || [];
-                    obrasPorSegmento[seg.key] = rows.map(r => {
-                        if(!r || !r.c) return {};
-                        return {
-                            nombre:    r.c[0]?.v || "",
-                            estado:    r.c[1]?.v || "",
-                            monto:     r.c[2]?.v || "",
-                            x:         r.c[3]?.v || "",
-                            y:         r.c[4]?.v || "",
-                            provincia: r.c[5]?.v || "",
-                            distrito:  r.c[6]?.v || "",
-                            carpeta:   r.c[7]?.v || "",
-                            desc:      r.c[8]?.v || r.c[8]?.f || ""
-                        };
-                    });
-                } catch (e) { console.error("Error al cargar " + seg.key, e); }
-            }
 
             segmentoEl.innerHTML = '<option value="">Selecciona segmento...</option>';
             SEGMENTOS.forEach(seg => {
                 const opt = document.createElement("option");
                 opt.value = seg.key;
-                opt.textContent = seg.nombre;
+                opt.textContent = seg.nombre || seg.key;
                 segmentoEl.appendChild(opt);
             });
             segmentoEl.disabled = false;
+            } catch(e) { 
+                console.error("Error al cargar SEGMENTOS", e); 
+                segmentoEl.innerHTML = '<option value="">Error de conexión</option>';
+            }
         }
 
-        document.getElementById('selectSegmento').addEventListener('change', function() {
+        document.getElementById('selectSegmento').addEventListener('change', async function() {
             const obraEl = document.getElementById('selectObra');
             const segmento = this.value;
+            
             document.getElementById('formEditar').style.display = 'none';
+            document.getElementById('fotosSection').style.display = 'none';
+            document.getElementById('iaSection').style.display = 'none';
+            document.getElementById('globalSaveSection').style.display = 'none';
 
             if (!segmento) {
                 obraEl.innerHTML = '<option value="">Primero elige segmento...</option>';
@@ -617,6 +615,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
 
+            // Si ya lo tenemos en caché, lo mostramos directo
+            if (obrasPorSegmento[segmento]) {
+                poblarSelectObras(segmento, obraEl);
+                return;
+            }
+
+            // Descargamos de Google Sheets
+            obraEl.innerHTML = '<option value="">Descargando obras del Excel...</option>';
+            obraEl.disabled = true;
+
+            try {
+                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(segmento)}&range=A:J&headers=1`;
+                const resp = await fetch(url);
+                const txt = await resp.text();
+                const json = parseGviz(txt);
+                
+                const rows = json.table?.rows || [];
+                obrasPorSegmento[segmento] = rows.map(r => {
+                    if(!r || !r.c) return {};
+                    return {
+                        nombre:    r.c[0]?.v || "",
+                        estado:    r.c[1]?.v || "",
+                        monto:     r.c[2]?.v || "",
+                        x:         r.c[3]?.v || "",
+                        y:         r.c[4]?.v || "",
+                        provincia: r.c[5]?.v || "",
+                        distrito:  r.c[6]?.v || "",
+                        carpeta:   r.c[7]?.v || "",
+                        desc:      r.c[8]?.v || r.c[8]?.f || ""
+                    };
+                });
+                poblarSelectObras(segmento, obraEl);
+            } catch (e) { 
+                console.error("Error al cargar " + segmento, e); 
+                obraEl.innerHTML = '<option value="">Error al cargar obras</option>';
+            }
+        });
+        
+        function poblarSelectObras(segmento, obraEl) {
             const lista = obrasPorSegmento[segmento] || [];
             obraEl.innerHTML = '<option value="">Selecciona obra a editar...</option>';
             
@@ -628,7 +665,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 obraEl.appendChild(opt);
             });
             obraEl.disabled = false;
-        });
+        }
 
         document.getElementById('selectObra').addEventListener('change', function() {
             const segmento = document.getElementById('selectSegmento').value;
