@@ -737,8 +737,8 @@
 
     <body data-barba="wrapper" onload="init()">
         
-        <!-- Loader que solo se ve al recargar -->
-        <div class="initial-loader">
+        <!-- Loader Inteligente (Anti-FOUC y Transición Suave) -->
+        <div class="initial-loader" id="loader-native">
             <div class="loader-h1">FUERZA<br>TACNA</div>
             <div class="water-layer">
                 <div class="water-content">
@@ -749,15 +749,17 @@
         </div>
 
         <script>
-            // Se ejecuta de inmediato para evitar el doble parpadeo
-            let isReload = false;
-            if (window.performance) {
-                if (performance.getEntriesByType && performance.getEntriesByType("navigation").length > 0) isReload = performance.getEntriesByType("navigation")[0].type === "reload";
-                else if (performance.navigation && performance.navigation.type === 1) isReload = true;
+            // Unificador de Cargas: Evita parpadeos al recargar la página
+            if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) {
+                const loader = document.getElementById('loader-native');
+                loader.innerHTML = ''; 
+                loader.style.backgroundColor = '#801039'; 
+                setTimeout(() => {
+                    loader.style.transition = 'transform 0.8s cubic-bezier(0.85, 0, 0.15, 1)';
+                    loader.style.transform = 'translateY(-100%)';
+                }, 400); 
+                setTimeout(() => { loader.style.display = 'none'; }, 1300);
             }
-            if (isReload) sessionStorage.removeItem('fuerzaTacnaLoaderPlayed');
-
-            if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) document.querySelector('.initial-loader').style.display = 'none';
         </script>
 
         <!-- <script>AOS.init();</script> PRUEBA DE AISLAMIENTO -->

@@ -78,16 +78,23 @@
 
 <div class="app-bg" aria-hidden="true"></div>
 
-<!-- Loader que solo se ve al recargar (Anti-FOUC Nativo) -->
-<div class="initial-loader">
+<!-- Loader Inteligente (Anti-FOUC y Transición Suave) -->
+<div class="initial-loader" id="loader-native">
     <div class="loader-h1">FUERZA<br>TACNA</div>
     <div class="water-layer"><div class="water-content"><div class="loader-h1">FUERZA<br>TACNA</div></div></div>
     <div class="wave"></div>
 </div>
 <script>
-    // Ocultar inmediatamente si ya se reprodujo en esta sesión
+    // Unificador de Cargas: Evita parpadeos al recargar la página
     if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) {
-        document.querySelector('.initial-loader').style.display = 'none';
+        const loader = document.getElementById('loader-native');
+        loader.innerHTML = ''; 
+        loader.style.backgroundColor = '#801039'; 
+        setTimeout(() => {
+            loader.style.transition = 'transform 0.8s cubic-bezier(0.85, 0, 0.15, 1)';
+            loader.style.transform = 'translateY(-100%)';
+        }, 400); 
+        setTimeout(() => { loader.style.display = 'none'; }, 1300);
     }
 </script>
 

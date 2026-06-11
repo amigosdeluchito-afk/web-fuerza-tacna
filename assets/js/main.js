@@ -614,25 +614,20 @@ function injectGlobalAssets() {
     if (!document.querySelector('.initial-loader')) {
         const loaderDiv = document.createElement('div');
         loaderDiv.className = 'initial-loader';
-        
-        // Detectar si es una recarga manual (F5) para limpiar la memoria
-        let isReload = false;
-        if (window.performance) {
-            if (performance.getEntriesByType && performance.getEntriesByType("navigation").length > 0) isReload = performance.getEntriesByType("navigation")[0].type === "reload";
-            else if (performance.navigation && performance.navigation.type === 1) isReload = true;
-        }
-        // ELIMINADO: Ya no obligamos al usuario a comerse la intro de 5s en cada recarga
-        // if (isReload) sessionStorage.removeItem('fuerzaTacnaLoaderPlayed');
 
         // Ocultar antes de inyectar si ya se reprodujo, evita el pestañeo
         if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) {
-            loaderDiv.style.display = 'none';
+            loaderDiv.id = 'loader-native';
+            loaderDiv.style.backgroundColor = '#801039';
+            setTimeout(() => { loaderDiv.style.transition = 'transform 0.8s cubic-bezier(0.85, 0, 0.15, 1)'; loaderDiv.style.transform = 'translateY(-100%)'; }, 400);
+            setTimeout(() => { loaderDiv.style.display = 'none'; }, 1300);
+        } else {
+            loaderDiv.innerHTML = `
+                <div class="loader-h1">FUERZA<br>TACNA</div>
+                <div class="water-layer"><div class="water-content"><div class="loader-h1">FUERZA<br>TACNA</div></div></div>
+                <div class="wave"></div>
+            `;
         }
-        loaderDiv.innerHTML = `
-            <div class="loader-h1">FUERZA<br>TACNA</div>
-            <div class="water-layer"><div class="water-content"><div class="loader-h1">FUERZA<br>TACNA</div></div></div>
-            <div class="wave"></div>
-        `;
         document.body.insertBefore(loaderDiv, document.body.firstChild);
     }
 
