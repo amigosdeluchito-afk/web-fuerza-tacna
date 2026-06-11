@@ -111,7 +111,9 @@ window.closeDock = function() {
 
 // --- 4. LÓGICA DE FILTRADO Y DATOS ---
 async function _getUniverseData() {
-    const segs = FILTERS.segments.size ? [...FILTERS.segments] : Object.keys(SHEETS).filter(s => s !== 'base' && SHEETS[s]);
+    // FIX: Extraer segmentos válidos directamente de los botones del menú para evitar duplicados y códigos internos
+    const validChips = Array.from(document.querySelectorAll('.chips-group .chip[data-map]:not([data-map="base"])')).map(c => c.getAttribute('data-map'));
+    const segs = FILTERS.segments.size ? [...FILTERS.segments] : (validChips.length > 0 ? validChips : Object.keys(SHEETS).filter(s => s !== 'base' && SHEETS[s]));
     const allData = [];
     window.SHEET_FETCH_PROMISES = window.SHEET_FETCH_PROMISES || {};
     for (const seg of segs) {
@@ -298,10 +300,12 @@ async function buildSegmentMenu() {
         if ($btnLabel) $btnLabel.textContent = SHOW_COUNTERS ? _btnLabelFromSet(FILTERS.segments, 'categ.', 'categ.') : '—';
     };
 
-    const segs = Object.keys(SHEETS).filter(s => s !== 'base' && SHEETS[s]);
+    // FIX: Construimos el menú de categorías usando los nombres limpios del menú visual
+    const chips = Array.from(document.querySelectorAll('.chips-group .chip[data-map]:not([data-map="base"])'));
+
     $menu.innerHTML = [
         `<label><input type="checkbox" data-role="all"> Seleccionar todo</label>`,
-        ...segs.map(s => `<label><input type="checkbox" value="${s}"> ${s.charAt(0).toUpperCase() + s.slice(1)}</label>`)
+        ...chips.map(chip => `<label><input type="checkbox" value="${chip.getAttribute('data-map')}"> ${chip.textContent.trim()}</label>`)
     ].join('');
 
     const all = $menu.querySelector('input[data-role="all"]');
