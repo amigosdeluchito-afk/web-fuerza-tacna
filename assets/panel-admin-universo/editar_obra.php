@@ -242,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .tabs-content { display: flex; flex-direction: column; position: relative; }
         .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
         .tab-pane.active { display: flex; }
-        .tab-pane textarea { flex: 1; width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow-y: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+        .tab-pane textarea { flex: none; width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow-y: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; transition: none; }
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }
@@ -473,8 +473,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         function autoExpandTextarea(el) {
-            el.style.height = 'auto';
+            // Evitar saltos de scroll en la pantalla al recalcular
+            const scrollPos = window.scrollY || document.documentElement.scrollTop;
+            el.style.height = '0px'; // Forzar recalculo hacia abajo
             el.style.height = (el.scrollHeight) + 'px';
+            window.scrollTo(0, scrollPos);
         }
 
         function agregarContexto(titulo = "", texto = "", promptUser = false, url = "") {
