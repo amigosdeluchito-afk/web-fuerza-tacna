@@ -463,7 +463,7 @@ window.initMapEngine = async function(container) {
                     
                     // FIX: Enlace directo al nombre de pestaña en Excel para extraer la foto de la carpeta correcta
                     const realTab = window.SHEETS ? window.SHEETS[currentKey] : currentKey;
-                    const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || realTab || currentKey).toLowerCase();
+                    const dirFotos = String(realTab || currentKey).toLowerCase();
                     const imgUrl = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}/1.thumb.webp?v=${sessionTs}` : 'https://via.placeholder.com/300x150/801039/ffc300?text=Fuerza+Tacna';
                     let fragHTML = `<div class="ghost-card__img" style="width: 100%; height: 140px; overflow: hidden; border-radius: 8px 8px 0 0;"><img src="${imgUrl}" alt="${nombre}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x150/801039/ffc300?text=Sin+Foto';"></div>`;
                     
@@ -486,7 +486,7 @@ window.initMapEngine = async function(container) {
         if (data && data.o) {
             const o = data.o;
             const realTab = window.SHEETS ? window.SHEETS[currentKey] : currentKey;
-            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || realTab || currentKey).toLowerCase();
+            const dirFotos = String(realTab || currentKey).toLowerCase();
             const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
             const dinBuster = "?v=" + new Date().getTime();
             const rawMonto = (o.monto || '').trim();
@@ -1063,13 +1063,21 @@ window.initMapEngine = async function(container) {
     // BUSCADOR, DOCKS Y FILTROS
     // El buscador ahora vive en mapa-buscador.js
     window.gotoObra = async function(key, seg){
-        // Traductor Inverso para temática VHS y URLs antiguas
+        // Traductor Inverso Inteligente (IA, URLs antiguas y temática VHS)
         if (seg) {
-            const normSeg = String(seg).toLowerCase();
-            if (normSeg.includes('alcalde') || normSeg.includes('provincial')) {
+            const normSegReq = String(seg).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            
+            if (normSegReq.includes('alcalde') || normSegReq.includes('provincial')) {
                 seg = 'alcalde_provincial';
-            } else if (window.SHEETS_FALLBACK && window.SHEETS_FALLBACK['alcalde_provincial'] === seg) {
-                seg = 'alcalde_provincial';
+            } else if (window.SHEETS_FALLBACK) {
+                for (const [keyFallback, valFallback] of Object.entries(window.SHEETS_FALLBACK)) {
+                    if (!valFallback) continue; // Si no hay ID, ignoramos
+                    const normFallbackKey = String(keyFallback).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                    if (normFallbackKey === normSegReq || String(valFallback).toLowerCase() === normSegReq) {
+                        seg = valFallback;
+                        break;
+                    }
+                }
             }
         }
 
@@ -1120,7 +1128,7 @@ window.initMapEngine = async function(container) {
             // Abrir el Panel de Obra
             const o = d.o;
             const realTab = window.SHEETS ? window.SHEETS[currentKey] : currentKey;
-            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || realTab || currentKey).toLowerCase();
+            const dirFotos = String(realTab || currentKey).toLowerCase();
             const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
             const dinBuster = "?v=" + new Date().getTime();
             const rawMonto = (o.monto || '').trim();
