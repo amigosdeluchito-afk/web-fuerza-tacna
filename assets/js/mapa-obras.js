@@ -866,6 +866,14 @@ window.initMapEngine = async function(container) {
         isSwapping = true; 
         currentKey = key; // Definimos el intento de navegación inmediatamente
         
+        // --- FIX: Clases dinámicas de temática especial (VHS / Alcalde) ---
+        document.body.className = document.body.className.replace(/\bsegmento-[^\s]+\b/g, '').trim();
+        if (key && key !== 'base') {
+            document.body.classList.add('segmento-' + key);
+        }
+        if (mapEl) {
+            mapEl.setAttribute('data-segment', key);
+        }
         
         setBackgroundFor(key);
 
@@ -1100,12 +1108,14 @@ window.initMapEngine = async function(container) {
                     // Ignorar la cabecera
                     if (index === 0 && row.c[0] && String(row.c[0].v).toLowerCase().includes('id')) return;
                     
-                    // Extracción robusta por columna (B=1, D=3, E=4)
+                    // Extracción robusta por columna (A=0, B=1, D=3, E=4)
+                    const v0 = row.c[0] && row.c[0].v ? String(row.c[0].v).trim() : ''; // El ID exacto (Ej: alcalde_provincial)
                     const v1 = row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : ''; 
                     const activoRaw = row.c[3] && row.c[3].v ? String(row.c[3].v).toUpperCase().trim() : 'NO';
                     const ordenRaw = row.c[4] && row.c[4].v ? parseInt(row.c[4].v) || 0 : 0;
                     
-                    const idHtml = v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : '';
+                    // Usamos el ID original del Dashboard para que el CSS (VHS) no se rompa
+                    const idHtml = v0 ? v0 : (v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, "_") : '');
 
                     if (activoRaw === 'SI' || activoRaw === '1' || activoRaw === 'TRUE' || activoRaw === 'SÍ') {
                         if (v1 && idHtml) {
@@ -1115,11 +1125,37 @@ window.initMapEngine = async function(container) {
                 });
                 
                 const chipsGroup = target.querySelector('.chips-group');
+                const navChips = target.querySelector('.chips');
+                
                 if (chipsGroup) {
+                    // Buscar Inicio y Buscador en toda la barra para no perderlos jamás
+                    let inicioBtn = (navChips && navChips.querySelector('.chip[data-map="base"]')) || chipsGroup.querySelector('.chip[data-map="base"]');
                     const label = chipsGroup.querySelector('.chip--label');
-                    const searchPill = chipsGroup.querySelector('.search-pill');
+                    const searchPill = (navChips && navChips.querySelector('.search-pill')) || chipsGroup.querySelector('.search-pill');
+                    
+                    // Failsafe por si el script anterior borró por completo el botón Inicio
+                    if (!inicioBtn) {
+                        inicioBtn = document.createElement('button');
+                        inicioBtn.className = 'chip';
+                        inicioBtn.setAttribute('data-map', 'base');
+                        inicioBtn.innerHTML = `<span>Inicio</span>`;
+                    }
                     
                     chipsGroup.innerHTML = '';
+                    
+                    // Orden Exacto: Inicio -> Divisor -> Buscador -> Divisor -> Label -> Segmentos
+                    if (inicioBtn) {
+                        chipsGroup.appendChild(inicioBtn);
+                        let div1 = document.createElement('div'); div1.className = 'divider-v'; 
+                        chipsGroup.appendChild(div1);
+                    }
+                    
+                    if (searchPill) {
+                        chipsGroup.appendChild(searchPill);
+                        let div2 = document.createElement('div'); div2.className = 'divider-v'; 
+                        chipsGroup.appendChild(div2);
+                    }
+
                     if (label) chipsGroup.appendChild(label);
                     
                     menuItems.sort((a, b) => a.orden - b.orden);
@@ -1127,16 +1163,17 @@ window.initMapEngine = async function(container) {
                     menuItems.forEach(item => {
                         const btn = document.createElement('button');
                         btn.className = 'chip';
+                        
+                        // Rescate de temática especial (Ej: Alcalde Provincial - Animación VHS)
+                        if (item.idHtml.includes('alcalde') || item.idHtml.includes('provincial')) {
+                            btn.classList.add('chip-alcalde');
+                            btn.classList.add('vhs-theme');
+                        }
+                        
                         btn.setAttribute('data-map', item.idHtml);
                         btn.innerHTML = `<span>${item.nombreVis}</span>`; // FIX: El span hace que el CSS funcione
                         chipsGroup.appendChild(btn);
                     });
-
-                    if (searchPill) {
-                        let div2 = document.createElement('div'); div2.className = 'divider-v'; 
-                        chipsGroup.appendChild(div2);
-                        chipsGroup.appendChild(searchPill);
-                    }
 
                     attachChipListeners();
                     console.log("[Mapa] ✅ Menú visual inyectado exitosamente:", menuItems);
