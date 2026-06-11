@@ -253,7 +253,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($action === 'unificar_fragmentados') {
         header('Content-Type: application/json');
-        if (!is_admin()) { echo json_encode(['ok'=>false, 'error'=>'Acceso denegado']); exit; }
         
         $db->beginTransaction();
         try {
@@ -503,9 +502,7 @@ sort($segmentos_unicos);
                             <option value="">📁 Todas las categorías</option>
                             <?php foreach($categorias_comunes as $cat): ?><option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option><?php endforeach; ?>
                         </select>
-                        <?php if (is_admin()): ?>
                         <button class="btn btn-sm btn-warning font-weight-bold" style="white-space: nowrap; font-size: 12px; padding: 6px 12px; color: #801039;" onclick="unificarFragmentados()" id="btnUnificar" title="Une todas las '(Parte X)' en un solo documento">🧩 Unificar Partes</button>
-                        <?php endif; ?>
                     </div>
                     <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
                         <table id="tablaDocsCargados" class="table table-sm table-hover mb-0" style="font-size: 12px;">
@@ -567,9 +564,7 @@ sort($segmentos_unicos);
                                                     <button class="btn btn-sm btn-outline-danger py-0 px-2">X</button>
                                                 </form>
                                                 
-                                                <?php if (is_admin()): ?>
                                                 <button class="btn btn-sm btn-outline-warning py-0 px-2" onclick="abrirModalMover(<?= $row['id'] ?>)" style="width: 100%; border-color: #d97706; color: #fbbf24;">📦 Mover a Obra</button>
-                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
@@ -584,7 +579,6 @@ sort($segmentos_unicos);
     </div>
 </div>
 
-<?php if (is_admin()): ?>
 <!-- Modal Mover a Obra -->
 <div class="modal-overlay" id="modalMoverObra" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
     <div style="background: #0f172a; width: 100%; max-width: 450px; border-radius: 12px; border: 1px solid #1f2937; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden;">
@@ -627,7 +621,6 @@ sort($segmentos_unicos);
         </div>
     </div>
 </div>
-<?php endif; ?>
 
 <script>
     function resetForm() {
