@@ -237,6 +237,7 @@ if (isset($_GET['success'])) {
                         <div class="tabs-header">
                             <div id="tabsHeaderList" style="display: flex;"></div>
                             <button type="button" class="btn-add-tab" onclick="agregarContexto(null, '', true)" title="Añadir nueva pestaña">➕ Nueva Pestaña</button>
+                            <button type="button" class="btn-add-tab" onclick="abrirExtractorUrl()" title="Extraer texto de un enlace web" style="color: #3b82f6;">🌐 Extraer Link</button>
                         </div>
                         <div class="tabs-content" id="tabsContent"></div>
                     </div>
@@ -661,6 +662,28 @@ if (isset($_GET['success'])) {
             }
         }
         agregarContexto("Principal");
+
+        async function abrirExtractorUrl() {
+            const url = prompt("Pega aquí el enlace de la noticia o página web:");
+            if (!url) return;
+            
+            const btn = document.querySelector('.btn-add-tab[onclick="abrirExtractorUrl()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ Extrayendo...";
+            btn.disabled = true;
+            
+            const fd = new FormData(); fd.append('action', 'extract_url_ajax'); fd.append('url', url);
+            
+            try {
+                const resp = await fetch('ia_conocimiento.php', {method: 'POST', body: fd});
+                const data = await resp.json();
+                if (data.ok) {
+                    agregarContexto(data.titulo, data.texto);
+                } else { alert("Error: " + data.error); }
+            } catch(e) {
+                alert("Error de red al extraer el link."); 
+            } finally { btn.innerHTML = originalText; btn.disabled = false; }
+        }
 
         // --- LÓGICA DE PROVINCIAS Y DISTRITOS DEPENDIENTES ---
         document.addEventListener('DOMContentLoaded', () => {
