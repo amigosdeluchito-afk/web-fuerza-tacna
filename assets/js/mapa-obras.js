@@ -500,22 +500,33 @@ window.initMapEngine = async function(container) {
 
                 if (match) {
                     const rows = window.gvizToObjects(JSON.parse(match[1]));
-                    window.SHEETS = window.SHEETS || {};
+                    
+                    // DESTRUIR EL HARDCODE: Limpiamos los datos viejos (transporte, agricultura)
+                    // que venían de HTML/utils y creamos un diccionario totalmente fresco.
+                    window.SHEETS = { base: '' };
+                    
                     rows.forEach(r => {
-                        // Rastrear la columna del nombre visual ("Educación")
-                        const nombreRaw = r.nombre ?? r.Nombre ?? r.NOMBRE ?? r.segmento ?? r.Segmento ?? r.categoria ?? r.Categoria ?? r.titulo ?? '';
-                        const nombre = String(nombreRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                        // Extraer valores con soporte para formato de Google Viz (sin guiones bajos)
+                        const idHtmlRaw = r.id_segmento ?? r.idsegmento ?? r.id ?? r.segmento ?? '';
+                        const nombreVisRaw = r.nombre_visible ?? r.nombrevisible ?? r.nombre ?? r.titulo ?? '';
+                        const tabExcelRaw = r.nombre_pestana ?? r.nombrepestana ?? r.pestana ?? r.tab ?? '';
                         
-                        // Rastrear la columna del código real ("ID_001")
-                        const codigoRaw = r.codigo ?? r.Codigo ?? r.CODIGO ?? r.id ?? r.Id ?? r.ID ?? r.pestaña ?? r.Pestaña ?? r.tab ?? r.hoja ?? '';
-                        const codigo = String(codigoRaw).trim();
+                        const idHtml = String(idHtmlRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                        const nombreVis = String(nombreVisRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                        const tabExcel = String(tabExcelRaw).trim();
                         
-                        if (nombre && codigo) {
-                            window.SHEETS[nombre] = codigo;
+                        // Enlazar ID del HTML (ej: data-map="formalizacion") -> Pestaña (FORMALIZACION)
+                        if (idHtml && tabExcel) {
+                            window.SHEETS[idHtml] = tabExcel;
+                        }
+                        
+                        // Enlazar Nombre Visible -> Pestaña (Como plan B de seguridad estricto)
+                        if (nombreVis && tabExcel && nombreVis !== idHtml) {
+                            window.SHEETS[nombreVis] = tabExcel;
                         }
                     });
                     window.SHEETS_MAPPED = true;
-                    console.log("[Mapa] ✅ ¡ÉXITO! Índice de SEGMENTOS cargado. La web ahora sabe traducir:", window.SHEETS);
+                    console.log("[Mapa] ✅ ¡ÉXITO! Índice de SEGMENTOS reconstruido limpiamente. Traductor:", window.SHEETS);
                 }
             } catch (e) {
                 console.warn("[Mapa] ⚠️ Error al intentar leer pestaña maestra 'SEGMENTOS'.", e);
