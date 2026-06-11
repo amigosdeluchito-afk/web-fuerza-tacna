@@ -1007,8 +1007,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const form = e.target;
             const btn = document.getElementById('btnGuardarGlobal');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Guardando todos los cambios...';
+            btn.innerHTML = '⏳ Guardando Excel, Fotos e IA...';
             btn.disabled = true;
+            
+            // ==============================================
+            // 1. INYECTAR A LA IA EN SEGUNDO PLANO
+            // ==============================================
+            const tabs = document.querySelectorAll('.tab-btn');
+            let contextoManual = "";
+            tabs.forEach(btnTab => {
+                const tabId = btnTab.dataset.target;
+                const tit = btnTab.querySelector('.ctx-titulo').value.trim();
+                const pane = document.getElementById(tabId);
+                if (pane) {
+                    const txt = pane.querySelector('.ctx-texto').value.trim();
+                    if (txt) contextoManual += `--- ${tit || 'Fragmento'} ---\n${txt}\n\n`;
+                }
+            });
+            
+            const formDesc = document.getElementById('inputDesc').value.trim();
+            const tituloClave = "Obra: " + document.getElementById('inputNombre').value.trim();
+            const nombreSeg = document.querySelector('#selectSegmento option:checked').text;
+            let textoIA = `La obra '${document.getElementById('inputNombre').value.trim()}' pertenece al sector ${nombreSeg}. `;
+            const dist = document.getElementById('inputDistrito').value;
+            const prov = document.getElementById('inputProvincia').value;
+            if (dist || prov) textoIA += `Ubicada en ${dist}, ${prov}. `;
+            const est = document.getElementById('inputEstado').value;
+            if (est) textoIA += `Estado actual: '${est}'. `;
+            const realMonto = base > 0 ? (base * mag) : '';
+            const displayMonto = formatMontoFriendly(realMonto);
+            if (displayMonto && displayMonto !== 'S/ 0') textoIA += `Monto referencial: ${displayMonto}. `;
+            if (formDesc) textoIA += `Descripción oficial: ${formDesc}. `;
+            if (contextoManual) textoIA += `Contexto adicional: ${contextoManual.trim()}`;
+            
+            const fdIA = new FormData();
+            fdIA.append('action', 'save_single');
+            fdIA.append('titulo', tituloClave);
+            fdIA.append('contenido', textoIA.trim());
+            fdIA.append('palabras', `${document.getElementById('inputNombre').value.trim()}, ${dist}, ${nombreSeg}`);
+
+            try { await fetch('ia_cerebro_obras.php', { method: 'POST', body: fdIA }); } catch(err) { console.warn("Error IA background", err); }
+            
+            // ==============================================
+            // 2. PROCEDER CON EL GUARDADO NORMAL (EXCEL)
+            // ==============================================
 
             const fd = new FormData(form);
             fd.append('ajax', '1'); // Le dice a PHP que no recargue la página
