@@ -1078,65 +1078,49 @@ window.initMapEngine = async function(container) {
         if (!window.SHEET_ID) return;
         try {
             console.log("[Mapa] 🔍 Construyendo menú dinámico desde 'SEGMENTOS'...");
-            let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:E&headers=1`;
+            let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:E`;
             let resp = await fetch(mapUrl);
             let txt = await resp.text();
             let match = txt.match(/setResponse\(([\s\S]+)\);?/);
             
             if (!match) {
-                mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:E&headers=1`;
+                mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:E`;
                 resp = await fetch(mapUrl);
                 txt = await resp.text();
                 match = txt.match(/setResponse\(([\s\S]+)\);?/);
             }
 
             if (match) {
-                const rows = window.gvizToObjects(JSON.parse(match[1]));
-                window.SHEETS = { base: '' };
+                const data = JSON.parse(match[1]);
+                const rows = data.table.rows || [];
                 let menuItems = [];
                 
-                rows.forEach(r => {
-                    const idHtmlRaw = r.id_segmento ?? r.idsegmento ?? r.id ?? r.segmento ?? '';
-                    const nombreVisRaw = r.nombre_visible ?? r.nombrevisible ?? r.nombre ?? r.titulo ?? '';
-                    const tabExcelRaw = r.nombre_pestana ?? r.nombrepestana ?? r.pestana ?? r.tab ?? '';
-                    const activoRaw = String(r.activo ?? r.Activo ?? r.ACTIVO ?? 'NO').toUpperCase().trim();
-                    const ordenRaw = parseInt(r.orden ?? r.Orden ?? r.ORDEN ?? 0) || 0;
+                rows.forEach((row, index) => {
+                    if (!row || !row.c) return;
+                    // Ignorar la cabecera
+                    if (index === 0 && row.c[0] && String(row.c[0].v).toLowerCase().includes('id')) return;
                     
-                    const idHtml = String(idHtmlRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-                    const nombreVis = String(nombreVisRaw).trim();
-                    const tabExcel = String(tabExcelRaw).trim();
+                    // Extracción robusta por columna (B=1, D=3, E=4)
+                    const v1 = row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : ''; 
+                    const activoRaw = row.c[3] && row.c[3].v ? String(row.c[3].v).toUpperCase().trim() : 'NO';
+                    const ordenRaw = row.c[4] && row.c[4].v ? parseInt(row.c[4].v) || 0 : 0;
                     
-                    if (idHtml && tabExcel) {
-                        window.SHEETS[idHtml] = tabExcel;
-                    }
-                    if (nombreVis && tabExcel && String(nombreVis).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() !== idHtml) {
-                        window.SHEETS[String(nombreVis).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()] = tabExcel;
-                    }
+                    const idHtml = v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : '';
 
                     if (activoRaw === 'SI' || activoRaw === '1' || activoRaw === 'TRUE' || activoRaw === 'SÍ') {
-                        if (nombreVis && idHtml) {
-                            menuItems.push({ idHtml, nombreVis, orden: ordenRaw });
+                        if (v1 && idHtml) {
+                            menuItems.push({ idHtml, nombreVis: v1, orden: ordenRaw });
                         }
                     }
                 });
                 
-                window.SHEETS_MAPPED = true;
-                
                 const chipsGroup = target.querySelector('.chips-group');
                 if (chipsGroup) {
-                    const inicioBtn = chipsGroup.querySelector('.chip[data-map="base"]');
+                    const label = chipsGroup.querySelector('.chip--label');
                     const searchPill = chipsGroup.querySelector('.search-pill');
                     
                     chipsGroup.innerHTML = '';
-                    if (inicioBtn) chipsGroup.appendChild(inicioBtn);
-                    
-                    let div1 = document.createElement('div'); div1.className = 'divider-v'; 
-                    chipsGroup.appendChild(div1);
-                    
-                    if (searchPill) chipsGroup.appendChild(searchPill);
-                    
-                    let div2 = document.createElement('div'); div2.className = 'divider-v'; 
-                    chipsGroup.appendChild(div2);
+                    if (label) chipsGroup.appendChild(label);
                     
                     menuItems.sort((a, b) => a.orden - b.orden);
                     
@@ -1144,12 +1128,18 @@ window.initMapEngine = async function(container) {
                         const btn = document.createElement('button');
                         btn.className = 'chip';
                         btn.setAttribute('data-map', item.idHtml);
-                        btn.textContent = item.nombreVis;
+                        btn.innerHTML = `<span>${item.nombreVis}</span>`; // FIX: El span hace que el CSS funcione
                         chipsGroup.appendChild(btn);
                     });
 
+                    if (searchPill) {
+                        let div2 = document.createElement('div'); div2.className = 'divider-v'; 
+                        chipsGroup.appendChild(div2);
+                        chipsGroup.appendChild(searchPill);
+                    }
+
                     attachChipListeners();
-                    console.log("[Mapa] ✅ Menú visual inyectado exitosamente.");
+                    console.log("[Mapa] ✅ Menú visual inyectado exitosamente:", menuItems);
                 }
             }
         } catch (e) {
