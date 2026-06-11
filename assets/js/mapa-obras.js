@@ -461,8 +461,10 @@ window.initMapEngine = async function(container) {
                     
                     const pill = typeof window.estadoToPill === 'function' ? window.estadoToPill(estado) : {cls:'', txt:estado};
                     
-                    let fragHTML = typeof window.imgFragmentFor === 'function' ? window.imgFragmentFor(currentKey, o.carpeta, nombre) : '';
-                    if (fragHTML && fragHTML.includes('1.thumb.webp')) fragHTML = fragHTML.replace(/1\.thumb\.webp/g, `1.thumb.webp?v=${sessionTs}`);
+                    // FIX: Construcción directa de la imagen, sin depender de la función externa eliminada
+                    const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || currentKey).toLowerCase();
+                    const imgUrl = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}/1.thumb.webp?v=${sessionTs}` : 'https://via.placeholder.com/300x150/801039/ffc300?text=Fuerza+Tacna';
+                    let fragHTML = `<div class="ghost-card__img" style="width: 100%; height: 140px; overflow: hidden; border-radius: 8px 8px 0 0;"><img src="${imgUrl}" alt="${nombre}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x150/801039/ffc300?text=Sin+Foto';"></div>`;
                     
                     const ghostHTML = `<div class="ghost-card" style="margin: 0;">${fragHTML}<div class="ghost-card__body"><div class="ghost-card__kicker">Obra <span class="pill ${pill.cls}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4Z"/></svg> ${pill.txt}</span></div><div class="ghost-card__title">${nombre}</div><div class="ghost-card__meta">${monto}</div><div class="ghost-card__divider"></div><div class="meta-row">${(o.distrito||'-')} · ${(o.provincia||'-')}</div></div></div>`;
                     
@@ -482,7 +484,7 @@ window.initMapEngine = async function(container) {
         
         if (data && data.o) {
             const o = data.o;
-            const dirFotos = String(window.FOTOS_DIR[currentKey] || currentKey).toLowerCase();
+            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || currentKey).toLowerCase();
             const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
             const dinBuster = "?v=" + new Date().getTime();
             const rawMonto = (o.monto || '').trim();
@@ -1102,7 +1104,7 @@ window.initMapEngine = async function(container) {
 
             // Abrir el Panel de Obra
             const o = d.o;
-            const dirFotos = String(window.FOTOS_DIR[currentKey] || currentKey).toLowerCase();
+            const dirFotos = String((window.FOTOS_DIR || {})[currentKey] || currentKey).toLowerCase();
             const base  = o.carpeta ? `IMG/fotos-obras/${dirFotos}/${o.carpeta}` : null;
             const dinBuster = "?v=" + new Date().getTime();
             const rawMonto = (o.monto || '').trim();
