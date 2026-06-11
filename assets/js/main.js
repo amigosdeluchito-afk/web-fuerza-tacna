@@ -648,6 +648,7 @@ function injectGlobalAssets() {
         const chatDiv = document.createElement('div');
         chatDiv.id = 'ft-chat-container';
         chatDiv.className = 'ft-chat-closed';
+        chatDiv.style.cssText = 'opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.5s ease;'; // Previene FOUC
         chatDiv.innerHTML = `
             <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
                 <div class="ft-fab-avatar">🐻</div>
@@ -761,7 +762,7 @@ document.addEventListener("DOMContentLoaded", function () {
     AOS.init({ duration: 1000, easing: 'ease', once: true });
     
     barba.init({
-        sync: true,
+        sync: false, // FIX: Espera que el telón cubra la pantalla antes de inyectar la nueva página
 
         transitions: [
             {

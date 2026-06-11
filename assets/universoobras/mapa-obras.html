@@ -78,6 +78,19 @@
 
 <div class="app-bg" aria-hidden="true"></div>
 
+<!-- Loader que solo se ve al recargar (Anti-FOUC Nativo) -->
+<div class="initial-loader">
+    <div class="loader-h1">FUERZA<br>TACNA</div>
+    <div class="water-layer"><div class="water-content"><div class="loader-h1">FUERZA<br>TACNA</div></div></div>
+    <div class="wave"></div>
+</div>
+<script>
+    // Ocultar inmediatamente si ya se reprodujo en esta sesión
+    if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) {
+        document.querySelector('.initial-loader').style.display = 'none';
+    }
+</script>
+
 <div id="video-intro-container">
     <video autoplay muted loop playsinline id="introVideo">
         <source src="IMG/VIDEO%20TACNA.mp4" type="video/mp4">
@@ -239,7 +252,7 @@
 <!-- ASISTENTE IA (LUCHITO) -->
 <!-- ========================================== -->
 <link rel="stylesheet" href="chat-ia.css?v=4">
-<div id="ft-chat-container" class="ft-chat-closed">
+<div id="ft-chat-container" class="ft-chat-closed" style="opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.5s ease;">
     <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
         <div class="ft-fab-avatar">🐻</div>
     </button>

@@ -16,6 +16,13 @@ function initChatIA() {
 
     chatContainer.dataset.initialized = 'true';
 
+    // Quitamos el escudo de invisibilidad una vez que el CSS ya está aplicado
+    setTimeout(() => {
+        chatContainer.style.opacity = '';
+        chatContainer.style.visibility = '';
+        chatContainer.style.pointerEvents = '';
+    }, 150);
+
     // --- CÁLCULO DE LA RAÍZ DEL PROYECTO (Anti-Bug de Rutas y Etiquetas Base) ---
     let projectRoot = window.location.href.split('?')[0].split('#')[0];
     if (projectRoot.includes('/assets/')) {
