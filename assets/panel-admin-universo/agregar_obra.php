@@ -94,7 +94,7 @@ if (isset($_GET['success'])) {
         .badge-principal { position: absolute; top: 6px; left: 6px; background: #10b981; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
         /* Estilos Pestañas Cerebro IA */
-        .tabs-container { display: block; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; margin-top: 10px; }
+        .tabs-container { display: flex; flex-direction: column; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; margin-top: 10px; }
         .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
         .tabs-header::-webkit-scrollbar { height: 4px; }
         .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -106,10 +106,10 @@ if (isset($_GET['success'])) {
         .tab-close:hover { opacity: 1; background: rgba(239,68,68,0.2); }
         .btn-add-tab { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: none; color: #10b981; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-add-tab:hover { background: rgba(16,185,129,0.1); }
-        .tabs-content { display: block; position: relative; }
-        .tab-pane { display: none; padding: 0; box-sizing: border-box; }
-        .tab-pane.active { display: block; }
-        .tab-pane textarea { display: block; width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow-y: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+        .tabs-content { display: flex; flex-direction: column; position: relative; }
+        .tab-pane { display: none; flex-direction: column; padding: 0; box-sizing: border-box; }
+        .tab-pane.active { display: flex; }
+        .tab-pane textarea { flex: 1; width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow-y: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         /* Estilos del Menú Desplegable */
         .dropdown { position: relative; display: inline-block; margin-right: 16px; }

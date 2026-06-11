@@ -130,12 +130,12 @@ try {
         .data-item label { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; }
         .data-item div { font-size: 14px; font-weight: 600; color: #e2e8f0; }
         
-        .textarea-wrap { display: block; min-height: 450px; margin-bottom: 20px; }
+        .textarea-wrap { display: flex; flex-direction: column; flex: 1; min-height: 450px; margin-bottom: 20px; }
         .textarea-wrap label { font-size: 15px; color: #f9fafb; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .textarea-wrap label span { font-size: 12px; font-weight: normal; color: #9ca3af; background: #1e293b; padding: 2px 8px; border-radius: 4px; }
         
         /* Nuevos estilos para los múltiples contextos (Pestañas tipo Navegador) */
-        .tabs-container { display: block; overflow: hidden; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; }
+        .tabs-container { display: flex; flex-direction: column; flex: 1; background: #0f172a; border: 1px solid #1f2937; border-radius: 8px; }
         .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1f2937; overflow-x: auto; }
         .tabs-header::-webkit-scrollbar { height: 4px; }
         .tabs-header::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -148,10 +148,10 @@ try {
         .btn-add-tab { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: none; color: #10b981; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-add-tab:hover { background: rgba(16,185,129,0.1); }
 
-        .tabs-content { display: block; position: relative; }
-        .tab-pane { display: none; padding: 0; box-sizing: border-box; }
-        .tab-pane.active { display: block; }
-        .tab-pane textarea { display: block; width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow-y: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
+        .tabs-content { display: flex; flex-direction: column; flex: 1; position: relative; }
+        .tab-pane { display: none; flex-direction: column; flex: 1; padding: 0; box-sizing: border-box; }
+        .tab-pane.active { display: flex; }
+        .tab-pane textarea { flex: 1; width: 100%; min-height: 350px; background: transparent; border: none; color: #e2e8f0; font-size: 14px; resize: none; overflow-y: hidden; outline: none; line-height: 1.6; font-family: system-ui; padding: 15px; box-sizing: border-box; }
 
         .btn-save-obra { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         .btn-save-obra:hover { background: #059669; }
@@ -235,7 +235,7 @@ try {
                         </div>
                     </div>
 
-                    <div class="textarea-wrap" style="display: block; width: 100%;">
+                    <div class="textarea-wrap">
                         <label>
                             Fuentes y Contexto Adicional
                             <span id="aiStatusBadge">🟢 Ya en Cerebro</span>
@@ -251,7 +251,7 @@ try {
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <div style="display: flex; gap: 10px; margin-top: auto; padding-top: 15px;">
                         <button class="btn-save-obra" id="btnSaveObra" style="flex: 2;">🧠 Alimentar Cerebro con esta Obra</button>
                         <button class="btn-save-obra" id="btnExportWord" style="flex: 1; background: #4f46e5; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);" onclick="exportarFichaWord()">⬇️ Exportar Ficha a Word</button>
                     </div>
