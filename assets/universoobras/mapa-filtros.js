@@ -120,7 +120,8 @@ async function _getUniverseData() {
         const TAB = SHEETS[seg];
         if (TAB) {
             if (!window.SHEET_CACHE[seg] && !window.SHEET_FETCH_PROMISES[seg]) {
-                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:J&headers=1`;
+                const tqBuster = encodeURIComponent(`select * offset 0`);
+                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=${encodeURIComponent(TAB)}&range=A:J&headers=1`;
                 window.SHEET_FETCH_PROMISES[seg] = fetch(url).then(r => r.text()).then(txt => {
                     const match = txt.match(/setResponse\(([\s\S]+)\);?/);
                     if (!match) throw new Error("Error GViz");

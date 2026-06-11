@@ -528,13 +528,14 @@ window.initMapEngine = async function(container) {
         if (!window.SHEETS_MAPPED && window.SHEET_ID) {
             try {
                 console.log("[Mapa] 🔍 Leyendo la pestaña maestra 'SEGMENTOS' (Directo por columnas)...");
-                let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:E`;
+                const tqBuster = encodeURIComponent(`select * offset 0`);
+                let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=SEGMENTOS&range=A:E`;
                 let resp = await fetch(mapUrl);
                 let txt = await resp.text();
                 let match = txt.match(/setResponse\(([\s\S]+)\);?/);
                 
                 if (!match) {
-                    mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:E`;
+                    mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=Segmentos&range=A:E`;
                     resp = await fetch(mapUrl);
                     txt = await resp.text();
                     match = txt.match(/setResponse\(([\s\S]+)\);?/);
@@ -615,7 +616,8 @@ window.initMapEngine = async function(container) {
             if (!window.SHEET_CACHE[segmento] && !window.SHEET_FETCH_PROMISES[segmento]){
                 window.SHEET_FETCH_PROMISES[segmento] = (async () => {
                     const doFetch = async (tabName) => {
-                        const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(tabName)}&range=A:Z&headers=1`;
+                        const tqBuster = encodeURIComponent(`select * offset 0`);
+                        const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=${encodeURIComponent(tabName)}&range=A:Z&headers=1`;
                         const res = await fetch(url);
                         const txt = await res.text();
                         const match = txt.match(/setResponse\(([\s\S]+)\);?/);
@@ -1184,13 +1186,14 @@ window.initMapEngine = async function(container) {
         if (!window.SHEET_ID) return;
         try {
             console.log("[Mapa] 🔍 Construyendo menú dinámico desde 'SEGMENTOS'...");
-            let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:E`;
+            const tqBuster = encodeURIComponent(`select * offset 0`);
+            let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=SEGMENTOS&range=A:E`;
             let resp = await fetch(mapUrl);
             let txt = await resp.text();
             let match = txt.match(/setResponse\(([\s\S]+)\);?/);
             
             if (!match) {
-                mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:E`;
+                mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=Segmentos&range=A:E`;
                 resp = await fetch(mapUrl);
                 txt = await resp.text();
                 match = txt.match(/setResponse\(([\s\S]+)\);?/);

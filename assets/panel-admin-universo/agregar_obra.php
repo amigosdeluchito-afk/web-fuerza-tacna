@@ -374,7 +374,8 @@ if (isset($_GET['success'])) {
             const segmento = document.getElementById('selectSegmento').value;
             
             try {
-                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(segmento)}&range=A:J&headers=1`;
+                const tqBuster = encodeURIComponent(`select * offset 0`);
+                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=${encodeURIComponent(segmento)}&range=A:J&headers=1`;
                 const resp = await fetch(url);
                 const txt = await resp.text();
                 const json = parseGviz(txt);
@@ -707,7 +708,8 @@ if (isset($_GET['success'])) {
         // Carga dinámica de segmentos
         async function cargarSegmentosAdmin() {
             try {
-                const resp = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=SEGMENTOS&range=A:D&headers=1`);
+                const tqBuster = encodeURIComponent(`select * offset 0`);
+                const resp = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&tq=${tqBuster}&sheet=SEGMENTOS&range=A:D&headers=1`);
                 const json = parseGviz(await resp.text());
                 const sel = document.getElementById('selectSegmento');
                 sel.innerHTML = '';

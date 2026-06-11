@@ -491,7 +491,8 @@ async function cargarSegmentos() {
   for (const k in obrasPorSegmento) delete obrasPorSegmento[k];
 
   try {
-    const respSeg = await fetch(`${SHEET_BASE_URL}SEGMENTOS`);
+    const tqBuster = encodeURIComponent(`select * offset 0`);
+    const respSeg = await fetch(`${SHEET_BASE_URL}SEGMENTOS&tq=${tqBuster}`);
     const jsonSeg = parseGviz(await respSeg.text());
     SEGMENTOS = (jsonSeg.table.rows || [])
         .map(r => ({ key: r.c[2]?.v, nombre: r.c[1]?.v, activo: String(r.c[3]?.v||'').toUpperCase() }))
@@ -500,7 +501,8 @@ async function cargarSegmentos() {
 
   // Cargar cada hoja del Sheet
   for (const seg of SEGMENTOS) {
-    const url = SHEET_BASE_URL + encodeURIComponent(seg.key);
+    const tqBuster = encodeURIComponent(`select * offset 0`);
+    const url = SHEET_BASE_URL + encodeURIComponent(seg.key) + `&tq=${tqBuster}`;
     const resp = await fetch(url);
     const txt  = await resp.text();
     const json = parseGviz(txt);

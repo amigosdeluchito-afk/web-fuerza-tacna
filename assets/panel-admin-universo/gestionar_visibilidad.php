@@ -252,7 +252,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // 1. Cargar segmentos al inicio
         async function cargarSegmentos() {
             try {
-                const resp = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=SEGMENTOS&range=A:D&headers=1`);
+                const tqBuster = encodeURIComponent(`select * offset 0`);
+                const resp = await fetch(`${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&tq=${tqBuster}&sheet=SEGMENTOS&range=A:D&headers=1`);
                 const json = parseGviz(await resp.text());
                 
                 selectSegmento.innerHTML = '<option value="">-- Elige un segmento --</option>';
@@ -282,7 +283,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             tbodyObras.innerHTML = '<tr><td colspan="5" class="loader">⏳ Descargando datos desde Excel...</td></tr>';
 
             try {
-                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&sheet=${encodeURIComponent(segmento)}&range=A:H&headers=1`;
+                const tqBuster = encodeURIComponent(`select * offset 0`);
+                const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${Date.now()}&tq=${tqBuster}&sheet=${encodeURIComponent(segmento)}&range=A:H&headers=1`;
                 const resp = await fetch(url);
                 const json = parseGviz(await resp.text());
                 
