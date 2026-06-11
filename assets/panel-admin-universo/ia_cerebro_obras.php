@@ -311,9 +311,12 @@ try {
 
                 // 2. Cargar obras de cada segmento
                 for (const seg of segmentos) {
-                    const url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(seg.key)}&range=A:J&headers=1`;
-                    const resp = await fetch(url);
-                    const json = parseGviz(await resp.text());
+                    // FIX CACHÉ: Añadimos un rompe-caché a la petición (tq) para forzar a Google Sheets a darnos datos en vivo al instante.
+                    const tqBuster = encodeURIComponent(`select * offset 0`);
+                    let url = `${SHEET_BASE_URL}?tqx=out:json;reqId=${new Date().getTime()}&tq=${tqBuster}&sheet=${encodeURIComponent(seg.key)}&range=A:J&headers=1`;
+                    
+                    let resp = await fetch(url);
+                    let json = parseGviz(await resp.text());
                     
                     (json.table.rows || []).forEach(r => {
                         if(!r || !r.c) return;
@@ -521,7 +524,8 @@ try {
             const seg = document.getElementById('selectSegmento').value;
             
             const filtradas = todasLasObras.filter(o => {
-                const matchSearch = o.nombre.toLowerCase().includes(q) || o.distrito.toLowerCase().includes(q);
+                // FIX BÚSQUEDA: Forzamos la conversión a String para evitar que el filtro colapse si una obra no tiene distrito
+                const matchSearch = String(o.nombre || '').toLowerCase().includes(q) || String(o.distrito || '').toLowerCase().includes(q);
                 const matchSegmento = seg === "" || o.segmento === seg;
                 return matchSearch && matchSegmento;
             });

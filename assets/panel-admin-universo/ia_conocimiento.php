@@ -666,6 +666,14 @@ sort($segmentos_unicos);
     function abrirModalMover(id) {
         document.getElementById('mover_id_doc').value = id;
         document.getElementById('modalMoverObra').style.display = 'flex';
+        
+        // Inicializar backup de opciones para el filtro estricto
+        if (!window.allObrasOptions) {
+            const select = document.getElementById('selectObraMover');
+            window.allObrasOptions = Array.from(select.options).map(o => ({
+                value: o.value, text: o.textContent, seg: o.getAttribute('data-seg'), nom: o.getAttribute('data-nom'), disabled: o.disabled
+            }));
+        }
     }
     
     function cerrarModalMover() {
@@ -682,19 +690,40 @@ sort($segmentos_unicos);
         const txt = document.getElementById('buscarObraMover').value.toLowerCase();
         const seg = document.getElementById('filtroSegmentoMover').value;
         const select = document.getElementById('selectObraMover');
-        const options = select.options;
         
-        for (let i = 0; i < options.length; i++) {
-            const opt = options[i];
-            if (opt.disabled) continue;
+        if (!window.allObrasOptions) return;
+        
+        select.innerHTML = '';
+        let count = 0;
+        
+        window.allObrasOptions.forEach(optData => {
+            if (optData.disabled) {
+                if (window.allObrasOptions.length === 1) {
+                    const opt = document.createElement('option');
+                    opt.disabled = true; opt.textContent = optData.text; select.appendChild(opt);
+                }
+                return;
+            }
             
-            const optSeg = opt.getAttribute('data-seg');
-            const optNom = opt.getAttribute('data-nom');
+            const matchTxt = (optData.nom || '').includes(txt);
+            const matchSeg = seg === "" || optData.seg === seg;
             
-            const matchTxt = optNom.includes(txt);
-            const matchSeg = seg === "" || optSeg === seg;
-            
-            opt.style.display = (matchTxt && matchSeg) ? "" : "none";
+            if (matchTxt && matchSeg) {
+                const opt = document.createElement('option');
+                opt.value = optData.value;
+                opt.textContent = optData.text;
+                opt.setAttribute('data-seg', optData.seg);
+                opt.setAttribute('data-nom', optData.nom);
+                select.appendChild(opt);
+                count++;
+            }
+        });
+
+        if (count === 0 && window.allObrasOptions.length > 1) {
+            const opt = document.createElement('option');
+            opt.disabled = true;
+            opt.textContent = "No hay obras que coincidan con la búsqueda.";
+            select.appendChild(opt);
         }
     }
 
