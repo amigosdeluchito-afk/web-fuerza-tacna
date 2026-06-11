@@ -46,6 +46,7 @@
 <script src="mapa-buscador.js" defer></script>
 <script src="../js/mapa-obras.js?v=1065" defer></script>
 <script src="mapa-filtros.js?v=10" defer></script>
+<script src="dashboard.js" defer></script>
 
 <style>
 /* 
@@ -83,6 +84,34 @@
         Tu navegador no soporta videos.
     </video>
     
+    <!-- Secuencia Intro y Tarjetas de Cantidades (Dashboard) -->
+    <div id="intro-dashboard" class="dashboard-overlay">
+        <div class="intro-titles">
+            <h1 class="intro-text it-1">BIENVENIDO A TACNA</h1>
+            <h1 class="intro-text it-2">EL FUTURO SE CONSTRUYE HOY</h1>
+            <h1 class="intro-text it-3">OBRAS DE FUERZA TACNA</h1>
+        </div>
+        
+        <div class="dashboard-cards">
+            <div class="dash-card">
+                <h3>Total Obras</h3>
+                <div id="val-total-obras" class="dash-val">0</div>
+            </div>
+            <div class="dash-card">
+                <h3>Inversión Total</h3>
+                <div id="val-total-inversion" class="dash-val">0</div>
+            </div>
+            <div class="dash-card">
+                <h3>Culminadas</h3>
+                <div id="val-total-culminadas" class="dash-val">0</div>
+            </div>
+            <div class="dash-card">
+                <h3>En Riesgo</h3>
+                <div id="val-total-riesgo" class="dash-val">0</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer de Inicio -->
     <div id="home-footer">
         MOVIMIENTO INDEPENDIENTE REGIONAL FUERZA TACNA

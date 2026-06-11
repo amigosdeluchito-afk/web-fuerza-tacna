@@ -49,6 +49,79 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   will-change: transform;
 }
 
+/* --- ANIMACIÓN INTRO Y TARJETAS DE CANTIDADES --- */
+.dashboard-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+}
+
+.intro-titles {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  text-align: center;
+  width: 100%;
+}
+.intro-text {
+  position: absolute;
+  width: 100%;
+  font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  color: #ffc300;
+  text-transform: uppercase;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  opacity: 0;
+  transform: translateY(20px);
+  margin: 0;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 15vh;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+.dash-card {
+  background: rgba(20, 20, 20, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 195, 0, 0.3);
+  border-radius: 16px;
+  padding: 20px 30px;
+  text-align: center;
+  min-width: 200px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.dash-card h3 {
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 10px 0;
+  opacity: 0.8;
+}
+.dash-val {
+  font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+  font-size: 2.5rem;
+  color: #ffc300;
+  line-height: 1;
+}
+@media (max-width: 768px) {
+  .dashboard-cards { gap: 10px; margin-top: 10vh; }
+  .dash-card { min-width: 140px; padding: 15px; }
+  .dash-val { font-size: 1.8rem; }
+}
+
 /* --- FOOTER INICIO --- */
 #home-footer {
     position: absolute;
