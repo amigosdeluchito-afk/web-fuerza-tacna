@@ -483,27 +483,25 @@ try {
                 const separador = "Contexto adicional:";
                 if (textoIA.includes(separador)) {
                     textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
-                    
-                    // FIX: Autolimpieza de duplicados generados por el bug de sincronización
-                    let textoParaLimpia = textoIA.replace(/--- Contexto General ---/g, '').replace(/--- Fragmento ---/g, '').trim();
-                    if (textoParaLimpia === (obra.descripcion_excel || '').trim()) {
-                        textoIA = ""; // Era un clon fantasma
-                    }
+                    let tabAdded = false;
 
                     if (textoIA !== "") {
                         if (textoIA.includes('--- ')) {
                             const bloques = textoIA.split(/--- (.*?) ---/g);
                             for (let i = 1; i < bloques.length; i += 2) {
                                 const t = bloques[i].trim();
-                                const c = (bloques[i+1] || "").trim();
-                                if (c !== "") agregarContexto(t, c);
+                                let c = (bloques[i+1] || "").trim();
+                                let normC = c.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                                let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                                if (normC !== normExcel && normC !== '') { agregarContexto(t, c); tabAdded = true; }
                             }
                         } else {
-                            agregarContexto("Contexto General", textoIA);
+                            let normC = textoIA.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                            let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                            if (normC !== normExcel && normC !== '') { agregarContexto("Contexto General", textoIA); tabAdded = true; }
                         }
-                    } else {
-                        agregarContexto("Principal");
                     }
+                    if (!tabAdded) agregarContexto("Principal");
                 } else {
                     agregarContexto("Principal"); // Si no hay contexto extra, creamos caja vacía
                 }
@@ -624,11 +622,21 @@ try {
                     
                     if (contextoIA.includes(sepModerno)) {
                         contextoManual = contextoIA.substring(contextoIA.indexOf(sepModerno) + sepModerno.length).trim();
-                        
-                        // FIX LIMPIEZA LOTE: Destruir clones fantasmas de la BD durante la sincronización
-                        let textoParaLimpia = contextoManual.replace(/--- Contexto General ---/g, '').replace(/--- Fragmento ---/g, '').trim();
-                        if (textoParaLimpia === (obra.descripcion_excel || '').trim()) {
-                            contextoManual = "";
+                        let cleanContexts = [];
+                        if (contextoManual.includes('--- ')) {
+                            const bloques = contextoManual.split(/--- (.*?) ---/g);
+                            for (let i = 1; i < bloques.length; i += 2) {
+                                const t = bloques[i].trim();
+                                let c = (bloques[i+1] || "").trim();
+                                let normC = c.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                                let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                                if (normC !== normExcel && normC !== '') cleanContexts.push(`--- ${t} ---\n${c}`);
+                            }
+                            contextoManual = cleanContexts.join('\n\n');
+                        } else {
+                            let normC = contextoManual.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                            let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                            if (normC === normExcel || normC === '') contextoManual = "";
                         }
                     }
                 }

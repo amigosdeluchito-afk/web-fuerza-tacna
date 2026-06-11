@@ -545,27 +545,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const separador = "Contexto adicional:";
                 if (textoIA.includes(separador)) {
                     textoIA = textoIA.substring(textoIA.indexOf(separador) + separador.length).trim();
-                    
-                    // FIX: Autolimpieza de duplicados generados por el bug de sincronización
-                    let textoParaLimpia = textoIA.replace(/--- Contexto General ---/g, '').replace(/--- Fragmento ---/g, '').trim();
-                    if (textoParaLimpia === (obra.desc || '').trim()) {
-                        textoIA = ""; // Clon fantasma detectado y purgado
-                    }
+                    let tabAdded = false;
 
                     if (textoIA !== "") {
                         if (textoIA.includes('--- ')) {
                             const bloques = textoIA.split(/--- (.*?) ---/g);
                             for (let i = 1; i < bloques.length; i += 2) {
                                 const t = bloques[i].trim();
-                                const c = (bloques[i+1] || "").trim();
-                                if (c !== "") agregarContexto(t, c);
+                                let c = (bloques[i+1] || "").trim();
+                                let normC = c.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                                let normExcel = (obra.desc || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                                if (normC !== normExcel && normC !== '') { agregarContexto(t, c); tabAdded = true; }
                             }
                         } else {
-                            agregarContexto("Contexto General", textoIA);
+                            let normC = textoIA.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                            let normExcel = (obra.desc || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                            if (normC !== normExcel && normC !== '') { agregarContexto("Contexto General", textoIA); tabAdded = true; }
                         }
-                    } else {
-                        agregarContexto("Principal");
                     }
+                    if (!tabAdded) agregarContexto("Principal");
                 } else {
                     agregarContexto("Principal");
                 }
