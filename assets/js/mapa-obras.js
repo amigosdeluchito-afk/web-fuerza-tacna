@@ -1092,6 +1092,19 @@ window.initMapEngine = async function(container) {
                 d = window.__OBRA_DATA.get(key);
             }
         }
+        
+        // FIX PARA INTELIGENCIA ARTIFICIAL: Si no encuentra por llave estricta, busca por nombre aproximado
+        if (!d && window.__OBRA_DATA.size > 0) {
+            const normKeySearch = String(key).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            for (const [k, v] of window.__OBRA_DATA.entries()) {
+                const normNombre = String(v.o.nombre || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+                if (normNombre === normKeySearch || normNombre.includes(normKeySearch)) {
+                    d = v;
+                    key = k; // Sobrescribimos la llave con la real para que la cámara y el panel no fallen
+                    break;
+                }
+            }
+        }
 
         if (d) {
             // Transición de cámara acelerada por hardware (Vuelo 3D)

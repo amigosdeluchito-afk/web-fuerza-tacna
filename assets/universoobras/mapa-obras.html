@@ -282,7 +282,16 @@
       // --- NUEVO: Leer segmento de la URL y activarlo ---
       const urlParams = new URLSearchParams(window.location.search);
       const segment = urlParams.get('s');
-      if (segment && segment !== 'base') {
+      const obraKey = urlParams.get('obra');
+
+      if (obraKey && segment) {
+          // Si la IA nos mandó a una obra específica, esperamos a que cargue MapLibre y la abrimos
+          setTimeout(() => {
+              if (typeof window.gotoObra === 'function') {
+                  window.gotoObra(obraKey, segment);
+              }
+          }, 800);
+      } else if (segment && segment !== 'base') {
           const chip = document.querySelector(`.chip[data-map="${segment}"]`);
           if (chip) setTimeout(() => chip.click(), 500);
       }

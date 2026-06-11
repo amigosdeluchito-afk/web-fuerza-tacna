@@ -98,15 +98,36 @@ function initChatIA() {
         };
 
         const dest = routes[actionType];
-        if (!dest) return;
+        let finalDest = dest;
+
+        // NUEVO: Permite que la IA derive a una obra específica en el mapa
+        if (actionType.startsWith('ir_a_obra:')) {
+            const parts = actionType.split(':');
+            if (parts.length >= 3) {
+                const obraKey = parts[1].trim();
+                const segmentKey = parts[2].trim();
+                
+                // Si ya estamos en el mapa, volamos directo sin recargar la página (¡Magia pura!)
+                if (typeof window.gotoObra === 'function') {
+                    chatContainer.classList.remove('ft-chat-open');
+                    chatContainer.classList.add('ft-chat-closed');
+                    window.gotoObra(obraKey, segmentKey);
+                    return;
+                }
+                
+                finalDest = projectRoot + `assets/universoobras/mapa-obras.html?s=${encodeURIComponent(segmentKey)}&obra=${encodeURIComponent(obraKey)}`;
+            }
+        }
+
+        if (!finalDest) return;
 
         chatContainer.classList.remove('ft-chat-open');
         chatContainer.classList.add('ft-chat-closed');
 
         if (typeof barba !== 'undefined' && barba.go) {
-            barba.go(dest);
+            barba.go(finalDest);
         } else {
-            window.location.href = dest;
+            window.location.href = finalDest;
         }
     };
 

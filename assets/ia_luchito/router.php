@@ -382,6 +382,9 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                 
                 // Inyección secreta anti-monotonía (No altera tu prompt visible en el panel)
                 $instruccion_secreta = "\n\n[INSTRUCCIÓN DEL SISTEMA]: Estás repitiendo mucho las mismas muletillas. A partir de ahora, PROHIBIDO iniciar tus respuestas siempre igual. Varía tu forma de hablar, usa otros términos de vez en cuando (amigo, sobrino) o ve directamente al grano sin saludos largos para sonar 100% humano e impredecible.";
+                
+                // Inyección para creación de botones directos a obras
+                $instruccion_secreta .= "\nSi el usuario pregunta por una OBRA ESPECÍFICA y sabes qué obra es, genera un botón mágico para llevarlo al mapa. Al final de tu texto, pon EXACTAMENTE este código: [btn:ir_a_obra:TITULO_OBRA:SEGMENTO|Ver Obra] (Reemplaza TITULO_OBRA por el nombre de la obra y SEGMENTO por 'vias', 'educacion', 'agua', 'social', etc).";
                 $prompt_final = $prompt_maestro . $instruccion_secreta;
 
                 $ia_result = llamar_openai_responses($ia_modelo, $prompt_final, $input_para_openai, $ia_temperatura, $ia_max_tokens, $decrypted_key);
