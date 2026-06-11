@@ -482,7 +482,7 @@ window.initMapEngine = async function(container) {
         try{
             window.SHEET_FETCH_PROMISES = window.SHEET_FETCH_PROMISES || {};
             if (!window.SHEET_CACHE[segmento] && !window.SHEET_FETCH_PROMISES[segmento]){
-                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:J&headers=1`;
+                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:Z&headers=1`;
                 window.SHEET_FETCH_PROMISES[segmento] = fetch(url).then(r => r.text()).then(txt => {
                     const match = txt.match(/setResponse\(([\s\S]+)\);?/);
                     if (!match) throw new Error("Error GViz");
