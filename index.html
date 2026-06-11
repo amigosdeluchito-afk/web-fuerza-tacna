@@ -749,6 +749,14 @@
         </div>
 
         <script>
+            // Permitimos que la animación épica vuelva a salir si el usuario recarga la página de Inicio (F5)
+            let isReload = false;
+            if (window.performance) {
+                if (performance.getEntriesByType && performance.getEntriesByType("navigation").length > 0) isReload = performance.getEntriesByType("navigation")[0].type === "reload";
+                else if (performance.navigation && performance.navigation.type === 1) isReload = true;
+            }
+            if (isReload) sessionStorage.removeItem('fuerzaTacnaLoaderPlayed');
+
             // Unificador de Cargas: Evita parpadeos al recargar la página
             if (sessionStorage.getItem('fuerzaTacnaLoaderPlayed')) {
                 const loader = document.getElementById('loader-native');
@@ -766,9 +774,6 @@
         <div class="cursor-follower"></div>
         <div class="load-container"><div class="loading-screen"></div></div>
         <main data-barba="container" data-barba-namespace="home-section">
-
-            <!-- Imagen HTML real (Copia para transiciones Barba.js) -->
-            <img src="assets/img/img-hero.png" alt="" class="hero-lcp-image" fetchpriority="high" decoding="async" width="1920" height="1080" style="display:none;">
 
         <style>
             .menu-links a, #hero-header ul li a {
@@ -991,27 +996,6 @@
                 width: 100%;
                 max-width: 280px;
                 text-align: center;
-            }
-
-            /* --- Optimización LCP Hero FASE 1 --- */
-            #hero-section {
-                background-image: none !important; /* Deshabilita el background tardío del CSS externo */
-                position: relative !important; /* Necesario para contener la imagen absoluta */
-                overflow: hidden; 
-            }
-            .hero-lcp-image {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                pointer-events: none;
-                z-index: 0;
-            }
-            /* Mantiene el contenido interactivo del hero por encima de la imagen LCP */
-            #hero-main-content, #mouse-scroll, .mobile-arrows {
-                position: relative;
-                z-index: 1; 
             }
 
             /* --- Asegurar que las flechas no se escapen y tengan espacio en todas las secciones --- */
@@ -1445,9 +1429,6 @@
 
             
             <div id="hero-section">
-                
-                <!-- Imagen HTML real para priorizar el LCP del hero de inmediato -->
-                <img src="assets/img/img-hero.png" alt="" class="hero-lcp-image" fetchpriority="high" decoding="async" width="1920" height="1080">
 
                 <header id="hero-header">
                     <h1 class="sr-only">Fuerza Tacna - Movimiento Independiente Regional</h1>
