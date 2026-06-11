@@ -484,49 +484,46 @@ window.initMapEngine = async function(container) {
         // ==============================================================================
         if (!window.SHEETS_MAPPED && window.SHEET_ID) {
             try {
-                console.log("[Mapa] 🔍 Leyendo la pestaña maestra 'SEGMENTOS' para enlazar los IDs...");
-                let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:Z&headers=1`;
+                console.log("[Mapa] 🔍 Leyendo la pestaña maestra 'SEGMENTOS' (Directo por columnas)...");
+                let mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=SEGMENTOS&range=A:E`;
                 let resp = await fetch(mapUrl);
                 let txt = await resp.text();
                 let match = txt.match(/setResponse\(([\s\S]+)\);?/);
                 
                 if (!match) {
-                    // Fallback de seguridad por si en el Excel la pestaña dice "Segmentos" en minúsculas
-                    mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:Z&headers=1`;
+                    mapUrl = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=Segmentos&range=A:E`;
                     resp = await fetch(mapUrl);
                     txt = await resp.text();
                     match = txt.match(/setResponse\(([\s\S]+)\);?/);
                 }
 
                 if (match) {
-                    const rows = window.gvizToObjects(JSON.parse(match[1]));
+                    const data = JSON.parse(match[1]);
+                    const rows = data.table.rows || [];
                     
-                    // DESTRUIR EL HARDCODE: Limpiamos los datos viejos (transporte, agricultura)
-                    // que venían de HTML/utils y creamos un diccionario totalmente fresco.
                     window.SHEETS = { base: '' };
+                    window.SHEETS_FALLBACK = window.SHEETS_FALLBACK || {};
                     
-                    rows.forEach(r => {
-                        // Extraer valores con soporte para formato de Google Viz (sin guiones bajos)
-                        const idHtmlRaw = r.id_segmento ?? r.idsegmento ?? r.id ?? r.segmento ?? '';
-                        const nombreVisRaw = r.nombre_visible ?? r.nombrevisible ?? r.nombre ?? r.titulo ?? '';
-                        const tabExcelRaw = r.nombre_pestana ?? r.nombrepestana ?? r.pestana ?? r.tab ?? '';
+                    rows.forEach((row, index) => {
+                        if (!row || !row.c) return;
+                        if (index === 0 && row.c[0] && String(row.c[0].v).toLowerCase().includes('id')) return;
                         
-                        const idHtml = String(idHtmlRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-                        const nombreVis = String(nombreVisRaw).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-                        const tabExcel = String(tabExcelRaw).trim();
+                        const v0 = row.c[0] && row.c[0].v ? String(row.c[0].v).trim() : ''; // ID (Ej: seg_001)
+                        const v1 = row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : ''; // Nombre Visible
+                        const v2 = row.c[2] && row.c[2].v ? String(row.c[2].v).trim() : ''; // Nombre Pestaña
                         
-                        // Enlazar ID del HTML (ej: data-map="formalizacion") -> Pestaña (FORMALIZACION)
-                        if (idHtml && tabExcel) {
-                            window.SHEETS[idHtml] = tabExcel;
+                        const idHtml = v0 ? v0 : (v1 ? String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, "_") : '');
+
+                        if (idHtml && v2) {
+                            window.SHEETS[idHtml] = v2;
                         }
-                        
-                        // Enlazar Nombre Visible -> Pestaña (Como plan B de seguridad estricto)
-                        if (nombreVis && tabExcel && nombreVis !== idHtml) {
-                            window.SHEETS[nombreVis] = tabExcel;
+                        if (v1 && v2 && v1 !== idHtml) {
+                            window.SHEETS[String(v1).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()] = v2;
                         }
+                        if (v1 && v0) window.SHEETS_FALLBACK[v1] = v0;
                     });
                     window.SHEETS_MAPPED = true;
-                    console.log("[Mapa] ✅ ¡ÉXITO! Índice de SEGMENTOS reconstruido limpiamente. Traductor:", window.SHEETS);
+                    console.log("[Mapa] ✅ Índice de SEGMENTOS reconstruido limpiamente. Traductor:", window.SHEETS, "Fallbacks:", window.SHEETS_FALLBACK);
                 }
             } catch (e) {
                 console.warn("[Mapa] ⚠️ Error al intentar leer pestaña maestra 'SEGMENTOS'.", e);
@@ -538,6 +535,7 @@ window.initMapEngine = async function(container) {
         // Atiende la regla: "Para pestaña el código es el verdadero nombre del segmento"
         // ==============================================================================
         let TAB = window.SHEETS ? window.SHEETS[segmento] : undefined;
+        let FALLBACK_TAB = window.SHEETS_FALLBACK ? window.SHEETS_FALLBACK[segmento] : undefined;
 
         if (!TAB && window.SHEETS) {
             const norm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -545,7 +543,10 @@ window.initMapEngine = async function(container) {
             
             // 1. Buscar si el botón coincide con alguna llave de la configuración
             const foundKey = Object.keys(window.SHEETS).find(k => norm(k) === reqNorm);
-            if (foundKey) TAB = window.SHEETS[foundKey];
+            if (foundKey) {
+                TAB = window.SHEETS[foundKey];
+                FALLBACK_TAB = window.SHEETS_FALLBACK[foundKey];
+            }
             
             // 2. Si el botón en el HTML ya está enviando el código ("ID_001"), usarlo.
             if (!TAB) {
@@ -557,26 +558,41 @@ window.initMapEngine = async function(container) {
         // 3. Fallback Supremo: Usar la solicitud cruda como el nombre exacto de la pestaña.
         if (!TAB) TAB = segmento;
 
-        console.log(`[Mapa] Solicitando pines... Botón presionado: "${segmento}" -> Pestaña a leer en Excel: "${TAB}"`);
+        console.log(`[Mapa] Solicitando pines... Botón: "${segmento}" -> Intento 1: "${TAB}" | Intento 2: "${FALLBACK_TAB}"`);
 
         try{
             window.SHEET_FETCH_PROMISES = window.SHEET_FETCH_PROMISES || {};
             if (!window.SHEET_CACHE[segmento] && !window.SHEET_FETCH_PROMISES[segmento]){
-                const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(TAB)}&range=A:Z&headers=1`;
-                window.SHEET_FETCH_PROMISES[segmento] = fetch(url).then(r => r.text()).then(txt => {
-                    const match = txt.match(/setResponse\(([\s\S]+)\);?/);
-                    if (!match) {
-                        console.error(`[Mapa] ❌ ERROR CRÍTICO: Google Sheets rechazó la petición. La pestaña "${TAB}" no existe. Verifica los nombres exactos en tu Excel.`);
-                        throw new Error("Pestaña no encontrada o Error GViz");
+                window.SHEET_FETCH_PROMISES[segmento] = (async () => {
+                    const doFetch = async (tabName) => {
+                        const url = `https://docs.google.com/spreadsheets/d/${window.SHEET_ID}/gviz/tq?tqx=out:json;reqId=${new Date().getTime()}&sheet=${encodeURIComponent(tabName)}&range=A:Z&headers=1`;
+                        const res = await fetch(url);
+                        const txt = await res.text();
+                        const match = txt.match(/setResponse\(([\s\S]+)\);?/);
+                        if (!match) throw new Error("Error GViz HTML");
+                        const data = JSON.parse(match[1]);
+                        if (data.status === 'error') throw new Error(data.errors[0]?.message || 'Error en Google Sheets');
+                        return window.gvizToObjects(data);
+                    };
+                    
+                    try {
+                        window.SHEET_CACHE[segmento] = await doFetch(TAB);
+                    } catch (e) {
+                        console.warn(`[Mapa] ⚠️ La pestaña '${TAB}' falló. Motivo:`, e.message);
+                        if (FALLBACK_TAB && FALLBACK_TAB !== TAB) {
+                            console.log(`[Mapa] 🔄 Intentando con código (ID) de pestaña: '${FALLBACK_TAB}'...`);
+                            window.SHEET_CACHE[segmento] = await doFetch(FALLBACK_TAB);
+                        } else {
+                            throw e;
+                        }
                     }
-                    window.SHEET_CACHE[segmento] = window.gvizToObjects(JSON.parse(match[1]));
-                });
+                })();
             }
             if (window.SHEET_FETCH_PROMISES[segmento]) {
                 await window.SHEET_FETCH_PROMISES[segmento];
             }
         }catch(err){
-            console.error("Error al cargar datos de la hoja:", err);
+            console.error(`[Mapa] ❌ ERROR CRÍTICO: No se encontraron datos para '${segmento}'.`, err);
             PINS_LOADING.delete(segmento);
             return;
         }
