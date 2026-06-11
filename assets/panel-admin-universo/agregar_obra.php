@@ -613,7 +613,7 @@ if (isset($_GET['success'])) {
 
         // --- LÓGICA DE PESTAÑAS CEREBRO IA ---
         let tabCounter = 0;
-        function agregarContexto(titulo = "", texto = "", promptUser = false) {
+        function agregarContexto(titulo = "", texto = "", promptUser = false, url = "") {
             if (promptUser) {
                 titulo = prompt("Ingresa un nombre para esta pestaña (Ej. 'Noticia', 'Expediente'):");
                 if (titulo === null || titulo.trim() === "") return;
@@ -639,7 +639,10 @@ if (isset($_GET['success'])) {
             const tabPane = document.createElement('div');
             tabPane.className = 'tab-pane active';
             tabPane.id = tabId;
-            tabPane.innerHTML = `<textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'...">${texto}</textarea>`;
+            tabPane.innerHTML = `
+                <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box;">
+                <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'...">${texto}</textarea>
+            `;
             tabsContent.appendChild(tabPane);
             tabsHeaderList.parentElement.scrollLeft = tabsHeaderList.parentElement.scrollWidth;
         }
@@ -678,7 +681,7 @@ if (isset($_GET['success'])) {
                 const resp = await fetch('ia_conocimiento.php', {method: 'POST', body: fd});
                 const data = await resp.json();
                 if (data.ok) {
-                    agregarContexto(data.titulo, data.texto + "\n\nEnlace de referencia: " + url);
+                    agregarContexto(data.titulo, data.texto, false, url);
                 } else { alert("Error: " + data.error); }
             } catch(e) {
                 alert("Error de red al extraer el link."); 

@@ -186,29 +186,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$html) { echo json_encode(['ok' => false, 'error' => 'No se pudo descargar la web']); exit; }
 
-        $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas|nav|footer|aside|header|form|menu)[^>]*?>.*?</\1>@si', ' ', $html);
+        $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
         $dom = new DOMDocument(); libxml_use_internal_errors(true); @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8')); libxml_clear_errors();
         $xpath = new DOMXPath($dom);
         
-        $basura = ['comment', 'sidebar', 'menu', 'footer', 'widget', 'cookie', 'popup', 'share', 'social', 'advert', 'promo', 'related', 'nav', 'author'];
-        $xpath_query = [];
-        foreach ($basura as $b) {
-            $xpath_query[] = "//*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
-            $xpath_query[] = "//*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
-        }
-        $nodosEliminar = $xpath->query(implode(' | ', $xpath_query));
+        $nodosEliminar = $xpath->query("//nav | //footer | //header | //aside | //form | //*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'menu')] | //*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'sidebar')] | //*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'menu')] | //*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'sidebar')]");
         foreach ($nodosEliminar as $node) { if ($node->parentNode) $node->parentNode->removeChild($node); }
 
         $mainNode = $dom->getElementsByTagName('article')->item(0);
         if (!$mainNode) $mainNode = $dom->getElementsByTagName('main')->item(0);
-        if (!$mainNode) {
-            $divs = $dom->getElementsByTagName('div');
-            $maxP = 0;
-            foreach ($divs as $div) {
-                $pCount = $xpath->evaluate('count(.//p)', $div);
-                if ($pCount > $maxP) { $maxP = $pCount; $mainNode = $div; }
-            }
-        }
         if (!$mainNode) $mainNode = $dom->getElementsByTagName('body')->item(0);
 
         if ($mainNode) {

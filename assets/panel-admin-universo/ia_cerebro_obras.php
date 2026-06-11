@@ -385,7 +385,7 @@ try {
             });
         }
 
-        function agregarContexto(titulo = "", texto = "", promptUser = false) {
+        function agregarContexto(titulo = "", texto = "", promptUser = false, url = "") {
             if (promptUser) {
                 titulo = prompt("Ingresa un nombre para esta pestaña (Ej. 'Noticia', 'Expediente'):");
                 if (titulo === null || titulo.trim() === "") return;
@@ -421,6 +421,7 @@ try {
             tabPane.className = 'tab-pane active';
             tabPane.id = tabId;
             tabPane.innerHTML = `
+                <input type="text" class="ctx-url" placeholder="Enlace web de referencia (Opcional)" value="${url}" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #1f2937; color: #93c5fd; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box;">
                 <textarea class="ctx-texto" placeholder="Pega aquí el contenido para '${titulo}'...">${texto}</textarea>
             `;
             
@@ -476,7 +477,7 @@ try {
                 const resp = await fetch('ia_conocimiento.php', {method: 'POST', body: fd});
                 const data = await resp.json();
                 if (data.ok) {
-                    agregarContexto(data.titulo, data.texto + "\n\nEnlace de referencia: " + url);
+                    agregarContexto(data.titulo, data.texto, false, url);
                 } else { alert("Error: " + data.error); }
             } catch(e) {
                 alert("Error de red al extraer el link."); 
@@ -518,14 +519,29 @@ try {
                             for (let i = 1; i < bloques.length; i += 2) {
                                 const t = bloques[i].trim();
                                 let c = (bloques[i+1] || "").trim();
+                                
+                                let foundUrl = '';
+                                const urlMatch = c.match(/Enlace de referencia:\s*(https?:\/\/[^\s]+)/i);
+                                if (urlMatch) {
+                                    foundUrl = urlMatch[1];
+                                    c = c.replace(urlMatch[0], '').trim();
+                                }
+                                
                                 let normC = c.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
                                 let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                                if (normC !== normExcel && normC !== '') { agregarContexto(t, c); tabAdded = true; }
+                                if (normC !== normExcel && normC !== '') { agregarContexto(t, c, false, foundUrl); tabAdded = true; }
                             }
                         } else {
-                            let normC = textoIA.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                            let c = textoIA;
+                            let foundUrl = '';
+                            const urlMatch = c.match(/Enlace de referencia:\s*(https?:\/\/[^\s]+)/i);
+                            if (urlMatch) {
+                                foundUrl = urlMatch[1];
+                                c = c.replace(urlMatch[0], '').trim();
+                            }
+                            let normC = c.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
                             let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                            if (normC !== normExcel && normC !== '') { agregarContexto("Contexto General", textoIA); tabAdded = true; }
+                            if (normC !== normExcel && normC !== '') { agregarContexto("Contexto General", c, false, foundUrl); tabAdded = true; }
                         }
                     }
                     if (!tabAdded) agregarContexto("Principal");
@@ -599,9 +615,12 @@ try {
                 const pane = document.getElementById(tabId);
                 if (pane) {
                     const txt = pane.querySelector('.ctx-texto').value.trim();
+                    const urlVal = pane.querySelector('.ctx-url') ? pane.querySelector('.ctx-url').value.trim() : '';
                     if (txt) {
-                        if (tit) contextoManual += `--- ${tit} ---\n${txt}\n\n`;
-                        else contextoManual += `--- Fragmento ---\n${txt}\n\n`;
+                        if (tit) contextoManual += `--- ${tit} ---\n${txt}\n`;
+                        else contextoManual += `--- Fragmento ---\n${txt}\n`;
+                        if (urlVal) contextoManual += `Enlace de referencia: ${urlVal}\n`;
+                        contextoManual += `\n`;
                     }
                 }
             });
@@ -656,15 +675,35 @@ try {
                             for (let i = 1; i < bloques.length; i += 2) {
                                 const t = bloques[i].trim();
                                 let c = (bloques[i+1] || "").trim();
+                                
+                                let foundUrl = '';
+                                const urlMatch = c.match(/Enlace de referencia:\s*(https?:\/\/[^\s]+)/i);
+                                if (urlMatch) {
+                                    foundUrl = urlMatch[1];
+                                    c = c.replace(urlMatch[0], '').trim();
+                                }
+                                
                                 let normC = c.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
                                 let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                                if (normC !== normExcel && normC !== '') cleanContexts.push(`--- ${t} ---\n${c}`);
+                                if (normC !== normExcel && normC !== '') {
+                                    let blockStr = `--- ${t} ---\n${c}`;
+                                    if (foundUrl) blockStr += `\nEnlace de referencia: ${foundUrl}`;
+                                    cleanContexts.push(blockStr);
+                                }
                             }
                             contextoManual = cleanContexts.join('\n\n');
                         } else {
                             let normC = contextoManual.replace(/Descripción oficial:/gi, '').replace(/Descripción:/gi, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
                             let normExcel = (obra.descripcion_excel || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                            if (normC === normExcel || normC === '') contextoManual = "";
+                            let c = contextoManual;
+                            let foundUrl = '';
+                            const urlMatch = c.match(/Enlace de referencia:\s*(https?:\/\/[^\s]+)/i);
+                            if (urlMatch) {
+                                foundUrl = urlMatch[1];
+                                c = c.replace(urlMatch[0], '').trim();
+                            }
+                            if (normC === normExcel || normC === '') { contextoManual = ""; }
+                            else { contextoManual = c; if (foundUrl) contextoManual += `\nEnlace de referencia: ${foundUrl}`; }
                         }
                     }
                 }

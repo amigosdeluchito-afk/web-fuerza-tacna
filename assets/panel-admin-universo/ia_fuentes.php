@@ -185,8 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (!$html) {
                             $_SESSION['ia_msg'] = "Error: No se pudo descargar el contenido de la URL o tardó demasiado. ($curl_err)";
                         } else {
-                            // 1. Limpieza inicial profunda: Quitar elementos estructurales inútiles
-                            $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas|nav|footer|aside|header|form|menu)[^>]*?>.*?</\1>@si', ' ', $html);
+                            // 1. Limpieza inicial suave
+                            $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
                             
                             $dom = new DOMDocument();
                             libxml_use_internal_errors(true);
@@ -195,14 +195,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             $xpath = new DOMXPath($dom);
                             
-                            // 2. Limpieza por Clases e IDs (Francotirador anti-basura)
-                            $basura = ['comment', 'sidebar', 'menu', 'footer', 'widget', 'cookie', 'popup', 'share', 'social', 'advert', 'promo', 'related', 'nav', 'author'];
-                            $xpath_query = [];
-                            foreach ($basura as $b) {
-                                $xpath_query[] = "//*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
-                                $xpath_query[] = "//*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '$b')]";
-                            }
-                            $nodosEliminar = $xpath->query(implode(' | ', $xpath_query));
+                            // 2. Limpieza básica de elementos no deseados
+                            $nodosEliminar = $xpath->query("//nav | //footer | //header | //aside | //form | //*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'menu')] | //*[contains(translate(@class, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'sidebar')] | //*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'menu')] | //*[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'sidebar')]");
                             
                             $nodos = [];
                             foreach ($nodosEliminar as $node) { $nodos[] = $node; }
@@ -210,20 +204,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 if ($node->parentNode) $node->parentNode->removeChild($node);
                             }
 
-                            // 3. Algoritmo de "Centro de Gravedad" (Buscar el artículo real)
+                            // 3. Obtener el contenedor principal (Suave)
                             $mainNode = $dom->getElementsByTagName('article')->item(0);
                             if (!$mainNode) $mainNode = $dom->getElementsByTagName('main')->item(0);
-                            if (!$mainNode) {
-                                $divs = $dom->getElementsByTagName('div');
-                                $maxP = 0;
-                                foreach ($divs as $div) {
-                                    $pCount = $xpath->evaluate('count(.//p)', $div);
-                                    if ($pCount > $maxP) {
-                                        $maxP = $pCount;
-                                        $mainNode = $div;
-                                    }
-                                }
-                            }
                             if (!$mainNode) $mainNode = $dom->getElementsByTagName('body')->item(0);
 
                             if ($mainNode) {
