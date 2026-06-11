@@ -709,7 +709,7 @@ function pageTransition() {
         width: "100%",
         yPercent: -100,
         ease: "Expo.easeInOut",
-        delay: 0.3,
+        delay: 0.5,
     });
     tl.set(".loading-screen", { yPercent: 100 });
 }
@@ -781,7 +781,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         document.querySelectorAll('.maplibregl-popup, .ghost-card-popup').forEach(el => el.remove());
 
                     pageTransition();
-                    await delay(1000);
+                await delay(1200);
                     done();
                 },
 
@@ -854,8 +854,8 @@ async function initCandidatos(container) {
                     const fotoHover = c.foto_portada ? `assets/universoobras/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
-                            <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" loading="lazy" decoding="async">
-                            <img src="${fotoHover}" alt="${c.nombres}" class="img-hover" loading="lazy" decoding="async">
+                        <img src="${fotoUrl}" alt="${c.nombres}" class="img-default">
+                        <img src="${fotoHover}" alt="${c.nombres}" class="img-hover">
                             <div class="candidate-info">
                                 <h3>${c.nombres}</h3>
                                 <p>${c.cargo_flotante}</p>
@@ -1774,8 +1774,7 @@ function inits(container) {
         // TRUCO UX: Retrasamos 250ms las inicializaciones pesadas (Mapas, Leaflet, Carruseles, etc.)
         // Esto hace que el navegador use todo su procesador EXACTAMENTE cuando el telón de Barba.js
         // está cubriendo toda la pantalla de un color sólido, escondiendo cualquier caída de FPS.
-        setTimeout(() => {
-            requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
                 console.log("=== 🔍 INICIANDO DETECTOR DE CUELLOS DE BOTELLA ===");
                 console.time("⏱️ DIAGNOSTICO: initCandidatos");
                 initCandidatos(container);
@@ -1804,8 +1803,7 @@ function inits(container) {
                 // Inicializador del cómic interactivo de la página de contacto
                 if (typeof initContactoComic === 'function') initContactoComic(container);
                 console.log("=== 🔍 FIN DEL DETECTOR ===");
-            });
-        }, 250);
+    });
 }
 
 barba.hooks.afterOnce((data) => {
@@ -2096,7 +2094,7 @@ function initContactoComic(container) {
         gsap.set(cards, { opacity: 0, y: 150, rotationX: 45, rotationY: 30, z: -300 });
 
         // 2. ENTRADA "WOW" CUANDO CARGA LA PÁGINA
-            let delayTime = 1000; // 1 segundo para que termine de subir el telón negro
+        let delayTime = 1500; // 1.5s sincronizado para cuando el telón amarillo empieza a bajar
             // Semáforo inteligente: Solo si la ola amarilla está corriendo realmente esperamos 6s
             if (window.isFirstLoadAnimationRunning) {
                 delayTime = 5800; // Si el agua amarilla está cargando, esperamos casi 6 segundos
