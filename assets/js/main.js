@@ -697,8 +697,6 @@ function delay(n) {
 }
 
 function pageTransition() {
-    // --- PRUEBA DE AISLAMIENTO EXTREMA: Desactivado GSAP ---
-    /*
     var tl = new TimelineMax(); 
     tl.set(".loading-screen", { yPercent: 100, top: 0, bottom: "auto", height: "100%" });
     tl.to(".loading-screen", 1.2, {
@@ -714,23 +712,17 @@ function pageTransition() {
         delay: 0.3,
     });
     tl.set(".loading-screen", { yPercent: 100 });
-    */
 }
 
 function contentAnimation() {
-    // --- PRUEBA DE AISLAMIENTO EXTREMA: Desactivado GSAP ---
-    /*
     var tl = new TimelineMax();
     tl.staggerFrom(".animate-this", 1, { opacity: 0, delay: 0.2 }, 0.4);
-    */
 }
 
 function initialLoadAnimation() {
-    // --- PRUEBA DE AISLAMIENTO EXTREMA: Desactivado GSAP ---
     const loader = document.querySelector('.initial-loader');
-    if (loader) loader.style.display = 'none';
-    
-    /*
+    if (!loader) return;
+
     try {
         var tl = new TimelineMax();
         
@@ -761,9 +753,8 @@ function initialLoadAnimation() {
         tl.staggerFrom(".animate-this", 1, { opacity: 0 }, 0.4, "-=0.4");
     } catch (e) {
         console.error("Error en animación GSAP, cerrando loader a la fuerza:", e);
-        document.querySelector('.initial-loader').style.display = 'none';
+        if (loader) loader.style.display = 'none';
     }
-    */
 }
 
 document.addEventListener("DOMContentLoaded", function () {
