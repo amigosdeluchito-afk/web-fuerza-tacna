@@ -1,12 +1,23 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Esperamos a que la web esté lista y el diccionario de pestañas se haya creado
+(function() {
+    // Usamos función autoejecutable en lugar de DOMContentLoaded para no perder el evento si el script carga asíncronamente
     const checkInterval = setInterval(async () => {
-        if (window.SHEETS_MAPPED && window.SHEETS) {
+        if ((window.SHEETS_MAPPED || (window.SHEETS && Object.keys(window.SHEETS).length > 1)) && typeof gsap !== 'undefined') {
             clearInterval(checkInterval);
+            if (window._dashInitDone) return;
+            window._dashInitDone = true;
             await iniciarDashboard();
         }
     }, 200);
-});
+    
+    // Failsafe: Si a los 3 segundos no arrancó por algún motivo, lo forzamos
+    setTimeout(async () => {
+        if (!window._dashInitDone && typeof gsap !== 'undefined') {
+            clearInterval(checkInterval);
+            window._dashInitDone = true;
+            await iniciarDashboard();
+        }
+    }, 3000);
+})();
 
 async function iniciarDashboard() {
     // 1. Secuencia Cinematográfica de Textos

@@ -1206,6 +1206,8 @@ window.initMapEngine = async function(container) {
                     }
                 });
                 
+                window.SHEETS_MAPPED = true;
+                
                 const chipsGroup = target.querySelector('.chips-group');
                 const navChips = target.querySelector('.chips');
                 
