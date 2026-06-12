@@ -995,7 +995,7 @@ window.initMapEngine = async function(container) {
         const svgContainer = document.getElementById('synced-svg-container');
         if (svgContainer) {
             if (key !== 'alcalde_provincial') {
-                svgContainer.style.opacity = '1';
+                svgContainer.style.setProperty('opacity', '1', 'important');
             }
             svgContainer.className = `active-segment-${key}`;
         }

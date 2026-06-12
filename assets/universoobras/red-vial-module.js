@@ -64,7 +64,7 @@ window.initRedVial = async function() {
         // 2. Cargar GeoJSON de forma nativa y asíncrona desde el archivo local
         window.redVialMapInstance.addSource('tramos-viales', { 
             'type': 'geojson', 
-            'data': '../data/tramos-viales.geojson' 
+            'data': 'tramos-viales.geojson' 
         });
 
         // 3. Renderizar líneas
@@ -165,7 +165,15 @@ window.activateRedVial = async function() {
         container.style.opacity = '1';
         container.style.pointerEvents = 'auto';
     }
-    if (svg) svg.style.opacity = '0';
+    
+    // 🔥 FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
+    if (window.redVialMapInstance) {
+        setTimeout(() => {
+            window.redVialMapInstance.resize();
+        }, 100);
+    }
+
+    if (svg) svg.style.setProperty('opacity', '0', 'important');
     if (filters) {
         filters.style.opacity = '1';
         filters.style.pointerEvents = 'auto';
@@ -181,7 +189,7 @@ window.deactivateRedVial = function() {
         container.style.opacity = '0';
         container.style.pointerEvents = 'none';
     }
-    if (svg) svg.style.opacity = '1';
+    if (svg) svg.style.setProperty('opacity', '1', 'important');
     if (filters) {
         filters.style.opacity = '0';
         filters.style.pointerEvents = 'none';
