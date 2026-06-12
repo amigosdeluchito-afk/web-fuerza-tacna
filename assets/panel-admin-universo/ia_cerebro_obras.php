@@ -194,10 +194,10 @@ try {
             <!-- Lista Izquierda -->
             <div class="col-lista">
                 <div class="search-box">
-                    <select id="selectSegmento">
+                    <select id="selectSegmento" onchange="filtrarObras()">
                         <option value="">📁 Todos los segmentos</option>
                     </select>
-                    <input type="text" id="searchInput" placeholder="Buscar obra...">
+                    <input type="text" id="searchInput" placeholder="Buscar obra..." oninput="filtrarObras()">
                 </div>
                 <ul class="lista-obras" id="obrasList">
                     <div style="padding: 20px; text-align: center; color: #64748b;">⏳ Cargando obras del Excel...</div>
@@ -577,20 +577,21 @@ try {
 
         // Buscador y Filtro por Segmento
         function filtrarObras() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            const seg = document.getElementById('selectSegmento').value;
+            const q = document.getElementById('searchInput').value.toLowerCase().trim();
+            const seg = document.getElementById('selectSegmento').value.trim();
             
             const filtradas = todasLasObras.filter(o => {
                 // FIX BÚSQUEDA: Forzamos la conversión a String para evitar que el filtro colapse si una obra no tiene distrito
                 const matchSearch = String(o.nombre || '').toLowerCase().includes(q) || String(o.distrito || '').toLowerCase().includes(q);
-                const matchSegmento = seg === "" || o.segmento === seg;
+                // Comparación estricta del segmento para asegurar que se oculten los demás
+                const matchSegmento = (seg === "" || String(o.segmento).trim() === seg);
                 return matchSearch && matchSegmento;
             });
             renderLista(filtradas);
+            
+            // Forzar que la lista vuelva arriba tras filtrar
+            document.getElementById('obrasList').scrollTop = 0;
         }
-        
-        document.getElementById('searchInput').addEventListener('input', filtrarObras);
-        document.getElementById('selectSegmento').addEventListener('change', filtrarObras);
 
         // ==========================================================
         // GENERADOR DEL SÚPER PÁRRAFO
