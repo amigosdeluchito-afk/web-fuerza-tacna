@@ -6,11 +6,13 @@
 .rv-map-container {
     position: absolute;
     inset: 0;
+    width: 100vw;
+    height: 100vh;
     z-index: 2; /* Sobre #map (1), debajo de #video-intro-container (10) */
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s ease;
-    background: transparent;
+    background: #e9e5dc; /* Gris plano por si fallan las texturas de internet */
 }
 
 /* Panel lateral de información aislado */

@@ -61,6 +61,9 @@ window.initRedVial = async function() {
     });
 
     window.redVialMapInstance.on('load', () => {
+        // 🔥 FIX: Forzar redibujado apenas el motor termine de cargar internamente
+        window.redVialMapInstance.resize();
+
         // 2. Cargar GeoJSON de forma nativa y asíncrona desde el archivo local
         window.redVialMapInstance.addSource('tramos-viales', { 
             'type': 'geojson', 
@@ -178,8 +181,12 @@ window.activateRedVial = async function() {
     // 🔥 FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
     if (window.redVialMapInstance) {
         setTimeout(() => {
-            window.redVialMapInstance.resize();
+            if(window.redVialMapInstance) window.redVialMapInstance.resize();
         }, 100);
+        // Doble seguro por si la tarjeta de video tarda en asignar el ancho de la pantalla
+        setTimeout(() => {
+            if(window.redVialMapInstance) window.redVialMapInstance.resize();
+        }, 600);
     }
 };
 
