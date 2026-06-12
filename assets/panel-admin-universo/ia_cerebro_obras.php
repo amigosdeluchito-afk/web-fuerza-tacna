@@ -577,20 +577,32 @@ try {
 
         // Buscador y Filtro por Segmento
         function filtrarObras() {
-            const q = document.getElementById('searchInput').value.toLowerCase().trim();
-            const seg = document.getElementById('selectSegmento').value.trim();
+            const selectEl = document.getElementById('selectSegmento');
+            const inputEl = document.getElementById('searchInput');
+            const ul = document.getElementById('obrasList');
             
+            // Obtenemos los valores exactos y físicos en tiempo real
+            const q = inputEl.value.toLowerCase().trim();
+            const seg = selectEl.options[selectEl.selectedIndex].value.trim();
+            
+            // Limpiamos la lista visualmente antes de operar
+            ul.innerHTML = '';
+
             const filtradas = todasLasObras.filter(o => {
-                // FIX BÚSQUEDA: Forzamos la conversión a String para evitar que el filtro colapse si una obra no tiene distrito
-                const matchSearch = String(o.nombre || '').toLowerCase().includes(q) || String(o.distrito || '').toLowerCase().includes(q);
-                // Comparación estricta del segmento para asegurar que se oculten los demás
-                const matchSegmento = (seg === "" || String(o.segmento).trim() === seg);
+                const nombreObra = String(o.nombre || '').toLowerCase();
+                const distritoObra = String(o.distrito || '').toLowerCase();
+                const segmentoObra = String(o.segmento || '').trim();
+                
+                const matchSearch = q === "" || nombreObra.includes(q) || distritoObra.includes(q);
+                const matchSegmento = seg === "" || segmentoObra === seg;
+                
                 return matchSearch && matchSegmento;
             });
+            
             renderLista(filtradas);
             
             // Forzar que la lista vuelva arriba tras filtrar
-            document.getElementById('obrasList').scrollTop = 0;
+            ul.scrollTop = 0;
         }
 
         // ==========================================================
