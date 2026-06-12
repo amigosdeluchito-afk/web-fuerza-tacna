@@ -61,42 +61,11 @@ window.initRedVial = async function() {
     });
 
     window.redVialMapInstance.on('load', () => {
-        // 2. Datos GeoJSON Dummy (MVP)
-        const dummyData = {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "id": "tramo-1",
-                        "nombre": "Avenida San Martín",
-                        "tipo": "Provincial",
-                        "estado": "En ejecución",
-                        "color": "#801039" // Granate institucional
-                    },
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": [ [-70.2505, -18.0135], [-70.2548, -18.0156], [-70.2580, -18.0175] ]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "id": "tramo-2",
-                        "nombre": "Avenida Bolognesi",
-                        "tipo": "Local",
-                        "estado": "Entregado",
-                        "color": "#ffc300" // Amarillo institucional
-                    },
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": [ [-70.2480, -18.0160], [-70.2520, -18.0185], [-70.2555, -18.0205] ]
-                    }
-                }
-            ]
-        };
-
-        window.redVialMapInstance.addSource('tramos-viales', { 'type': 'geojson', 'data': dummyData });
+        // 2. Cargar GeoJSON de forma nativa y asíncrona desde el archivo local
+        window.redVialMapInstance.addSource('tramos-viales', { 
+            'type': 'geojson', 
+            'data': '../data/tramos-viales.geojson' 
+        });
 
         // 3. Renderizar líneas
         window.redVialMapInstance.addLayer({
@@ -123,12 +92,37 @@ window.initRedVial = async function() {
             if (e.features.length > 0) abrirPanelRedVial(e.features[0].properties);
         });
         
+        // 5. Inicializar la lógica de Filtros UI
+        setupRedVialFilters();
+
         window.isRedVialLoading = false;
     });
     
     // Prevención de cuelgues si el usuario cambia de página antes de cargar los tiles
     window.redVialMapInstance.on('error', () => { window.isRedVialLoading = false; });
 };
+
+function setupRedVialFilters() {
+    const filterButtons = document.querySelectorAll('.rv-filter-btn');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Actualizar apariencia del UI
+            filterButtons.forEach(b => b.classList.remove('is-active'));
+            btn.classList.add('is-active');
+
+            const tipoSeleccionado = btn.getAttribute('data-tipo');
+            
+            // Aplicar filtro espacial a las capas nativas
+            if (tipoSeleccionado === 'Todos') {
+                window.redVialMapInstance.setFilter('tramos-viales-layer', null);
+                window.redVialMapInstance.setFilter('tramos-viales-bg', null);
+            } else {
+                window.redVialMapInstance.setFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipoSeleccionado]);
+                window.redVialMapInstance.setFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipoSeleccionado]);
+            }
+        });
+    });
+}
 
 function abrirPanelRedVial(props) {
     const panel = document.getElementById('redVialInfoPanel');
@@ -161,6 +155,7 @@ window.activateRedVial = async function() {
     
     const container = document.getElementById('red-vial-map-container');
     const svg = document.getElementById('synced-svg-container');
+    const filters = document.getElementById('red-vial-filters');
     
     if (!window.redVialMapInstance) {
         await window.initRedVial();
@@ -171,17 +166,26 @@ window.activateRedVial = async function() {
         container.style.pointerEvents = 'auto';
     }
     if (svg) svg.style.opacity = '0';
+    if (filters) {
+        filters.style.opacity = '1';
+        filters.style.pointerEvents = 'auto';
+    }
 };
 
 window.deactivateRedVial = function() {
     const container = document.getElementById('red-vial-map-container');
     const svg = document.getElementById('synced-svg-container');
+    const filters = document.getElementById('red-vial-filters');
     
     if (container) {
         container.style.opacity = '0';
         container.style.pointerEvents = 'none';
     }
     if (svg) svg.style.opacity = '1';
+    if (filters) {
+        filters.style.opacity = '0';
+        filters.style.pointerEvents = 'none';
+    }
 
     // Cerrar el panel si estuviera abierto
     const panel = document.getElementById('redVialInfoPanel');

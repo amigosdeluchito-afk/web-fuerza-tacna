@@ -33,3 +33,37 @@
 .rv-info-panel.is-active {
     transform: translateX(0);
 }
+
+/* =========================================================
+   Filtros Flotantes del mapa Red Vial
+   ========================================================= */
+.rv-filters {
+    position: absolute;
+    top: 80px; /* Debajo de los chips principales */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100; /* Sobre el mapa (2) pero bajo modales y muelles */
+    display: flex;
+    gap: 8px;
+    transition: opacity 0.5s ease;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 6px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.rv-filter-btn {
+    background: transparent;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font: 900 11px/1.2 'Arial Black', Arial, sans-serif;
+    color: #801039;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+.rv-filter-btn.is-active, .rv-filter-btn:hover {
+    background: #801039;
+    color: #ffc300;
+}
