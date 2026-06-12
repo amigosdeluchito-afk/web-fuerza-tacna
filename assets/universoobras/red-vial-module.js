@@ -156,6 +156,15 @@ window.activateRedVial = async function() {
     const container = document.getElementById('red-vial-map-container');
     const svg = document.getElementById('synced-svg-container');
     const filters = document.getElementById('red-vial-filters');
+    const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
+    
+    // 🔥 FIX 1: Ocultar INMEDIATAMENTE el SVG y los pines del mapa base antes de cargar nada
+    if (svg) svg.style.setProperty('opacity', '0', 'important');
+    if (baseCanvas) baseCanvas.style.setProperty('opacity', '0', 'important');
+    if (filters) {
+        filters.style.opacity = '1';
+        filters.style.pointerEvents = 'auto';
+    }
     
     if (!window.redVialMapInstance) {
         await window.initRedVial();
@@ -172,24 +181,23 @@ window.activateRedVial = async function() {
             window.redVialMapInstance.resize();
         }, 100);
     }
-
-    if (svg) svg.style.setProperty('opacity', '0', 'important');
-    if (filters) {
-        filters.style.opacity = '1';
-        filters.style.pointerEvents = 'auto';
-    }
 };
 
 window.deactivateRedVial = function() {
     const container = document.getElementById('red-vial-map-container');
     const svg = document.getElementById('synced-svg-container');
     const filters = document.getElementById('red-vial-filters');
+    const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
     
     if (container) {
         container.style.opacity = '0';
         container.style.pointerEvents = 'none';
     }
+    
+    // 🔥 FIX 2: Restaurar INMEDIATAMENTE el SVG y los pines del mapa base
     if (svg) svg.style.setProperty('opacity', '1', 'important');
+    if (baseCanvas) baseCanvas.style.setProperty('opacity', '1', 'important');
+    
     if (filters) {
         filters.style.opacity = '0';
         filters.style.pointerEvents = 'none';
