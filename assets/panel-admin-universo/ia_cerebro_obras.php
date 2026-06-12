@@ -337,7 +337,8 @@ try {
                         }
                     });
                 }
-                renderLista(todasLasObras);
+                // Al finalizar de cargar, respetamos el filtro que el usuario haya seleccionado
+                filtrarObras();
             } catch (e) {
                 document.getElementById('obrasList').innerHTML = `<div style="padding: 20px; color: #ef4444;">❌ Error cargando Excel. Verifica conexión.</div>`;
             }
