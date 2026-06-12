@@ -123,7 +123,7 @@ try {
         .editor-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b; }
         .editor-placeholder svg { width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5; }
         
-        .editor-content { display: none; flex-direction: column; min-height: 100%; }
+        .editor-content { display: none; flex-direction: column; min-height: 100%; flex-shrink: 0; }
         .excel-data-card { background: #020617; border: 1px solid #1e293b; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
         .excel-data-card h3 { margin: 0 0 10px 0; font-size: 14px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
         .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
