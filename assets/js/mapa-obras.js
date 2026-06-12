@@ -994,7 +994,9 @@ window.initMapEngine = async function(container) {
         // Le avisamos al SVG qué botón se presionó y lo hacemos visible
         const svgContainer = document.getElementById('synced-svg-container');
         if (svgContainer) {
-            svgContainer.style.opacity = '1';
+            if (key !== 'alcalde_provincial') {
+                svgContainer.style.opacity = '1';
+            }
             svgContainer.className = `active-segment-${key}`;
         }
 
