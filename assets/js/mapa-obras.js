@@ -945,6 +945,13 @@ window.initMapEngine = async function(container) {
         
         setBackgroundFor(key);
 
+        // --- FASE RED VIAL: Activador bajo demanda (Sandbox) ---
+        if (key === 'alcalde_provincial') {
+            if (typeof window.activateRedVial === 'function') window.activateRedVial();
+        } else {
+            if (typeof window.deactivateRedVial === 'function') window.deactivateRedVial();
+        }
+
 
         // --- NUEVO: Si entramos a un segmento de mapa, ocultamos el video ---
         const isFromBase = (prevKey === 'base' || !prevKey);
@@ -1332,6 +1339,9 @@ window.initMapEngine = async function(container) {
             window.mapInstance.remove();
             window.mapInstance = null;
         }
+        // Destrucción total del entorno de Red Vial para evitar Memory Leaks en Barba.js
+        if (typeof window.destroyRedVial === 'function') window.destroyRedVial();
+
         document.querySelector('.app-bg')?.classList.remove('show');
     };
 }

@@ -1,0 +1,35 @@
+/* =========================================================
+   RED VIAL - Módulo Sandbox Independiente
+   ========================================================= */
+
+/* Contenedor del mapa aislado */
+.rv-map-container {
+    position: absolute;
+    inset: 0;
+    z-index: 2; /* Sobre #map (1), debajo de #video-intro-container (10) */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    background: transparent;
+}
+
+/* Panel lateral de información aislado */
+.rv-info-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1500; /* Sobre ResultsDock (1400), debajo de Legend (2000) y Filters (9000) */
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+    pointer-events: auto;
+}
+
+.rv-info-panel.is-active {
+    transform: translateX(0);
+}
