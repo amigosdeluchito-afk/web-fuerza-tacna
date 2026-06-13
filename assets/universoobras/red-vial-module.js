@@ -2,10 +2,6 @@
    RED-VIAL-MODULE.JS - Sandbox Independiente
    ========================================================= */
 
-// Configuración opcional: Si obtienes un token de MapTiler, colócalo aquí 
-// y cambia la variable 'mapStyle' dentro de initRedVial().
-const MAPTILER_KEY = 'TU_TOKEN_AQUI';
-
 window.redVialMapInstance = null;
 window.isRedVialLoading = false; // Bloqueo para evitar doble inicialización
 
@@ -25,33 +21,53 @@ window.initRedVial = async function() {
         }
     }
 
-    console.log("[Red Vial] Inicializando mapa MapLibre (Modo MVP Seguro)...");
+    // 1. Cargar el lector de PMTiles dinámicamente si no existe
+    if (typeof pmtiles === 'undefined') {
+        console.log("[Red Vial] Cargando librería PMTiles...");
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/pmtiles@3.0.6/dist/index.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    // 2. Registrar el protocolo de PMTiles en MapLibre
+    if (!window.pmtilesProtocolRegistered) {
+        const protocol = new pmtiles.Protocol();
+        window.maplibregl.addProtocol('pmtiles', protocol.tile);
+        window.pmtilesProtocolRegistered = true;
+    }
+
+    console.log("[Red Vial] Inicializando mapa Vectorial PMTiles Offline...");
     
-    // Estilo Raster libre (OpenStreetMap) para no depender de Tokens en el MVP.
-    const mvpStyle = {
+    // 3. Estilo Vectorial (Style.json adaptado a código)
+    // Ocultamos a propósito POIs (Negocios), Parques y Nombres de lugares.
+    const mapStyle = {
         version: 8,
+        // Fuente vectorial base desde nuestro archivo local
         sources: {
-            'osm': {
-                type: 'raster',
-                tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-                tileSize: 256,
-                attribution: '&copy; OpenStreetMap Contributors'
+            "protomaps": {
+                type: "vector",
+                url: "pmtiles://../data/tacna.pmtiles", // Lee desde XAMPP
+                attribution: "<a href='https://protomaps.com'>Protomaps</a> © <a href='https://openstreetmap.org'>OpenStreetMap</a>"
             }
         },
-        layers: [{
-            id: 'osm-layer',
-            type: 'raster',
-            source: 'osm',
-            minzoom: 0,
-            maxzoom: 19
-        }]
+        layers: [
+            // Fondo base gris
+            { id: "background", type: "background", paint: { "background-color": "#e9e5dc" } },
+            // Cuerpos de agua (Ríos, mar)
+            { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#a0c8f0" } },
+            // Las Vías y Calles (Mantenemos un color gris sutil para que resalten tus obras)
+            { id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#cccccc", "line-width": 1.5 } },
+            // Edificios y manzanas (Para darle volumen a la ciudad)
+            { id: "buildings", type: "fill", source: "protomaps", "source-layer": "buildings", paint: { "fill-color": "#d9d6ce", "fill-opacity": 0.6 } }
+            // 🛑 ¡MAGIA!: Como NO hemos declarado capas de textos (places), ni parques (landuse), ni negocios (pois), NO SE MOSTRARÁN.
+        ]
     };
 
-    // Si prefieres usar MapTiler (Vectorial) descomenta esta línea y pon tu Token arriba:
-    // const mapStyle = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
-    const mapStyle = mvpStyle;
-
-    // 1. Instanciar mapa anclado a #red-vial-map-container
+    // 4. Instanciar mapa anclado a #red-vial-map-container
     window.redVialMapInstance = new maplibregl.Map({
         container: 'red-vial-map-container',
         style: mapStyle,
