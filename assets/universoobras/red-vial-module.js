@@ -22,20 +22,20 @@ window.initRedVial = async function() {
     }
 
     // 1. Cargar el lector de PMTiles dinámicamente si no existe
-    if (typeof pmtiles === 'undefined') {
+    if (typeof window.pmtiles === 'undefined') {
         console.log("[Red Vial] Cargando librería PMTiles...");
-        await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/pmtiles@3.0.6/dist/index.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
+        try {
+            window.pmtiles = await import('https://unpkg.com/pmtiles@3.0.6/dist/index.js');
+        } catch (error) {
+            console.error("[Red Vial] Error al cargar librería PMTiles:", error);
+            window.isRedVialLoading = false;
+            return;
+        }
     }
 
     // 2. Registrar el protocolo de PMTiles en MapLibre
     if (!window.pmtilesProtocolRegistered) {
-        const protocol = new pmtiles.Protocol();
+        const protocol = new window.pmtiles.Protocol();
         window.maplibregl.addProtocol('pmtiles', protocol.tile);
         window.pmtilesProtocolRegistered = true;
     }
