@@ -5,6 +5,9 @@
 window.redVialMapInstance = null;
 window.isRedVialLoading = false; // Bloqueo para evitar doble inicialización
 
+// Constante única para la ruta de la base de datos vectorial
+const PMTILES_URL = '../data/tacna.pmtiles';
+
 // =========================================================
 // ARQUITECTURA DE ESTILOS Y CAPAS (STUDIO)
 // =========================================================
@@ -67,7 +70,7 @@ window.rvApplyStyle = function() {
         sources: {
             "protomaps": {
                 type: "vector",
-                url: "pmtiles://../data/tacna_final.pmtiles", // Obligamos a internet a descargar un archivo fresco
+                url: `pmtiles://${PMTILES_URL}`, // Ruta centralizada y apuntando al archivo real
                 attribution: "<a href='https://protomaps.com'>Protomaps</a> © <a href='https://openstreetmap.org'>OpenStreetMap</a>"
             },
             "tramos-viales": { 
