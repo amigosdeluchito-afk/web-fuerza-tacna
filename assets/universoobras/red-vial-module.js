@@ -223,30 +223,50 @@ function initRedVialStudio() {
 
     const panel = document.createElement('div');
     panel.id = 'rv-studio-panel';
-    panel.style.cssText = 'position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 15px; border-radius: 12px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 230px; font-family: "Arial Black", Arial, sans-serif; color: #111; transition: all 0.3s ease; border: 1px solid rgba(255, 195, 0, 0.5);';
+    panel.className = 'rv-panel';
 
     panel.innerHTML = `
-        <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #801039; text-transform: uppercase;">🎨 Estudio Visual</h3>
-        <label style="display: block; font-size: 10px; margin-bottom: 4px; font-weight: 900; color: #666; text-transform: uppercase;">Tema Base</label>
-        <select id="rv-theme-select" style="width: 100%; padding: 6px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 12px; font-family: system-ui, sans-serif; outline: none; background: #fff;">
-            <option value="tecnico">Ingeniería / Técnico</option>
-            <option value="ciudadano">Ciudadano / Público</option>
-            <option value="dashboard">Dashboard Obras</option>
-        </select>
-        <hr style="border:0; border-top:1px solid #eee; margin: 10px 0;">
-        <div style="font-size: 12px; display: flex; flex-direction: column; gap: 8px; font-family: system-ui, sans-serif; font-weight: 500;">
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="roads"> 🛣️ Vías y Calles</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="buildings"> 🏢 Edificios 2D</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="buildings3d"> 🏙️ Edificios 3D</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="water"> 💧 Cuerpos de Agua</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="parks"> 🌳 Parques y Áreas Verdes</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="boundaries"> 🗺️ Límites Distritales</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="transit"> 🚆 Transporte Férreo</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="places-text"> 🏷️ Nombres de Distritos</label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" data-layer="pois-text"> 📍 Puntos de Interés</label>
+        <div class="rv-panel-header" id="rv-panel-header-btn" title="Mostrar/Ocultar capas">
+            <h3 class="rv-panel-title">🗺️ Vista del Mapa</h3>
+            <button class="rv-panel-toggle">▼</button>
+        </div>
+        <div class="rv-panel-body">
+            <div class="rv-panel-group">
+                <select id="rv-theme-select" class="rv-panel-select">
+                    <option value="tecnico">Técnico</option>
+                    <option value="ciudadano">Ciudadano</option>
+                    <option value="dashboard">Impacto</option>
+                </select>
+            </div>
+            <div class="rv-panel-group">
+                <div class="rv-panel-group-title">Base</div>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="water"> 💧 Agua</label>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="parks"> 🌳 Parques</label>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="buildings"> 🏢 Edificios 2D</label>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="buildings3d"> 🏙️ Edificios 3D</label>
+            </div>
+            <div class="rv-panel-group">
+                <div class="rv-panel-group-title">Vías</div>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="roads"> 🛣️ Calles</label>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> 🚆 Transp. Férreo</label>
+            </div>
+            <div class="rv-panel-group">
+                <div class="rv-panel-group-title">Territorio</div>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="boundaries"> 🗺️ Límites Distr.</label>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="places-text"> 🏷️ Nombres</label>
+            </div>
+            <div class="rv-panel-group">
+                <div class="rv-panel-group-title">Referencias</div>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="pois-text"> � Puntos de Interés</label>
+            </div>
         </div>
     `;
     container.appendChild(panel);
+
+    // Evento para colapsar/expandir el panel
+    panel.querySelector('#rv-panel-header-btn').addEventListener('click', () => {
+        panel.classList.toggle('is-collapsed');
+    });
 
     // Sincronizar UI con el estado
     const select = panel.querySelector('#rv-theme-select');
