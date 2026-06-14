@@ -573,7 +573,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   border-radius: 12px;
   z-index: 1000;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  width: 220px;
+  width: 240px;
   font-family: system-ui, -apple-system, sans-serif;
   border: 1px solid rgba(128, 16, 57, 0.2);
   overflow: hidden;
@@ -667,7 +667,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 /* --- NUEVO: Selector de Perfiles y Opciones Avanzadas --- */
 .rv-profiles {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 12px;
   background: #f1f5f9;
   padding: 4px;
@@ -675,8 +675,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 }
 .rv-profile-btn {
   flex: 1;
-  padding: 8px 2px;
-  font-size: 10.5px;
+  padding: 6px 2px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   text-align: center;
