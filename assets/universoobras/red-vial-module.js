@@ -203,6 +203,31 @@ window.initRedVial = async function() {
         // Levantar el Panel de Control Visual (Studio)
         initRedVialStudio();
 
+        // =========================================================
+        // 🔍 MÓDULO DE DIAGNÓSTICO ESTRICTO (SOLO LECTURA)
+        // =========================================================
+        const inspectFeatures = (features, context) => {
+            console.log(`\n=== 🔍 DIAGNÓSTICO: ${context} ===`);
+            const protoFeatures = features.filter(f => f.source === 'protomaps');
+            if (protoFeatures.length === 0) console.log("No se encontraron features vectoriales de Protomaps en este punto.");
+            protoFeatures.forEach((f, i) => {
+                console.log(`[${i+1}] Capa Origen (source-layer): ${f.sourceLayer} | Capa Visual (layer.id): ${f.layer.id}`);
+                console.log("Propiedades Reales:", f.properties);
+            });
+            console.log("===================================================\n");
+        };
+
+        // Diagnóstico Inicial (Centro de la pantalla tras 2 segundos de carga)
+        setTimeout(() => {
+            const centerPoint = window.redVialMapInstance.project(window.redVialMapInstance.getCenter());
+            inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(centerPoint), "CENTRO DEL MAPA (INICIO)");
+        }, 2000);
+
+        // Diagnóstico por Clic (Global y pasivo, NO rompe los paneles)
+        window.redVialMapInstance.on('click', (e) => {
+            inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(e.point), "CLIC DEL USUARIO");
+        });
+
         window.isRedVialLoading = false;
     });
     
