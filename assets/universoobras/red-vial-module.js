@@ -67,7 +67,7 @@ window.rvApplyStyle = function() {
         sources: {
             "protomaps": {
                 type: "vector",
-                url: "pmtiles://../data/tacna.pmtiles?v=3", // Volvemos al nombre original con un nuevo bypass
+                url: "pmtiles://../data/tacna_final.pmtiles", // Obligamos a internet a descargar un archivo fresco
                 attribution: "<a href='https://protomaps.com'>Protomaps</a> © <a href='https://openstreetmap.org'>OpenStreetMap</a>"
             },
             "tramos-viales": { 
