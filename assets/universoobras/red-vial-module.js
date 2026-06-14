@@ -87,8 +87,8 @@ window.rvApplyStyle = function() {
     if (toggles['boundaries']) style.layers.push({ id: "boundaries", type: "line", source: "protomaps", "source-layer": "boundaries", filter: ["in", "admin_level", 4, 6], paint: { "line-color": t.boundary, "line-dasharray": [4,4], "line-width": 1.5 } });
     
     // 2. Capas Vectoriales Textos
-    if (toggles['places-text']) style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["get", "name"], "text-font": ["Roboto Regular"], "text-size": 14 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
-    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", layout: { "text-field": ["get", "name"], "text-font": ["Roboto Regular"], "text-size": 11 }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1 } });
+    if (toggles['places-text']) style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 14 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
+    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 11 }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1 } });
 
     // 3. Capas Operativas (GeoJSON Obras inyectado directamente en el estilo)
     style.layers.push({
