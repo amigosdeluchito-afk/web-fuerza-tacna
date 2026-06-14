@@ -38,12 +38,12 @@ const RV_THEMES = {
         routeBg: "#ffffff"
     },
     ciudadano: {
-        bg: "#EBEAE4", water: "#AADAFF", parks: "#BFE3C8",
+        bg: "#F2EFE9", water: "#B9D9F7", parks: "#CFE8C9",
         amenity_med: "#fee2e2", amenity_edu: "#fef08a",
-        road_highway: "#E4CCA0", road_highway_case: "#d1b585",
-        road_main: "#F2E3C6", road_main_case: "#e3ce9f",
-        road_secondary: "#F8F4E6", road_secondary_case: "#e8dfc3",
-        road_minor: "#FFFFFF", road_minor_case: "#dbdad3",
+        road_highway: "#A8B8CB", road_highway_case: "#98abc0",
+        road_main: "#C2CEDC", road_main_case: "#b3c1d1",
+        road_secondary: "#D6DEE7", road_secondary_case: "#c8d2df",
+        road_minor: "#FFFFFF", road_minor_case: "#E6ECF1",
         transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1", 
         text: "#1e293b", poi: "#0284c7", road_text: "#57534e",
         routeBg: "#ffffff"
