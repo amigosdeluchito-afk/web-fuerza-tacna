@@ -19,7 +19,7 @@ window.rvStyleConfig = {
         'boundaries': false,
         'transit': false,
         'places-text': true,
-        'pois-text': false
+        'pois-text': true // Activado por defecto para el perfil ciudadano
     }
 };
 
@@ -32,10 +32,10 @@ const RV_THEMES = {
         routeBg: "#ffffff"
     },
     ciudadano: {
-        bg: "#f4f1eb", water: "#a0c8f0", parks: "#c8e6c9",
+        bg: "#f4f1eb", water: "#93c5fd", parks: "#a7f3d0",
         road: "#ffffff", transit: "#f87171",
-        building: "#e0dcd2", boundary: "#cbd5e1", 
-        text: "#475569", poi: "#64748b",
+        building: "#d6d3c9", boundary: "#cbd5e1", 
+        text: "#1e293b", poi: "#0284c7",
         routeBg: "#ffffff"
     },
     impacto: {
@@ -76,7 +76,7 @@ window.rvApplyStyle = function() {
     if (toggles['water']) style.layers.push({ id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": t.water } });
     if (toggles['parks']) style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["any", ["==", "class", "park"], ["==", "class", "pitch"], ["==", "class", "cemetery"], ["==", "class", "hospital"]], paint: { "fill-color": t.parks } });
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
-    if (toggles['roads']) style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": t.road, "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1, 16, 4] } });
+    if (toggles['roads']) style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": t.road, "line-width": ["interpolate", ["linear"], ["zoom"], 12, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 3, 1], 16, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 10, 4]] } });
     
     if (toggles['buildings'] || toggles['buildings3d']) {
         if (toggles['buildings3d']) {
@@ -89,7 +89,7 @@ window.rvApplyStyle = function() {
     
     // 2. Capas Vectoriales Textos
     if (toggles['places-text']) style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 14 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
-    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 11 }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1 } });
+    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["in", "class", "hospital", "police", "school", "university", "college", "bus_station", "town_hall", "stadium"], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 11 }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1.5 } });
 
     // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     style.layers.push({
@@ -294,7 +294,7 @@ function initRedVialStudio() {
             e.target.classList.add('is-active');
             
             const t = window.rvStyleConfig.toggles;
-            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'pois-text': true, roads: true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
             
