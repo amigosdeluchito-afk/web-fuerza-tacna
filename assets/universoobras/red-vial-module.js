@@ -211,8 +211,8 @@ window.initRedVial = async function() {
             const protoFeatures = features.filter(f => f.source === 'protomaps');
             if (protoFeatures.length === 0) console.log("No se encontraron features vectoriales de Protomaps en este punto.");
             protoFeatures.forEach((f, i) => {
-                console.log(`[${i+1}] Capa Origen (source-layer): ${f.sourceLayer} | Capa Visual (layer.id): ${f.layer.id}`);
-                console.log("Propiedades Reales:", f.properties);
+                console.log(`[${i+1}] Capa Origen (source-layer): ${f.sourceLayer} | Capa Visual (layer.id): ${f.layer.id} | Tipo Geom: ${f.geometry.type}`);
+                console.log("Propiedades Reales:\n" + JSON.stringify(f.properties, null, 2));
             });
             console.log("===================================================\n");
         };
