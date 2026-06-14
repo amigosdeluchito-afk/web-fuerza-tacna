@@ -687,6 +687,11 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   cursor: pointer;
   transition: all 0.2s;
 }
+.rv-profile-btn:hover:not(.is-active) {
+  background: rgba(255, 255, 255, 0.6);
+  color: #1e293b;
+  transform: translateY(-1px);
+}
 .rv-profile-btn.is-active {
   background: #fff;
   color: #801039;

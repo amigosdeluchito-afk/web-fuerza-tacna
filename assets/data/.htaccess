@@ -8,6 +8,6 @@
 </IfModule>
 
 # Prevenir que Apache comprima el archivo (lo cual borra la cabecera Content-Length)
-<IfModule mod_env.c>
+<IfModule mod_setenvif.c>
     SetEnvIfNoCase Request_URI "\.pmtiles$" no-gzip dont-vary
 </IfModule>
