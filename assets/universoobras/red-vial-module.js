@@ -16,8 +16,8 @@ window.rvStyleConfig = {
         'buildings3d': false,
         'water': true,
         'parks': true,
-        'boundaries': true,
-        'transit': true,
+        'boundaries': false,
+        'transit': false,
         'places-text': true,
         'pois-text': false
     }
@@ -38,7 +38,7 @@ const RV_THEMES = {
         text: "#475569", poi: "#64748b",
         routeBg: "#ffffff"
     },
-    dashboard: {
+    impacto: {
         bg: "#0f172a", water: "#1e293b", parks: "#064e3b",
         road: "#334155", transit: "#7f1d1d",
         building: "#1e293b", boundary: "#475569", 
@@ -50,6 +50,7 @@ const RV_THEMES = {
 window.rvApplyStyle = function() {
     const t = RV_THEMES[window.rvStyleConfig.theme];
     const toggles = window.rvStyleConfig.toggles;
+    const isImpacto = window.rvStyleConfig.theme === 'impacto';
 
     const style = {
         version: 8,
@@ -90,20 +91,20 @@ window.rvApplyStyle = function() {
     if (toggles['places-text']) style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 14 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
     if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 11 }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1 } });
 
-    // 3. Capas Operativas (GeoJSON Obras inyectado directamente en el estilo)
+    // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     style.layers.push({
         'id': 'tramos-viales-bg',
         'type': 'line',
         'source': 'tramos-viales',
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
-        'paint': { 'line-color': t.routeBg, 'line-width': 8 }
+        'paint': { 'line-color': isImpacto ? ['get', 'color'] : t.routeBg, 'line-width': isImpacto ? 14 : 8, 'line-blur': isImpacto ? 6 : 0, 'line-opacity': isImpacto ? 0.8 : 1 }
     });
     style.layers.push({
         'id': 'tramos-viales-layer',
         'type': 'line',
         'source': 'tramos-viales',
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
-        'paint': { 'line-color': ['get', 'color'], 'line-width': 4 }
+        'paint': { 'line-color': isImpacto ? '#ffffff' : ['get', 'color'], 'line-width': isImpacto ? 3 : 4 }
     });
 
     if (window.redVialMapInstance) {
@@ -234,33 +235,40 @@ function initRedVialStudio() {
             <button class="rv-panel-toggle">▼</button>
         </div>
         <div class="rv-panel-body">
-            <div class="rv-panel-group">
-                <select id="rv-theme-select" class="rv-panel-select">
-                    <option value="tecnico">Técnico</option>
-                    <option value="ciudadano">Ciudadano</option>
-                    <option value="dashboard">Impacto</option>
-                </select>
+            <!-- Pestañas Principales (UX Ciudadano) -->
+            <div class="rv-profiles">
+                <button class="rv-profile-btn is-active" data-profile="ciudadano">Ciudadano</button>
+                <button class="rv-profile-btn" data-profile="tecnico">Técnico</button>
+                <button class="rv-profile-btn" data-profile="impacto">Impacto</button>
             </div>
-            <div class="rv-panel-group">
-                <div class="rv-panel-group-title">Base</div>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="water"> 💧 Agua</label>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="parks"> 🌳 Parques</label>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="buildings"> 🏢 Edificios 2D</label>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="buildings3d"> 🏙️ Edificios 3D</label>
+            
+            <!-- Acordeón Opciones Avanzadas -->
+            <div class="rv-advanced-header" id="rv-advanced-toggle">
+                <span>⚙️ Opciones Avanzadas</span>
+                <span>▼</span>
             </div>
-            <div class="rv-panel-group">
-                <div class="rv-panel-group-title">Vías</div>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="roads"> 🛣️ Calles</label>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> 🚆 Transp. Férreo</label>
-            </div>
-            <div class="rv-panel-group">
-                <div class="rv-panel-group-title">Territorio</div>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="boundaries"> 🗺️ Límites Distr.</label>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="places-text"> 🏷️ Nombres</label>
-            </div>
-            <div class="rv-panel-group">
-                <div class="rv-panel-group-title">Referencias</div>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="pois-text"> 📍 Puntos de Interés</label>
+            <div class="rv-advanced-content" id="rv-advanced-content">
+                <div class="rv-panel-group">
+                    <div class="rv-panel-group-title">Base</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="water"> 💧 Agua</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="parks"> 🌳 Parques</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings"> 🏢 Edificios 2D</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings3d"> 🏙️ Edificios 3D</label>
+                </div>
+                <div class="rv-panel-group">
+                    <div class="rv-panel-group-title">Vías</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="roads"> 🛣️ Calles</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> 🚆 Transp. Férreo</label>
+                </div>
+                <div class="rv-panel-group">
+                    <div class="rv-panel-group-title">Territorio</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="boundaries"> 🗺️ Límites Distr.</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="places-text"> 🏷️ Nombres</label>
+                </div>
+                <div class="rv-panel-group">
+                    <div class="rv-panel-group-title">Referencias</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="pois-text"> 📍 Puntos de Interés</label>
+                </div>
             </div>
         </div>
     `;
@@ -270,16 +278,33 @@ function initRedVialStudio() {
     panel.querySelector('#rv-panel-header-btn').addEventListener('click', () => {
         panel.classList.toggle('is-collapsed');
     });
-
-    // Sincronizar UI con el estado
-    const select = panel.querySelector('#rv-theme-select');
-    select.value = window.rvStyleConfig.theme;
-    select.addEventListener('change', (e) => {
-        window.rvStyleConfig.theme = e.target.value;
-        if (e.target.value === 'dashboard') { window.rvStyleConfig.toggles['buildings3d'] = true; window.rvStyleConfig.toggles['buildings'] = false; panel.querySelector('[data-layer="buildings3d"]').checked = true; panel.querySelector('[data-layer="buildings"]').checked = false; window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); } else { window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
-        window.rvApplyStyle();
+    
+    // Evento Acordeón Avanzado
+    panel.querySelector('#rv-advanced-toggle').addEventListener('click', () => {
+        panel.querySelector('#rv-advanced-content').classList.toggle('is-open');
     });
 
+    // Lógica de Perfiles Públicos
+    panel.querySelectorAll('.rv-profile-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const profile = e.target.getAttribute('data-profile');
+            window.rvStyleConfig.theme = profile;
+            
+            panel.querySelectorAll('.rv-profile-btn').forEach(b => b.classList.remove('is-active'));
+            e.target.classList.add('is-active');
+            
+            const t = window.rvStyleConfig.toggles;
+            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
+            
+            // Sincronizar checkboxes avanzados
+            Object.keys(t).forEach(key => { const chk = panel.querySelector(`input[data-layer="${key}"]`); if (chk) chk.checked = t[key]; });
+            window.rvApplyStyle();
+        });
+    });
+
+    // Lógica Controles Avanzados Manuales
     panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
         const layerKey = chk.getAttribute('data-layer');
         chk.checked = window.rvStyleConfig.toggles[layerKey];
