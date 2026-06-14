@@ -189,7 +189,10 @@ window.initRedVial = async function() {
     });
     
     // Prevención de cuelgues si el usuario cambia de página antes de cargar los tiles
-    window.redVialMapInstance.on('error', () => { window.isRedVialLoading = false; });
+    window.redVialMapInstance.on('error', (e) => { 
+        console.error("[MapLibre Error Detalle]:", e.error || e);
+        window.isRedVialLoading = false; 
+    });
 };
 
 function setupRedVialFilters() {
@@ -257,7 +260,7 @@ function initRedVialStudio() {
             </div>
             <div class="rv-panel-group">
                 <div class="rv-panel-group-title">Referencias</div>
-                <label class="rv-panel-item"><input type="checkbox" data-layer="pois-text"> � Puntos de Interés</label>
+                <label class="rv-panel-item"><input type="checkbox" data-layer="pois-text"> 📍 Puntos de Interés</label>
             </div>
         </div>
     `;
