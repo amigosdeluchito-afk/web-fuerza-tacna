@@ -26,23 +26,31 @@ window.rvStyleConfig = {
 const RV_THEMES = {
     tecnico: {
         bg: "#e9e5dc", water: "#a0c8f0", parks: "#d5d5d5",
-        road: "#cccccc", transit: "#999999",
+        amenity_med: "#d5d5d5", amenity_edu: "#d5d5d5",
+        road_main: "#cccccc", road_main_case: "#bbbbbb",
+        road_minor: "#cccccc", road_minor_case: "#bbbbbb",
+        transit: "#999999",
         building: "#d9d6ce", boundary: "#999999", 
-        text: "#666666", poi: "#888888",
+        text: "#666666", poi: "#888888", road_text: "#666666",
         routeBg: "#ffffff"
     },
     ciudadano: {
-        bg: "#f4f1eb", water: "#93c5fd", parks: "#a7f3d0",
-        road: "#ffffff", transit: "#f87171",
-        building: "#d6d3c9", boundary: "#cbd5e1", 
-        text: "#1e293b", poi: "#0284c7",
+        bg: "#f8f6f0", water: "#a5cbf0", parks: "#bbf7d0",
+        amenity_med: "#fee2e2", amenity_edu: "#fef08a",
+        road_main: "#fde047", road_main_case: "#d4c585",
+        road_minor: "#ffffff", road_minor_case: "#e2e0d9",
+        transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1", 
+        text: "#1e293b", poi: "#0284c7", road_text: "#57534e",
         routeBg: "#ffffff"
     },
     impacto: {
         bg: "#0f172a", water: "#1e293b", parks: "#064e3b",
-        road: "#334155", transit: "#7f1d1d",
+        amenity_med: "#0f172a", amenity_edu: "#0f172a",
+        road_main: "#334155", road_main_case: "#1e293b",
+        road_minor: "#334155", road_minor_case: "#1e293b",
+        transit: "#7f1d1d",
         building: "#1e293b", boundary: "#475569", 
-        text: "#94a3b8", poi: "#cbd5e1",
+        text: "#94a3b8", poi: "#cbd5e1", road_text: "#64748b",
         routeBg: "#000000"
     }
 };
@@ -74,9 +82,12 @@ window.rvApplyStyle = function() {
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
     if (toggles['water']) style.layers.push({ id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": t.water } });
-    if (toggles['parks']) style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["any", ["==", "class", "park"], ["==", "class", "pitch"], ["==", "class", "cemetery"], ["==", "class", "hospital"]], paint: { "fill-color": t.parks } });
+    if (toggles['parks']) style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["any", ["in", "class", "park", "pitch", "cemetery", "stadium", "hospital", "school", "university", "college", "market"]], paint: { "fill-color": ["match", ["get", "class"], ["hospital"], t.amenity_med, ["school", "university", "college"], t.amenity_edu, t.parks] } });
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
-    if (toggles['roads']) style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": t.road, "line-width": ["interpolate", ["linear"], ["zoom"], 12, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 3, 1], 16, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 10, 4]] } });
+    if (toggles['roads']) {
+        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], t.road_main_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 12, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 4, 1.5], 16, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 14, 6]] } });
+        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], t.road_main, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 12, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 2.5, 0.5], 16, ["match", ["get", "class"], ["motorway", "trunk", "primary", "secondary"], 10, 4]] } });
+    }
     
     if (toggles['buildings'] || toggles['buildings3d']) {
         if (toggles['buildings3d']) {
@@ -88,8 +99,11 @@ window.rvApplyStyle = function() {
     if (toggles['boundaries']) style.layers.push({ id: "boundaries", type: "line", source: "protomaps", "source-layer": "boundaries", filter: ["in", "admin_level", 4, 6], paint: { "line-color": t.boundary, "line-dasharray": [4,4], "line-width": 1.5 } });
     
     // 2. Capas Vectoriales Textos
-    if (toggles['places-text']) style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 14 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
-    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["in", "class", "hospital", "police", "school", "university", "college", "bus_station", "town_hall", "stadium"], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 11 }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1.5 } });
+    if (toggles['places-text']) {
+        style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-transform": "uppercase", "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
+        if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["in", "class", "motorway", "trunk", "primary", "secondary"]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 12, 10, 16, 13], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": t.road_minor, "text-halo-width": 2 } });
+    }
+    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["in", "class", "hospital", "police", "school", "university", "college", "bus_station", "town_hall", "stadium", "market"], layout: { "text-field": ["concat", ["match", ["get", "class"], "hospital", "🏥 ", "police", "🚓 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "bus_station", "🚌 ", "town_hall", "🏛️ ", "stadium", "⚽ ", "market", "🛒 ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 14, 11, 16, 13], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1.5 } });
 
     // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     style.layers.push({
