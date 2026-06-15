@@ -138,7 +138,14 @@ window.rvApplyStyle = function() {
     
     // 2. Capas Vectoriales Textos
     if (toggles['places-text']) {
-        style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", filter: ["all", ["has", "name"]], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 11, 14, 14, 16, 15], "text-letter-spacing": 0.05 }, paint: { "text-color": t.places_text || t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
+        const isMajorPlace = ["any", ["==", ["get", "kind"], "city"], ["==", ["get", "kind"], "town"], ["==", ["get", "kind"], "municipality"]];
+        
+        // Distritos (Zonas Mayores): Visibles de lejos, con un color ligeramente más oscuro
+        style.layers.push({ id: "places-major-text", type: "symbol", source: "protomaps", "source-layer": "places", filter: ["all", ["has", "name"], isMajorPlace], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 14, 16, 16], "text-letter-spacing": 0.05 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
+        
+        // Barrios y Asociaciones (Zonas Menores): Ocultos de lejos, aparecen desde Zoom 13 con texto más pequeño
+        style.layers.push({ id: "places-minor-text", type: "symbol", source: "protomaps", "source-layer": "places", minzoom: 13, filter: ["all", ["has", "name"], ["!", isMajorPlace]], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 13, 10, 15, 12, 17, 14], "text-letter-spacing": 0.05 }, paint: { "text-color": t.places_text || t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
+
         if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, ["case", isMajorRoad, 11, 0], 13, ["case", isMajorRoad, 13, isAvenida, 11, 0], 15, ["case", isMajorRoad, 14, isAvenida, 13, 10], 17, ["case", isMajorRoad, 16, isAvenida, 14, 12]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
     }
     
