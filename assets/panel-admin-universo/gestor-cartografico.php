@@ -132,12 +132,17 @@ require_admin();
                         "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" }
                     },
                     layers: [
-                        { id: "bg", type: "background", paint: { "background-color": "#0f172a" } },
-                        { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#1e293b" } },
-                        { id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#334155", "line-width": 1 } },
-                        { id: "places", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#64748b"} },
+                        { id: "bg", type: "background", paint: { "background-color": "#F2EFE9" } },
+                        { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#B9D9F7" } },
+                        { id: "parks", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["any", ["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "hospital"]], "paint": { "fill-color": ["match", ["get", "kind"], "hospital", "#F4C7C3", "school", "#F6E6A8", "university", "#F6E6A8", "#C2E2BA"] } },
+                        { id: "buildings", type: "fill", source: "protomaps", "source-layer": "buildings", paint: { "fill-color": "#e6e4df", "fill-opacity": 0.6 } },
+                        { id: "roads-minor", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#FFFFFF", "line-width": 2 } },
+                        { id: "roads-major", type: "line", source: "protomaps", "source-layer": "roads", filter: ["in", ["get", "kind"], "highway", "major_road"], paint: { "line-color": "#CDD7E3", "line-width": 4 } },
+                        { id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 14}, paint: {"text-color": "#1e293b", "text-halo-color": "#F2EFE9", "text-halo-width": 2} },
+                        { id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 11, "symbol-placement": "line"}, paint: {"text-color": "#3f3f46", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
+                        { id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#666666", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
                         { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
-                        { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#ffffff", "text-halo-color": "#0f172a", "text-halo-width": 2 } }
+                        { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#1e293b", "text-halo-color": "#ffffff", "text-halo-width": 3 } }
                     ]
                 },
                 center: [-70.2528, -18.0146],
@@ -155,6 +160,57 @@ require_admin();
                 document.getElementById('inpLat').value = lat;
                 document.getElementById('inpLng').value = lng;
                 document.getElementById('panelFormulario').classList.add('active');
+                
+                // =========================================================
+                // 🔍 AUTOCOMPLETADO INTELIGENTE (Priorización Vectorial)
+                // =========================================================
+                const features = map.queryRenderedFeatures(e.point);
+                let bestMatch = null;
+                let priority = 99;
+
+                for (let f of features) {
+                    const layer = f.sourceLayer;
+                    const props = f.properties || {};
+                    const name = props.name || '';
+                    const kind = props.kind || '';
+
+                    if (layer === 'pois' && name && priority > 1) { bestMatch = { name, kind, layer }; priority = 1; } 
+                    else if (layer === 'places' && name && priority > 2) { bestMatch = { name, kind, layer }; priority = 2; } 
+                    else if (layer === 'landuse' && kind && priority > 3) { bestMatch = { name: name || kind.toUpperCase(), kind, layer }; priority = 3; } 
+                    else if (layer === 'roads' && name && priority > 4) { bestMatch = { name, kind, layer }; priority = 4; }
+                }
+
+                let sugName = '', sugCorto = '', sugCat = 'General', sugIcon = 'hito';
+
+                if (bestMatch) {
+                    sugName = bestMatch.name;
+                    sugCorto = bestMatch.name;
+                    const k = bestMatch.kind;
+
+                    if (['hospital', 'clinic'].includes(k)) {
+                        sugCat = 'Salud'; sugIcon = 'salud';
+                        sugCorto = 'Hosp. ' + (sugName.replace(/(hospital|clinica|centro de salud|puesto de salud)\s+/i, '').split(' ')[0] || 'Salud');
+                    } else if (['school', 'university', 'college', 'kindergarten'].includes(k)) {
+                        sugCat = 'Educación'; sugIcon = 'educacion';
+                    } else if (['townhall', 'town_hall', 'police', 'fire_station'].includes(k)) {
+                        sugCat = 'Gobierno'; sugIcon = 'gobierno';
+                        if (k === 'townhall' || k === 'town_hall') sugCorto = 'Muni. ' + (sugName.split(' ')[0] || '');
+                    } else if (['stadium', 'pitch', 'park', 'sports_centre'].includes(k)) {
+                        sugCat = 'Deporte'; sugIcon = 'deporte';
+                    } else if (['marketplace', 'market'].includes(k)) {
+                        sugCat = 'Mercado'; sugIcon = 'comercio';
+                    } else if (['bus_station', 'aerodrome'].includes(k)) {
+                        sugCat = 'Transporte'; sugIcon = 'transporte';
+                    } else if (bestMatch.layer === 'roads') {
+                        sugCat = 'Vía'; sugIcon = 'hito';
+                    }
+                }
+
+                document.getElementById('inpNombre').value = sugName;
+                document.getElementById('inpCorto').value = sugCorto;
+                document.getElementById('inpCat').value = sugCat;
+                document.getElementById('inpIcon').value = sugIcon;
+
                 document.getElementById('inpNombre').focus();
             });
         }
