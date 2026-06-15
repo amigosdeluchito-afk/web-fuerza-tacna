@@ -1,39 +1,7 @@
-<FilesMatch "\.pmtiles$">
-    # 1. Desactivar compresión en Apache (mod_env / mod_setenvif)
-    SetEnv no-gzip 1
-    SetEnv no-brotli 1
-    
-    <IfModule mod_setenvif.c>
-        SetEnvIfNoCase Request_URI "\.pmtiles$" no-gzip dont-vary
-        SetEnvIfNoCase Request_URI "\.pmtiles$" no-brotli dont-vary
-    </IfModule>
-
-    # 2. Eliminar filtros de compresión dinámicos (mod_deflate)
-    <IfModule mod_deflate.c>
-        RemoveOutputFilter .pmtiles
-    </IfModule>
-
-    # 3. Forzar el tipo MIME binario para evitar alteraciones
-    ForceType application/octet-stream
-
-    # 4. Configurar cabeceras obligatorias (CORS y Byte Serving)
-    <IfModule mod_headers.c>
-        Header set Access-Control-Allow-Origin "*"
-        Header set Access-Control-Allow-Methods "GET, OPTIONS"
-        Header set Access-Control-Allow-Headers "Range"
-        Header set Access-Control-Expose-Headers "Content-Length, Content-Range, Accept-Ranges"
-        Header set Accept-Ranges "bytes"
-        
-        # Evitar que intermediarios (Cloudflare/Nginx) transformen el archivo
-        Header set Cache-Control "public, max-age=31536000, no-transform"
-        
-        # Asegurar que no se envíe la cabecera de compresión
-        Header unset Content-Encoding
-    </IfModule>
-</FilesMatch>
-
-# 5. Doble seguro con mod_rewrite para servidores muy estrictos (cPanel/LiteSpeed)
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule \.pmtiles$ - [E=no-gzip:1,E=no-brotli:1]
+    
+    # Enviar peticiones de PMTiles a un Proxy PHP para garantizar cabeceras 206 intactas
+    # Esto permite no tocar el archivo JS ni cambiar la constante PMTILES_URL
+    RewriteRule ^(.*\.pmtiles)$ serve_pmtiles.php?file=$1 [L,QSA]
 </IfModule>
