@@ -270,6 +270,33 @@ window.initRedVial = async function() {
         window.redVialMapInstance.on('click', (e) => {
             inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(e.point), "CLIC DEL USUARIO");
         });
+        
+        // =========================================================
+        // 🔍 AUDITORÍA AUTOMÁTICA DE HITOS URBANOS (FASE D)
+        // =========================================================
+        const targetKeywords = ['aeropuerto', 'terminal', 'unanue', 'basadre', 'paseo', 'arco', 'mercado', 'grau', 'cenepa', 'essalud', 'privada de tacna', 'plaza'];
+        const auditedFeatures = new Set();
+
+        const scanFeatures = () => {
+            // Consultar datos vectoriales crudos directamente de la fuente
+            const features = window.redVialMapInstance.querySourceFeatures('protomaps');
+            features.forEach(f => {
+                if ((f.sourceLayer === 'pois' || f.sourceLayer === 'places') && f.properties && f.properties.name) {
+                    const name = f.properties.name.toLowerCase();
+                    const hasMatch = targetKeywords.some(kw => name.includes(kw));
+                    if (hasMatch) {
+                        const uniqueKey = `${f.sourceLayer}|${f.properties.kind}|${f.properties.name}`;
+                        if (!auditedFeatures.has(uniqueKey)) {
+                            auditedFeatures.add(uniqueKey);
+                            console.log(`📍 HITO ENCONTRADO -> Capa: ${f.sourceLayer} | kind: ${f.properties.kind || 'N/A'} | name: ${f.properties.name}`);
+                        }
+                    }
+                }
+            });
+        };
+
+        window.redVialMapInstance.on('moveend', scanFeatures);
+        setTimeout(scanFeatures, 3000); // Primer escaneo automático
 
         window.isRedVialLoading = false;
     });
