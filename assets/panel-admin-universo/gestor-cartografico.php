@@ -210,7 +210,8 @@ require_admin();
                     { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
                     { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#1e293b", "text-halo-color": "#ffffff", "text-halo-width": 3 } },
                     { id: "draw-line-layer", type: "line", source: "draw-source", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#3b82f6", "line-width": 4, "line-dasharray": [2, 2] } },
-                    { id: "draw-points-layer", type: "circle", source: "draw-points", paint: { "circle-radius": 5, "circle-color": "#ffffff", "circle-stroke-width": 2, "circle-stroke-color": "#3b82f6" } }
+                    { id: "draw-points-layer", type: "circle", source: "draw-points", paint: { "circle-radius": 5, "circle-color": "#ffffff", "circle-stroke-width": 2, "circle-stroke-color": "#3b82f6" } },
+                    { id: "draw-points-hit", type: "circle", source: "draw-points", paint: { "circle-radius": 15, "circle-color": "rgba(0,0,0,0)" } }
                 ]
             };
 
@@ -331,36 +332,31 @@ require_admin();
             // EVENTOS DE EDICIÓN AVANZADA (MOVER / ELIMINAR)
             // ==========================================
             
+            map.on('mouseenter', 'draw-points-hit', () => {
+                if (currentMode !== 'vias') return;
+                map.getCanvas().style.cursor = 'move';
+                map.dragPan.disable();
+            });
+
+            map.on('mouseleave', 'draw-points-hit', () => {
+                if (currentMode !== 'vias' || isDraggingRVNode) return;
+                map.getCanvas().style.cursor = 'crosshair';
+                map.dragPan.enable();
+            });
+
+            map.on('mousedown', 'draw-points-hit', (e) => {
+                if (currentMode !== 'vias' || e.button !== 0) return;
+                e.preventDefault();
+                isDraggingRVNode = true;
+                draggedRVNodeIndex = e.features[0].properties.index;
+                map.getCanvas().style.cursor = 'grabbing';
+            });
+            
             map.on('mousemove', (e) => {
                 if (currentMode !== 'vias') return;
                 if (isDraggingRVNode && draggedRVNodeIndex !== -1) {
                     rvCoords[draggedRVNodeIndex] = [e.lngLat.lng, e.lngLat.lat];
                     updateDrawLayer();
-                } else {
-                    // Escaneo robusto del cursor
-                    const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
-                    const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
-                    if (features.length > 0) {
-                        map.getCanvas().style.cursor = 'move';
-                        map.dragPan.disable(); // PRE-BLOQUEO: Apaga el movimiento del mapa antes de hacer clic
-                    } else {
-                        map.getCanvas().style.cursor = 'crosshair';
-                        map.dragPan.enable(); // Libera si no estás sobre el nodo
-                    }
-                }
-            });
-            
-            map.on('mousedown', (e) => {
-                if (currentMode !== 'vias' || e.button !== 0) return;
-                
-                // Imán (Área de captura ampliada a 16x16 píxeles)
-                const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
-                const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
-                if (features.length > 0) {
-                    e.preventDefault(); // <-- CLAVE: Corta el evento nativo de paneo del mapa
-                    isDraggingRVNode = true;
-                    draggedRVNodeIndex = features[0].properties.index;
-                    map.getCanvas().style.cursor = 'grabbing';
                 }
             });
             
@@ -374,16 +370,12 @@ require_admin();
                 }
             });
             
-            map.on('contextmenu', (e) => {
+            map.on('contextmenu', 'draw-points-hit', (e) => {
                 if (currentMode !== 'vias') return;
-                const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
-                const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
-                if (features.length > 0) {
-                    if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
-                        const idx = features[0].properties.index;
-                        rvCoords.splice(idx, 1);
-                        updateDrawLayer();
-                    }
+                if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
+                    const idx = e.features[0].properties.index;
+                    rvCoords.splice(idx, 1);
+                    updateDrawLayer();
                 }
             });
         }
