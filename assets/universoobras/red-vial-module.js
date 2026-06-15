@@ -22,7 +22,14 @@ window.rvStyleConfig = {
         'boundaries': false,
         'transit': false,
         'places-text': true,
-        'pois-text': true // Activado por defecto para el perfil ciudadano
+        'pois-text': true, // Activado por defecto para el perfil ciudadano
+        'srv-edu': false,
+        'srv-salud': true,
+        'srv-seguridad': false,
+        'srv-gobierno': true,
+        'srv-mercados': true,
+        'srv-deporte': false,
+        'srv-transporte': true
     }
 };
 
@@ -87,7 +94,18 @@ window.rvApplyStyle = function() {
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
     if (toggles['water']) style.layers.push({ id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": t.water } });
-    if (toggles['parks']) style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", paint: { "fill-color": ["match", ["get", "kind"], "hospital", t.amenity_med, "clinic", t.amenity_med, "school", t.amenity_edu, "university", t.amenity_edu, "college", t.amenity_edu, "kindergarten", t.amenity_edu, "park", t.parks, "grass", t.parks, "recreation_ground", t.parks, "pitch", t.parks, "cemetery", t.parks, "forest", t.parks, "wood", t.parks, "rgba(0,0,0,0)"] } });
+    
+    const landuseColors = ["match", ["get", "kind"]];
+    if (toggles['srv-salud']) landuseColors.push("hospital", t.amenity_med, "clinic", t.amenity_med);
+    if (toggles['srv-edu']) landuseColors.push("school", t.amenity_edu, "university", t.amenity_edu, "college", t.amenity_edu, "kindergarten", t.amenity_edu);
+    if (toggles['srv-deporte']) landuseColors.push("stadium", t.parks, "pitch", t.parks);
+    if (toggles['parks']) landuseColors.push("park", t.parks, "grass", t.parks, "recreation_ground", t.parks, "cemetery", t.parks, "forest", t.parks, "wood", t.parks);
+    landuseColors.push("rgba(0,0,0,0)");
+    
+    if (toggles['parks'] || toggles['srv-salud'] || toggles['srv-edu'] || toggles['srv-deporte']) {
+        style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", paint: { "fill-color": landuseColors } });
+    }
+
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
     
     const isMajorRoad = ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]];
@@ -113,7 +131,19 @@ window.rvApplyStyle = function() {
         style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
         if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 12, 0], 14, ["case", isMajorRoad, 14, isAvenida, 12, 0], 16, ["case", isMajorRoad, 16, isAvenida, 14, 11]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
     }
-    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "hospital"], ["==", ["get", "kind"], "clinic"], ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "university"], ["==", ["get", "kind"], "college"], ["==", ["get", "kind"], "kindergarten"], ["==", ["get", "kind"], "police"], ["==", ["get", "kind"], "marketplace"], ["==", ["get", "kind"], "market"], ["==", ["get", "kind"], "stadium"], ["==", ["get", "kind"], "bus_station"], ["==", ["get", "kind"], "townhall"], ["==", ["get", "kind"], "town_hall"]]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "clinic", "🏥 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "kindergarten", "🧸 ", "police", "🚓 ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "⚽ ", "bus_station", "🚌 ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
+    
+    const poiFilters = [];
+    if (toggles['srv-salud']) poiFilters.push(["==", ["get", "kind"], "hospital"], ["==", ["get", "kind"], "clinic"]);
+    if (toggles['srv-edu']) poiFilters.push(["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "university"], ["==", ["get", "kind"], "college"], ["==", ["get", "kind"], "kindergarten"]);
+    if (toggles['srv-seguridad']) poiFilters.push(["==", ["get", "kind"], "police"]);
+    if (toggles['srv-gobierno']) poiFilters.push(["==", ["get", "kind"], "townhall"], ["==", ["get", "kind"], "town_hall"]);
+    if (toggles['srv-mercados']) poiFilters.push(["==", ["get", "kind"], "marketplace"], ["==", ["get", "kind"], "market"]);
+    if (toggles['srv-deporte']) poiFilters.push(["==", ["get", "kind"], "stadium"], ["==", ["get", "kind"], "pitch"]);
+    if (toggles['srv-transporte']) poiFilters.push(["==", ["get", "kind"], "bus_station"]);
+
+    if (toggles['pois-text'] && poiFilters.length > 0) {
+        style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ...poiFilters]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "clinic", "🏥 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "kindergarten", "🧸 ", "police", "🚓 ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "⚽ ", "pitch", "⚽ ", "bus_station", "🚌 ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
+    }
 
     // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     style.layers.push({
@@ -318,6 +348,16 @@ function initRedVialStudio() {
                     <div class="rv-panel-group-title">Referencias</div>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="pois-text"> 📍 Puntos de Interés</label>
                 </div>
+                <div class="rv-panel-group">
+                    <div class="rv-panel-group-title">🏢 Servicios</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-edu"> 📚 Educación</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-salud"> 🏥 Salud</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-seguridad"> 🚓 Seguridad</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-gobierno"> 🏛️ Gobierno</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-mercados"> 🛒 Mercados</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-deporte"> ⚽ Deporte</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-transporte"> 🚍 Transporte</label>
+                </div>
             </div>
         </div>
     `;
@@ -343,9 +383,9 @@ function initRedVialStudio() {
             e.target.classList.add('is-active');
             
             const t = window.rvStyleConfig.toggles;
-            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'pois-text': true, roads: true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
-            if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
-            if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'pois-text': false, roads: true }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
+            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'pois-text': true, roads: true, 'srv-edu': false, 'srv-salud': true, 'srv-seguridad': false, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': false, 'srv-transporte': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'pois-text': false, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'pois-text': false, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
             
             // Sincronizar checkboxes avanzados
             Object.keys(t).forEach(key => { const chk = panel.querySelector(`input[data-layer="${key}"]`); if (chk) chk.checked = t[key]; });
