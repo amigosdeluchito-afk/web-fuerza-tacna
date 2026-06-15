@@ -12,6 +12,7 @@ if ($action === 'create') {
     $tipo = trim($input['tipo'] ?? 'Local');
     $estado = trim($input['estado'] ?? 'En estudios');
     $color = trim($input['color'] ?? '#ffffff');
+    $descripcion = trim($input['descripcion'] ?? '');
     $coords = $input['coordenadas'] ?? [];
 
     if ($nombre === '' || !is_array($coords) || count($coords) < 2) {
@@ -25,13 +26,62 @@ if ($action === 'create') {
 
     try {
         $db = get_db_connection();
-        $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, coordenadas, activo) VALUES (?, ?, ?, ?, ?, ?, 1)");
-        $stmt->execute([$string_id, $nombre, $tipo, $estado, $color, $json_coords]);
+        $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, descripcion, coordenadas, activo) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
+        $stmt->execute([$string_id, $nombre, $tipo, $estado, $color, $descripcion, $json_coords]);
         log_action('rv_crear', "Trazó tramo vial: $nombre");
         echo json_encode(['ok' => true]);
     } catch (Exception $e) {
         http_response_code(500); 
         echo json_encode(['error' => 'Error al guardar en BD: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'update') {
+    require_admin();
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    $string_id = trim($input['id'] ?? '');
+    $nombre = trim($input['nombre'] ?? '');
+    $tipo = trim($input['tipo'] ?? 'Local');
+    $estado = trim($input['estado'] ?? 'En estudios');
+    $color = trim($input['color'] ?? '#ffffff');
+    $descripcion = trim($input['descripcion'] ?? '');
+    $coords = $input['coordenadas'] ?? [];
+
+    if ($string_id === '' || $nombre === '' || !is_array($coords) || count($coords) < 2) {
+        http_response_code(400); echo json_encode(['error' => 'Datos inválidos']); exit;
+    }
+
+    $json_coords = json_encode($coords);
+
+    try {
+        $db = get_db_connection();
+        $stmt = $db->prepare("UPDATE panel_tramos_viales SET nombre=?, tipo=?, estado=?, color=?, descripcion=?, coordenadas=? WHERE string_id=?");
+        $stmt->execute([$nombre, $tipo, $estado, $color, $descripcion, $json_coords, $string_id]);
+        log_action('rv_editar', "Editó tramo vial: $nombre");
+        echo json_encode(['ok' => true]);
+    } catch (Exception $e) {
+        http_response_code(500); echo json_encode(['error' => 'Error al actualizar: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'delete') {
+    require_admin();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $string_id = trim($input['id'] ?? '');
+    
+    if ($string_id === '') { http_response_code(400); echo json_encode(['error' => 'ID inválido']); exit; }
+
+    try {
+        $db = get_db_connection();
+        $stmt = $db->prepare("DELETE FROM panel_tramos_viales WHERE string_id=?");
+        $stmt->execute([$string_id]);
+        log_action('rv_eliminar', "Eliminó tramo vial ID: $string_id");
+        echo json_encode(['ok' => true]);
+    } catch (Exception $e) {
+        http_response_code(500); echo json_encode(['error' => 'Error al eliminar: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -48,11 +98,15 @@ if ($action === 'geojson') {
             tipo VARCHAR(100) DEFAULT 'Local',
             estado VARCHAR(100) DEFAULT 'En estudios',
             color VARCHAR(20) DEFAULT '#ffffff',
+            descripcion TEXT NULL,
             coordenadas JSON NOT NULL,
             activo TINYINT(1) DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        // Migración silenciosa por si la tabla ya existía sin la columna descripcion
+        try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN descripcion TEXT NULL AFTER color"); } catch (Exception $e) {}
 
         // 2. Sembrar los datos idénticos al archivo estático original (Si la tabla está vacía)
         $db->exec("INSERT IGNORE INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, coordenadas) VALUES
@@ -74,7 +128,8 @@ if ($action === 'geojson') {
                     'nombre' => $row['nombre'],
                     'tipo' => $row['tipo'],
                     'estado' => $row['estado'],
-                    'color' => $row['color']
+                    'color' => $row['color'],
+                    'descripcion' => $row['descripcion'] ?? ''
                 ],
                 'geometry' => [
                     'type' => 'LineString',

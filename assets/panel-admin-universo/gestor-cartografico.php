@@ -63,7 +63,7 @@ require_admin();
         </div>
 
         <div class="instrucciones">📍 Haz clic en cualquier lugar de Tacna para anclar un nuevo Titán</div>
-        <button onclick="abrirLista()" style="position:absolute; top: 20px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #3b82f6; color: #93c5fd; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;">📋 Ver Lista de Puntos</button>
+        <button id="btnVerLista" onclick="abrirListaActual()" style="position:absolute; top: 20px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #3b82f6; color: #93c5fd; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;">📋 Ver Lista de Puntos</button>
         <div id="map"></div>
         
         <!-- Panel Flotante de Dibujo RV -->
@@ -141,10 +141,17 @@ require_admin();
             <button type="button" class="btn btn-secondary" onclick="cerrarLista()">❌ Volver al Mapa</button>
         </div>
         
+        <div class="panel-lista" id="panelListaRV">
+            <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Vías Guardadas</h3>
+            <div id="listaRvContainer" style="flex: 1; overflow-y: auto; margin-bottom: 15px;"></div>
+            <button type="button" class="btn btn-secondary" onclick="cerrarListaRV()">❌ Volver al Mapa</button>
+        </div>
+        
         <!-- Panel de Formulario Red Vial -->
         <div class="panel-formulario" id="panelFormularioRV">
             <h3 style="margin-top:0; color:#f8fafc; font-size:18px; border-bottom:1px solid #1e293b; padding-bottom:10px;">🛣️ Guardar Tramo Vial</h3>
             <form id="rvForm">
+                <input type="hidden" id="rvId" value="">
                 <div class="form-group"><label>Nombre de la Vía (Detectado)</label><input type="text" id="rvNombre" class="form-control" required></div>
                 <div class="form-group"><label>Tipo de Vía</label><select id="rvTipo" class="form-control"><option value="Local">Local</option><option value="Provincial">Provincial</option><option value="Regional">Regional</option></select></div>
                 <div class="form-group"><label>Estado Actual</label><select id="rvEstado" class="form-control"><option value="En estudios">En estudios</option><option value="Buena Pro">Buena Pro</option><option value="En ejecución">En ejecución</option><option value="Paralizado">Paralizado</option><option value="Transferencia">Transferencia</option><option value="Entregado">Entregado</option></select></div>
@@ -163,6 +170,7 @@ require_admin();
         let refsGeoJSON = null;
         let currentMode = 'hitos';
         let rvCoords = [];
+        let rvGeoJSON = null;
 
         async function initGestorCartografico() {
             // Importar PMTiles dinámicamente (compatible con ES Modules)
@@ -222,6 +230,7 @@ require_admin();
             // Evento Click en el Mapa
             map.on('click', (e) => {
                 document.getElementById('panelLista').classList.remove('active');
+                document.getElementById('panelListaRV').classList.remove('active');
                 
                 if (currentMode === 'hitos') {
                 const lat = e.lngLat.lat.toFixed(6);
@@ -326,6 +335,11 @@ require_admin();
             document.getElementById('btnModeVias').className = mode === 'vias' ? 'btn btn-primary' : 'btn';
             document.getElementById('btnModeVias').style.background = mode === 'vias' ? '' : 'transparent';
             document.getElementById('btnModeVias').style.color = mode === 'vias' ? '' : '#94a3b8';
+            document.getElementById('btnVerLista').textContent = mode === 'hitos' ? '📋 Ver Lista de Puntos' : '📋 Ver Lista de Vías';
+            
+            document.getElementById('panelLista').classList.remove('active');
+            document.getElementById('panelListaRV').classList.remove('active');
+            rvCancel();
             
             document.querySelector('.instrucciones').textContent = mode === 'hitos' 
                 ? "📍 Haz clic en el mapa para anclar un nuevo Titán" 
@@ -351,6 +365,8 @@ require_admin();
             document.getElementById('rvDrawPanel').style.display = 'none'; 
             document.getElementById('panelFormularioRV').classList.remove('active'); 
             document.getElementById('rvForm').reset(); 
+            document.getElementById('rvId').value = '';
+            document.getElementById('btnGuardarRv').textContent = '💾 Guardar Tramo';
         }
         
         function rvFinish() { 
@@ -381,6 +397,11 @@ require_admin();
                 refsGeoJSON = await res.json();
                 renderLista();
             } catch (e) { console.error('Error fetching list', e); }
+        }
+
+        function abrirListaActual() {
+            if (currentMode === 'hitos') abrirLista();
+            else abrirListaRV();
         }
 
         function abrirLista() {
@@ -443,6 +464,79 @@ require_admin();
             } catch(e) { alert('Error de conexión'); }
         }
 
+        // ==========================================
+        // LÓGICA DE LISTADO Y EDICIÓN RED VIAL
+        // ==========================================
+        async function fetchListaRV() {
+            try {
+                const res = await fetch('mapa_redvial_api.php?action=geojson');
+                rvGeoJSON = await res.json();
+                renderListaRV();
+            } catch (e) { console.error('Error fetching list RV', e); }
+        }
+
+        function abrirListaRV() {
+            document.getElementById('panelFormularioRV').classList.remove('active');
+            document.getElementById('rvDrawPanel').style.display = 'none';
+            document.getElementById('panelListaRV').classList.add('active');
+            fetchListaRV();
+        }
+
+        function cerrarListaRV() {
+            document.getElementById('panelListaRV').classList.remove('active');
+        }
+
+        function renderListaRV() {
+            const cont = document.getElementById('listaRvContainer');
+            if (!rvGeoJSON || !rvGeoJSON.features || rvGeoJSON.features.length === 0) {
+                cont.innerHTML = '<p style="color:#64748b; font-size:12px;">No hay vías guardadas.</p>';
+                return;
+            }
+            let html = '';
+            rvGeoJSON.features.forEach(f => {
+                const p = f.properties;
+                html += `<div style="background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong style="color:#f8fafc;">🛣️ ${p.nombre}</strong><br><span style="color:#94a3b8; font-size:11px;">Tipo: ${p.tipo} | Estado: ${p.estado}</span></div>
+                    <div style="display:flex; gap:6px;"><button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button><button type="button" class="btn" style="padding:6px; background:#ef4444; color:white; min-width:30px;" onclick="eliminarRV('${p.id}')" title="Eliminar">🗑️</button></div>
+                </div>`;
+            });
+            cont.innerHTML = html;
+        }
+
+        function editarRV(id) {
+            const feature = rvGeoJSON.features.find(f => f.properties.id === id);
+            if (!feature) return;
+            
+            rvCoords = feature.geometry.coordinates;
+            updateDrawLayer();
+            if (rvCoords.length > 0) map.flyTo({ center: rvCoords[0], zoom: 15 });
+
+            document.getElementById('rvId').value = id;
+            document.getElementById('rvNombre').value = feature.properties.nombre || '';
+            document.getElementById('rvTipo').value = feature.properties.tipo || 'Local';
+            document.getElementById('rvEstado').value = feature.properties.estado || 'En estudios';
+            document.getElementById('rvColor').value = feature.properties.color || '#3b82f6';
+            document.getElementById('rvDesc').value = feature.properties.descripcion || '';
+            
+            document.getElementById('panelListaRV').classList.remove('active');
+            document.getElementById('rvDrawPanel').style.display = 'flex';
+            document.getElementById('panelFormularioRV').classList.add('active');
+            document.getElementById('btnGuardarRv').textContent = '💾 Actualizar Tramo';
+        }
+
+        async function eliminarRV(id) {
+            if (!confirm('⚠️ ¿Estás seguro de eliminar este tramo vial?')) return;
+            try {
+                const res = await fetch('mapa_redvial_api.php?action=delete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) });
+                const data = await res.json();
+                if (data.ok) { 
+                    if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson'); 
+                    fetchListaRV(); 
+                    rvCancel();
+                } else { alert('Error: ' + data.error); }
+            } catch(e) { alert('Error de conexión'); }
+        }
+
         // Enviar Formulario
         document.getElementById('refForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -470,20 +564,22 @@ require_admin();
             if (rvCoords.length < 2) return alert("Necesitas al menos 2 puntos para guardar una vía.");
             
             const btn = document.getElementById('btnGuardarRv');
-            btn.disabled = true; btn.textContent = '⏳ Guardando Tramo...';
+            const isEdit = document.getElementById('rvId').value !== '';
+            btn.disabled = true; btn.textContent = isEdit ? '⏳ Actualizando Tramo...' : '⏳ Guardando Tramo...';
             
             const payload = { nombre: document.getElementById('rvNombre').value, tipo: document.getElementById('rvTipo').value, estado: document.getElementById('rvEstado').value, color: document.getElementById('rvColor').value, descripcion: document.getElementById('rvDesc').value, coordenadas: rvCoords };
+            if (isEdit) payload.id = document.getElementById('rvId').value;
             
             try {
-                const res = await fetch('mapa_redvial_api.php?action=create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const res = await fetch(`mapa_redvial_api.php?action=${isEdit ? 'update' : 'create'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.ok) {
                     if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson');
                     rvCancel();
-                    alert("🛣️ ¡Tramo guardado con éxito!");
+                    alert(isEdit ? "🛣️ ¡Tramo actualizado con éxito!" : "🛣️ ¡Tramo guardado con éxito!");
                 } else { alert('Error: ' + data.error); }
             } catch (err) { alert('Error de conexión al guardar.'); } 
-            finally { btn.disabled = false; btn.textContent = '💾 Guardar Tramo'; }
+            finally { btn.disabled = false; btn.textContent = isEdit ? '💾 Actualizar Tramo' : '💾 Guardar Tramo'; }
         });
     </script>
 </body>
