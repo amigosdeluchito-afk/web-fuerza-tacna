@@ -340,7 +340,13 @@ require_admin();
                     // Escaneo robusto del cursor
                     const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
                     const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
-                    map.getCanvas().style.cursor = features.length > 0 ? 'move' : 'crosshair';
+                    if (features.length > 0) {
+                        map.getCanvas().style.cursor = 'move';
+                        map.dragPan.disable(); // PRE-BLOQUEO: Apaga el movimiento del mapa antes de hacer clic
+                    } else {
+                        map.getCanvas().style.cursor = 'crosshair';
+                        map.dragPan.enable(); // Libera si no estás sobre el nodo
+                    }
                 }
             });
             
@@ -355,16 +361,14 @@ require_admin();
                     isDraggingRVNode = true;
                     draggedRVNodeIndex = features[0].properties.index;
                     map.getCanvas().style.cursor = 'grabbing';
-                    map.dragPan.disable(); // Bloquea el mapa para que no se mueva mientras arrastras
                 }
             });
             
-            map.on('mouseup', () => {
+            window.addEventListener('mouseup', () => {
                 if (isDraggingRVNode) {
                     isDraggingRVNode = false;
                     draggedRVNodeIndex = -1;
-                    map.getCanvas().style.cursor = 'crosshair';
-                    map.dragPan.enable(); // Libera el mapa
+                    if (map) { map.getCanvas().style.cursor = 'crosshair'; map.dragPan.enable(); }
                     justDragged = true;
                     setTimeout(() => justDragged = false, 100);
                 }
@@ -395,6 +399,7 @@ require_admin();
                 rvCancel();
             }
             currentMode = mode;
+            if (map) map.dragPan.enable(); // Seguro anti-bloqueo al cambiar de modo
             document.getElementById('btnModeHitos').className = mode === 'hitos' ? 'btn btn-primary' : 'btn';
             document.getElementById('btnModeHitos').style.background = mode === 'hitos' ? '' : 'transparent';
             document.getElementById('btnModeHitos').style.color = mode === 'hitos' ? '' : '#94a3b8';
