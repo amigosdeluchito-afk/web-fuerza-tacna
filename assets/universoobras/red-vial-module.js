@@ -90,7 +90,7 @@ window.rvApplyStyle = function() {
             },
             "tramos-viales": { 
                 type: "geojson", 
-                data: "tramos-viales.geojson" 
+                data: "../panel-admin-universo/mapa_redvial_api.php?action=geojson" 
             },
             "referencias-estrategicas": {
                 type: "geojson",
