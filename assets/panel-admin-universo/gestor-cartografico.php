@@ -338,7 +338,7 @@ require_admin();
                     updateDrawLayer();
                 } else {
                     // Escaneo robusto del cursor
-                    const bbox = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+                    const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
                     const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
                     map.getCanvas().style.cursor = features.length > 0 ? 'move' : 'crosshair';
                 }
@@ -347,10 +347,11 @@ require_admin();
             map.on('mousedown', (e) => {
                 if (currentMode !== 'vias' || e.button !== 0) return;
                 
-                // Imán (Área de captura de 12x12 píxeles)
-                const bbox = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+                // Imán (Área de captura ampliada a 16x16 píxeles)
+                const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
                 const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
                 if (features.length > 0) {
+                    e.preventDefault(); // <-- CLAVE: Corta el evento nativo de paneo del mapa
                     isDraggingRVNode = true;
                     draggedRVNodeIndex = features[0].properties.index;
                     map.getCanvas().style.cursor = 'grabbing';
@@ -371,7 +372,7 @@ require_admin();
             
             map.on('contextmenu', (e) => {
                 if (currentMode !== 'vias') return;
-                const bbox = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+                const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
                 const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
                 if (features.length > 0) {
                     if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
