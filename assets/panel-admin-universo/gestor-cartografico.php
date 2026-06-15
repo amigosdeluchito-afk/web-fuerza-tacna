@@ -171,6 +171,10 @@ require_admin();
         let currentMode = 'hitos';
         let rvCoords = [];
         let rvGeoJSON = null;
+        
+        let isDraggingRVNode = false;
+        let draggedRVNodeIndex = -1;
+        let justDragged = false;
 
         async function initGestorCartografico() {
             // Importar PMTiles dinámicamente (compatible con ES Modules)
@@ -229,6 +233,8 @@ require_admin();
             
             // Evento Click en el Mapa
             map.on('click', (e) => {
+                if (justDragged) return; // Evita crear un punto nuevo justo después de soltar un arrastre
+                
                 document.getElementById('panelLista').classList.remove('active');
                 document.getElementById('panelListaRV').classList.remove('active');
                 
@@ -316,6 +322,49 @@ require_admin();
                     updateDrawLayer();
                 }
             });
+            
+            // ==========================================
+            // EVENTOS DE EDICIÓN AVANZADA (MOVER / ELIMINAR)
+            // ==========================================
+            map.on('mouseenter', 'draw-points-layer', () => { if (currentMode === 'vias') map.getCanvas().style.cursor = 'move'; });
+            map.on('mouseleave', 'draw-points-layer', () => { if (currentMode === 'vias' && !isDraggingRVNode) map.getCanvas().style.cursor = 'crosshair'; });
+            
+            map.on('mousedown', 'draw-points-layer', (e) => {
+                if (currentMode !== 'vias') return;
+                e.preventDefault();
+                if (e.features.length > 0) {
+                    isDraggingRVNode = true;
+                    draggedRVNodeIndex = e.features[0].properties.index;
+                    map.getCanvas().style.cursor = 'grabbing';
+                }
+            });
+            
+            map.on('mousemove', (e) => {
+                if (isDraggingRVNode && draggedRVNodeIndex !== -1) {
+                    rvCoords[draggedRVNodeIndex] = [e.lngLat.lng, e.lngLat.lat];
+                    updateDrawLayer();
+                }
+            });
+            
+            map.on('mouseup', () => {
+                if (isDraggingRVNode) {
+                    isDraggingRVNode = false;
+                    draggedRVNodeIndex = -1;
+                    map.getCanvas().style.cursor = 'crosshair';
+                    justDragged = true;
+                    setTimeout(() => justDragged = false, 100);
+                }
+            });
+            
+            map.on('contextmenu', 'draw-points-layer', (e) => {
+                if (currentMode !== 'vias') return;
+                if (e.features.length > 0) {
+                    e.preventDefault();
+                    const idx = e.features[0].properties.index;
+                    rvCoords.splice(idx, 1);
+                    updateDrawLayer();
+                }
+            });
         }
         
         initGestorCartografico();
@@ -343,7 +392,7 @@ require_admin();
             
             document.querySelector('.instrucciones').textContent = mode === 'hitos' 
                 ? "📍 Haz clic en el mapa para anclar un nuevo Titán" 
-                : "🛣️ Haz clics sucesivos en la calle para trazar la vía";
+                : "🛣️ Clic para trazar • Arrastra nodos para mover • Clic derecho para borrar";
                 
             map.getCanvas().style.cursor = mode === 'vias' ? 'crosshair' : '';
         }
@@ -351,7 +400,7 @@ require_admin();
         function updateDrawLayer() {
             if (map.getSource('draw-source')) {
                 map.getSource('draw-source').setData({ type: "Feature", geometry: { type: "LineString", coordinates: rvCoords } });
-                map.getSource('draw-points').setData({ type: "FeatureCollection", features: rvCoords.map(c => ({ type: "Feature", geometry: { type: "Point", coordinates: c } })) });
+                map.getSource('draw-points').setData({ type: "FeatureCollection", features: rvCoords.map((c, i) => ({ type: "Feature", properties: { index: i }, geometry: { type: "Point", coordinates: c } })) });
             }
             document.getElementById('rvDrawCount').textContent = rvCoords.length + (rvCoords.length === 1 ? " punto" : " puntos");
             document.getElementById('btnRvFinish').disabled = rvCoords.length < 2;
