@@ -39,13 +39,13 @@ const RV_THEMES = {
     },
     ciudadano: {
         bg: "#F2EFE9", water: "#B9D9F7", parks: "#CFE8C9",
-        amenity_med: "#fee2e2", amenity_edu: "#fef08a",
+        amenity_med: "#F4C7C3", amenity_edu: "#F6E6A8",
         road_highway: "#A8B8CB", road_highway_case: "#98abc0",
         road_main: "#C2CEDC", road_main_case: "#b3c1d1",
         road_secondary: "#D6DEE7", road_secondary_case: "#c8d2df",
         road_minor: "#FFFFFF", road_minor_case: "#E6ECF1",
         transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1", 
-        text: "#1e293b", poi: "#0284c7", road_text: "#57534e",
+        text: "#1e293b", poi: "#666666", road_text: "#57534e",
         routeBg: "#ffffff"
     },
     impacto: {
@@ -87,7 +87,7 @@ window.rvApplyStyle = function() {
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
     if (toggles['water']) style.layers.push({ id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": t.water } });
-    if (toggles['parks']) style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", paint: { "fill-color": ["match", ["get", "pmap:kind"], "hospital", t.amenity_med, "clinic", t.amenity_med, "school", t.amenity_edu, "university", t.amenity_edu, "college", t.amenity_edu, "park", t.parks, "pitch", t.parks, "cemetery", t.parks, "stadium", t.parks, "wood", t.parks, "grass", t.parks, "forest", t.parks, "rgba(0,0,0,0)"] } });
+    if (toggles['parks']) style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", paint: { "fill-color": ["match", ["get", "kind"], "hospital", t.amenity_med, "clinic", t.amenity_med, "school", t.amenity_edu, "university", t.amenity_edu, "college", t.amenity_edu, "kindergarten", t.amenity_edu, "park", t.parks, "grass", t.parks, "recreation_ground", t.parks, "pitch", t.parks, "cemetery", t.parks, "forest", t.parks, "wood", t.parks, "rgba(0,0,0,0)"] } });
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
     
     const isMajorRoad = ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]];
@@ -113,7 +113,7 @@ window.rvApplyStyle = function() {
         style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
         if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 12, 0], 14, ["case", isMajorRoad, 14, isAvenida, 12, 0], 16, ["case", isMajorRoad, 16, isAvenida, 14, 11]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": t.road_minor, "text-halo-width": 2 } });
     }
-    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["any", ["==", ["get", "pmap:kind"], "hospital"], ["==", ["get", "pmap:kind"], "clinic"], ["==", ["get", "pmap:kind"], "police"], ["==", ["get", "pmap:kind"], "school"], ["==", ["get", "pmap:kind"], "university"], ["==", ["get", "pmap:kind"], "college"], ["==", ["get", "pmap:kind"], "bus_station"], ["==", ["get", "pmap:kind"], "town_hall"], ["==", ["get", "pmap:kind"], "stadium"], ["==", ["get", "pmap:kind"], "market"]], layout: { "text-field": ["concat", ["match", ["get", "pmap:kind"], "hospital", "🏥 ", "clinic", "🏥 ", "police", "🚓 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "bus_station", "🚌 ", "town_hall", "🏛️ ", "public", "🏛️ ", "stadium", "⚽ ", "market", "🛒 ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 14, 11, 16, 13], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": t.bg, "text-halo-width": 1.5 } });
+    if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "hospital"], ["==", ["get", "kind"], "clinic"], ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "university"], ["==", ["get", "kind"], "college"], ["==", ["get", "kind"], "kindergarten"], ["==", ["get", "kind"], "police"], ["==", ["get", "kind"], "marketplace"], ["==", ["get", "kind"], "market"], ["==", ["get", "kind"], "stadium"], ["==", ["get", "kind"], "bus_station"], ["==", ["get", "kind"], "townhall"], ["==", ["get", "kind"], "town_hall"]]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "clinic", "🏥 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "kindergarten", "🧸 ", "police", "🚓 ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "⚽ ", "bus_station", "🚌 ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
 
     // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     style.layers.push({
