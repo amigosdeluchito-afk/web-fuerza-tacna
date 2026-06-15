@@ -88,5 +88,51 @@ if ($action === 'create') {
     exit;
 }
 
+if ($action === 'update') {
+    require_admin();
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    $id = isset($input['id']) ? (int)$input['id'] : 0;
+    $nombre = trim($input['nombre'] ?? '');
+    $nombre_corto = trim($input['nombre_corto'] ?? '');
+    $categoria = trim($input['categoria'] ?? 'General');
+    $icon_type = trim($input['icon_type'] ?? 'hito');
+    $lat = isset($input['lat']) ? (float)$input['lat'] : null;
+    $lng = isset($input['lng']) ? (float)$input['lng'] : null;
+    $min_zoom = isset($input['min_zoom']) ? (int)$input['min_zoom'] : 11;
+
+    if ($id === 0 || $nombre === '' || $lat === null || $lng === null) {
+        http_response_code(400); echo json_encode(['error' => 'Faltan datos obligatorios']); exit;
+    }
+
+    try {
+        $stmt = $db->prepare("UPDATE panel_mapa_referencias SET nombre=?, nombre_corto=?, categoria=?, icon_type=?, lat=?, lng=?, min_zoom=? WHERE id=?");
+        $stmt->execute([$nombre, $nombre_corto, $categoria, $icon_type, $lat, $lng, $min_zoom, $id]);
+        log_action('ref_editar', "Editó Referencia: $nombre");
+        echo json_encode(['ok' => true]);
+    } catch (Exception $e) {
+        http_response_code(500); echo json_encode(['error' => 'Error al actualizar: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'delete') {
+    require_admin();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $id = isset($input['id']) ? (int)$input['id'] : 0;
+    
+    if ($id === 0) { http_response_code(400); echo json_encode(['error' => 'ID inválido']); exit; }
+
+    try {
+        $stmt = $db->prepare("DELETE FROM panel_mapa_referencias WHERE id=?");
+        $stmt->execute([$id]);
+        log_action('ref_eliminar', "Eliminó Referencia ID: $id");
+        echo json_encode(['ok' => true]);
+    } catch (Exception $e) {
+        http_response_code(500); echo json_encode(['error' => 'Error al eliminar: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
 http_response_code(400);
 echo json_encode(['error' => 'Acción no válida']);

@@ -25,6 +25,9 @@ require_admin();
         .panel-formulario { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; padding: 25px; display: none; flex-direction: column; overflow-y: auto; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; }
         .panel-formulario.active { display: flex; }
         
+        .panel-lista { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; padding: 25px; display: none; flex-direction: column; overflow-y: auto; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; }
+        .panel-lista.active { display: flex; }
+        
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
         .form-control { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; font-size: 14px; outline: none; }
@@ -54,13 +57,15 @@ require_admin();
     
     <div class="main-container">
         <div class="instrucciones">📍 Haz clic en cualquier lugar de Tacna para anclar un nuevo Titán</div>
+        <button onclick="abrirLista()" style="position:absolute; top: 20px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #3b82f6; color: #93c5fd; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;">📋 Ver Lista de Puntos</button>
         <div id="map"></div>
         
         <div class="panel-formulario" id="panelFormulario">
-            <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">➕ Agregar Referencia</h3>
-            <p style="font-size: 12px; color: #38bdf8;">Las coordenadas han sido capturadas automáticamente desde el mapa.</p>
+            <h3 id="formTitle" style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">➕ Agregar Referencia</h3>
+            <p id="formSub" style="font-size: 12px; color: #38bdf8;">Las coordenadas han sido capturadas automáticamente desde el mapa.</p>
             
             <form id="refForm">
+                <input type="hidden" id="refId" value="">
                 <div style="display: flex; gap: 10px;">
                     <div class="form-group" style="flex: 1;">
                         <label>Latitud</label>
@@ -81,7 +86,16 @@ require_admin();
                 </div>
                 <div class="form-group">
                     <label>Categoría</label>
-                    <input type="text" id="inpCat" class="form-control" required value="General">
+                    <select id="inpCat" class="form-control" required>
+                        <option value="General">📍 General</option>
+                        <option value="Salud">🏥 Salud</option>
+                        <option value="Educación">🎓 Educación</option>
+                        <option value="Gobierno">🏛️ Gobierno</option>
+                        <option value="Deporte">⚽ Deporte</option>
+                        <option value="Transporte">🚌 Transporte</option>
+                        <option value="Mercado">🛒 Mercado</option>
+                        <option value="Parque">🌳 Parque / Plaza</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Icono</label>
@@ -93,6 +107,7 @@ require_admin();
                         <option value="deporte">⚽ Deporte</option>
                         <option value="transporte">🚌 Transporte</option>
                         <option value="comercio">🛒 Comercio / Mercado</option>
+                        <option value="parque">🌳 Parque / Plaza</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -105,12 +120,19 @@ require_admin();
                 <button type="button" class="btn btn-secondary" onclick="cerrarPanel()">❌ Cancelar</button>
             </form>
         </div>
+        
+        <div class="panel-lista" id="panelLista">
+            <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Referencias Guardadas</h3>
+            <div id="listaReferenciasContainer" style="flex: 1; overflow-y: auto; margin-bottom: 15px;"></div>
+            <button type="button" class="btn btn-secondary" onclick="cerrarLista()">❌ Volver al Mapa</button>
+        </div>
     </div>
 
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <script>
         let map;
         let activeMarker = null;
+        let refsGeoJSON = null;
 
         async function initGestorCartografico() {
             // Importar PMTiles dinámicamente (compatible con ES Modules)
@@ -163,12 +185,17 @@ require_admin();
             
             // Evento Click en el Mapa
             map.on('click', (e) => {
+                document.getElementById('panelLista').classList.remove('active');
+                
                 const lat = e.lngLat.lat.toFixed(6);
                 const lng = e.lngLat.lng.toFixed(6);
                 
                 if (activeMarker) activeMarker.remove();
                 activeMarker = new maplibregl.Marker({ color: '#ef4444' }).setLngLat([lng, lat]).addTo(map);
                 
+                document.getElementById('refId').value = '';
+                document.getElementById('formTitle').textContent = '➕ Agregar Referencia';
+                document.getElementById('btnGuardar').textContent = '💾 Guardar Referencia';
                 document.getElementById('inpLat').value = lat;
                 document.getElementById('inpLng').value = lng;
                 document.getElementById('panelFormulario').classList.add('active');
@@ -209,12 +236,14 @@ require_admin();
                         if (k === 'townhall' || k === 'town_hall') sugCorto = 'Muni. ' + (sugName.split(' ')[0] || '');
                     } else if (['stadium', 'pitch', 'park', 'sports_centre'].includes(k)) {
                         sugCat = 'Deporte'; sugIcon = 'deporte';
+                    } else if (['park', 'recreation_ground'].includes(k)) {
+                        sugCat = 'Parque'; sugIcon = 'parque';
                     } else if (['marketplace', 'market'].includes(k)) {
                         sugCat = 'Mercado'; sugIcon = 'comercio';
                     } else if (['bus_station', 'aerodrome'].includes(k)) {
                         sugCat = 'Transporte'; sugIcon = 'transporte';
                     } else if (bestMatch.layer === 'roads') {
-                        sugCat = 'Vía'; sugIcon = 'hito';
+                        sugCat = 'General'; sugIcon = 'hito';
                     }
                 }
 
@@ -233,28 +262,99 @@ require_admin();
             document.getElementById('panelFormulario').classList.remove('active');
             if (activeMarker) activeMarker.remove();
             document.getElementById('refForm').reset();
+            document.getElementById('refId').value = '';
             document.getElementById('inpZoom').value = 11;
             document.getElementById('inpCat').value = 'General';
             document.getElementById('inpIcon').value = 'hito';
+        }
+
+        async function fetchLista() {
+            try {
+                const res = await fetch('mapa_referencias_api.php?action=geojson');
+                refsGeoJSON = await res.json();
+                renderLista();
+            } catch (e) { console.error('Error fetching list', e); }
+        }
+
+        function abrirLista() {
+            document.getElementById('panelFormulario').classList.remove('active');
+            document.getElementById('panelLista').classList.add('active');
+            fetchLista();
+        }
+
+        function cerrarLista() {
+            document.getElementById('panelLista').classList.remove('active');
+        }
+
+        function renderLista() {
+            const cont = document.getElementById('listaReferenciasContainer');
+            if (!refsGeoJSON || !refsGeoJSON.features || refsGeoJSON.features.length === 0) {
+                cont.innerHTML = '<p style="color:#64748b; font-size:12px;">No hay referencias guardadas.</p>';
+                return;
+            }
+            let html = '';
+            const iconMap = { 'salud':'🏥', 'educacion':'🎓', 'gobierno':'🏛️', 'deporte':'⚽', 'transporte':'🚌', 'comercio':'🛒', 'parque':'🌳', 'hito':'📍' };
+            refsGeoJSON.features.forEach(f => {
+                const p = f.properties;
+                const emoji = iconMap[p.icon_type] || '📍';
+                html += `<div style="background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong style="color:#f8fafc;">${emoji} ${p.name}</strong><br><span style="color:#94a3b8; font-size:11px;">Cat: ${p.categoria} | Zoom: ${p.min_zoom}</span></div>
+                    <div style="display:flex; gap:6px;"><button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRef(${p.id})" title="Editar">✏️</button><button type="button" class="btn" style="padding:6px; background:#ef4444; color:white; min-width:30px;" onclick="eliminarRef(${p.id})" title="Eliminar">🗑️</button></div>
+                </div>`;
+            });
+            cont.innerHTML = html;
+        }
+
+        function editarRef(id) {
+            const feature = refsGeoJSON.features.find(f => f.properties.id === id);
+            if (!feature) return;
+            
+            const lng = feature.geometry.coordinates[0], lat = feature.geometry.coordinates[1];
+            if (activeMarker) activeMarker.remove();
+            activeMarker = new maplibregl.Marker({ color: '#3b82f6' }).setLngLat([lng, lat]).addTo(map);
+            map.flyTo({ center: [lng, lat], zoom: 15 });
+
+            document.getElementById('refId').value = id;
+            document.getElementById('inpLat').value = lat; document.getElementById('inpLng').value = lng;
+            document.getElementById('inpNombre').value = feature.properties.name; document.getElementById('inpCorto').value = feature.properties.short_name;
+            document.getElementById('inpCat').value = feature.properties.categoria; document.getElementById('inpIcon').value = feature.properties.icon_type;
+            document.getElementById('inpZoom').value = feature.properties.min_zoom;
+            
+            document.getElementById('panelLista').classList.remove('active');
+            document.getElementById('panelFormulario').classList.add('active');
+            document.getElementById('formTitle').textContent = '✏️ Editar Referencia';
+            document.getElementById('btnGuardar').textContent = '💾 Actualizar Referencia';
+        }
+
+        async function eliminarRef(id) {
+            if (!confirm('⚠️ ¿Estás seguro de eliminar este punto? Desaparecerá de todos los mapas públicos de inmediato.')) return;
+            try {
+                const res = await fetch('mapa_referencias_api.php?action=delete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) });
+                const data = await res.json();
+                if (data.ok) { if (map && map.getSource('referencias')) map.getSource('referencias').setData('mapa_referencias_api.php?action=geojson'); fetchLista(); } 
+                else { alert('Error: ' + data.error); }
+            } catch(e) { alert('Error de conexión'); }
         }
 
         // Enviar Formulario
         document.getElementById('refForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnGuardar');
-            btn.disabled = true; btn.textContent = '⏳ Guardando...';
+            const isEdit = document.getElementById('refId').value !== '';
+            btn.disabled = true; btn.textContent = isEdit ? '⏳ Actualizando...' : '⏳ Guardando...';
             
             const payload = { lat: parseFloat(document.getElementById('inpLat').value), lng: parseFloat(document.getElementById('inpLng').value), nombre: document.getElementById('inpNombre').value, nombre_corto: document.getElementById('inpCorto').value, categoria: document.getElementById('inpCat').value, icon_type: document.getElementById('inpIcon').value, min_zoom: parseInt(document.getElementById('inpZoom').value) };
+            if (isEdit) payload.id = parseInt(document.getElementById('refId').value);
             
             try {
-                const res = await fetch('mapa_referencias_api.php?action=create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const res = await fetch(`mapa_referencias_api.php?action=${isEdit ? 'update' : 'create'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.ok) {
                     if (map && map.getSource('referencias')) map.getSource('referencias').setData('mapa_referencias_api.php?action=geojson');
                     cerrarPanel();
                 } else { alert('Error: ' + data.error); }
             } catch (err) { alert('Error de conexión'); } 
-            finally { btn.disabled = false; btn.textContent = '💾 Guardar Referencia'; }
+            finally { btn.disabled = false; btn.textContent = isEdit ? '💾 Actualizar Referencia' : '💾 Guardar Referencia'; }
         });
     </script>
 </body>

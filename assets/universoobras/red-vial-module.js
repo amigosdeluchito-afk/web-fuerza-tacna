@@ -348,6 +348,7 @@ window.initRedVial = async function() {
         createAndAddIcon('icon-ref-salud', '🏥'); createAndAddIcon('icon-ref-edu', '🎓');
         createAndAddIcon('icon-ref-gob', '🏛️'); createAndAddIcon('icon-ref-deporte', '⚽');
         createAndAddIcon('icon-ref-transporte', '🚌'); createAndAddIcon('icon-ref-comercio', '🛒');
+        createAndAddIcon('icon-ref-parque', '🌳');
         createAndAddIcon('icon-ref-hito', '📍');
 
         // =========================================================
