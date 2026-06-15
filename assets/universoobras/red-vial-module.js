@@ -38,14 +38,14 @@ const RV_THEMES = {
         routeBg: "#ffffff"
     },
     ciudadano: {
-        bg: "#F2EFE9", water: "#B9D9F7", parks: "#CFE8C9",
+        bg: "#F2EFE9", water: "#B9D9F7", parks: "#C2E2BA",
         amenity_med: "#F4C7C3", amenity_edu: "#F6E6A8",
-        road_highway: "#A8B8CB", road_highway_case: "#98abc0",
-        road_main: "#C2CEDC", road_main_case: "#b3c1d1",
-        road_secondary: "#D6DEE7", road_secondary_case: "#c8d2df",
+        road_highway: "#B7C5D5", road_highway_case: "#A8BACB",
+        road_main: "#CDD7E3", road_main_case: "#C1CDDA",
+        road_secondary: "#DFE5EC", road_secondary_case: "#D3DCE5",
         road_minor: "#FFFFFF", road_minor_case: "#E6ECF1",
         transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1", 
-        text: "#1e293b", poi: "#666666", road_text: "#57534e",
+        text: "#1e293b", poi: "#666666", road_text: "#3f3f46",
         routeBg: "#ffffff"
     },
     impacto: {
@@ -110,8 +110,8 @@ window.rvApplyStyle = function() {
     
     // 2. Capas Vectoriales Textos
     if (toggles['places-text']) {
-        style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2 } });
-        if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 12, 0], 14, ["case", isMajorRoad, 14, isAvenida, 12, 0], 16, ["case", isMajorRoad, 16, isAvenida, 14, 11]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": t.road_minor, "text-halo-width": 2 } });
+        style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
+        if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 12, 0], 14, ["case", isMajorRoad, 14, isAvenida, 12, 0], 16, ["case", isMajorRoad, 16, isAvenida, 14, 11]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
     }
     if (toggles['pois-text']) style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "hospital"], ["==", ["get", "kind"], "clinic"], ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "university"], ["==", ["get", "kind"], "college"], ["==", ["get", "kind"], "kindergarten"], ["==", ["get", "kind"], "police"], ["==", ["get", "kind"], "marketplace"], ["==", ["get", "kind"], "market"], ["==", ["get", "kind"], "stadium"], ["==", ["get", "kind"], "bus_station"], ["==", ["get", "kind"], "townhall"], ["==", ["get", "kind"], "town_hall"]]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "clinic", "🏥 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "kindergarten", "🧸 ", "police", "🚓 ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "⚽ ", "bus_station", "🚌 ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
 
