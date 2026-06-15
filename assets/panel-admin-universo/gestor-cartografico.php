@@ -232,6 +232,9 @@ require_admin();
                 dragRotate: false // Desactiva la manito/rotación del clic derecho
             });
             
+            // Bloquear el menú nativo del navegador en el canvas para asegurar el clic derecho
+            map.getCanvas().addEventListener('contextmenu', e => e.preventDefault());
+            
             // Evento Click en el Mapa
             map.on('click', (e) => {
                 if (justDragged) return; // Evita crear un punto nuevo justo después de soltar un arrastre
@@ -327,23 +330,27 @@ require_admin();
             // ==========================================
             // EVENTOS DE EDICIÓN AVANZADA (MOVER / ELIMINAR)
             // ==========================================
-            map.on('mouseenter', 'draw-points-layer', () => { if (currentMode === 'vias') map.getCanvas().style.cursor = 'move'; });
-            map.on('mouseleave', 'draw-points-layer', () => { if (currentMode === 'vias' && !isDraggingRVNode) map.getCanvas().style.cursor = 'crosshair'; });
-            
-            map.on('mousedown', 'draw-points-layer', (e) => {
-                if (currentMode !== 'vias') return;
-                e.preventDefault();
-                if (e.features.length > 0) {
-                    isDraggingRVNode = true;
-                    draggedRVNodeIndex = e.features[0].properties.index;
-                    map.getCanvas().style.cursor = 'grabbing';
-                }
-            });
             
             map.on('mousemove', (e) => {
+                if (currentMode !== 'vias') return;
                 if (isDraggingRVNode && draggedRVNodeIndex !== -1) {
                     rvCoords[draggedRVNodeIndex] = [e.lngLat.lng, e.lngLat.lat];
                     updateDrawLayer();
+                } else {
+                    // Escaneo robusto del cursor
+                    const features = map.queryRenderedFeatures(e.point, { layers: ['draw-points-layer'] });
+                    map.getCanvas().style.cursor = features.length > 0 ? 'move' : 'crosshair';
+                }
+            });
+            
+            map.on('mousedown', (e) => {
+                if (currentMode !== 'vias' || e.button !== 0) return;
+                const features = map.queryRenderedFeatures(e.point, { layers: ['draw-points-layer'] });
+                if (features.length > 0) {
+                    isDraggingRVNode = true;
+                    draggedRVNodeIndex = features[0].properties.index;
+                    map.getCanvas().style.cursor = 'grabbing';
+                    map.dragPan.disable(); // Bloquea el mapa para que no se mueva mientras arrastras
                 }
             });
             
@@ -352,17 +359,18 @@ require_admin();
                     isDraggingRVNode = false;
                     draggedRVNodeIndex = -1;
                     map.getCanvas().style.cursor = 'crosshair';
+                    map.dragPan.enable(); // Libera el mapa
                     justDragged = true;
                     setTimeout(() => justDragged = false, 100);
                 }
             });
             
-            map.on('contextmenu', 'draw-points-layer', (e) => {
+            map.on('contextmenu', (e) => {
                 if (currentMode !== 'vias') return;
-                if (e.features.length > 0) {
-                    e.preventDefault();
+                const features = map.queryRenderedFeatures(e.point, { layers: ['draw-points-layer'] });
+                if (features.length > 0) {
                     if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
-                        const idx = e.features[0].properties.index;
+                        const idx = features[0].properties.index;
                         rvCoords.splice(idx, 1);
                         updateDrawLayer();
                     }
