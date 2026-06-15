@@ -228,7 +228,8 @@ require_admin();
                 container: 'map',
                 style: mapStyle,
                 center: [-70.2528, -18.0146],
-                zoom: 12
+                zoom: 12,
+                dragRotate: false // Desactiva la manito/rotación del clic derecho
             });
             
             // Evento Click en el Mapa
@@ -360,9 +361,11 @@ require_admin();
                 if (currentMode !== 'vias') return;
                 if (e.features.length > 0) {
                     e.preventDefault();
-                    const idx = e.features[0].properties.index;
-                    rvCoords.splice(idx, 1);
-                    updateDrawLayer();
+                    if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
+                        const idx = e.features[0].properties.index;
+                        rvCoords.splice(idx, 1);
+                        updateDrawLayer();
+                    }
                 }
             });
         }
