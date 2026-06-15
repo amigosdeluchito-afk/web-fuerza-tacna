@@ -4,6 +4,38 @@ require_once __DIR__ . '/config.php';
 
 $action = $_GET['action'] ?? '';
 
+if ($action === 'create') {
+    require_admin();
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $nombre = trim($input['nombre'] ?? '');
+    $tipo = trim($input['tipo'] ?? 'Local');
+    $estado = trim($input['estado'] ?? 'En estudios');
+    $color = trim($input['color'] ?? '#ffffff');
+    $coords = $input['coordenadas'] ?? [];
+
+    if ($nombre === '' || !is_array($coords) || count($coords) < 2) {
+        http_response_code(400); 
+        echo json_encode(['error' => 'Datos inválidos o se requieren mínimo 2 puntos.']); 
+        exit;
+    }
+
+    $string_id = 'tramo-' . uniqid();
+    $json_coords = json_encode($coords);
+
+    try {
+        $db = get_db_connection();
+        $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, coordenadas, activo) VALUES (?, ?, ?, ?, ?, ?, 1)");
+        $stmt->execute([$string_id, $nombre, $tipo, $estado, $color, $json_coords]);
+        log_action('rv_crear', "Trazó tramo vial: $nombre");
+        echo json_encode(['ok' => true]);
+    } catch (Exception $e) {
+        http_response_code(500); 
+        echo json_encode(['error' => 'Error al guardar en BD: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
 if ($action === 'geojson') {
     try {
         $db = get_db_connection();
