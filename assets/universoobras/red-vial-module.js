@@ -276,6 +276,7 @@ window.initRedVial = async function() {
         // =========================================================
         const targetKeywords = ['aeropuerto', 'terminal', 'unanue', 'basadre', 'paseo', 'arco', 'mercado', 'grau', 'cenepa', 'essalud', 'privada de tacna', 'plaza'];
         const auditedFeatures = new Set();
+        let uniqueCount = 0;
 
         const scanFeatures = () => {
             // Consultar datos vectoriales crudos directamente de la fuente
@@ -288,7 +289,13 @@ window.initRedVial = async function() {
                         const uniqueKey = `${f.sourceLayer}|${f.properties.kind}|${f.properties.name}`;
                         if (!auditedFeatures.has(uniqueKey)) {
                             auditedFeatures.add(uniqueKey);
-                            console.log(`📍 HITO ENCONTRADO -> Capa: ${f.sourceLayer} | kind: ${f.properties.kind || 'N/A'} | name: ${f.properties.name}`);
+                            uniqueCount++;
+                            console.log(`\n[${uniqueCount}] 📍 HITO ENCONTRADO`);
+                            console.log(`   - source-layer: ${f.sourceLayer}`);
+                            console.log(`   - kind: ${f.properties.kind || 'N/A'}`);
+                            console.log(`   - name: ${f.properties.name}`);
+                            console.log(`   - min_zoom: ${f.properties.min_zoom !== undefined ? f.properties.min_zoom : 'N/A'}`);
+                            console.log(`   - sort_rank: ${f.properties.sort_rank !== undefined ? f.properties.sort_rank : 'N/A'}`);
                         }
                     }
                 }
