@@ -133,23 +133,23 @@ window.rvApplyStyle = function() {
     
     // 2. Capas Vectoriales Textos
     const refPlacesFilter = ["any",
-        ["in", "Calana", ["get", "name"]],
-        ["in", "Monte Verde 2", ["get", "name"]]
+        ["==", ["get", "name"], "Calana"],
+        ["==", ["get", "name"], "Monte Verde 2"]
     ];
 
     const refPoisFilter = ["any",
-        ["in", "Provincial de Tacna", ["get", "name"]],
-        ["in", "Albarracín Lanchipa", ["get", "name"]],
-        ["in", "Regional de Tacna", ["get", "name"]],
-        ["in", "Jorge Basadre Grohmann", ["get", "name"]],
-        ["in", "Daniel Alcides Carrión", ["get", "name"]],
-        ["in", "Solidaridad", ["get", "name"]],
-        ["in", "Paillardelle", ["get", "name"]]
+        ["==", ["get", "name"], "Municipalidad Provincial de Tacna"],
+        ["==", ["get", "name"], "Municipalidad de Gregorio Albarracín Lanchipa"],
+        ["==", ["get", "name"], "Gobierno Regional de Tacna"],
+        ["==", ["get", "name"], "Universidad Nacional Jorge Basadre Grohmann"],
+        ["==", ["get", "name"], "Hospital III Daniel Alcides Carrión"],
+        ["==", ["get", "name"], "Hospital de la Solidaridad"],
+        ["==", ["get", "name"], "Estadio Enrique Paillardelle"]
     ];
 
     // INYECTAR REFERENCIAS URBANAS PRIMERO PARA GARANTIZAR PRIORIDAD ANTI-COLISIONES
     if (toggles['ref-urbanas']) {
-        style.layers.push({ id: "ref-urbanas-pois", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 11, filter: ["all", ["has", "name"], refPoisFilter], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "university", "🎓 ", "stadium", "⚽ ", "townhall", "🏛️ ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 15, 16], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.text, "text-halo-color": "#FFFFFF", "text-halo-width": 3 } });
+        style.layers.push({ id: "ref-urbanas-pois", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 11, filter: ["all", ["has", "name"], refPoisFilter], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "university", "🎓 ", "stadium", "⚽ ", "townhall", "🏛️ ", "📍 "], ["match", ["get", "name"], "Municipalidad Provincial de Tacna", "Muni. Tacna", "Municipalidad de Gregorio Albarracín Lanchipa", "Muni. Albarracín", "Gobierno Regional de Tacna", "GORE Tacna", "Universidad Nacional Jorge Basadre Grohmann", "UNJBG", "Hospital III Daniel Alcides Carrión", "Hosp. Carrión", "Hospital de la Solidaridad", "Hosp. Solidaridad", "Estadio Enrique Paillardelle", "Estadio Paillardelle", ["get", "name"]]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 15, 16], "text-anchor": "bottom", "text-offset": [0, 0.5], "text-allow-overlap": true }, paint: { "text-color": t.text, "text-halo-color": "#FFFFFF", "text-halo-width": 3 } });
         style.layers.push({ id: "ref-urbanas-places", type: "symbol", source: "protomaps", "source-layer": "places", minzoom: 10, filter: ["all", ["has", "name"], refPlacesFilter], layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
     }
 
