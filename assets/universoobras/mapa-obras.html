@@ -339,6 +339,17 @@
       initFilters();
     }
 
+    // FIX: Forzar el recálculo de dimensiones del mapa
+    // Esto soluciona el bug donde el mapa aparece "movido" o descuadrado hasta que se hace zoom.
+    const forceMapResize = () => {
+        [100, 300, 600].forEach(ms => setTimeout(() => window.dispatchEvent(new Event('resize')), ms));
+    };
+    
+    // Forzar al cargar la página
+    forceMapResize();
+    // Forzar cada vez que el usuario hace clic en un segmento (botón/chip)
+    document.querySelectorAll('.chip').forEach(btn => btn.addEventListener('click', forceMapResize));
+
   });
   
 </script>
