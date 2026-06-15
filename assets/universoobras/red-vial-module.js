@@ -28,13 +28,13 @@ window.rvStyleConfig = {
         'transit': false,
         'places-text': true,
         'ref-urbanas': true, // Ahora controlan a tus Titanes de la BD y están visibles por defecto
-        'srv-edu': false,
-        'srv-salud': false,
-        'srv-seguridad': false,
-        'srv-gobierno': false,
-        'srv-mercados': false,
-        'srv-deporte': false,
-        'srv-transporte': false
+        'srv-edu': true,
+        'srv-salud': true,
+        'srv-seguridad': true,
+        'srv-gobierno': true,
+        'srv-mercados': true,
+        'srv-deporte': true,
+        'srv-transporte': true
     }
 };
 
@@ -534,7 +534,7 @@ function initRedVialStudio() {
             e.target.classList.add('is-active');
             
             const t = window.rvStyleConfig.toggles;
-            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': true, 'srv-salud': true, 'srv-seguridad': true, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': true, 'srv-transporte': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
             
