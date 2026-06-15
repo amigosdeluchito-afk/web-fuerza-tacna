@@ -6,7 +6,7 @@ window.redVialMapInstance = null;
 window.isRedVialLoading = false; // Bloqueo para evitar doble inicialización
 
 // Constante única para la ruta de la base de datos vectorial
-const PMTILES_URL = '../data/tacna.pmtiles';
+const PMTILES_URL = '../data/pmtiles_proxy.php';
 
 // =========================================================
 // ARQUITECTURA DE ESTILOS Y CAPAS (STUDIO)
