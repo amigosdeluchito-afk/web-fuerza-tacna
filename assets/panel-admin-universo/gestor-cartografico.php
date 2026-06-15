@@ -122,29 +122,41 @@ require_admin();
             const protocol = new pmtiles.Protocol();
             maplibregl.addProtocol('pmtiles', protocol.tile);
             
+            const mapStyle = {
+                version: 8,
+                glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
+                sources: {
+                    "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy.php" },
+                    "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" }
+                },
+                layers: [
+                    { id: "bg", type: "background", paint: { "background-color": "#F2EFE9" } },
+                    { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#B9D9F7" } },
+                    { id: "parks", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["any", ["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "hospital"]], "paint": { "fill-color": ["match", ["get", "kind"], "hospital", "#F4C7C3", "school", "#F6E6A8", "university", "#F6E6A8", "#C2E2BA"] } },
+                    { id: "buildings", type: "fill", source: "protomaps", "source-layer": "buildings", paint: { "fill-color": "#e6e4df", "fill-opacity": 0.6 } },
+                    { id: "roads-minor", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#FFFFFF", "line-width": 2 } },
+                    { id: "roads-major", type: "line", source: "protomaps", "source-layer": "roads", filter: ["in", ["get", "kind"], "highway", "major_road"], paint: { "line-color": "#CDD7E3", "line-width": 4 } },
+                    { id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 14}, paint: {"text-color": "#1e293b", "text-halo-color": "#F2EFE9", "text-halo-width": 2} },
+                    { id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 11, "symbol-placement": "line"}, paint: {"text-color": "#3f3f46", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
+                    { id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#666666", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
+                    { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
+                    { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#1e293b", "text-halo-color": "#ffffff", "text-halo-width": 3 } }
+                ]
+            };
+
+            console.log("--- INICIO AUDITORÍA DE CAPAS ---");
+            mapStyle.layers.forEach((layerConfig, index) => {
+                console.log(`\nCapa Index: [${index}]`);
+                console.log(`ID: ${layerConfig.id}`);
+                console.log(`Source-layer: ${layerConfig['source-layer'] || 'N/A'}`);
+                if (layerConfig.filter) console.log(`Filter: ${JSON.stringify(layerConfig.filter)}`);
+                console.log(`Objeto Completo:\n`, JSON.stringify(layerConfig, null, 2));
+            });
+            console.log("--- FIN AUDITORÍA DE CAPAS ---\n");
+
             map = new maplibregl.Map({
                 container: 'map',
-                style: {
-                    version: 8,
-                    glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
-                    sources: {
-                        "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy.php" },
-                        "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" }
-                    },
-                    layers: [
-                        { id: "bg", type: "background", paint: { "background-color": "#F2EFE9" } },
-                        { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#B9D9F7" } },
-                        { id: "parks", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["any", ["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "hospital"]], "paint": { "fill-color": ["match", ["get", "kind"], "hospital", "#F4C7C3", "school", "#F6E6A8", "university", "#F6E6A8", "#C2E2BA"] } },
-                        { id: "buildings", type: "fill", source: "protomaps", "source-layer": "buildings", paint: { "fill-color": "#e6e4df", "fill-opacity": 0.6 } },
-                        { id: "roads-minor", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#FFFFFF", "line-width": 2 } },
-                        { id: "roads-major", type: "line", source: "protomaps", "source-layer": "roads", filter: ["in", ["get", "kind"], "highway", "major_road"], paint: { "line-color": "#CDD7E3", "line-width": 4 } },
-                        { id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 14}, paint: {"text-color": "#1e293b", "text-halo-color": "#F2EFE9", "text-halo-width": 2} },
-                        { id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 11, "symbol-placement": "line"}, paint: {"text-color": "#3f3f46", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
-                        { id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#666666", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
-                        { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
-                        { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#1e293b", "text-halo-color": "#ffffff", "text-halo-width": 3 } }
-                    ]
-                },
+                style: mapStyle,
                 center: [-70.2528, -18.0146],
                 zoom: 12
             });
