@@ -170,12 +170,54 @@ window.rvApplyStyle = function() {
     }
 
     // =========================================================
-    // PRUEBA DIAGNÓSTICA (MOVIDO AL FINAL DEL STACK DE TEXTOS + ASCII TAGS)
+    // CAPA DE REFERENCIAS URBANAS (TITANES) CON ICONOS
     // =========================================================
     if (toggles['ref-urbanas']) {
-        style.layers.push({ id: "ref-urbanas-places", type: "symbol", source: "protomaps", "source-layer": "places", minzoom: 10, filter: ["all", ["has", "name"], refPlacesFilter], layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1, "text-ignore-placement": true }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
+        // Capa para nombres de zonas (Calana, etc.)
+        style.layers.push({ 
+            id: "ref-urbanas-places", 
+            type: "symbol", 
+            source: "protomaps", 
+            "source-layer": "places", 
+            minzoom: 10, 
+            filter: ["all", ["has", "name"], refPlacesFilter], 
+            layout: { 
+                "text-field": ["upcase", ["get", "name"]], 
+                "text-font": ["Noto Sans Regular"], 
+                "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], 
+                "text-letter-spacing": 0.1,
+                "text-ignore-placement": true 
+            }, 
+            paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } 
+        });
         
-        style.layers.push({ id: "ref-urbanas-pois", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 11, filter: ["all", ["has", "name"], refPoisFilter], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "[HOSP] ", "university", "[UNIV] ", "stadium", "[DEP] ", "townhall", "[GOB] ", "[PIN] "], ["match", ["get", "name"], "Municipalidad Provincial de Tacna", "Muni. Tacna", "Municipalidad de Gregorio Albarracín Lanchipa", "Muni. Albarracín", "Gobierno Regional de Tacna", "GORE Tacna", "Universidad Nacional Jorge Basadre Grohmann", "UNJBG", "Hospital III Daniel Alcides Carrión", "Hosp. Carrión", "Hospital de la Solidaridad", "Hosp. Solidaridad", "Estadio Enrique Paillardelle", "Estadio Paillardelle", ["get", "name"]]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 15, 16], "text-anchor": "bottom", "text-offset": [0, 0.5], "text-allow-overlap": true, "text-ignore-placement": true }, paint: { "text-color": t.text, "text-halo-color": "#FFFFFF", "text-halo-width": 3 } });
+        // Capa para los POIs (Titanes) con iconos y texto separado
+        style.layers.push({ 
+            id: "ref-urbanas-pois", 
+            type: "symbol", 
+            source: "protomaps", 
+            "source-layer": "pois", 
+            minzoom: 11, 
+            filter: ["all", ["has", "name"], refPoisFilter], 
+            layout: {
+                "icon-image": ["match", ["get", "kind"], "hospital", "icon-ref-salud", "university", "icon-ref-edu", "stadium", "icon-ref-deporte", "townhall", "icon-ref-gob", ""],
+                "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 14, 1],
+                "icon-allow-overlap": true,
+                "icon-ignore-placement": true,
+                "text-field": ["match", ["get", "name"], "Municipalidad Provincial de Tacna", "Muni. Tacna", "Municipalidad de Gregorio Albarracín Lanchipa", "Muni. Albarracín", "Gobierno Regional de Tacna", "GORE Tacna", "Universidad Nacional Jorge Basadre Grohmann", "UNJBG", "Hospital III Daniel Alcides Carrión", "Hosp. Carrión", "Hospital de la Solidaridad", "Hosp. Solidaridad", "Estadio Enrique Paillardelle", "Estadio Paillardelle", ["get", "name"]],
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 12, 11, 15, 13],
+                "text-anchor": "top",
+                "text-offset": [0, 0.8],
+                "text-allow-overlap": true,
+                "text-ignore-placement": true
+            }, 
+            paint: { 
+                "text-color": t.text, 
+                "text-halo-color": "#FFFFFF", 
+                "text-halo-width": 2.5
+            } 
+        });
     }
 
     // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
@@ -277,6 +319,32 @@ window.initRedVial = async function() {
         
         // Levantar el Panel de Control Visual (Studio)
         initRedVialStudio();
+
+        // =========================================================
+        // 🚀 REGISTRO DE ICONOS PERSONALIZADOS (FASE D)
+        // =========================================================
+        const createAndAddIcon = (id, emoji, size = 32) => {
+            if (window.redVialMapInstance.hasImage(id)) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fill();
+
+            ctx.font = `${size * 0.75}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, size / 2, size / 2 + 1);
+
+            window.redVialMapInstance.addImage(id, ctx.getImageData(0, 0, size, size), { sdf: false });
+        };
+        createAndAddIcon('icon-ref-salud', '🏥'); createAndAddIcon('icon-ref-edu', '🎓');
+        createAndAddIcon('icon-ref-gob', '🏛️'); createAndAddIcon('icon-ref-deporte', '⚽');
 
         // =========================================================
         // 🔍 MÓDULO DE DIAGNÓSTICO ESTRICTO (SOLO LECTURA)
