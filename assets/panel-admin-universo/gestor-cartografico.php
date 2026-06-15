@@ -338,14 +338,18 @@ require_admin();
                     updateDrawLayer();
                 } else {
                     // Escaneo robusto del cursor
-                    const features = map.queryRenderedFeatures(e.point, { layers: ['draw-points-layer'] });
+                    const bbox = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+                    const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
                     map.getCanvas().style.cursor = features.length > 0 ? 'move' : 'crosshair';
                 }
             });
             
             map.on('mousedown', (e) => {
                 if (currentMode !== 'vias' || e.button !== 0) return;
-                const features = map.queryRenderedFeatures(e.point, { layers: ['draw-points-layer'] });
+                
+                // Imán (Área de captura de 12x12 píxeles)
+                const bbox = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+                const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
                 if (features.length > 0) {
                     isDraggingRVNode = true;
                     draggedRVNodeIndex = features[0].properties.index;
@@ -367,7 +371,8 @@ require_admin();
             
             map.on('contextmenu', (e) => {
                 if (currentMode !== 'vias') return;
-                const features = map.queryRenderedFeatures(e.point, { layers: ['draw-points-layer'] });
+                const bbox = [[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]];
+                const features = map.queryRenderedFeatures(bbox, { layers: ['draw-points-layer'] });
                 if (features.length > 0) {
                     if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
                         const idx = features[0].properties.index;
