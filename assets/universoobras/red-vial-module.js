@@ -167,6 +167,11 @@ window.rvApplyStyle = function() {
         'paint': { 'line-color': isImpacto ? '#ffffff' : ['get', 'color'], 'line-width': isImpacto ? 3 : 4 }
     });
 
+    // =========================================================
+    // 4. CAPAS FANTASMA DE AUDITORÍA (Forzar carga en memoria RAM)
+    style.layers.push({ id: "debug-pois", type: "circle", source: "protomaps", "source-layer": "pois", paint: { "circle-opacity": 0, "circle-radius": 0 } });
+    style.layers.push({ id: "debug-places", type: "circle", source: "protomaps", "source-layer": "places", paint: { "circle-opacity": 0, "circle-radius": 0 } });
+
     if (window.redVialMapInstance) {
         window.redVialMapInstance.setStyle(style);
         // Restaurar filtro espacial si estaba activo al cambiar la estética
@@ -274,7 +279,7 @@ window.initRedVial = async function() {
         // =========================================================
         // 🔍 AUDITORÍA AUTOMÁTICA DE HITOS URBANOS (FASE D)
         // =========================================================
-        const targetKeywords = ['aeropuerto', 'terminal', 'unanue', 'basadre', 'paseo', 'arco', 'mercado', 'grau', 'cenepa', 'essalud', 'privada de tacna', 'plaza'];
+        const targetKeywords = ['aeropuerto', 'terminal', 'unanue', 'basadre', 'mercado', 'grau', 'cenepa', 'plaza', 'paseo', 'arco', 'universidad', 'privada', 'jorge basadre', 'essalud'];
         const auditedFeatures = new Set();
         let uniqueCount = 0;
 
