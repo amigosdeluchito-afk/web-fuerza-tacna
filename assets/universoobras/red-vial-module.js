@@ -139,7 +139,7 @@ window.rvApplyStyle = function() {
     // 2. Capas Vectoriales Textos
     if (toggles['places-text']) {
         style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", filter: ["all", ["has", "name"]], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 11, 14, 14, 16, 15], "text-letter-spacing": 0.05 }, paint: { "text-color": t.places_text || t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
-        if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 12, 0], 14, ["case", isMajorRoad, 14, isAvenida, 12, 0], 16, ["case", isMajorRoad, 16, isAvenida, 14, 11]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
+        if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, ["case", isMajorRoad, 11, 0], 13, ["case", isMajorRoad, 13, isAvenida, 11, 0], 15, ["case", isMajorRoad, 14, isAvenida, 13, 10], 17, ["case", isMajorRoad, 16, isAvenida, 14, 12]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
     }
     
     const poiFilters = [];
@@ -208,8 +208,8 @@ window.rvApplyStyle = function() {
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
                 "text-field": ["get", "short_name"],
-                "text-font": ["Noto Sans Regular"],
-                "text-size": ["interpolate", ["linear"], ["zoom"], 12, 11, 15, 13],
+                "text-font": ["Noto Sans Bold"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 12, 10, 15, 12],
                 "text-anchor": "top",
                 "text-offset": [0, 0.8],
                 "text-allow-overlap": true,
