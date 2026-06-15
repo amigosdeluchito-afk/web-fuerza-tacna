@@ -161,9 +161,31 @@ window.rvApplyStyle = function() {
         style.layers.push({ 
             id: "negocios-text", type: "symbol", source: "protomaps", "source-layer": "pois", 
             minzoom: 16.5, 
-            filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "shop"], ["==", ["get", "kind"], "restaurant"], ["==", ["get", "kind"], "cafe"], ["==", ["get", "kind"], "fast_food"], ["==", ["get", "kind"], "pharmacy"], ["==", ["get", "kind"], "bakery"], ["==", ["get", "kind"], "supermarket"], ["==", ["get", "kind"], "convenience"], ["==", ["get", "kind"], "bank"]]], 
+            filter: ["all", 
+                ["has", "name"], 
+                ["!", ["any", 
+                    ["==", ["get", "kind"], "hospital"], ["==", ["get", "kind"], "clinic"],
+                    ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "university"], ["==", ["get", "kind"], "college"], ["==", ["get", "kind"], "kindergarten"],
+                    ["==", ["get", "kind"], "police"], ["==", ["get", "kind"], "fire_station"],
+                    ["==", ["get", "kind"], "townhall"], ["==", ["get", "kind"], "town_hall"],
+                    ["==", ["get", "kind"], "marketplace"], ["==", ["get", "kind"], "market"],
+                    ["==", ["get", "kind"], "stadium"], ["==", ["get", "kind"], "pitch"],
+                    ["==", ["get", "kind"], "bus_station"],
+                    ["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "recreation_ground"]
+                ]]
+            ], 
             layout: { 
-                "text-field": ["concat", ["match", ["get", "kind"], "restaurant", "🍽️ ", "cafe", "☕ ", "fast_food", "🍔 ", "pharmacy", "💊 ", "bakery", "🥐 ", "supermarket", "🛒 ", "convenience", "🏪 ", "bank", "🏦 ", "🏪 "], ["get", "name"]], 
+                "text-field": ["concat", ["match", ["get", "kind"], 
+                    "restaurant", "🍽️ ", "cafe", "☕ ", "fast_food", "🍔 ", "bar", "🍺 ", "pub", "🍻 ",
+                    "pharmacy", "💊 ", "dentist", "🦷 ", "doctors", "🩺 ", "veterinary", "🐕 ",
+                    "bakery", "🥐 ", "supermarket", "🛒 ", "convenience", "🏪 ", "butcher", "🥩 ",
+                    "bank", "🏦 ", "atm", "🏧 ", 
+                    "hotel", "🏨 ", "motel", "🛏️ ",
+                    "gas_station", "⛽ ", "car_wash", "🚗 ", "parking", "🅿️ ",
+                    "hairdresser", "✂️ ", "clothes", "👕 ", "shoes", "👟 ",
+                    "cinema", "🍿 ", "theatre", "🎭 ", "gym", "🏋️ ", "sports_centre", "🏋️ ",
+                    "🏪 " // Fallback universal
+                ], ["get", "name"]], 
                 "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 16.5, 9, 19, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] 
             }, 
             paint: { "text-color": t.places_text || t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } 
