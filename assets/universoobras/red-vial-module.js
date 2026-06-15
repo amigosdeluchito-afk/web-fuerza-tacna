@@ -34,7 +34,8 @@ window.rvStyleConfig = {
         'srv-gobierno': true,
         'srv-mercados': true,
         'srv-deporte': true,
-        'srv-transporte': true
+        'srv-transporte': true,
+        'srv-negocios': true
     }
 };
 
@@ -153,6 +154,20 @@ window.rvApplyStyle = function() {
 
     if (poiFilters.length > 0) {
         style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ...poiFilters]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "clinic", "🏥 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "kindergarten", "🧸 ", "police", "🚓 ", "fire_station", "🚒 ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "⚽ ", "pitch", "⚽ ", "bus_station", "🚌 ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "park", "🌳 ", "recreation_ground", "🌳 ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
+    }
+
+    // CAPA DE NEGOCIOS PRIVADOS (Aparece solo con muchísimo zoom)
+    if (toggles['srv-negocios']) {
+        style.layers.push({ 
+            id: "negocios-text", type: "symbol", source: "protomaps", "source-layer": "pois", 
+            minzoom: 16.5, 
+            filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "shop"], ["==", ["get", "kind"], "restaurant"], ["==", ["get", "kind"], "cafe"], ["==", ["get", "kind"], "fast_food"], ["==", ["get", "kind"], "pharmacy"], ["==", ["get", "kind"], "bakery"], ["==", ["get", "kind"], "supermarket"], ["==", ["get", "kind"], "convenience"], ["==", ["get", "kind"], "bank"]]], 
+            layout: { 
+                "text-field": ["concat", ["match", ["get", "kind"], "restaurant", "🍽️ ", "cafe", "☕ ", "fast_food", "🍔 ", "pharmacy", "💊 ", "bakery", "🥐 ", "supermarket", "🛒 ", "convenience", "🏪 ", "bank", "🏦 ", "🏪 "], ["get", "name"]], 
+                "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 16.5, 9, 19, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] 
+            }, 
+            paint: { "text-color": t.places_text || t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } 
+        });
     }
 
     // =========================================================
@@ -509,6 +524,7 @@ function initRedVialStudio() {
                     <label class="rv-panel-item"><input type="checkbox" data-layer="srv-mercados"> 🛒 Mercados</label>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="srv-deporte"> ⚽ Deporte</label>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="srv-transporte"> 🚍 Transporte</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-negocios"> 🏪 Negocios Locales</label>
                 </div>
             </div>
         </div>
@@ -535,9 +551,9 @@ function initRedVialStudio() {
             e.target.classList.add('is-active');
             
             const t = window.rvStyleConfig.toggles;
-            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': true, 'srv-salud': true, 'srv-seguridad': true, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': true, 'srv-transporte': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
-            if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
-            if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
+            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': true, 'srv-salud': true, 'srv-seguridad': true, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': true, 'srv-transporte': true, 'srv-negocios': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
             
             // Sincronizar checkboxes avanzados
             Object.keys(t).forEach(key => { const chk = panel.querySelector(`input[data-layer="${key}"]`); if (chk) chk.checked = t[key]; });
