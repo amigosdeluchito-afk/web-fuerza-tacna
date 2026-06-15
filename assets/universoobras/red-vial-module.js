@@ -26,15 +26,15 @@ window.rvStyleConfig = {
         'parks': true,
         'boundaries': false,
         'transit': false,
-        'places-text': true,
-        'ref-urbanas': true, // Reemplaza pois-text por Referencias Urbanas (Los Titanes)
+        'places-text': false,
+        'ref-urbanas': false, // Apagadas por defecto para evitar conflicto visual
         'srv-edu': false,
-        'srv-salud': true,
+        'srv-salud': false,
         'srv-seguridad': false,
-        'srv-gobierno': true,
-        'srv-mercados': true,
+        'srv-gobierno': false,
+        'srv-mercados': false,
         'srv-deporte': false,
-        'srv-transporte': true
+        'srv-transporte': false
     }
 };
 
@@ -222,34 +222,34 @@ window.rvApplyStyle = function() {
                 "text-halo-width": 2.5
             } 
         });
-
-        // NUEVO: Capa de Referencias Estratégicas dinámicas desde BD
-        style.layers.push({ 
-            id: "ref-estrategicas-pois", 
-            type: "symbol", 
-            source: "referencias-estrategicas", 
-            minzoom: 10,
-            filter: ["<=", ["get", "min_zoom"], ["zoom"]],
-            layout: {
-                "icon-image": ["concat", "icon-ref-", ["get", "icon_type"]],
-                "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 14, 1],
-                "icon-allow-overlap": true,
-                "icon-ignore-placement": true,
-                "text-field": ["get", "short_name"],
-                "text-font": ["Noto Sans Regular"],
-                "text-size": ["interpolate", ["linear"], ["zoom"], 12, 11, 15, 13],
-                "text-anchor": "top",
-                "text-offset": [0, 0.8],
-                "text-allow-overlap": true,
-                "text-ignore-placement": true
-            }, 
-            paint: { 
-                "text-color": t.text, 
-                "text-halo-color": "#FFFFFF", 
-                "text-halo-width": 2.5
-            } 
-        });
     }
+
+    // NUEVO: Capa de Referencias Estratégicas dinámicas desde BD (Siempre activa)
+    style.layers.push({ 
+        id: "ref-estrategicas-pois", 
+        type: "symbol", 
+        source: "referencias-estrategicas", 
+        minzoom: 10,
+        filter: ["<=", ["get", "min_zoom"], ["zoom"]],
+        layout: {
+            "icon-image": ["concat", "icon-ref-", ["get", "icon_type"]],
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 14, 1],
+            "icon-allow-overlap": true,
+            "icon-ignore-placement": true,
+            "text-field": ["get", "short_name"],
+            "text-font": ["Noto Sans Regular"],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 12, 11, 15, 13],
+            "text-anchor": "top",
+            "text-offset": [0, 0.8],
+            "text-allow-overlap": true,
+            "text-ignore-placement": true
+        }, 
+        paint: { 
+            "text-color": t.text, 
+            "text-halo-color": "#FFFFFF", 
+            "text-halo-width": 2.5
+        } 
+    });
 
     // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     style.layers.push({
@@ -608,7 +608,7 @@ function initRedVialStudio() {
             e.target.classList.add('is-active');
             
             const t = window.rvStyleConfig.toggles;
-            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': true, 'srv-seguridad': false, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': false, 'srv-transporte': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': false, 'ref-urbanas': false, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'ref-urbanas': false, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'ref-urbanas': false, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
             
