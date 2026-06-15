@@ -333,6 +333,46 @@ window.initRedVial = async function() {
 
         window.redVialMapInstance.on('moveend', scanFeatures);
         setTimeout(scanFeatures, 3000); // Primer escaneo automático
+        
+        // =========================================================
+        // 🔍 AUDITORÍA OBJETIVA FASE D: REFERENCIAS URBANAS
+        // =========================================================
+        setTimeout(() => {
+            console.log("\n=== AUDITORÍA OBJETIVA: REFERENCIAS URBANAS ===");
+            const layers = window.redVialMapInstance.getStyle().layers;
+            console.log("Captura 1: Stack de capas completo", layers);
+
+            const refLayerId = 'ref-urbanas-pois';
+            const refLayer = layers.find(l => l.id === refLayerId);
+            
+            if (!refLayer) {
+                console.log(`1. ¿La capa existe?: NO SE ENCONTRÓ '${refLayerId}'`);
+                return;
+            }
+
+            console.log("1. ¿La capa existe?: SÍ");
+            console.log("2. ID exacto:", refLayer.id);
+            console.log("3. source-layer exacto:", refLayer['source-layer']);
+            console.log("4. filter exacto:", JSON.stringify(refLayer.filter));
+            console.log("5. text-field exacto:", JSON.stringify(window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-field')));
+            console.log("Captura 2: Propiedad text-field directa", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-field'));
+            console.log("6. text-font exacto:", JSON.stringify(window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-font')));
+            console.log("7. Propiedades Anti-Colisión:");
+            console.log("   - text-allow-overlap:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-allow-overlap'));
+            console.log("   - text-ignore-placement:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-ignore-placement'));
+            console.log("   - icon-allow-overlap:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'icon-allow-overlap'));
+            console.log("   - icon-ignore-placement:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'icon-ignore-placement'));
+            console.log("8. minzoom real:", refLayer.minzoom);
+            
+            const index = layers.findIndex(l => l.id === refLayerId);
+            console.log(`9. Posición en el stack: Índice ${index} de ${layers.length - 1}`);
+            console.log("10. Renderizado relativo (Posiciones):");
+            console.log(`    - ${refLayerId}: ${index}`);
+            console.log(`    - places-text: ${layers.findIndex(l => l.id === 'places-text')}`);
+            console.log(`    - roads-text: ${layers.findIndex(l => l.id === 'roads-text')}`);
+            console.log(`    - pois-text: ${layers.findIndex(l => l.id === 'pois-text')}`);
+            console.log("===============================================\n");
+        }, 3500);
 
         window.isRedVialLoading = false;
     });
