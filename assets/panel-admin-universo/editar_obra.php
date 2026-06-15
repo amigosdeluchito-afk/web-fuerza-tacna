@@ -102,9 +102,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $distrito = $_POST['distrito'] ?? '';
         $provincia= $_POST['provincia'] ?? '';
         
-        // Guardamos como string estricto para evitar que Google Sheets los redondee a 0 por el idioma
-        $x        = str_replace(',', '.', $_POST['x'] ?? '0');
-        $y        = str_replace(',', '.', $_POST['y'] ?? '0');
+        // Convertimos a float para que Google Sheets lo interprete como número
+        // y la API pública no lo oculte al mezclar tipos de datos.
+        $x        = (float) str_replace(',', '.', $_POST['x'] ?? '0');
+        $y        = (float) str_replace(',', '.', $_POST['y'] ?? '0');
         $carpeta  = trim($_POST['carpeta'] ?? '');
         $descripcion = $_POST['descripcion'] ?? '';
 
@@ -718,8 +719,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         nombre:    r.c[0]?.v || "",
                         estado:    r.c[1]?.v || "",
                         monto:     r.c[2]?.v || "",
-                        x:         r.c[3]?.v || "",
-                        y:         r.c[4]?.v || "",
+                        x:         r.c[3] ? (r.c[3].v !== null && r.c[3].v !== undefined ? r.c[3].v : (r.c[3].f || "")) : "",
+                        y:         r.c[4] ? (r.c[4].v !== null && r.c[4].v !== undefined ? r.c[4].v : (r.c[4].f || "")) : "",
                         provincia: r.c[5]?.v || "",
                         distrito:  r.c[6]?.v || "",
                         carpeta:   r.c[7]?.v || "",
