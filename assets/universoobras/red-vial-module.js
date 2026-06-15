@@ -149,8 +149,8 @@ window.rvApplyStyle = function() {
 
     // INYECTAR REFERENCIAS URBANAS PRIMERO PARA GARANTIZAR PRIORIDAD ANTI-COLISIONES
     if (toggles['ref-urbanas']) {
-        style.layers.push({ id: "ref-urbanas-pois", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 11, filter: ["all", ["has", "name"], refPoisFilter], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "university", "🎓 ", "stadium", "⚽ ", "townhall", "🏛️ ", "📍 "], ["match", ["get", "name"], "Municipalidad Provincial de Tacna", "Muni. Tacna", "Municipalidad de Gregorio Albarracín Lanchipa", "Muni. Albarracín", "Gobierno Regional de Tacna", "GORE Tacna", "Universidad Nacional Jorge Basadre Grohmann", "UNJBG", "Hospital III Daniel Alcides Carrión", "Hosp. Carrión", "Hospital de la Solidaridad", "Hosp. Solidaridad", "Estadio Enrique Paillardelle", "Estadio Paillardelle", ["get", "name"]]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 15, 16], "text-anchor": "bottom", "text-offset": [0, 0.5], "text-allow-overlap": true }, paint: { "text-color": t.text, "text-halo-color": "#FFFFFF", "text-halo-width": 3 } });
-        style.layers.push({ id: "ref-urbanas-places", type: "symbol", source: "protomaps", "source-layer": "places", minzoom: 10, filter: ["all", ["has", "name"], refPlacesFilter], layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
+        style.layers.push({ id: "ref-urbanas-pois", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 11, filter: ["all", ["has", "name"], refPoisFilter], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "university", "🎓 ", "stadium", "⚽ ", "townhall", "🏛️ ", "📍 "], ["match", ["get", "name"], "Municipalidad Provincial de Tacna", "Muni. Tacna", "Municipalidad de Gregorio Albarracín Lanchipa", "Muni. Albarracín", "Gobierno Regional de Tacna", "GORE Tacna", "Universidad Nacional Jorge Basadre Grohmann", "UNJBG", "Hospital III Daniel Alcides Carrión", "Hosp. Carrión", "Hospital de la Solidaridad", "Hosp. Solidaridad", "Estadio Enrique Paillardelle", "Estadio Paillardelle", ["get", "name"]]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 15, 16], "text-anchor": "bottom", "text-offset": [0, 0.5], "text-allow-overlap": true, "text-ignore-placement": true }, paint: { "text-color": t.text, "text-halo-color": "#FFFFFF", "text-halo-width": 3 } });
+        style.layers.push({ id: "ref-urbanas-places", type: "symbol", source: "protomaps", "source-layer": "places", minzoom: 10, filter: ["all", ["has", "name"], refPlacesFilter], layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1, "text-ignore-placement": true }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
     }
 
     if (toggles['places-text']) {
@@ -415,7 +415,19 @@ function initRedVialStudio() {
                 </div>
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Referencias</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="ref-urbanas"> 📍 Referencias Urbanas</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="ref-urbanas"> 📍 Referencias Clave</label>
+                    <div id="ref-urbanas-list" class="rv-ref-list" style="display: none;">
+                        <ul>
+                            <li>🏛️ Municipalidad Provincial de Tacna</li>
+                            <li>🏛️ Municipalidad de G. Albarracín</li>
+                            <li>🏛️ Gobierno Regional de Tacna</li>
+                            <li>🎓 Universidad Nacional Jorge Basadre G.</li>
+                            <li>🏥 Hospital III Daniel Alcides Carrión</li>
+                            <li>🏥 Hospital de la Solidaridad</li>
+                            <li>⚽ Estadio Enrique Paillardelle</li>
+                            <li>🏷️ Calana / Monte Verde 2</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">🏢 Servicios</div>
@@ -458,6 +470,13 @@ function initRedVialStudio() {
             
             // Sincronizar checkboxes avanzados
             Object.keys(t).forEach(key => { const chk = panel.querySelector(`input[data-layer="${key}"]`); if (chk) chk.checked = t[key]; });
+
+            // Sincronizar lista de referencias al cambiar de perfil
+            const refList = document.getElementById('ref-urbanas-list');
+            if (refList) {
+                refList.style.display = t['ref-urbanas'] ? 'block' : 'none';
+            }
+
             window.rvApplyStyle();
         });
     });
@@ -470,9 +489,24 @@ function initRedVialStudio() {
             if (layerKey === 'buildings3d' && e.target.checked) { window.rvStyleConfig.toggles['buildings'] = false; panel.querySelector('[data-layer="buildings"]').checked = false; }
             if (layerKey === 'buildings' && e.target.checked) { window.rvStyleConfig.toggles['buildings3d'] = false; panel.querySelector('[data-layer="buildings3d"]').checked = false; }
             window.rvStyleConfig.toggles[layerKey] = e.target.checked;
+
+            // Lógica para mostrar/ocultar lista de Referencias Urbanas
+            if (layerKey === 'ref-urbanas') {
+                const list = document.getElementById('ref-urbanas-list');
+                if (list) {
+                    list.style.display = e.target.checked ? 'block' : 'none';
+                }
+            }
+
             window.rvApplyStyle();
         });
     });
+
+    // Sincronización inicial de la lista de referencias
+    const refList = document.getElementById('ref-urbanas-list');
+    if (refList) {
+        refList.style.display = window.rvStyleConfig.toggles['ref-urbanas'] ? 'block' : 'none';
+    }
 }
 
 function abrirPanelRedVial(props) {
