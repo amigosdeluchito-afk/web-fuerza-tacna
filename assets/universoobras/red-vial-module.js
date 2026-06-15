@@ -133,29 +133,30 @@ window.rvApplyStyle = function() {
     
     // 2. Capas Vectoriales Textos
     const refPlacesFilter = ["any",
-        ["==", ["get", "name"], "Calana"],
-        ["==", ["get", "name"], "Monte Verde 2"]
+        ["in", "Calana", ["get", "name"]],
+        ["in", "Monte Verde 2", ["get", "name"]]
     ];
 
     const refPoisFilter = ["any",
-        ["==", ["get", "name"], "Municipalidad Provincial de Tacna"],
-        ["==", ["get", "name"], "Municipalidad de Gregorio Albarracín Lanchipa"],
-        ["==", ["get", "name"], "Gobierno Regional de Tacna"],
-        ["==", ["get", "name"], "Universidad Nacional Jorge Basadre Grohmann"],
-        ["==", ["get", "name"], "Hospital III Daniel Alcides Carrión"],
-        ["==", ["get", "name"], "Hospital de la Solidaridad"],
-        ["==", ["get", "name"], "Estadio Enrique Paillardelle"]
+        ["in", "Provincial de Tacna", ["get", "name"]],
+        ["in", "Albarracín Lanchipa", ["get", "name"]],
+        ["in", "Regional de Tacna", ["get", "name"]],
+        ["in", "Jorge Basadre Grohmann", ["get", "name"]],
+        ["in", "Daniel Alcides Carrión", ["get", "name"]],
+        ["in", "Solidaridad", ["get", "name"]],
+        ["in", "Paillardelle", ["get", "name"]]
     ];
+
+    // INYECTAR REFERENCIAS URBANAS PRIMERO PARA GARANTIZAR PRIORIDAD ANTI-COLISIONES
+    if (toggles['ref-urbanas']) {
+        style.layers.push({ id: "ref-urbanas-pois", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 11, filter: ["all", ["has", "name"], refPoisFilter], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "university", "🎓 ", "stadium", "⚽ ", "townhall", "🏛️ ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 13, 15, 16], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.text, "text-halo-color": "#FFFFFF", "text-halo-width": 3 } });
+        style.layers.push({ id: "ref-urbanas-places", type: "symbol", source: "protomaps", "source-layer": "places", minzoom: 10, filter: ["all", ["has", "name"], refPlacesFilter], layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
+    }
 
     if (toggles['places-text']) {
         const finalPlacesFilter = toggles['ref-urbanas'] ? ["all", ["has", "name"], ["!", refPlacesFilter]] : ["all", ["has", "name"]];
         style.layers.push({ id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", filter: finalPlacesFilter, layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
         if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 12, 0], 14, ["case", isMajorRoad, 14, isAvenida, 12, 0], 16, ["case", isMajorRoad, 16, isAvenida, 14, 11]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
-    }
-
-    if (toggles['ref-urbanas']) {
-        style.layers.push({ id: "ref-urbanas-places", type: "symbol", source: "protomaps", "source-layer": "places", minzoom: 10, filter: ["all", ["has", "name"], refPlacesFilter], layout: { "text-field": ["upcase", ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 16], "text-letter-spacing": 0.1 }, paint: { "text-color": t.text, "text-halo-color": t.bg, "text-halo-width": 2.5 } });
-        style.layers.push({ id: "ref-urbanas-pois", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 11, filter: ["all", ["has", "name"], refPoisFilter], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "university", "🎓 ", "stadium", "⚽ ", "townhall", "🏛️ ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, 11, 15, 14], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
     }
     
     const poiFilters = [];
