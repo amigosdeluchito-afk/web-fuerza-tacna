@@ -108,49 +108,58 @@ require_admin();
     </div>
 
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-    <script src="https://unpkg.com/pmtiles@3.0.6/dist/index.js"></script>
     <script>
-        // Configuración PMTiles y MapLibre
-        const protocol = new pmtiles.Protocol();
-        maplibregl.addProtocol('pmtiles', protocol.tile);
-        
-        const map = new maplibregl.Map({
-            container: 'map',
-            style: {
-                version: 8,
-                glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
-                sources: {
-                    "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy.php" },
-                    "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" }
-                },
-                layers: [
-                    { id: "bg", type: "background", paint: { "background-color": "#0f172a" } },
-                    { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#1e293b" } },
-                    { id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#334155", "line-width": 1 } },
-                    { id: "places", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#64748b"} },
-                    { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
-                    { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#ffffff", "text-halo-color": "#0f172a", "text-halo-width": 2 } }
-                ]
-            },
-            center: [-70.2528, -18.0146],
-            zoom: 12
-        });
-        
+        let map;
         let activeMarker = null;
 
-        // Evento Click en el Mapa
-        map.on('click', (e) => {
-            const lat = e.lngLat.lat.toFixed(6);
-            const lng = e.lngLat.lng.toFixed(6);
+        async function initGestorCartografico() {
+            // Importar PMTiles dinámicamente (compatible con ES Modules)
+            const pmtiles = await import('https://unpkg.com/pmtiles@3.0.6/dist/index.js');
+            window.pmtiles = pmtiles;
+            console.log("typeof pmtiles:", typeof window.pmtiles);
+
+            // Configuración PMTiles y MapLibre
+            const protocol = new pmtiles.Protocol();
+            maplibregl.addProtocol('pmtiles', protocol.tile);
             
-            if (activeMarker) activeMarker.remove();
-            activeMarker = new maplibregl.Marker({ color: '#ef4444' }).setLngLat([lng, lat]).addTo(map);
+            map = new maplibregl.Map({
+                container: 'map',
+                style: {
+                    version: 8,
+                    glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
+                    sources: {
+                        "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy.php" },
+                        "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" }
+                    },
+                    layers: [
+                        { id: "bg", type: "background", paint: { "background-color": "#0f172a" } },
+                        { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#1e293b" } },
+                        { id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#334155", "line-width": 1 } },
+                        { id: "places", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#64748b"} },
+                        { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
+                        { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#ffffff", "text-halo-color": "#0f172a", "text-halo-width": 2 } }
+                    ]
+                },
+                center: [-70.2528, -18.0146],
+                zoom: 12
+            });
             
-            document.getElementById('inpLat').value = lat;
-            document.getElementById('inpLng').value = lng;
-            document.getElementById('panelFormulario').classList.add('active');
-            document.getElementById('inpNombre').focus();
-        });
+            // Evento Click en el Mapa
+            map.on('click', (e) => {
+                const lat = e.lngLat.lat.toFixed(6);
+                const lng = e.lngLat.lng.toFixed(6);
+                
+                if (activeMarker) activeMarker.remove();
+                activeMarker = new maplibregl.Marker({ color: '#ef4444' }).setLngLat([lng, lat]).addTo(map);
+                
+                document.getElementById('inpLat').value = lat;
+                document.getElementById('inpLng').value = lng;
+                document.getElementById('panelFormulario').classList.add('active');
+                document.getElementById('inpNombre').focus();
+            });
+        }
+        
+        initGestorCartografico();
 
         function cerrarPanel() {
             document.getElementById('panelFormulario').classList.remove('active');
@@ -173,7 +182,7 @@ require_admin();
                 const res = await fetch('mapa_referencias_api.php?action=create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.ok) {
-                    map.getSource('referencias').setData('mapa_referencias_api.php?action=geojson');
+                    if (map && map.getSource('referencias')) map.getSource('referencias').setData('mapa_referencias_api.php?action=geojson');
                     cerrarPanel();
                 } else { alert('Error: ' + data.error); }
             } catch (err) { alert('Error de conexión'); } 
