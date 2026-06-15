@@ -3,6 +3,23 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/config.php';
 
 $db = get_db_connection();
+
+// Crear la tabla automáticamente si no existe (para evitar errores 500)
+$db->exec("CREATE TABLE IF NOT EXISTS panel_mapa_referencias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    nombre_corto VARCHAR(100) NOT NULL,
+    categoria VARCHAR(100) DEFAULT 'General',
+    icon_type VARCHAR(50) DEFAULT 'hito',
+    lat DECIMAL(10, 8) NOT NULL,
+    lng DECIMAL(11, 8) NOT NULL,
+    min_zoom INT DEFAULT 11,
+    activo TINYINT(1) DEFAULT 1,
+    orden INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 $action = $_GET['action'] ?? '';
 
 if ($action === 'geojson') {
