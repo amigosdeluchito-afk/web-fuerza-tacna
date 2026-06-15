@@ -228,7 +228,8 @@ window.rvApplyStyle = function() {
             id: "ref-estrategicas-pois", 
             type: "symbol", 
             source: "referencias-estrategicas", 
-            minzoom: ["get", "min_zoom"], 
+            minzoom: 10,
+            filter: ["<=", ["get", "min_zoom"], ["zoom"]],
             layout: {
                 "icon-image": ["concat", "icon-ref-", ["get", "icon_type"]],
                 "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 14, 1],
