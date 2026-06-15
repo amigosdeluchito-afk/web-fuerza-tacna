@@ -354,7 +354,7 @@ window.initRedVial = async function() {
         // =========================================================
         // 🚀 REGISTRO DE ICONOS PERSONALIZADOS (FASE D)
         // =========================================================
-        const createAndAddIcon = (id, emoji, size = 32) => {
+        const createAndAddIcon = (id, emoji, size = 64) => {
             if (window.redVialMapInstance.hasImage(id)) return;
 
             const canvas = document.createElement('canvas');
@@ -362,17 +362,21 @@ window.initRedVial = async function() {
             canvas.height = size;
             const ctx = canvas.getContext('2d');
             
+            // Suavizado de bordes activado
+            ctx.imageSmoothingEnabled = true;
+            
             ctx.beginPath();
             ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.fill();
 
-            ctx.font = `${size * 0.75}px sans-serif`;
+            ctx.font = `${size * 0.7}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(emoji, size / 2, size / 2 + 1);
+            ctx.fillText(emoji, size / 2, size / 2 + 4);
 
-            window.redVialMapInstance.addImage(id, ctx.getImageData(0, 0, size, size), { sdf: false });
+            // pixelRatio: 2 empaqueta los 64px en un espacio de 32px (Efecto Retina HD)
+            window.redVialMapInstance.addImage(id, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 });
         };
         createAndAddIcon('icon-ref-salud', '🏥'); createAndAddIcon('icon-ref-edu', '🎓');
         createAndAddIcon('icon-ref-gob', '🏛️'); createAndAddIcon('icon-ref-deporte', '⚽');
