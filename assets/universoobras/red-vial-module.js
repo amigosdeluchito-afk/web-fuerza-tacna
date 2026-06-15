@@ -90,6 +90,10 @@ window.rvApplyStyle = function() {
             "tramos-viales": { 
                 type: "geojson", 
                 data: "tramos-viales.geojson" 
+            },
+            "referencias-estrategicas": {
+                type: "geojson",
+                data: "../panel-admin-universo/mapa_referencias_api.php?action=geojson"
             }
         },
         layers: [
@@ -205,6 +209,32 @@ window.rvApplyStyle = function() {
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
                 "text-field": ["match", ["get", "name"], "Municipalidad Provincial de Tacna", "Muni. Tacna", "Municipalidad de Gregorio Albarracín Lanchipa", "Muni. Albarracín", "Gobierno Regional de Tacna", "GORE Tacna", "Universidad Nacional Jorge Basadre Grohmann", "UNJBG", "Hospital III Daniel Alcides Carrión", "Hosp. Carrión", "Hospital de la Solidaridad", "Hosp. Solidaridad", "Estadio Enrique Paillardelle", "Estadio Paillardelle", ["get", "name"]],
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 12, 11, 15, 13],
+                "text-anchor": "top",
+                "text-offset": [0, 0.8],
+                "text-allow-overlap": true,
+                "text-ignore-placement": true
+            }, 
+            paint: { 
+                "text-color": t.text, 
+                "text-halo-color": "#FFFFFF", 
+                "text-halo-width": 2.5
+            } 
+        });
+
+        // NUEVO: Capa de Referencias Estratégicas dinámicas desde BD
+        style.layers.push({ 
+            id: "ref-estrategicas-pois", 
+            type: "symbol", 
+            source: "referencias-estrategicas", 
+            minzoom: ["get", "min_zoom"], 
+            layout: {
+                "icon-image": ["concat", "icon-ref-", ["get", "icon_type"]],
+                "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 14, 1],
+                "icon-allow-overlap": true,
+                "icon-ignore-placement": true,
+                "text-field": ["get", "short_name"],
                 "text-font": ["Noto Sans Regular"],
                 "text-size": ["interpolate", ["linear"], ["zoom"], 12, 11, 15, 13],
                 "text-anchor": "top",
@@ -345,6 +375,8 @@ window.initRedVial = async function() {
         };
         createAndAddIcon('icon-ref-salud', '🏥'); createAndAddIcon('icon-ref-edu', '🎓');
         createAndAddIcon('icon-ref-gob', '🏛️'); createAndAddIcon('icon-ref-deporte', '⚽');
+        createAndAddIcon('icon-ref-transporte', '🚌'); createAndAddIcon('icon-ref-comercio', '🛒');
+        createAndAddIcon('icon-ref-hito', '📍');
 
         // =========================================================
         // 🔍 MÓDULO DE DIAGNÓSTICO ESTRICTO (SOLO LECTURA)
