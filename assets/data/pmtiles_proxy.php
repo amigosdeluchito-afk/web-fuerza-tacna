@@ -1,21 +1,29 @@
 <?php
-// Habilitar errores en pantalla temporalmente para depuración
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // Desactivar compresión nativa de PHP de forma segura
 @ini_set('zlib.output_compression', 'Off');
 
+// Destruir cualquier buffer activo para evitar Transfer-Encoding: chunked
+while (ob_get_level() > 0) {
+    ob_end_clean();
+}
+
 $file = __DIR__ . '/tacna.pmtiles';
 
-echo "<h1>OK PMTILES PROXY</h1>";
-echo "Ruta absoluta buscada: " . htmlspecialchars($file) . "<br><br>";
-
-if (file_exists($file)) {
-    echo "<strong style='color:green;'>ESTADO: El archivo tacna.pmtiles EXISTE.</strong><br>";
-    echo "Peso del archivo: " . number_format(filesize($file) / 1048576, 2) . " MB";
-} else {
-    echo "<strong style='color:red;'>ERROR: El archivo tacna.pmtiles NO se encuentra en la carpeta.</strong>";
+if (!file_exists($file)) {
+    header("HTTP/1.1 404 Not Found");
+    exit;
 }
-exit;
+
+$filesize = filesize($file);
+
+// Cabeceras de control estricto (Sin lógica Range todavía)
+header("Access-Control-Allow-Origin: *");
+header("Accept-Ranges: bytes");
+header("Content-Type: application/octet-stream");
+header("Content-Length: " . $filesize);
+header("Cache-Control: public, max-age=31536000, no-transform");
+
+if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS' && $_SERVER['REQUEST_METHOD'] !== 'HEAD') {
+    // Entregar el archivo completo de un solo golpe
+    readfile($file);
+}
