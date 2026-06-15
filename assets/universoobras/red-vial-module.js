@@ -205,7 +205,7 @@ window.rvApplyStyle = function() {
             filter: ["all", ["has", "name"], refPoisFilter], 
             layout: {
                 "icon-image": ["match", ["get", "kind"], "hospital", "icon-ref-salud", "university", "icon-ref-edu", "stadium", "icon-ref-deporte", "townhall", "icon-ref-gob", ""],
-                "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 14, 1],
+                "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.45, 14, 0.8],
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
                 "text-field": ["match", ["get", "name"], "Municipalidad Provincial de Tacna", "Muni. Tacna", "Municipalidad de Gregorio Albarracín Lanchipa", "Muni. Albarracín", "Gobierno Regional de Tacna", "GORE Tacna", "Universidad Nacional Jorge Basadre Grohmann", "UNJBG", "Hospital III Daniel Alcides Carrión", "Hosp. Carrión", "Hospital de la Solidaridad", "Hosp. Solidaridad", "Estadio Enrique Paillardelle", "Estadio Paillardelle", ["get", "name"]],
@@ -233,7 +233,7 @@ window.rvApplyStyle = function() {
         filter: ["<=", ["get", "min_zoom"], ["zoom"]],
         layout: {
             "icon-image": ["concat", "icon-ref-", ["get", "icon_type"]],
-            "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.7, 14, 1],
+            "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.45, 14, 0.8],
             "icon-allow-overlap": true,
             "icon-ignore-placement": true,
             "text-field": ["get", "short_name"],
@@ -365,12 +365,7 @@ window.initRedVial = async function() {
             // Suavizado de bordes activado
             ctx.imageSmoothingEnabled = true;
             
-            ctx.beginPath();
-            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fill();
-
-            ctx.font = `${size * 0.7}px sans-serif`;
+            ctx.font = `${size * 0.85}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(emoji, size / 2, size / 2 + 4);
