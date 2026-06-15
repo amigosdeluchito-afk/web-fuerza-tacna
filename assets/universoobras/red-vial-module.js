@@ -208,7 +208,7 @@ window.rvApplyStyle = function() {
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
                 "text-field": ["get", "short_name"],
-                "text-font": ["Noto Sans Bold"],
+                "text-font": ["Noto Sans Regular"],
                 "text-size": ["interpolate", ["linear"], ["zoom"], 12, 10, 15, 12],
                 "text-anchor": "top",
                 "text-offset": [0, 0.8],
