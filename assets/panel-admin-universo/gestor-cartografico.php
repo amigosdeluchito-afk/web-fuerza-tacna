@@ -143,6 +143,24 @@ require_admin();
         
         <div class="panel-lista" id="panelListaRV">
             <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Vías Guardadas</h3>
+            
+            <!-- Controles de Búsqueda y Filtros -->
+            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+                <input type="text" id="filtroNombreRV" class="form-control" placeholder="🔍 Buscar por nombre..." oninput="renderListaRV()">
+                <div style="display: flex; gap: 8px;">
+                    <select id="filtroTipoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                        <option value="">Todos los tipos</option><option value="Local">Local</option><option value="Provincial">Provincial</option><option value="Regional">Regional</option>
+                    </select>
+                    <select id="filtroEstadoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                        <option value="">Todos los estados</option><option value="En estudios">En estudios</option><option value="Buena Pro">Buena Pro</option><option value="En ejecución">En ejecución</option><option value="Paralizado">Paralizado</option><option value="Transferencia">Transferencia</option><option value="Entregado">Entregado</option>
+                    </select>
+                    <select id="filtroVisibilidadRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                        <option value="">Visibilidad (Todas)</option><option value="1">Solo Activas</option><option value="0">Solo Inactivas</option>
+                    </select>
+                </div>
+                <div id="contadorRV" style="font-size: 11px; color: #94a3b8; text-align: right;"></div>
+            </div>
+
             <div id="listaRvContainer" style="flex: 1; overflow-y: auto; margin-bottom: 15px;"></div>
             <button type="button" class="btn btn-secondary" onclick="cerrarListaRV()">❌ Volver al Mapa</button>
         </div>
@@ -700,13 +718,33 @@ require_admin();
 
         function renderListaRV() {
             const cont = document.getElementById('listaRvContainer');
+            const contadorEl = document.getElementById('contadorRV');
+            
             if (!rvGeoJSON || !rvGeoJSON.features || rvGeoJSON.features.length === 0) {
                 cont.innerHTML = '<p style="color:#64748b; font-size:12px;">No hay vías guardadas.</p>';
+                if (contadorEl) contadorEl.textContent = '';
                 return;
             }
+            
+            const qNombre = (document.getElementById('filtroNombreRV')?.value || '').toLowerCase();
+            const qTipo = document.getElementById('filtroTipoRV')?.value || '';
+            const qEstado = document.getElementById('filtroEstadoRV')?.value || '';
+            const qVisib = document.getElementById('filtroVisibilidadRV')?.value || '';
+            
             let html = '';
+            let count = 0;
+            const total = rvGeoJSON.features.length;
+            
             rvGeoJSON.features.forEach(f => {
                 const p = f.properties;
+                
+                if (qNombre && !p.nombre.toLowerCase().includes(qNombre)) return;
+                if (qTipo && p.tipo !== qTipo) return;
+                if (qEstado && p.estado !== qEstado) return;
+                if (qVisib !== '' && p.activo.toString() !== qVisib) return;
+                
+                count++;
+                
                 const isActivo = p.activo === 1;
                 const opacity = isActivo ? '1' : '0.6';
                 const badgeActivo = isActivo ? '' : '<span style="background:#ef4444; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:8px;">INACTIVA</span>';
@@ -719,7 +757,11 @@ require_admin();
                     <div style="display:flex; gap:6px;"><button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button>${btnToggle}</div>
                 </div>`;
             });
+            
+            if (count === 0) html = '<p style="color:#64748b; font-size:12px;">No se encontraron vías con esos filtros.</p>';
+            
             cont.innerHTML = html;
+            if (contadorEl) contadorEl.textContent = `Mostrando ${count} de ${total} vías`;
         }
 
         function editarRV(id) {
