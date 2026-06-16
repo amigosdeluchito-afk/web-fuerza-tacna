@@ -335,18 +335,22 @@ require_admin();
             map.on('mouseenter', 'draw-points-hit', () => {
                 if (currentMode !== 'vias') return;
                 map.getCanvas().style.cursor = 'move';
-                map.dragPan.disable();
             });
 
             map.on('mouseleave', 'draw-points-hit', () => {
                 if (currentMode !== 'vias' || isDraggingRVNode) return;
                 map.getCanvas().style.cursor = 'crosshair';
-                map.dragPan.enable();
             });
 
             map.on('mousedown', 'draw-points-hit', (e) => {
                 if (currentMode !== 'vias' || e.button !== 0) return;
                 e.preventDefault();
+                if (e.originalEvent) {
+                    e.originalEvent.preventDefault();
+                    e.originalEvent.stopPropagation();
+                }
+                map.dragPan.disable();
+                
                 isDraggingRVNode = true;
                 draggedRVNodeIndex = e.features[0].properties.index;
                 map.getCanvas().style.cursor = 'grabbing';
