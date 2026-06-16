@@ -681,7 +681,7 @@ require_admin();
         // ==========================================
         async function fetchListaRV() {
             try {
-                const res = await fetch('mapa_redvial_api.php?action=geojson');
+                const res = await fetch('mapa_redvial_api.php?action=listar_admin');
                 rvGeoJSON = await res.json();
                 renderListaRV();
             } catch (e) { console.error('Error fetching list RV', e); }
@@ -707,9 +707,16 @@ require_admin();
             let html = '';
             rvGeoJSON.features.forEach(f => {
                 const p = f.properties;
-                html += `<div style="background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
-                    <div><strong style="color:#f8fafc;">🛣️ ${p.nombre}</strong><br><span style="color:#94a3b8; font-size:11px;">Tipo: ${p.tipo} | Estado: ${p.estado}</span></div>
-                    <div style="display:flex; gap:6px;"><button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button><button type="button" class="btn" style="padding:6px; background:#ef4444; color:white; min-width:30px;" onclick="eliminarRV('${p.id}')" title="Eliminar">🗑️</button></div>
+                const isActivo = p.activo === 1;
+                const opacity = isActivo ? '1' : '0.6';
+                const badgeActivo = isActivo ? '' : '<span style="background:#ef4444; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:8px;">INACTIVA</span>';
+                const btnToggle = isActivo 
+                    ? `<button type="button" class="btn" style="padding:6px; background:#ef4444; color:white; min-width:30px;" onclick="toggleActivoRV('${p.id}', 0)" title="Desactivar y ocultar">🚫</button>`
+                    : `<button type="button" class="btn" style="padding:6px; background:#10b981; color:white; min-width:30px;" onclick="toggleActivoRV('${p.id}', 1)" title="Reactivar">✅</button>`;
+                
+                html += `<div style="background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; display:flex; justify-content:space-between; align-items:center; opacity:${opacity};">
+                    <div><strong style="color:#f8fafc;">🛣️ ${p.nombre}</strong>${badgeActivo}<br><span style="color:#94a3b8; font-size:11px;">Tipo: ${p.tipo} | Estado: ${p.estado}</span></div>
+                    <div style="display:flex; gap:6px;"><button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button>${btnToggle}</div>
                 </div>`;
             });
             cont.innerHTML = html;
@@ -740,10 +747,11 @@ require_admin();
             document.getElementById('btnGuardarRv').textContent = '💾 Actualizar Tramo';
         }
 
-        async function eliminarRV(id) {
-            if (!confirm('⚠️ ¿Estás seguro de eliminar este tramo vial?')) return;
+        async function toggleActivoRV(id, activo) {
+            const accionTexto = activo === 1 ? 'reactivar' : 'desactivar (ocultar del mapa público)';
+            if (!confirm(`⚠️ ¿Estás seguro de ${accionTexto} este tramo vial?`)) return;
             try {
-                const res = await fetch('mapa_redvial_api.php?action=delete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) });
+                const res = await fetch('mapa_redvial_api.php?action=toggle_activo', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id: id, activo: activo}) });
                 const data = await res.json();
                 if (data.ok) { 
                     if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson'); 

@@ -90,6 +90,56 @@ if ($action === 'delete') {
     exit;
 }
 
+if ($action === 'toggle_activo') {
+    require_admin();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $string_id = trim($input['id'] ?? '');
+    $activo = isset($input['activo']) ? (int)$input['activo'] : 1;
+    
+    if ($string_id === '') { http_response_code(400); echo json_encode(['error' => 'ID inválido']); exit; }
+
+    try {
+        $db = get_db_connection();
+        $stmt = $db->prepare("UPDATE panel_tramos_viales SET activo=?, updated_at=NOW() WHERE string_id=?");
+        $stmt->execute([$activo, $string_id]);
+        $accion_log = $activo === 1 ? 'Reactivo' : 'Desactivo';
+        log_action('rv_estado', "$accion_log tramo vial ID: $string_id");
+        echo json_encode(['ok' => true]);
+    } catch (Exception $e) {
+        http_response_code(500); echo json_encode(['error' => 'Error al cambiar estado: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+if ($action === 'listar_admin') {
+    require_admin();
+    try {
+        $db = get_db_connection();
+        $stmt = $db->query("SELECT * FROM panel_tramos_viales ORDER BY id DESC");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $features = [];
+        foreach ($rows as $row) {
+            $features[] = [
+                'type' => 'Feature',
+                'properties' => [
+                    'id' => $row['string_id'],
+                    'nombre' => $row['nombre'],
+                    'tipo' => $row['tipo'],
+                    'estado' => $row['estado'],
+                    'color' => $row['color'],
+                    'descripcion' => $row['descripcion'] ?? '',
+                    'datos_edicion' => $row['datos_edicion'] ? json_decode($row['datos_edicion'], true) : null,
+                    'activo' => (int)$row['activo']
+                ],
+                'geometry' => [ 'type' => 'LineString', 'coordinates' => json_decode($row['coordenadas'], true) ]
+            ];
+        }
+        echo json_encode(['type' => 'FeatureCollection', 'features' => $features], JSON_UNESCAPED_UNICODE);
+    } catch (Exception $e) { http_response_code(500); echo json_encode(['error' => 'Error: ' . $e->getMessage()]); }
+    exit;
+}
+
 if ($action === 'geojson') {
     try {
         $db = get_db_connection();
