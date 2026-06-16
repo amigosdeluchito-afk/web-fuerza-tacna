@@ -836,7 +836,7 @@ function abrirPanelRedVial(props = {}) {
                 ${htmlAntesAhora}
                 ${htmlNoData}
             </div>
-            <div id="rv-gallery-container" style="display: none; padding: 0 15px 15px 15px;"></div>
+            <div id="rv-gallery-container" style="display: none; padding: 0 15px 12px 15px;"></div>
             <div class="rd-rv-footer">
                 <button id="btnCompartirRV" class="btn-share">🔗 Compartir Vía</button>
             </div>
