@@ -169,7 +169,7 @@ require_admin();
         let activeMarker = null;
         let refsGeoJSON = null;
         let currentMode = 'hitos';
-        let rvCoords = [];
+        let rvNodes = [];
         let rvGeoJSON = null;
         
         let isDraggingRVNode = false;
@@ -313,9 +313,9 @@ require_admin();
                 } 
                 else if (currentMode === 'vias') {
                     document.getElementById('panelFormularioRV').classList.remove('active');
-                    rvCoords.push([e.lngLat.lng, e.lngLat.lat]);
+                    rvNodes.push({ nodo: [e.lngLat.lng, e.lngLat.lat], control: null });
                     
-                    if (rvCoords.length === 1) {
+                    if (rvNodes.length === 1) {
                         document.getElementById('rvDrawPanel').style.display = 'flex';
                         // Captura inteligente de nombre con buffer de 8px
                         const bbox = [ [e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8] ];
@@ -368,7 +368,7 @@ require_admin();
             map.on('mousemove', (e) => {
                 if (currentMode !== 'vias') return;
                 if (isDraggingRVNode && draggedRVNodeIndex !== -1) {
-                    rvCoords[draggedRVNodeIndex] = [e.lngLat.lng, e.lngLat.lat];
+                    rvNodes[draggedRVNodeIndex].nodo = [e.lngLat.lng, e.lngLat.lat];
                     updateDrawLayer();
                 }
             });
@@ -387,7 +387,7 @@ require_admin();
                 if (currentMode !== 'vias') return;
                 if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
                     const idx = e.features[0].properties.index;
-                    rvCoords.splice(idx, 1);
+                    rvNodes.splice(idx, 1);
                     updateDrawLayer();
                 }
             });
@@ -399,7 +399,7 @@ require_admin();
         // LÓGICA DE DIBUJO Y MODO RED VIAL (RV2)
         // ==========================================
         function setMode(mode) {
-            if (currentMode === 'vias' && rvCoords.length > 0 && mode === 'hitos') {
+            if (currentMode === 'vias' && rvNodes.length > 0 && mode === 'hitos') {
                 if (!confirm("Tienes un trazo en progreso. ¿Descartarlo?")) return;
                 rvCancel();
             }
@@ -424,19 +424,43 @@ require_admin();
             map.getCanvas().style.cursor = mode === 'vias' ? 'crosshair' : '';
         }
 
-        function updateDrawLayer() {
-            if (map.getSource('draw-source')) {
-                map.getSource('draw-source').setData({ type: "Feature", geometry: { type: "LineString", coordinates: rvCoords } });
-                map.getSource('draw-points').setData({ type: "FeatureCollection", features: rvCoords.map((c, i) => ({ type: "Feature", properties: { index: i }, geometry: { type: "Point", coordinates: c } })) });
+        function getBakedCoords(nodes) {
+            if (nodes.length === 0) return [];
+            let baked = [nodes[0].nodo];
+            for (let i = 0; i < nodes.length - 1; i++) {
+                let p0 = nodes[i].nodo;
+                let p1 = nodes[i].control;
+                let p2 = nodes[i + 1].nodo;
+                
+                if (p1) {
+                    const pasos = 20;
+                    for (let j = 1; j <= pasos; j++) {
+                        let t = j / pasos;
+                        let lng = Math.pow(1 - t, 2) * p0[0] + 2 * (1 - t) * t * p1[0] + Math.pow(t, 2) * p2[0];
+                        let lat = Math.pow(1 - t, 2) * p0[1] + 2 * (1 - t) * t * p1[1] + Math.pow(t, 2) * p2[1];
+                        baked.push([lng, lat]);
+                    }
+                } else {
+                    baked.push(p2);
+                }
             }
-            document.getElementById('rvDrawCount').textContent = rvCoords.length + (rvCoords.length === 1 ? " punto" : " puntos");
-            document.getElementById('btnRvFinish').disabled = rvCoords.length < 2;
+            return baked;
         }
 
-        function rvUndo() { rvCoords.pop(); updateDrawLayer(); if (rvCoords.length === 0) document.getElementById('rvDrawPanel').style.display = 'none'; }
+        function updateDrawLayer() {
+            if (map.getSource('draw-source')) {
+                const bakedCoords = getBakedCoords(rvNodes);
+                map.getSource('draw-source').setData({ type: "Feature", geometry: { type: "LineString", coordinates: bakedCoords } });
+                map.getSource('draw-points').setData({ type: "FeatureCollection", features: rvNodes.map((n, i) => ({ type: "Feature", properties: { index: i }, geometry: { type: "Point", coordinates: n.nodo } })) });
+            }
+            document.getElementById('rvDrawCount').textContent = rvNodes.length + (rvNodes.length === 1 ? " punto" : " puntos");
+            document.getElementById('btnRvFinish').disabled = rvNodes.length < 2;
+        }
+
+        function rvUndo() { rvNodes.pop(); updateDrawLayer(); if (rvNodes.length === 0) document.getElementById('rvDrawPanel').style.display = 'none'; }
         
         function rvCancel() { 
-            rvCoords = []; 
+            rvNodes = []; 
             updateDrawLayer(); 
             document.getElementById('rvDrawPanel').style.display = 'none'; 
             document.getElementById('panelFormularioRV').classList.remove('active'); 
@@ -583,9 +607,13 @@ require_admin();
             const feature = rvGeoJSON.features.find(f => f.properties.id === id);
             if (!feature) return;
             
-            rvCoords = feature.geometry.coordinates;
+            if (feature.properties.datos_edicion && Array.isArray(feature.properties.datos_edicion)) {
+                rvNodes = feature.properties.datos_edicion;
+            } else {
+                rvNodes = feature.geometry.coordinates.map(c => ({ nodo: c, control: null }));
+            }
             updateDrawLayer();
-            if (rvCoords.length > 0) map.flyTo({ center: rvCoords[0], zoom: 15 });
+            if (rvNodes.length > 0) map.flyTo({ center: rvNodes[0].nodo, zoom: 15 });
 
             document.getElementById('rvId').value = id;
             document.getElementById('rvNombre').value = feature.properties.nombre || '';
@@ -637,13 +665,14 @@ require_admin();
         // Enviar Formulario de Red Vial
         document.getElementById('rvForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (rvCoords.length < 2) return alert("Necesitas al menos 2 puntos para guardar una vía.");
+            if (rvNodes.length < 2) return alert("Necesitas al menos 2 puntos para guardar una vía.");
             
             const btn = document.getElementById('btnGuardarRv');
             const isEdit = document.getElementById('rvId').value !== '';
             btn.disabled = true; btn.textContent = isEdit ? '⏳ Actualizando Tramo...' : '⏳ Guardando Tramo...';
             
-            const payload = { nombre: document.getElementById('rvNombre').value, tipo: document.getElementById('rvTipo').value, estado: document.getElementById('rvEstado').value, color: document.getElementById('rvColor').value, descripcion: document.getElementById('rvDesc').value, coordenadas: rvCoords };
+            const bakedCoords = getBakedCoords(rvNodes);
+            const payload = { nombre: document.getElementById('rvNombre').value, tipo: document.getElementById('rvTipo').value, estado: document.getElementById('rvEstado').value, color: document.getElementById('rvColor').value, descripcion: document.getElementById('rvDesc').value, coordenadas: bakedCoords, datos_edicion: rvNodes };
             if (isEdit) payload.id = document.getElementById('rvId').value;
             
             try {

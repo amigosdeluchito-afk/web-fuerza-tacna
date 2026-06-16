@@ -14,6 +14,7 @@ if ($action === 'create') {
     $color = trim($input['color'] ?? '#ffffff');
     $descripcion = trim($input['descripcion'] ?? '');
     $coords = $input['coordenadas'] ?? [];
+    $datos_edicion = $input['datos_edicion'] ?? null;
 
     if ($nombre === '' || !is_array($coords) || count($coords) < 2) {
         http_response_code(400); 
@@ -23,11 +24,12 @@ if ($action === 'create') {
 
     $string_id = 'tramo-' . uniqid();
     $json_coords = json_encode($coords);
+    $json_edicion = $datos_edicion ? json_encode($datos_edicion) : null;
 
     try {
         $db = get_db_connection();
-        $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, descripcion, coordenadas, activo) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
-        $stmt->execute([$string_id, $nombre, $tipo, $estado, $color, $descripcion, $json_coords]);
+        $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, descripcion, coordenadas, datos_edicion, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)");
+        $stmt->execute([$string_id, $nombre, $tipo, $estado, $color, $descripcion, $json_coords, $json_edicion]);
         log_action('rv_crear', "Trazó tramo vial: $nombre");
         echo json_encode(['ok' => true]);
     } catch (Exception $e) {
@@ -48,17 +50,19 @@ if ($action === 'update') {
     $color = trim($input['color'] ?? '#ffffff');
     $descripcion = trim($input['descripcion'] ?? '');
     $coords = $input['coordenadas'] ?? [];
+    $datos_edicion = $input['datos_edicion'] ?? null;
 
     if ($string_id === '' || $nombre === '' || !is_array($coords) || count($coords) < 2) {
         http_response_code(400); echo json_encode(['error' => 'Datos inválidos']); exit;
     }
 
     $json_coords = json_encode($coords);
+    $json_edicion = $datos_edicion ? json_encode($datos_edicion) : null;
 
     try {
         $db = get_db_connection();
-        $stmt = $db->prepare("UPDATE panel_tramos_viales SET nombre=?, tipo=?, estado=?, color=?, descripcion=?, coordenadas=? WHERE string_id=?");
-        $stmt->execute([$nombre, $tipo, $estado, $color, $descripcion, $json_coords, $string_id]);
+        $stmt = $db->prepare("UPDATE panel_tramos_viales SET nombre=?, tipo=?, estado=?, color=?, descripcion=?, coordenadas=?, datos_edicion=? WHERE string_id=?");
+        $stmt->execute([$nombre, $tipo, $estado, $color, $descripcion, $json_coords, $json_edicion, $string_id]);
         log_action('rv_editar', "Editó tramo vial: $nombre");
         echo json_encode(['ok' => true]);
     } catch (Exception $e) {
@@ -100,6 +104,7 @@ if ($action === 'geojson') {
             color VARCHAR(20) DEFAULT '#ffffff',
             descripcion TEXT NULL,
             coordenadas JSON NOT NULL,
+            datos_edicion JSON NULL,
             activo TINYINT(1) DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -107,6 +112,7 @@ if ($action === 'geojson') {
 
         // Migración silenciosa por si la tabla ya existía sin la columna descripcion
         try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN descripcion TEXT NULL AFTER color"); } catch (Exception $e) {}
+        try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN datos_edicion JSON NULL AFTER coordenadas"); } catch (Exception $e) {}
 
         // 2. Sembrar los datos idénticos al archivo estático original (Si la tabla está vacía)
         $db->exec("INSERT IGNORE INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, coordenadas) VALUES
@@ -129,7 +135,8 @@ if ($action === 'geojson') {
                     'tipo' => $row['tipo'],
                     'estado' => $row['estado'],
                     'color' => $row['color'],
-                    'descripcion' => $row['descripcion'] ?? ''
+                    'descripcion' => $row['descripcion'] ?? '',
+                    'datos_edicion' => $row['datos_edicion'] ? json_decode($row['datos_edicion'], true) : null
                 ],
                 'geometry' => [
                     'type' => 'LineString',
