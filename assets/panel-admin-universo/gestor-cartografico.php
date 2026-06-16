@@ -333,6 +333,7 @@ require_admin();
                     { id: "roads-minor", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#FFFFFF", "line-width": 2 } },
                     { id: "roads-major", type: "line", source: "protomaps", "source-layer": "roads", filter: ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]], paint: { "line-color": "#CDD7E3", "line-width": 4 } },
                     { id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 14}, paint: {"text-color": "#1e293b", "text-halo-color": "#F2EFE9", "text-halo-width": 2} },
+                    { id: "places-hitbox", type: "circle", source: "protomaps", "source-layer": "places", paint: { "circle-radius": 20, "circle-opacity": 0 } },
                     { id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 11, "symbol-placement": "line"}, paint: {"text-color": "#3f3f46", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
                     { id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#666666", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
                     { id: "tramos-viales-layer", type: "line", source: "tramos-viales", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["get", "color"], "line-width": 4 } },
@@ -455,36 +456,6 @@ require_admin();
                         const features = map.queryRenderedFeatures(bbox, { layers: ['roads-major', 'roads-minor'] });
                         let detName = features.find(f => f.properties && f.properties.name)?.properties.name;
                         document.getElementById('rvNombre').value = detName || 'Tramo vial sin nombre';
-                        
-                        // === Sugerencia Inteligente de Sector (RV3-C2.2-B) ===
-                        const inputSector = document.getElementById('rvSector');
-                        if (inputSector && inputSector.value.trim() === '') {
-                            // Ampliamos el área de búsqueda para capturar urbanizaciones cercanas
-                            const bboxPlaces = [ [e.point.x - 30, e.point.y - 30], [e.point.x + 30, e.point.y + 30] ];
-                            const placeFeatures = map.queryRenderedFeatures(bboxPlaces, { layers: ['places-text'] });
-                            
-                            let suggestedSector = null;
-                            for (let p of placeFeatures) {
-                                if (p.properties && ['neighbourhood', 'suburb', 'locality'].includes(p.properties.kind)) {
-                                    suggestedSector = p.properties.name;
-                                    break;
-                                }
-                            }
-                            if (!suggestedSector && placeFeatures.length > 0) suggestedSector = placeFeatures[0].properties.name;
-                            
-                            if (suggestedSector) {
-                                inputSector.value = suggestedSector;
-                                let msg = document.getElementById('rvSectorMsg');
-                                if (!msg) {
-                                    msg = document.createElement('small');
-                                    msg.id = 'rvSectorMsg';
-                                    msg.style.cssText = 'color:#3b82f6; font-size:10px; display:block; margin-top:4px; font-weight:bold;';
-                                    inputSector.parentNode.appendChild(msg);
-                                }
-                                msg.textContent = '✨ Sugerido según mapa';
-                                setTimeout(() => { if(msg) msg.textContent = ''; }, 6000);
-                            }
-                        }
                     }
                     
                     updateDrawLayer();
@@ -740,6 +711,48 @@ require_admin();
             document.getElementById('rvDrawPanel').style.display = 'none'; 
             document.getElementById('panelFormularioRV').classList.add('active'); 
             document.getElementById('rvNombre').focus(); 
+            
+            // ==========================================
+            // AUDITORÍA Y SUGERENCIA AUTOMÁTICA DE SECTOR
+            // ==========================================
+            const inputSector = document.getElementById('rvSector');
+            if (inputSector && inputSector.value.trim() === '' && rvNodes.length > 0) {
+                
+                // 1. Log de Auditoría general de capas (A pedido)
+                console.log("=== DIAGNÓSTICO DE CAPAS DISPONIBLES ===");
+                console.log(map.getStyle().layers.map(l => ({ id: l.id, type: l.type, sourceLayer: l['source-layer'] })).filter(l => l.sourceLayer === 'places'));
+                
+                // 2. Usar el nodo central del tramo
+                const midIndex = Math.floor(rvNodes.length / 2);
+                const midNode = rvNodes[midIndex].nodo;
+                const screenPoint = map.project(midNode);
+                const bbox = [ [screenPoint.x - 80, screenPoint.y - 80], [screenPoint.x + 80, screenPoint.y + 80] ];
+                
+                // 3. Auditoría profunda en consola
+                const allPlaces = map.queryRenderedFeatures(bbox, { layers: ['places-text', 'places-hitbox'] });
+                console.log("=== DIAGNÓSTICO BBOX 80px (PLACES) ===");
+                allPlaces.forEach(f => console.log(`Encontrado: ${f.properties.name} | Kind: ${f.properties.kind} | Layer: ${f.layer.id}`));
+                
+                // 4. Asignación si existe match válido
+                let suggestedSector = null;
+                for (let p of allPlaces) {
+                    if (p.properties && ['neighbourhood', 'suburb', 'locality', 'village'].includes(p.properties.kind)) {
+                        suggestedSector = p.properties.name; break;
+                    }
+                }
+                
+                if (suggestedSector) {
+                    inputSector.value = suggestedSector;
+                    let msg = document.getElementById('rvSectorMsg');
+                    if (!msg) {
+                        msg = document.createElement('small'); msg.id = 'rvSectorMsg';
+                        msg.style.cssText = 'color:#3b82f6; font-size:10px; display:block; margin-top:4px; font-weight:bold;';
+                        inputSector.parentNode.appendChild(msg);
+                    }
+                    msg.textContent = '✨ Sugerido según centro del tramo';
+                    setTimeout(() => { if(msg) msg.textContent = ''; }, 6000);
+                }
+            }
         }
 
         // Auto-asignación de color por estado idéntico al CSS público
