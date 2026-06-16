@@ -778,8 +778,6 @@ require_admin();
             const coords = feature.geometry.coordinates;
             if (coords.length < 2) return;
 
-            cerrarListaRV();
-
             const bounds = coords.reduce((bounds, coord) => {
                 return bounds.extend(coord);
             }, new maplibregl.LngLatBounds(coords[0], coords[0]));
