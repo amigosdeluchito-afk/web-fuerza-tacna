@@ -17,7 +17,7 @@ require_admin();
         .app-header nav a:hover { color: #e5e7eb; }
         .app-header .user { font-size: 13px; color: #9ca3af; }
         
-        .main-container { flex: 1; display: flex; position: relative; }
+        .main-container { flex: 1; display: flex; position: relative; height: calc(100vh - 56px); min-height: 0; box-sizing: border-box; }
         #map { flex: 1; background: #0f172a; }
         
         .instrucciones { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); padding: 10px 20px; border-radius: 8px; z-index: 10; font-size: 14px; border: 1px solid #3b82f6; color: #93c5fd; pointer-events: none; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
@@ -25,8 +25,12 @@ require_admin();
         .panel-formulario { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; padding: 25px; display: none; flex-direction: column; overflow-y: auto; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; }
         .panel-formulario.active { display: flex; }
         
-        .panel-lista { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; display: none; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; height: 100%; overflow: hidden; outline: 3px solid red; }
-        .panel-lista.active { display: flex; }
+        .panel-lista { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; display: none; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; height: 100%; max-height: 100%; box-sizing: border-box; overflow: hidden; }
+        .panel-lista.active { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+        
+        .rv-list-header { box-sizing: border-box; padding: 25px 25px 0 25px; }
+        .rv-list-scroll { min-height: 0; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; padding: 20px 25px; }
+        .rv-list-footer { box-sizing: border-box; padding: 15px 25px 25px 25px; background: #0f172a; border-top: 1px solid #1e293b; z-index: 5; }
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
@@ -136,17 +140,17 @@ require_admin();
         </div>
         
         <div class="panel-lista" id="panelLista">
-            <div style="flex-shrink: 0; padding: 25px 25px 15px 25px; outline: 2px solid yellow;">
+            <div class="rv-list-header">
                 <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Referencias Guardadas</h3>
             </div>
-            <div id="listaReferenciasContainer" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 25px 15px 25px; outline: 2px solid lime;"></div>
-            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a; position: sticky; bottom: 0; z-index: 5; outline: 2px solid cyan;">
+            <div id="listaReferenciasContainer" class="rv-list-scroll"></div>
+            <div class="rv-list-footer">
                 <button type="button" class="btn btn-secondary" onclick="cerrarLista()">❌ Volver al Mapa</button>
             </div>
         </div>
         
         <div class="panel-lista" id="panelListaRV">
-            <div style="flex-shrink: 0; padding: 25px 25px 0 25px; outline: 2px solid yellow;">
+            <div class="rv-list-header">
                 <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Vías Guardadas</h3>
                 
                 <!-- Controles de Búsqueda y Filtros -->
@@ -167,9 +171,9 @@ require_admin();
                 </div>
             </div>
 
-            <div id="listaRvContainer" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 25px 15px 25px; outline: 2px solid lime;"></div>
+            <div id="listaRvContainer" class="rv-list-scroll"></div>
             
-            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a; position: sticky; bottom: 0; z-index: 5; outline: 2px solid cyan;">
+            <div class="rv-list-footer">
                 <button type="button" class="btn btn-secondary" onclick="cerrarListaRV()">❌ Volver al Mapa</button>
             </div>
         </div>
