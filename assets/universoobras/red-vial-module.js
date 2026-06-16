@@ -695,6 +695,31 @@ window.rv_compartirViaSeguro = function(idEncoded, nombreRaw) {
     }
 }
 
+// Helpers de Renderizado Condicional y Formato
+function rv_hasValue(val) {
+    return val !== null && val !== undefined && String(val).trim() !== '';
+}
+
+function rv_formatMoney(val) {
+    const num = parseFloat(val);
+    if (isNaN(num) || num <= 0) return '';
+    if (num >= 1000000) {
+        let m = num / 1000000;
+        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Millones';
+    } else if (num >= 1000) {
+        let m = num / 1000;
+        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Mil';
+    }
+    return 'S/ ' + num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function rv_formatDate(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return dateStr;
+}
+
 function abrirPanelRedVial(props = {}) {
     const panel = document.getElementById('redVialInfoPanel');
     if (!panel) return;
@@ -707,6 +732,22 @@ function abrirPanelRedVial(props = {}) {
     const idEncoded = rawId ? encodeURIComponent(rawId) : '';
     const descSafe = rv_escapeHTML(props.descripcion || '').replace(/\n/g, '<br>');
 
+    // RV3-C3: Extracción Segura de Nuevos Campos Estratégicos
+    const mensajeSafe = rv_escapeHTML(props.mensaje_principal);
+    const sectorSafe = rv_escapeHTML(props.sector);
+    const desdeSafe = rv_escapeHTML(props.tramo_desde);
+    const hastaSafe = rv_escapeHTML(props.tramo_hasta);
+    const longitudSafe = rv_escapeHTML(props.longitud);
+    const benefSafe = rv_escapeHTML(props.beneficiarios);
+    const antesSafe = rv_escapeHTML(props.situacion_antes).replace(/\n/g, '<br>');
+    const ahoraSafe = rv_escapeHTML(props.situacion_ahora).replace(/\n/g, '<br>');
+    const inicioSafe = rv_formatDate(props.fecha_inicio);
+    const entregaSafe = rv_formatDate(props.fecha_entrega);
+
+    const avance = props.avance_fisico;
+    const hasAvance = rv_hasValue(avance) && !isNaN(avance) && avance >= 0 && avance <= 100;
+    const montoSafe = rv_formatMoney(props.monto_inversion);
+
     let estadoClass = 'pill--estudios';
     const estLow = estadoSafe.toLowerCase();
     if (estLow.includes('entregado')) estadoClass = 'pill--entregado';
@@ -714,6 +755,54 @@ function abrirPanelRedVial(props = {}) {
     else if (estLow.includes('paralizado')) estadoClass = 'pill--paralizado';
     else if (estLow.includes('buena pro')) estadoClass = 'pill--buenapro';
     else if (estLow.includes('transferencia')) estadoClass = 'pill--transferencia';
+
+    // Bloques Condicionales HTML
+    let htmlMensaje = '';
+    if (rv_hasValue(mensajeSafe)) htmlMensaje = `<div class="rd-rv-hook" style="color: ${colorSafe};">${mensajeSafe}</div>`;
+
+    let gridItems = '';
+    if (rv_hasValue(longitudSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>📏 Longitud</strong><span>${longitudSafe}</span></div>`;
+    if (rv_hasValue(benefSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>👥 Beneficiarios</strong><span>${benefSafe}</span></div>`;
+    if (rv_hasValue(montoSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>💰 Inversión</strong><span>${montoSafe}</span></div>`;
+    if (rv_hasValue(inicioSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>📅 Inicio</strong><span>${inicioSafe}</span></div>`;
+    if (rv_hasValue(entregaSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>🏁 Entrega</strong><span>${entregaSafe}</span></div>`;
+
+    let htmlDatosRapidos = '';
+    if (gridItems !== '') htmlDatosRapidos = `<div class="rd-rv-quick-data">${gridItems}</div>`;
+
+    let htmlTramo = '';
+    if (rv_hasValue(desdeSafe) && rv_hasValue(hastaSafe) && rv_hasValue(sectorSafe)) {
+        htmlTramo = `<div class="rd-rv-tramo">📍 Comprende el tramo desde <strong>${desdeSafe}</strong> hasta <strong>${hastaSafe}</strong>, en el sector <strong>${sectorSafe}</strong>.</div>`;
+    } else if (rv_hasValue(desdeSafe) && rv_hasValue(hastaSafe)) {
+        htmlTramo = `<div class="rd-rv-tramo">📍 Comprende el tramo desde <strong>${desdeSafe}</strong> hasta <strong>${hastaSafe}</strong>.</div>`;
+    } else if (rv_hasValue(sectorSafe)) {
+        htmlTramo = `<div class="rd-rv-tramo">📍 Ubicado en el sector: <strong>${sectorSafe}</strong>.</div>`;
+    }
+
+    let htmlAvance = '';
+    if (hasAvance) {
+        let avanceTxt = `${avance}%`;
+        if (estLow.includes('entregado') && parseInt(avance) === 100) avanceTxt = 'Obra Culminada';
+        htmlAvance = `<div class="rd-rv-progress-container"><div class="rd-rv-progress-header"><strong>📊 Avance Físico</strong><span>${avanceTxt}</span></div><div class="rd-rv-progress-bar-bg"><div class="rd-rv-progress-bar-fill" style="width: ${avance}%; background-color: ${colorSafe};"></div></div></div>`;
+    }
+
+    let htmlAntesAhora = '';
+    if (rv_hasValue(antesSafe) || rv_hasValue(ahoraSafe)) {
+        htmlAntesAhora = `<div class="rd-rv-antes-ahora">`;
+        if (rv_hasValue(antesSafe)) htmlAntesAhora += `<div class="rd-rv-aa-card rd-rv-antes"><span class="rd-rv-aa-badge">Antes</span><p>${antesSafe}</p></div>`;
+        if (rv_hasValue(ahoraSafe)) htmlAntesAhora += `<div class="rd-rv-aa-card rd-rv-ahora"><span class="rd-rv-aa-badge" style="background:${colorSafe};">Ahora</span><p>${ahoraSafe}</p></div>`;
+        htmlAntesAhora += `</div>`;
+    }
+
+    let htmlDesc = '';
+    if (rv_hasValue(descSafe)) {
+        htmlDesc = `<div class="rd-rv-desc" style="margin-bottom: 18px;"><p style="margin:0;">${descSafe}</p></div>`;
+    }
+
+    let htmlNoData = '';
+    if (!hasAvance && !rv_hasValue(descSafe) && gridItems === '' && htmlTramo === '' && htmlAntesAhora === '') {
+        htmlNoData = `<p style="color:#94a3b8; font-style:italic;">No hay información adicional disponible para este tramo.</p>`;
+    }
 
     panel.innerHTML = `
         <div class="rd-rv-panel" style="position: relative;">
@@ -731,9 +820,15 @@ function abrirPanelRedVial(props = {}) {
                     <span class="pill pill--tag">${tipoSafe}</span>
                 </div>
                 <h2 class="rd-rv-title" style="color: ${colorSafe};">${nombreSafe}</h2>
+                ${htmlMensaje}
             </div>
             <div class="rd-rv-body">
-                ${descSafe ? `<p>${descSafe}</p>` : `<p style="color:#94a3b8; font-style:italic;">No hay descripción oficial disponible para este tramo.</p>`}
+                ${htmlAvance}
+                ${htmlDatosRapidos}
+                ${htmlTramo}
+                ${htmlDesc}
+                ${htmlAntesAhora}
+                ${htmlNoData}
             </div>
             <div id="rv-gallery-container" style="display: none; padding: 0 20px 15px 20px;"></div>
             <div class="rd-rv-footer">

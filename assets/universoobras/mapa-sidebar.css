@@ -335,6 +335,46 @@
 }
 .rd-rv-thumb:hover { transform: translateY(-2px); opacity: 1 !important; }
 
+/* =========================================================
+   FICHA PÚBLICA RED VIAL - DATOS ESTRATÉGICOS (RV3-C3)
+   ========================================================= */
+.rd-rv-hook {
+  font-size: 14.5px; font-weight: 700; font-style: italic; margin-top: 10px; line-height: 1.4; opacity: 0.9;
+}
+.rd-rv-quick-data {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;
+}
+.rd-rv-grid-item {
+  background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 8px; display: flex; flex-direction: column;
+}
+.rd-rv-grid-item strong {
+  font-size: 10.5px; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;
+}
+.rd-rv-grid-item span {
+  font-size: 13px; color: #0f172a; font-weight: 700; line-height: 1.2;
+}
+.rd-rv-tramo {
+  background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 15px; border-radius: 0 8px 8px 0; font-size: 13px; color: #064e3b; margin-bottom: 18px; line-height: 1.5;
+}
+.rd-rv-progress-container {
+  background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 18px;
+}
+.rd-rv-progress-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; color: #0f172a;
+}
+.rd-rv-progress-bar-bg {
+  height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden;
+}
+.rd-rv-progress-bar-fill {
+  height: 100%; border-radius: 999px; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.rd-rv-antes-ahora { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+.rd-rv-aa-card { padding: 15px 15px 12px; border-radius: 8px; border: 1px solid #e2e8f0; position: relative; }
+.rd-rv-antes { background: #f8fafc; }
+.rd-rv-ahora { background: #fdf5f7; border-color: rgba(128, 16, 57, 0.15); }
+.rd-rv-aa-badge { position: absolute; top: -10px; left: 15px; background: #64748b; color: white; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; }
+.rd-rv-aa-card p { margin: 0; font-size: 13.5px; color: #334155; line-height: 1.5; padding-top: 2px; }
+
 /* === Apartado: Volver a la Web (Dentro del Sidebar) === */
 .fp-home-btn {
   display: grid;
