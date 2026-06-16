@@ -654,29 +654,96 @@ function initRedVialStudio() {
     }
 }
 
-function abrirPanelRedVial(props) {
+function rv_escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function rv_getSafeColor(colorStr, fallback = '#801039') {
+    if (!colorStr) return fallback;
+    const hexRegex = /^#([0-9A-Fa-f]{3}){1,2}$/;
+    return hexRegex.test(colorStr) ? colorStr : fallback;
+}
+
+window.rv_compartirViaSeguro = function(idEncoded, nombreRaw) {
+    const shareUrl = new URL(window.location.href);
+    if (idEncoded) {
+        shareUrl.searchParams.set('via', idEncoded);
+    }
+    const url = shareUrl.toString();
+
+    if (navigator.share) {
+        navigator.share({
+            title: nombreRaw + ' - Fuerza Tacna',
+            text: 'Conoce los detalles de esta vía en el mapa interactivo:',
+            url: url
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(url).then(() => {
+            const btn = document.getElementById('btnCompartirRV');
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ ¡Enlace copiado!';
+                setTimeout(() => { if(btn) btn.innerHTML = originalText; }, 2500);
+            }
+        });
+    }
+}
+
+function abrirPanelRedVial(props = {}) {
     const panel = document.getElementById('redVialInfoPanel');
     if (!panel) return;
     
-    // HTML interno simple y limpio para el panel
+    const nombreSafe = rv_escapeHTML(props.nombre);
+    const tipoSafe = rv_escapeHTML(props.tipo || 'Local');
+    const estadoSafe = rv_escapeHTML(props.estado || 'En estudios');
+    const colorSafe = rv_getSafeColor(props.color, '#801039');
+    const rawId = props.id || props.string_id || '';
+    const idEncoded = rawId ? encodeURIComponent(rawId) : '';
+    const descSafe = rv_escapeHTML(props.descripcion || '').replace(/\n/g, '<br>');
+
+    let estadoClass = 'pill--estudios';
+    const estLow = estadoSafe.toLowerCase();
+    if (estLow.includes('entregado')) estadoClass = 'pill--entregado';
+    else if (estLow.includes('ejecución') || estLow.includes('construccion')) estadoClass = 'pill--construccion';
+    else if (estLow.includes('paralizado')) estadoClass = 'pill--paralizado';
+    else if (estLow.includes('buena pro')) estadoClass = 'pill--buenapro';
+    else if (estLow.includes('transferencia')) estadoClass = 'pill--transferencia';
+
     panel.innerHTML = `
-        <div style="padding: 24px; font-family: system-ui, sans-serif;">
-            <button onclick="document.getElementById('redVialInfoPanel').classList.remove('is-active')" 
-                    style="float: right; background: #801039; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 8px; font-weight: bold;">
-                Cerrar ✖
+        <div class="rd-rv-panel" style="position: relative;">
+            <button id="btnCerrarRV" class="sheet-close" title="Cerrar panel">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 style="color: #801039; margin-top: 0; font-family: 'Arial Black', sans-serif;">${props.nombre}</h2>
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-            <p><strong>Tipo de Vía:</strong> <span style="background:#eee; padding:2px 8px; border-radius:4px;">${props.tipo}</span></p>
-            <p><strong>Estado:</strong> ${props.estado}</p>
-            <div style="margin-top: 30px; padding: 15px; background: #fff8e1; border-left: 4px solid #ffc300; border-radius: 4px;">
-                <p style="color: #666; font-size: 0.85em; margin: 0;">
-                    * Datos del MVP. En fases posteriores aquí se conectará la galería de fotos, el costo de inversión, metas y ficha técnica.
-                </p>
+            <div class="rd-rv-header" style="border-left-color: ${colorSafe};">
+                <div class="rd-rv-pills">
+                    <span class="pill ${estadoClass}">${estadoSafe}</span>
+                    <span class="pill pill--tag">${tipoSafe}</span>
+                </div>
+                <h2 class="rd-rv-title" style="color: ${colorSafe};">${nombreSafe}</h2>
+            </div>
+            <div class="rd-rv-body">
+                ${descSafe ? `<p>${descSafe}</p>` : `<p style="color:#94a3b8; font-style:italic;">No hay descripción oficial disponible para este tramo.</p>`}
+            </div>
+            <div class="rd-rv-footer">
+                <button id="btnCompartirRV" class="btn-share">🔗 Compartir Vía</button>
             </div>
         </div>
     `;
     
+    panel.querySelector('#btnCerrarRV').addEventListener('click', () => {
+        panel.classList.remove('is-active');
+    });
+
+    panel.querySelector('#btnCompartirRV').addEventListener('click', () => {
+        window.rv_compartirViaSeguro(idEncoded, props.nombre || 'Tramo Vial'); 
+    });
+
     panel.classList.add('is-active');
 }
 
