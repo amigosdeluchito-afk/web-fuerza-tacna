@@ -4,10 +4,12 @@ require_once __DIR__ . '/config.php';
 
 $action = $_GET['action'] ?? '';
 
-function json_response($data, $status = 200) {
-    http_response_code($status);
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
-    exit;
+if (!function_exists('json_response')) {
+    function json_response($data, $status = 200) {
+        http_response_code($status);
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 }
 
 // =========================================================
@@ -112,8 +114,16 @@ if ($action === 'upload') {
         json_response(['ok' => false, 'error' => 'Formato no permitido. Solo JPG, PNG o WebP. MIME detectado: ' . $mime], 400);
     }
 
+    // 2.5 Verificar que el servidor soporte procesamiento de imágenes
+    if (!extension_loaded('gd') || !function_exists('imagewebp') || !function_exists('imagecreatefromjpeg') || !function_exists('imagecreatefrompng') || !function_exists('imagecreatefromwebp')) {
+        json_response(['ok' => false, 'error' => 'El servidor no soporta la librería GD o el formato WebP. Contacte al administrador del sistema.'], 500);
+    }
+
     // 3. Crear carpetas seguras
     global $PROJECT_ROOT;
+    if (!$PROJECT_ROOT || !is_dir($PROJECT_ROOT)) {
+        json_response(['ok' => false, 'error' => 'Configuración de servidor incorrecta. Ruta pública no encontrada.'], 500);
+    }
     $target_dir = $PROJECT_ROOT . '/IMG/red-vial/' . $tramo_id;
     if (!is_dir($target_dir)) {
         if (!mkdir($target_dir, 0755, true)) {
@@ -122,7 +132,7 @@ if ($action === 'upload') {
     }
 
     // 4. Nombres criptográficos
-    $base_name = uniqid('rv_');
+    $base_name = 'rv_' . bin2hex(random_bytes(8));
     $file_main = $base_name . '.webp';
     $file_thumb = $base_name . '_thumb.webp';
     
@@ -138,22 +148,33 @@ if ($action === 'upload') {
         json_response(['ok' => false, 'error' => 'Error al generar la miniatura.'], 500);
     }
 
-    // 6. Lógica de Portada Única
-    if ($tipo === 'portada') {
-        $db->prepare("UPDATE panel_tramos_viales_fotos SET tipo = 'galeria' WHERE tramo_string_id = ? AND tipo = 'portada'")->execute([$tramo_id]);
+    // 6. Ejecución Atómica en Base de Datos
+    try {
+        $db->beginTransaction();
+        
+        if ($tipo === 'portada') {
+            $db->prepare("UPDATE panel_tramos_viales_fotos SET tipo = 'galeria' WHERE tramo_string_id = ? AND tipo = 'portada'")->execute([$tramo_id]);
+        }
+
+        $stmtO = $db->prepare("SELECT IFNULL(MAX(orden), 0) + 1 FROM panel_tramos_viales_fotos WHERE tramo_string_id = ?");
+        $stmtO->execute([$tramo_id]);
+        $orden = $stmtO->fetchColumn();
+
+        $stmt = $db->prepare("INSERT INTO panel_tramos_viales_fotos (tramo_string_id, tipo, archivo, archivo_thumb, orden) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$tramo_id, $tipo, $file_main, $file_thumb, $orden]);
+        $new_id = $db->lastInsertId();
+
+        $db->commit();
+        
+        if (function_exists('log_action')) log_action('rv_foto', "Subió foto ($tipo) para el tramo: $tramo_id");
+        json_response(['ok' => true, 'id' => $new_id, 'archivo' => $file_main, 'archivo_thumb' => $file_thumb]);
+    } catch (Exception $e) {
+        $db->rollBack();
+        // Rollback de Archivos (Garbage Collection)
+        @unlink($path_main);
+        @unlink($path_thumb);
+        json_response(['ok' => false, 'error' => 'Error al guardar en base de datos: ' . $e->getMessage()], 500);
     }
-
-    // 7. Determinar orden e Insertar
-    $stmtO = $db->prepare("SELECT IFNULL(MAX(orden), 0) + 1 FROM panel_tramos_viales_fotos WHERE tramo_string_id = ?");
-    $stmtO->execute([$tramo_id]);
-    $orden = $stmtO->fetchColumn();
-
-    $stmt = $db->prepare("INSERT INTO panel_tramos_viales_fotos (tramo_string_id, tipo, archivo, archivo_thumb, orden) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$tramo_id, $tipo, $file_main, $file_thumb, $orden]);
-    $new_id = $db->lastInsertId();
-
-    log_action('rv_foto', "Subió foto ($tipo) para el tramo: $tramo_id");
-    json_response(['ok' => true, 'id' => $new_id, 'archivo' => $file_main, 'archivo_thumb' => $file_thumb]);
 }
 
 // =========================================================
@@ -163,21 +184,35 @@ if ($action === 'update_meta') {
     require_admin();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
-    $tramo_id = $input['tramo_string_id'] ?? '';
     $tipo = in_array($input['tipo'] ?? '', ['portada', 'galeria', 'antes', 'despues']) ? $input['tipo'] : 'galeria';
     $titulo = trim($input['titulo'] ?? '');
     $desc = trim($input['descripcion_corta'] ?? '');
     
-    if ($id <= 0 || empty($tramo_id)) json_response(['ok' => false, 'error' => 'Datos inválidos'], 400);
+    if ($id <= 0) json_response(['ok' => false, 'error' => 'ID inválido'], 400);
 
-    // Garantizar portada única
-    if ($tipo === 'portada') {
-        $db->prepare("UPDATE panel_tramos_viales_fotos SET tipo = 'galeria' WHERE tramo_string_id = ? AND tipo = 'portada' AND id != ?")->execute([$tramo_id, $id]);
+    try {
+        $db->beginTransaction();
+        
+        // Extracción segura del ID maestro desde BD (Ignoramos el frontend)
+        $stmtGet = $db->prepare("SELECT tramo_string_id FROM panel_tramos_viales_fotos WHERE id = ?");
+        $stmtGet->execute([$id]);
+        $fotoReal = $stmtGet->fetch(PDO::FETCH_ASSOC);
+        if (!$fotoReal) throw new Exception("Foto no encontrada.");
+        $tramo_id = $fotoReal['tramo_string_id'];
+
+        if ($tipo === 'portada') {
+            $db->prepare("UPDATE panel_tramos_viales_fotos SET tipo = 'galeria' WHERE tramo_string_id = ? AND tipo = 'portada' AND id != ?")->execute([$tramo_id, $id]);
+        }
+
+        $stmt = $db->prepare("UPDATE panel_tramos_viales_fotos SET tipo = ?, titulo = ?, descripcion_corta = ? WHERE id = ?");
+        $stmt->execute([$tipo, $titulo, $desc, $id]);
+        
+        $db->commit();
+        json_response(['ok' => true]);
+    } catch (Exception $e) {
+        $db->rollBack();
+        json_response(['ok' => false, 'error' => $e->getMessage()], 500);
     }
-
-    $stmt = $db->prepare("UPDATE panel_tramos_viales_fotos SET tipo = ?, titulo = ?, descripcion_corta = ? WHERE id = ?");
-    $stmt->execute([$tipo, $titulo, $desc, $id]);
-    json_response(['ok' => true]);
 }
 
 // =========================================================
@@ -187,7 +222,7 @@ if ($action === 'toggle_activo') {
     require_admin();
     $input = json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
-    $activo = isset($input['activo']) ? (int)$input['activo'] : 1;
+    $activo = (isset($input['activo']) && (int)$input['activo'] === 1) ? 1 : 0;
     
     if ($id <= 0) json_response(['ok' => false, 'error' => 'ID inválido'], 400);
     $db->prepare("UPDATE panel_tramos_viales_fotos SET activo = ? WHERE id = ?")->execute([$activo, $id]);
