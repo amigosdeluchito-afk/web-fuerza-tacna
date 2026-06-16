@@ -175,6 +175,9 @@ require_admin();
         let isDraggingRVNode = false;
         let draggedRVNodeIndex = -1;
         let justDragged = false;
+        let isDraggingControlNode = false;
+        let draggedControlIndex = -1;
+        let hoveredSegmentIndex = -1;
 
         async function initGestorCartografico() {
             // Importar PMTiles dinámicamente (compatible con ES Modules)
@@ -194,7 +197,9 @@ require_admin();
                     "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" },
                     "tramos-viales": { type: "geojson", data: "mapa_redvial_api.php?action=geojson" },
                     "draw-source": { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } } },
+                    "draw-line-hit-source": { type: "geojson", data: { type: "FeatureCollection", features: [] } },
                     "draw-points": { type: "geojson", data: { type: "FeatureCollection", features: [] } }
+                    "draw-control-source": { type: "geojson", data: { type: "FeatureCollection", features: [] } }
                 },
                 layers: [
                     { id: "bg", type: "background", paint: { "background-color": "#F2EFE9" } },
@@ -210,8 +215,11 @@ require_admin();
                     { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
                     { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#1e293b", "text-halo-color": "#ffffff", "text-halo-width": 3 } },
                     { id: "draw-line-layer", type: "line", source: "draw-source", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#3b82f6", "line-width": 4, "line-dasharray": [2, 2] } },
+                    { id: "draw-line-hit", type: "line", source: "draw-line-hit-source", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-width": 20, "line-color": "rgba(0,0,0,0)" } },
                     { id: "draw-points-layer", type: "circle", source: "draw-points", paint: { "circle-radius": 5, "circle-color": "#ffffff", "circle-stroke-width": 2, "circle-stroke-color": "#3b82f6" } },
-                    { id: "draw-points-hit", type: "circle", source: "draw-points", paint: { "circle-radius": 15, "circle-color": "rgba(0,0,0,0)" } }
+                    { id: "draw-points-hit", type: "circle", source: "draw-points", paint: { "circle-radius": 15, "circle-color": "rgba(0,0,0,0)" } },
+                    { id: "draw-control-layer", type: "circle", source: "draw-control-source", paint: { "circle-radius": 6, "circle-color": "#ffc300", "circle-stroke-width": 2, "circle-stroke-color": "#801039" } },
+                    { id: "draw-control-hit", type: "circle", source: "draw-control-source", paint: { "circle-radius": 16, "circle-color": "rgba(0,0,0,0)" } }
                 ]
             };
 
@@ -332,15 +340,6 @@ require_admin();
             // EVENTOS DE EDICIÓN AVANZADA (MOVER / ELIMINAR)
             // ==========================================
             
-            map.on('mouseenter', 'draw-points-hit', () => {
-                if (currentMode !== 'vias') return;
-                map.getCanvas().style.cursor = 'move';
-            });
-
-            map.on('mouseleave', 'draw-points-hit', () => {
-                if (currentMode !== 'vias' || isDraggingRVNode) return;
-                map.getCanvas().style.cursor = 'crosshair';
-            });
 
             map.on('mousedown', 'draw-points-hit', (e) => {
                 const button = e.originalEvent ? e.originalEvent.button : 0;
@@ -365,11 +364,66 @@ require_admin();
                 map.getCanvas().style.cursor = 'grabbing';
             });
             
+            map.on('mousedown', 'draw-control-hit', (e) => {
+                const button = e.originalEvent ? e.originalEvent.button : 0;
+                if (currentMode !== 'vias' || button !== 0) return;
+                
+                e.preventDefault();
+                if (e.originalEvent) {
+                    e.originalEvent.preventDefault();
+                    e.originalEvent.stopPropagation();
+                }
+                map.dragPan.disable();
+                
+                isDraggingControlNode = true;
+                draggedControlIndex = e.features[0].properties.segmentIndex;
+                map.getCanvas().style.cursor = 'grabbing';
+                
+                console.log('RV2.8-B: START DRAG CONTROL', { segmentIndex: draggedControlIndex, dragPanDisabled: true });
+            });
+            
             map.on('mousemove', (e) => {
                 if (currentMode !== 'vias') return;
                 if (isDraggingRVNode && draggedRVNodeIndex !== -1) {
                     rvNodes[draggedRVNodeIndex].nodo = [e.lngLat.lng, e.lngLat.lat];
                     updateDrawLayer();
+                    if (hoveredSegmentIndex !== -1) updateControlPointLayer(hoveredSegmentIndex);
+                } else if (isDraggingControlNode && draggedControlIndex !== -1) {
+                    rvNodes[draggedControlIndex].control = [e.lngLat.lng, e.lngLat.lat];
+                    updateControlPointLayer(draggedControlIndex);
+                    updateDrawLayer();
+                    console.log('RV2.8-B: Recalculando Bézier', { segmento: draggedControlIndex, control: rvNodes[draggedControlIndex].control });
+                } else {
+                    const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
+                    const hitNodes = map.queryRenderedFeatures(bbox, { layers: ['draw-points-hit'] });
+                    const hitControls = map.queryRenderedFeatures(bbox, { layers: ['draw-control-hit'] });
+                    
+                    if (hitNodes.length > 0 || hitControls.length > 0) {
+                        map.getCanvas().style.cursor = 'move';
+                    } else {
+                        map.getCanvas().style.cursor = 'crosshair';
+                        const hitSegments = map.queryRenderedFeatures(bbox, { layers: ['draw-line-hit'] });
+                        if (hitSegments.length > 0) {
+                            const idx = hitSegments[0].properties.segmentIndex;
+                            if (hoveredSegmentIndex !== idx) {
+                                hoveredSegmentIndex = idx;
+                                updateControlPointLayer(idx);
+                            }
+                        } else {
+                            if (hoveredSegmentIndex !== -1) {
+                                hoveredSegmentIndex = -1;
+                                hideControlPointLayer();
+                            }
+                        }
+                    }
+                }
+                if (isDraggingControlNode) {
+                    console.log('RV2.8-B: FIN DRAG CONTROL, reactivando dragPan');
+                    isDraggingControlNode = false;
+                    draggedControlIndex = -1;
+                    if (map) { map.getCanvas().style.cursor = 'crosshair'; map.dragPan.enable(); }
+                    justDragged = true;
+                    setTimeout(() => justDragged = false, 100);
                 }
             });
             
@@ -388,6 +442,8 @@ require_admin();
                 if (confirm("🗑️ ¿Deseas eliminar este vértice del tramo?")) {
                     const idx = e.features[0].properties.index;
                     rvNodes.splice(idx, 1);
+                    hoveredSegmentIndex = -1;
+                    hideControlPointLayer();
                     updateDrawLayer();
                 }
             });
@@ -424,43 +480,83 @@ require_admin();
             map.getCanvas().style.cursor = mode === 'vias' ? 'crosshair' : '';
         }
 
-        function getBakedCoords(nodes) {
-            if (nodes.length === 0) return [];
-            let baked = [nodes[0].nodo];
-            for (let i = 0; i < nodes.length - 1; i++) {
-                let p0 = nodes[i].nodo;
-                let p1 = nodes[i].control;
-                let p2 = nodes[i + 1].nodo;
-                
-                if (p1) {
-                    const pasos = 20;
-                    for (let j = 1; j <= pasos; j++) {
-                        let t = j / pasos;
-                        let lng = Math.pow(1 - t, 2) * p0[0] + 2 * (1 - t) * t * p1[0] + Math.pow(t, 2) * p2[0];
-                        let lat = Math.pow(1 - t, 2) * p0[1] + 2 * (1 - t) * t * p1[1] + Math.pow(t, 2) * p2[1];
-                        baked.push([lng, lat]);
-                    }
-                } else {
-                    baked.push(p2);
-                }
+        function getBakedSegment(p0, p1, p2) {
+            if (!p1) return [p0, p2];
+            let baked = [];
+            const pasos = 20;
+            for (let j = 0; j <= pasos; j++) {
+                let t = j / pasos;
+                let lng = Math.pow(1 - t, 2) * p0[0] + 2 * (1 - t) * t * p1[0] + Math.pow(t, 2) * p2[0];
+                let lat = Math.pow(1 - t, 2) * p0[1] + 2 * (1 - t) * t * p1[1] + Math.pow(t, 2) * p2[1];
+                baked.push([lng, lat]);
             }
             return baked;
+        }
+
+        function getBakedCoords(nodes) {
+            if (nodes.length === 0) return [];
+            if (nodes.length === 1) return [nodes[0].nodo];
+            let baked = [];
+            for (let i = 0; i < nodes.length - 1; i++) {
+                let segment = getBakedSegment(nodes[i].nodo, nodes[i].control, nodes[i + 1].nodo);
+                if (i > 0) segment.shift(); // Evitar duplicar el punto de unión
+                baked.push(...segment);
+            }
+            return baked;
+        }
+
+        function updateControlPointLayer(idx) {
+            if (idx < 0 || idx >= rvNodes.length - 1) return hideControlPointLayer();
+            let p0 = rvNodes[idx].nodo;
+            let p1 = rvNodes[idx].control;
+            let p2 = rvNodes[idx+1].nodo;
+            
+            let controlPoint = p1 ? p1 : [(p0[0] + p2[0]) / 2, (p0[1] + p2[1]) / 2];
+            
+            console.log('RV2.8-B: Mostrando Punto Fantasma', { segmentIndex: idx, coord: controlPoint });
+            
+            if (map && map.getSource('draw-control-source')) {
+                map.getSource('draw-control-source').setData({ type: "Feature", properties: { segmentIndex: idx }, geometry: { type: "Point", coordinates: controlPoint } });
+            }
+        }
+        
+        function hideControlPointLayer() {
+            if (map && map.getSource('draw-control-source')) {
+                map.getSource('draw-control-source').setData({ type: "FeatureCollection", features: [] });
+            }
         }
 
         function updateDrawLayer() {
             if (map.getSource('draw-source')) {
                 const bakedCoords = getBakedCoords(rvNodes);
                 map.getSource('draw-source').setData({ type: "Feature", geometry: { type: "LineString", coordinates: bakedCoords } });
+                
+                const segmentFeatures = [];
+                for (let i = 0; i < rvNodes.length - 1; i++) {
+                    segmentFeatures.push({ type: "Feature", properties: { segmentIndex: i }, geometry: { type: "LineString", coordinates: getBakedSegment(rvNodes[i].nodo, rvNodes[i].control, rvNodes[i+1].nodo) } });
+                }
+                if (map.getSource('draw-line-hit-source')) {
+                    map.getSource('draw-line-hit-source').setData({ type: "FeatureCollection", features: segmentFeatures });
+                }
+                
                 map.getSource('draw-points').setData({ type: "FeatureCollection", features: rvNodes.map((n, i) => ({ type: "Feature", properties: { index: i }, geometry: { type: "Point", coordinates: n.nodo } })) });
             }
             document.getElementById('rvDrawCount').textContent = rvNodes.length + (rvNodes.length === 1 ? " punto" : " puntos");
             document.getElementById('btnRvFinish').disabled = rvNodes.length < 2;
         }
 
-        function rvUndo() { rvNodes.pop(); updateDrawLayer(); if (rvNodes.length === 0) document.getElementById('rvDrawPanel').style.display = 'none'; }
+        function rvUndo() { 
+            rvNodes.pop(); 
+            hoveredSegmentIndex = -1;
+            hideControlPointLayer();
+            updateDrawLayer(); 
+            if (rvNodes.length === 0) document.getElementById('rvDrawPanel').style.display = 'none'; 
+        }
         
         function rvCancel() { 
             rvNodes = []; 
+            hoveredSegmentIndex = -1;
+            hideControlPointLayer();
             updateDrawLayer(); 
             document.getElementById('rvDrawPanel').style.display = 'none'; 
             document.getElementById('panelFormularioRV').classList.remove('active'); 
