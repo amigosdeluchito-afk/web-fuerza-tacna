@@ -918,7 +918,7 @@ require_admin();
             let html = '';
             fotos.forEach(f => {
                 const isPortada = f.tipo === 'portada';
-                const isActivo = f.activo === 1;
+                const isActivo = String(f.activo) === '1';
                 const badgeTipo = isPortada ? '<span style="background:#10b981; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">PORTADA</span>' : `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; text-transform:uppercase;">${f.tipo}</span>`;
                 const badgeEstado = isActivo ? '' : '<span style="background:#ef4444; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">INACTIVA</span>';
                 
