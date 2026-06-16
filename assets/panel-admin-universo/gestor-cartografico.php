@@ -178,6 +178,33 @@ require_admin();
             </div>
         </div>
         
+        <!-- NUEVO PANEL: GALERÍA DE FOTOS (RV3-B2-A) -->
+        <div class="panel-lista" id="panelGaleriaRV">
+            <div class="rv-list-header">
+                <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📸 Galería de Vía</h3>
+                <p id="galeriaTramoNombre" style="color: #93c5fd; font-size: 13px; margin-top: -5px; margin-bottom: 15px; font-weight: bold;"></p>
+                
+                <form id="formSubirFotoRV" style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border: 1px dashed #3b82f6; margin-bottom: 15px;">
+                    <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">Subir Nueva Foto</label>
+                    <input type="file" id="rvFotoInput" accept="image/jpeg, image/png, image/webp" class="form-control" style="font-size: 12px; padding: 5px;" required>
+                    <select id="rvFotoTipo" class="form-control" style="font-size: 12px; padding: 5px; margin-top: 8px;" required>
+                        <option value="galeria">Galería Estándar</option>
+                        <option value="portada">Portada (Principal)</option>
+                        <option value="antes">Antes</option>
+                        <option value="despues">Después</option>
+                    </select>
+                    <button type="submit" id="btnSubirFotoRV" class="btn btn-primary" style="padding: 6px; font-size: 12px; margin-top: 8px;">Subir Foto</button>
+                    <div id="uploadFotoMsg" style="font-size: 11px; margin-top: 5px; font-weight: bold;"></div>
+                </form>
+            </div>
+            
+            <div id="listaFotosRVContainer" class="rv-list-scroll"></div>
+            
+            <div class="rv-list-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarGaleriaRV()">⬅️ Volver a Lista de Vías</button>
+            </div>
+        </div>
+        
         <!-- Panel de Formulario Red Vial -->
         <div class="panel-formulario" id="panelFormularioRV">
             <h3 style="margin-top:0; color:#f8fafc; font-size:18px; border-bottom:1px solid #1e293b; padding-bottom:10px;">🛣️ Guardar Tramo Vial</h3>
@@ -724,6 +751,7 @@ require_admin();
         function abrirListaRV() {
             document.getElementById('panelFormularioRV').classList.remove('active');
             document.getElementById('rvDrawPanel').style.display = 'none';
+            document.getElementById('panelGaleriaRV').classList.remove('active');
             document.getElementById('panelListaRV').classList.add('active');
             fetchListaRV();
         }
@@ -772,6 +800,7 @@ require_admin();
                     <div><strong style="color:#f8fafc;">🛣️ ${p.nombre}</strong>${badgeActivo}<br><span style="color:#94a3b8; font-size:11px;">Tipo: ${p.tipo} | Estado: ${p.estado}</span></div>
                     <div style="display:flex; gap:6px;">
                         <button type="button" class="btn" style="padding:6px; background:#4f46e5; color:white; min-width:30px;" onclick="centrarEnRV('${p.id}')" title="Ver en mapa">👁️</button>
+                        <button type="button" class="btn" style="padding:6px; background:#8b5cf6; color:white; min-width:30px;" onclick="abrirGaleriaRV('${p.id}', '${p.nombre.replace(/'/g, "\\'")}')" title="Galería de Fotos">📸</button>
                         <button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button>
                         ${btnToggle}
                     </div>
@@ -845,6 +874,97 @@ require_admin();
                     rvCancel();
                 } else { alert('Error: ' + data.error); }
             } catch(e) { alert('Error de conexión'); }
+        }
+        
+        // ==========================================
+        // LÓGICA DE FOTOS RED VIAL (RV3-B2)
+        // ==========================================
+        let currentGalleryTramoId = null;
+
+        function abrirGaleriaRV(id, nombre) {
+            currentGalleryTramoId = id;
+            document.getElementById('galeriaTramoNombre').textContent = 'Vía: ' + nombre;
+            document.getElementById('panelListaRV').classList.remove('active');
+            document.getElementById('panelGaleriaRV').classList.add('active');
+            document.getElementById('uploadFotoMsg').innerHTML = '';
+            document.getElementById('rvFotoInput').value = '';
+            fetchFotosRV();
+        }
+
+        function cerrarGaleriaRV() {
+            document.getElementById('panelGaleriaRV').classList.remove('active');
+            document.getElementById('panelListaRV').classList.add('active');
+            currentGalleryTramoId = null;
+        }
+
+        async function fetchFotosRV() {
+            if (!currentGalleryTramoId) return;
+            const container = document.getElementById('listaFotosRVContainer');
+            container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size: 12px;">⏳ Cargando fotos...</div>';
+            try {
+                const res = await fetch(`fotos_redvial_api.php?action=listar_admin&tramo_id=${currentGalleryTramoId}`);
+                const data = await res.json();
+                if (data.ok) renderFotosRV(data.fotos);
+                else container.innerHTML = `<div style="color:#ef4444; font-size: 12px; text-align:center;">❌ Error: ${data.error}</div>`;
+            } catch (e) { container.innerHTML = `<div style="color:#ef4444; font-size: 12px; text-align:center;">❌ Error de conexión al cargar fotos.</div>`; }
+        }
+
+        function renderFotosRV(fotos) {
+            const container = document.getElementById('listaFotosRVContainer');
+            if (!fotos || fotos.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#64748b; font-size: 12px;">No hay fotos para esta vía.</div>';
+                return;
+            }
+            let html = '';
+            fotos.forEach(f => {
+                const isPortada = f.tipo === 'portada';
+                const isActivo = f.activo === 1;
+                const badgeTipo = isPortada ? '<span style="background:#10b981; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">PORTADA</span>' : `<span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; text-transform:uppercase;">${f.tipo}</span>`;
+                const badgeEstado = isActivo ? '' : '<span style="background:#ef4444; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">INACTIVA</span>';
+                
+                html += `
+                <div style="background:#1e293b; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #334155; opacity: ${isActivo ? '1' : '0.5'}; display: flex; gap: 10px; align-items: center; transition: 0.2s;">
+                    <div style="width: 70px; height: 70px; flex-shrink: 0; background: #020617; border-radius: 6px; overflow: hidden; border: 1px solid #475569;">
+                        <img src="../universoobras/IMG/red-vial/${currentGalleryTramoId}/${f.archivo_thumb}?v=${Date.now()}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://via.placeholder.com/70x70/1e293b/94a3b8?text=Error'">
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px;">
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;">${badgeTipo} ${badgeEstado}</div>
+                        <div style="display:flex; gap: 4px;">
+                            ${!isPortada ? `<button class="btn" style="padding:6px; font-size:10px; background:#10b981; color:white;" onclick="marcarPortadaRV(${f.id})">⭐ Portada</button>` : ''}
+                            <button class="btn" style="padding:6px; font-size:10px; background:${isActivo ? '#ef4444' : '#3b82f6'}; color:white;" onclick="toggleActivoFotoRV(${f.id}, ${isActivo ? 0 : 1})">${isActivo ? '🚫 Ocultar' : '✅ Activar'}</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        document.getElementById('formSubirFotoRV')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentGalleryTramoId) return;
+            const btn = document.getElementById('btnSubirFotoRV'); const msg = document.getElementById('uploadFotoMsg');
+            const fileInput = document.getElementById('rvFotoInput'); const tipoInput = document.getElementById('rvFotoTipo');
+            if (fileInput.files.length === 0) return;
+            
+            btn.disabled = true; btn.textContent = '⏳ Subiendo...'; msg.innerHTML = '';
+            const fd = new FormData(); fd.append('action', 'upload'); fd.append('tramo_string_id', currentGalleryTramoId); fd.append('tipo', tipoInput.value); fd.append('foto', fileInput.files[0]);
+            
+            try {
+                const res = await fetch('fotos_redvial_api.php?action=upload', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.ok) { msg.innerHTML = '<span style="color:#10b981;">✅ Foto subida exitosamente</span>'; fileInput.value = ''; fetchFotosRV(); } 
+                else { msg.innerHTML = `<span style="color:#ef4444;">❌ ${data.error}</span>`; }
+            } catch (err) { msg.innerHTML = '<span style="color:#ef4444;">❌ Error de conexión al servidor.</span>'; } 
+            finally { btn.disabled = false; btn.textContent = 'Subir Foto'; setTimeout(() => { if(msg.textContent.includes('✅')) msg.innerHTML = ''; }, 3000); }
+        });
+
+        async function marcarPortadaRV(fotoId) {
+            if (!confirm('¿Marcar esta foto como la portada principal? La anterior pasará a ser galería normal.')) return;
+            try { const res = await fetch('fotos_redvial_api.php?action=update_meta', { method: 'POST', body: JSON.stringify({id: fotoId, tipo: 'portada'}) }); const data = await res.json(); if (data.ok) fetchFotosRV(); else alert('Error: ' + data.error); } catch (e) { alert('Error de conexión'); }
+        }
+        async function toggleActivoFotoRV(fotoId, activo) {
+            if (!confirm(`¿Estás seguro de ${activo ? 'mostrar' : 'ocultar'} esta foto?`)) return;
+            try { const res = await fetch('fotos_redvial_api.php?action=toggle_activo', { method: 'POST', body: JSON.stringify({id: fotoId, activo: activo}) }); const data = await res.json(); if (data.ok) fetchFotosRV(); else alert('Error: ' + data.error); } catch (e) { alert('Error de conexión'); }
         }
 
         // Enviar Formulario
