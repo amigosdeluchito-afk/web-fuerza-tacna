@@ -18,6 +18,7 @@ if ($action === 'create') {
     
     // RV3-C2: Nuevos campos estratégicos
     $mensaje_principal = isset($input['mensaje_principal']) && $input['mensaje_principal'] !== '' ? trim($input['mensaje_principal']) : null;
+    $distrito = isset($input['distrito']) && $input['distrito'] !== '' ? trim($input['distrito']) : null;
     $sector = isset($input['sector']) && $input['sector'] !== '' ? trim($input['sector']) : null;
     $tramo_desde = isset($input['tramo_desde']) && $input['tramo_desde'] !== '' ? trim($input['tramo_desde']) : null;
     $tramo_hasta = isset($input['tramo_hasta']) && $input['tramo_hasta'] !== '' ? trim($input['tramo_hasta']) : null;
@@ -26,6 +27,10 @@ if ($action === 'create') {
     $situacion_antes = isset($input['situacion_antes']) && $input['situacion_antes'] !== '' ? trim($input['situacion_antes']) : null;
     $situacion_ahora = isset($input['situacion_ahora']) && $input['situacion_ahora'] !== '' ? trim($input['situacion_ahora']) : null;
     
+    $longitud_valor = isset($input['longitud_valor']) && $input['longitud_valor'] !== '' ? (float)$input['longitud_valor'] : null;
+    $longitud_unidad = isset($input['longitud_unidad']) && in_array($input['longitud_unidad'], ['metros', 'km', 'cuadras']) ? $input['longitud_unidad'] : null;
+    $longitud_cuadras = isset($input['longitud_cuadras']) && $input['longitud_cuadras'] !== '' ? (float)$input['longitud_cuadras'] : null;
+
     $avance_fisico = isset($input['avance_fisico']) && $input['avance_fisico'] !== '' ? (int)$input['avance_fisico'] : null;
     if ($avance_fisico !== null && ($avance_fisico < 0 || $avance_fisico > 100)) $avance_fisico = 0;
     $monto_inversion = isset($input['monto_inversion']) && $input['monto_inversion'] !== '' ? (float)$input['monto_inversion'] : null;
@@ -44,10 +49,10 @@ if ($action === 'create') {
 
     try {
         $db = get_db_connection();
-        $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, descripcion, coordenadas, datos_edicion, activo, mensaje_principal, sector, tramo_desde, tramo_hasta, longitud, beneficiarios, situacion_antes, situacion_ahora, avance_fisico, monto_inversion, fecha_inicio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, descripcion, coordenadas, datos_edicion, activo, mensaje_principal, distrito, sector, tramo_desde, tramo_hasta, longitud, longitud_valor, longitud_unidad, longitud_cuadras, beneficiarios, situacion_antes, situacion_ahora, avance_fisico, monto_inversion, fecha_inicio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $string_id, $nombre, $tipo, $estado, $color, $descripcion, $json_coords, $json_edicion,
-            $mensaje_principal, $sector, $tramo_desde, $tramo_hasta, $longitud, $beneficiarios, $situacion_antes, $situacion_ahora, $avance_fisico, $monto_inversion, $fecha_inicio, $fecha_entrega
+            $mensaje_principal, $distrito, $sector, $tramo_desde, $tramo_hasta, $longitud, $longitud_valor, $longitud_unidad, $longitud_cuadras, $beneficiarios, $situacion_antes, $situacion_ahora, $avance_fisico, $monto_inversion, $fecha_inicio, $fecha_entrega
         ]);
         log_action('rv_crear', "Trazó tramo vial: $nombre");
         echo json_encode(['ok' => true]);
@@ -73,6 +78,7 @@ if ($action === 'update') {
     
     // RV3-C2: Nuevos campos estratégicos
     $mensaje_principal = isset($input['mensaje_principal']) && $input['mensaje_principal'] !== '' ? trim($input['mensaje_principal']) : null;
+    $distrito = isset($input['distrito']) && $input['distrito'] !== '' ? trim($input['distrito']) : null;
     $sector = isset($input['sector']) && $input['sector'] !== '' ? trim($input['sector']) : null;
     $tramo_desde = isset($input['tramo_desde']) && $input['tramo_desde'] !== '' ? trim($input['tramo_desde']) : null;
     $tramo_hasta = isset($input['tramo_hasta']) && $input['tramo_hasta'] !== '' ? trim($input['tramo_hasta']) : null;
@@ -81,6 +87,10 @@ if ($action === 'update') {
     $situacion_antes = isset($input['situacion_antes']) && $input['situacion_antes'] !== '' ? trim($input['situacion_antes']) : null;
     $situacion_ahora = isset($input['situacion_ahora']) && $input['situacion_ahora'] !== '' ? trim($input['situacion_ahora']) : null;
     
+    $longitud_valor = isset($input['longitud_valor']) && $input['longitud_valor'] !== '' ? (float)$input['longitud_valor'] : null;
+    $longitud_unidad = isset($input['longitud_unidad']) && in_array($input['longitud_unidad'], ['metros', 'km', 'cuadras']) ? $input['longitud_unidad'] : null;
+    $longitud_cuadras = isset($input['longitud_cuadras']) && $input['longitud_cuadras'] !== '' ? (float)$input['longitud_cuadras'] : null;
+
     $avance_fisico = isset($input['avance_fisico']) && $input['avance_fisico'] !== '' ? (int)$input['avance_fisico'] : null;
     if ($avance_fisico !== null && ($avance_fisico < 0 || $avance_fisico > 100)) $avance_fisico = 0;
     $monto_inversion = isset($input['monto_inversion']) && $input['monto_inversion'] !== '' ? (float)$input['monto_inversion'] : null;
@@ -96,10 +106,10 @@ if ($action === 'update') {
 
     try {
         $db = get_db_connection();
-        $stmt = $db->prepare("UPDATE panel_tramos_viales SET nombre=?, tipo=?, estado=?, color=?, descripcion=?, coordenadas=?, datos_edicion=?, mensaje_principal=?, sector=?, tramo_desde=?, tramo_hasta=?, longitud=?, beneficiarios=?, situacion_antes=?, situacion_ahora=?, avance_fisico=?, monto_inversion=?, fecha_inicio=?, fecha_entrega=? WHERE string_id=?");
+        $stmt = $db->prepare("UPDATE panel_tramos_viales SET nombre=?, tipo=?, estado=?, color=?, descripcion=?, coordenadas=?, datos_edicion=?, mensaje_principal=?, distrito=?, sector=?, tramo_desde=?, tramo_hasta=?, longitud=?, longitud_valor=?, longitud_unidad=?, longitud_cuadras=?, beneficiarios=?, situacion_antes=?, situacion_ahora=?, avance_fisico=?, monto_inversion=?, fecha_inicio=?, fecha_entrega=? WHERE string_id=?");
         $stmt->execute([
             $nombre, $tipo, $estado, $color, $descripcion, $json_coords, $json_edicion,
-            $mensaje_principal, $sector, $tramo_desde, $tramo_hasta, $longitud, $beneficiarios, $situacion_antes, $situacion_ahora, $avance_fisico, $monto_inversion, $fecha_inicio, $fecha_entrega,
+            $mensaje_principal, $distrito, $sector, $tramo_desde, $tramo_hasta, $longitud, $longitud_valor, $longitud_unidad, $longitud_cuadras, $beneficiarios, $situacion_antes, $situacion_ahora, $avance_fisico, $monto_inversion, $fecha_inicio, $fecha_entrega,
             $string_id
         ]);
         log_action('rv_editar', "Editó tramo vial: $nombre");
@@ -169,10 +179,14 @@ if ($action === 'listar_admin') {
                     'color' => $row['color'],
                     'descripcion' => $row['descripcion'] ?? '',
                     'mensaje_principal' => $row['mensaje_principal'] ?? null,
+                    'distrito' => $row['distrito'] ?? null,
                     'sector' => $row['sector'] ?? null,
                     'tramo_desde' => $row['tramo_desde'] ?? null,
                     'tramo_hasta' => $row['tramo_hasta'] ?? null,
                     'longitud' => $row['longitud'] ?? null,
+                    'longitud_valor' => $row['longitud_valor'] ?? null,
+                    'longitud_unidad' => $row['longitud_unidad'] ?? null,
+                    'longitud_cuadras' => $row['longitud_cuadras'] ?? null,
                     'beneficiarios' => $row['beneficiarios'] ?? null,
                     'situacion_antes' => $row['situacion_antes'] ?? null,
                     'situacion_ahora' => $row['situacion_ahora'] ?? null,
@@ -219,10 +233,14 @@ if ($action === 'geojson') {
         try { 
             $db->exec("ALTER TABLE panel_tramos_viales 
                 ADD COLUMN mensaje_principal VARCHAR(255) NULL AFTER descripcion,
+                ADD COLUMN distrito VARCHAR(120) NULL AFTER sector,
                 ADD COLUMN sector VARCHAR(150) NULL AFTER mensaje_principal,
                 ADD COLUMN tramo_desde VARCHAR(150) NULL AFTER sector,
                 ADD COLUMN tramo_hasta VARCHAR(150) NULL AFTER tramo_desde,
                 ADD COLUMN longitud VARCHAR(50) NULL AFTER tramo_hasta,
+                ADD COLUMN longitud_valor DECIMAL(10,2) NULL AFTER longitud,
+                ADD COLUMN longitud_unidad VARCHAR(30) NULL AFTER longitud_valor,
+                ADD COLUMN longitud_cuadras DECIMAL(10,1) NULL AFTER longitud_unidad,
                 ADD COLUMN beneficiarios VARCHAR(100) NULL AFTER longitud,
                 ADD COLUMN situacion_antes TEXT NULL AFTER beneficiarios,
                 ADD COLUMN situacion_ahora TEXT NULL AFTER situacion_antes,
@@ -255,10 +273,14 @@ if ($action === 'geojson') {
                     'color' => $row['color'],
                     'descripcion' => $row['descripcion'] ?? '',
                     'mensaje_principal' => $row['mensaje_principal'] ?? null,
+                    'distrito' => $row['distrito'] ?? null,
                     'sector' => $row['sector'] ?? null,
                     'tramo_desde' => $row['tramo_desde'] ?? null,
                     'tramo_hasta' => $row['tramo_hasta'] ?? null,
                     'longitud' => $row['longitud'] ?? null,
+                    'longitud_valor' => $row['longitud_valor'] ?? null,
+                    'longitud_unidad' => $row['longitud_unidad'] ?? null,
+                    'longitud_cuadras' => $row['longitud_cuadras'] ?? null,
                     'beneficiarios' => $row['beneficiarios'] ?? null,
                     'situacion_antes' => $row['situacion_antes'] ?? null,
                     'situacion_ahora' => $row['situacion_ahora'] ?? null,

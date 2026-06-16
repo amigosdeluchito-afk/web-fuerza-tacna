@@ -705,12 +705,9 @@ function rv_formatMoney(val) {
     if (isNaN(num) || num <= 0) return '';
     if (num >= 1000000) {
         let m = num / 1000000;
-        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' M';
-    } else if (num >= 1000) {
-        let m = num / 1000;
-        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' K';
+        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' millones';
     }
-    return 'S/ ' + num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    return 'S/ ' + num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 function rv_formatDate(dateStr) {
@@ -718,6 +715,23 @@ function rv_formatDate(dateStr) {
     const parts = dateStr.split('-');
     if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
     return dateStr;
+}
+
+function rv_formatBeneficiarios(val) {
+    if (!val) return '';
+    const str = String(val).trim();
+    if (/^\d+$/.test(str)) return parseInt(str, 10).toLocaleString('en-US') + ' beneficiarios';
+    return str;
+}
+
+function rv_formatLongitud(props) {
+    const val = props.longitud_valor;
+    const unit = props.longitud_unidad;
+    if (rv_hasValue(val) && rv_hasValue(unit)) {
+        return `${val} ${unit}`;
+    }
+    // Fallback retrocompatibilidad
+    return rv_hasValue(props.longitud) ? props.longitud : '';
 }
 
 function abrirPanelRedVial(props = {}) {
@@ -734,11 +748,12 @@ function abrirPanelRedVial(props = {}) {
 
     // RV3-C3: Extracción Segura de Nuevos Campos Estratégicos
     const mensajeSafe = rv_escapeHTML(props.mensaje_principal);
+    const distritoSafe = rv_escapeHTML(props.distrito);
     const sectorSafe = rv_escapeHTML(props.sector);
     const desdeSafe = rv_escapeHTML(props.tramo_desde);
     const hastaSafe = rv_escapeHTML(props.tramo_hasta);
-    const longitudSafe = rv_escapeHTML(props.longitud);
-    const benefSafe = rv_escapeHTML(props.beneficiarios);
+    const longitudSafe = rv_escapeHTML(rv_formatLongitud(props));
+    const benefSafe = rv_escapeHTML(rv_formatBeneficiarios(props.beneficiarios));
     const antesSafe = rv_escapeHTML(props.situacion_antes).replace(/\n/g, '<br>');
     const ahoraSafe = rv_escapeHTML(props.situacion_ahora).replace(/\n/g, '<br>');
     const inicioSafe = rv_formatDate(props.fecha_inicio);
@@ -762,10 +777,21 @@ function abrirPanelRedVial(props = {}) {
     let htmlMensaje = '';
     if (rv_hasValue(mensajeSafe)) htmlMensaje = `<div class="rd-rv-hook" style="color: ${colorSafe};">${mensajeSafe}</div>`;
 
+    // Ubicación (Debajo del título)
+    let locParts = [];
+    if (rv_hasValue(distritoSafe)) locParts.push(`<strong>${distritoSafe}</strong>`);
+    if (rv_hasValue(sectorSafe)) locParts.push(`Sector ${sectorSafe}`);
+    let htmlUbicacion = locParts.length > 0 ? `<div class="rd-rv-location"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg> ${locParts.join(' &middot; ')}</div>` : '';
+
     // NIVEL 1: PROTAGONISTAS VISUALES (Métricas Principales)
     let metricsItems = '';
     if (rv_hasValue(montoSafe)) metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">💰 Inversión</span></div>`;
-    if (rv_hasValue(longitudSafe)) metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">📏 Longitud</span></div>`;
+    if (rv_hasValue(longitudSafe)) {
+        let cuadrasHtml = '';
+        const cVal = props.longitud_cuadras;
+        if (rv_hasValue(cVal) && parseFloat(cVal) > 0) cuadrasHtml = `<span class="rd-rv-metric-sub">Equivale a aprox. ${cVal} cuadras</span>`;
+        metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">📏 Longitud</span>${cuadrasHtml}</div>`;
+    }
     if (hasAvance) {
         let avanceTxt = `${avance}%`;
         if (estLow.includes('entregado') && parseInt(avance) === 100) avanceTxt = '100%';
@@ -826,6 +852,7 @@ function abrirPanelRedVial(props = {}) {
                     <span class="pill pill--tag">${tipoSafe}</span>
                 </div>
                 <h2 class="rd-rv-title" style="color: ${colorSafe};">${nombreSafe}</h2>
+                ${htmlUbicacion}
                 ${htmlMensaje}
             </div>
             <div class="rd-rv-body">

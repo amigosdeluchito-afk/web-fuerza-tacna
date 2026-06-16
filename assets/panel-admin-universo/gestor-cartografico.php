@@ -228,12 +228,21 @@ require_admin();
 
                 <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
                     <div style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 4px;">🛣️ 3. Alcance del Tramo</div>
-                    <div class="form-group"><label>Sector / Zona (Opcional)</label><input type="text" id="rvSector" class="form-control" placeholder="Ej: Cono Sur"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="form-group" style="flex:1;"><label>Distrito</label><input type="text" id="rvDistrito" class="form-control" placeholder="Ej: Gregorio Albarracín"></div>
+                        <div class="form-group" style="flex:1;"><label>Sector / Zona</label><input type="text" id="rvSector" class="form-control" placeholder="Ej: Viñani"></div>
+                    </div>
                     <div style="display: flex; gap: 8px;">
                         <div class="form-group" style="flex:1;"><label>Desde</label><input type="text" id="rvDesde" class="form-control" placeholder="Referencia inicio"></div>
                         <div class="form-group" style="flex:1;"><label>Hasta</label><input type="text" id="rvHasta" class="form-control" placeholder="Referencia fin"></div>
                     </div>
-                    <div class="form-group"><label>Longitud (Opcional)</label><input type="text" id="rvLongitud" class="form-control" placeholder="Ej: 1.2 km o 850 metros"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="form-group" style="flex:2;"><label>Longitud (Num.)</label><input type="number" step="0.01" min="0" id="rvLongitudValor" class="form-control" placeholder="Ej: 850"></div>
+                        <div class="form-group" style="flex:1;"><label>Unidad</label><select id="rvLongitudUnidad" class="form-control" style="padding: 10px 5px;"><option value="metros">Metros</option><option value="km">Kilómetros</option><option value="cuadras">Cuadras</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Equivalencia (Cuadras)</label><input type="number" step="0.1" min="0" id="rvLongitudCuadras" class="form-control" placeholder="Ej: 5"><small style="color:#64748b; font-size:10px;">Opcional: Aprox. cuántas cuadras representa.</small></div>
+                    <!-- Campo legacy oculto -->
+                    <input type="hidden" id="rvLongitud">
                 </div>
 
                 <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
@@ -897,10 +906,14 @@ require_admin();
             
             // RV3-C2: Nuevos campos estratégicos seguros
             document.getElementById('rvMensaje').value = feature.properties.mensaje_principal || '';
+            document.getElementById('rvDistrito').value = feature.properties.distrito || '';
             document.getElementById('rvSector').value = feature.properties.sector || '';
             document.getElementById('rvDesde').value = feature.properties.tramo_desde || '';
             document.getElementById('rvHasta').value = feature.properties.tramo_hasta || '';
             document.getElementById('rvLongitud').value = feature.properties.longitud || '';
+            document.getElementById('rvLongitudValor').value = feature.properties.longitud_valor || '';
+            document.getElementById('rvLongitudUnidad').value = feature.properties.longitud_unidad || 'metros';
+            document.getElementById('rvLongitudCuadras').value = feature.properties.longitud_cuadras || '';
             document.getElementById('rvBeneficiarios').value = feature.properties.beneficiarios || '';
             document.getElementById('rvAntes').value = feature.properties.situacion_antes || '';
             document.getElementById('rvAhora').value = feature.properties.situacion_ahora || '';
@@ -1060,10 +1073,14 @@ require_admin();
                 coordenadas: bakedCoords, 
                 datos_edicion: rvNodes,
                 mensaje_principal: document.getElementById('rvMensaje').value,
+                distrito: document.getElementById('rvDistrito').value,
                 sector: document.getElementById('rvSector').value,
                 tramo_desde: document.getElementById('rvDesde').value,
                 tramo_hasta: document.getElementById('rvHasta').value,
                 longitud: document.getElementById('rvLongitud').value,
+                longitud_valor: document.getElementById('rvLongitudValor').value,
+                longitud_unidad: document.getElementById('rvLongitudUnidad').value,
+                longitud_cuadras: document.getElementById('rvLongitudCuadras').value,
                 beneficiarios: document.getElementById('rvBeneficiarios').value,
                 situacion_antes: document.getElementById('rvAntes').value,
                 situacion_ahora: document.getElementById('rvAhora').value,
