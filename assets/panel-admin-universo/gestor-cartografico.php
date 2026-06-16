@@ -25,7 +25,7 @@ require_admin();
         .panel-formulario { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; padding: 25px; display: none; flex-direction: column; overflow-y: auto; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; }
         .panel-formulario.active { display: flex; }
         
-        .panel-lista { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; padding: 25px; display: none; flex-direction: column; overflow-y: auto; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; }
+        .panel-lista { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; display: none; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; height: 100%; }
         .panel-lista.active { display: flex; }
         
         .form-group { margin-bottom: 15px; }
@@ -136,33 +136,42 @@ require_admin();
         </div>
         
         <div class="panel-lista" id="panelLista">
-            <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Referencias Guardadas</h3>
-            <div id="listaReferenciasContainer" style="flex: 1; overflow-y: auto; margin-bottom: 15px;"></div>
-            <button type="button" class="btn btn-secondary" onclick="cerrarLista()">❌ Volver al Mapa</button>
+            <div style="flex-shrink: 0; padding: 25px 25px 15px 25px;">
+                <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Referencias Guardadas</h3>
+            </div>
+            <div id="listaReferenciasContainer" style="flex: 1; overflow-y: auto; padding: 0 25px 15px 25px;"></div>
+            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a;">
+                <button type="button" class="btn btn-secondary" onclick="cerrarLista()">❌ Volver al Mapa</button>
+            </div>
         </div>
         
         <div class="panel-lista" id="panelListaRV">
-            <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Vías Guardadas</h3>
-            
-            <!-- Controles de Búsqueda y Filtros -->
-            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
-                <input type="text" id="filtroNombreRV" class="form-control" placeholder="🔍 Buscar por nombre..." oninput="renderListaRV()">
-                <div style="display: flex; gap: 8px;">
-                    <select id="filtroTipoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
-                        <option value="">Todos los tipos</option><option value="Local">Local</option><option value="Provincial">Provincial</option><option value="Regional">Regional</option>
-                    </select>
-                    <select id="filtroEstadoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
-                        <option value="">Todos los estados</option><option value="En estudios">En estudios</option><option value="Buena Pro">Buena Pro</option><option value="En ejecución">En ejecución</option><option value="Paralizado">Paralizado</option><option value="Transferencia">Transferencia</option><option value="Entregado">Entregado</option>
-                    </select>
-                    <select id="filtroVisibilidadRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
-                        <option value="">Visibilidad (Todas)</option><option value="1">Solo Activas</option><option value="0">Solo Inactivas</option>
-                    </select>
+            <div style="flex-shrink: 0; padding: 25px 25px 0 25px;">
+                <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Vías Guardadas</h3>
+                
+                <!-- Controles de Búsqueda y Filtros -->
+                <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <input type="text" id="filtroNombreRV" class="form-control" placeholder="🔍 Buscar por nombre..." oninput="renderListaRV()">
+                    <div style="display: flex; gap: 8px;">
+                        <select id="filtroTipoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                            <option value="">Todos los tipos</option><option value="Local">Local</option><option value="Provincial">Provincial</option><option value="Regional">Regional</option>
+                        </select>
+                        <select id="filtroEstadoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                            <option value="">Todos los estados</option><option value="En estudios">En estudios</option><option value="Buena Pro">Buena Pro</option><option value="En ejecución">En ejecución</option><option value="Paralizado">Paralizado</option><option value="Transferencia">Transferencia</option><option value="Entregado">Entregado</option>
+                        </select>
+                        <select id="filtroVisibilidadRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                            <option value="">Visibilidad (Todas)</option><option value="1">Solo Activas</option><option value="0">Solo Inactivas</option>
+                        </select>
+                    </div>
+                    <div id="contadorRV" style="font-size: 11px; color: #94a3b8; text-align: right;"></div>
                 </div>
-                <div id="contadorRV" style="font-size: 11px; color: #94a3b8; text-align: right;"></div>
             </div>
 
-            <div id="listaRvContainer" style="flex: 1; overflow-y: auto; margin-bottom: 15px;"></div>
-            <button type="button" class="btn btn-secondary" onclick="cerrarListaRV()">❌ Volver al Mapa</button>
+            <div id="listaRvContainer" style="flex: 1; overflow-y: auto; padding: 0 25px 15px 25px;"></div>
+            
+            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a;">
+                <button type="button" class="btn btn-secondary" onclick="cerrarListaRV()">❌ Volver al Mapa</button>
+            </div>
         </div>
         
         <!-- Panel de Formulario Red Vial -->
