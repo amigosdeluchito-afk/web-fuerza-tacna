@@ -717,9 +717,14 @@ function abrirPanelRedVial(props = {}) {
 
     panel.innerHTML = `
         <div class="rd-rv-panel" style="position: relative;">
-            <button id="btnCerrarRV" class="sheet-close" title="Cerrar panel">
+            <button id="btnCerrarRV" class="sheet-close" title="Cerrar panel" style="z-index: 10;">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
+            <!-- Contenedor Hero Image (Cargado en modo Lazy) -->
+            <div id="rv-hero-container" style="display: none; width: 100%; height: 200px; background-color: #f1f5f9; background-size: cover; background-position: center; position: relative;">
+                <!-- Sutil degradado para que se funda con la cabecera -->
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to bottom, transparent, rgba(253, 245, 247, 0.7));"></div>
+            </div>
             <div class="rd-rv-header" style="border-left-color: ${colorSafe};">
                 <div class="rd-rv-pills">
                     <span class="pill ${estadoClass}">${estadoSafe}</span>
@@ -743,6 +748,29 @@ function abrirPanelRedVial(props = {}) {
     panel.querySelector('#btnCompartirRV').addEventListener('click', () => {
         window.rv_compartirViaSeguro(idEncoded, props.nombre || 'Tramo Vial'); 
     });
+    
+    // Petición Asíncrona (Lazy Load) de la Galería Pública
+    if (rawId) {
+        fetch(`../panel-admin-universo/fotos_redvial_api.php?action=listar_publico&tramo_id=${idEncoded}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok && data.fotos && data.fotos.length > 0) {
+                    // Buscar la foto marcada como portada
+                    const portada = data.fotos.find(f => f.tipo === 'portada');
+                    if (portada) {
+                        const heroEl = document.getElementById('rv-hero-container');
+                        if (heroEl) {
+                            const imgUrl = `IMG/red-vial/${idEncoded}/${encodeURIComponent(portada.archivo)}`;
+                            heroEl.style.backgroundImage = `url('${imgUrl}')`;
+                            heroEl.style.display = 'block';
+                        }
+                    }
+                }
+            })
+            .catch(err => {
+                console.warn("[Red Vial] Ocurrió un error al consultar la galería pública:", err);
+            });
+    }
 
     panel.classList.add('is-active');
 }
