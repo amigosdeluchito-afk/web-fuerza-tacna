@@ -229,7 +229,23 @@ require_admin();
                 <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
                     <div style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 4px;">🛣️ 3. Alcance del Tramo</div>
                     <div style="display: flex; gap: 8px;">
-                        <div class="form-group" style="flex:1;"><label>Distrito</label><input type="text" id="rvDistrito" class="form-control" placeholder="Ej: Gregorio Albarracín"></div>
+                        <div class="form-group" style="flex:1;">
+                            <label>Distrito</label>
+                            <select id="rvDistrito" class="form-control" style="padding: 10px 5px;">
+                                <option value="">Otro / Sin especificar</option>
+                                <option value="Tacna">Tacna</option>
+                                <option value="Alto de la Alianza">Alto de la Alianza</option>
+                                <option value="Ciudad Nueva">Ciudad Nueva</option>
+                                <option value="Gregorio Albarracín">Gregorio Albarracín</option>
+                                <option value="Pocollay">Pocollay</option>
+                                <option value="Calana">Calana</option>
+                                <option value="Inclán">Inclán</option>
+                                <option value="Pachía">Pachía</option>
+                                <option value="Palca">Palca</option>
+                                <option value="Sama">Sama</option>
+                                <option value="La Yarada Los Palos">La Yarada Los Palos</option>
+                            </select>
+                        </div>
                         <div class="form-group" style="flex:1;"><label>Sector / Zona</label><input type="text" id="rvSector" class="form-control" placeholder="Ej: Viñani"></div>
                     </div>
                     <div style="display: flex; gap: 8px;">
@@ -439,6 +455,36 @@ require_admin();
                         const features = map.queryRenderedFeatures(bbox, { layers: ['roads-major', 'roads-minor'] });
                         let detName = features.find(f => f.properties && f.properties.name)?.properties.name;
                         document.getElementById('rvNombre').value = detName || 'Tramo vial sin nombre';
+                        
+                        // === Sugerencia Inteligente de Sector (RV3-C2.2-B) ===
+                        const inputSector = document.getElementById('rvSector');
+                        if (inputSector && inputSector.value.trim() === '') {
+                            // Ampliamos el área de búsqueda para capturar urbanizaciones cercanas
+                            const bboxPlaces = [ [e.point.x - 30, e.point.y - 30], [e.point.x + 30, e.point.y + 30] ];
+                            const placeFeatures = map.queryRenderedFeatures(bboxPlaces, { layers: ['places-text'] });
+                            
+                            let suggestedSector = null;
+                            for (let p of placeFeatures) {
+                                if (p.properties && ['neighbourhood', 'suburb', 'locality'].includes(p.properties.kind)) {
+                                    suggestedSector = p.properties.name;
+                                    break;
+                                }
+                            }
+                            if (!suggestedSector && placeFeatures.length > 0) suggestedSector = placeFeatures[0].properties.name;
+                            
+                            if (suggestedSector) {
+                                inputSector.value = suggestedSector;
+                                let msg = document.getElementById('rvSectorMsg');
+                                if (!msg) {
+                                    msg = document.createElement('small');
+                                    msg.id = 'rvSectorMsg';
+                                    msg.style.cssText = 'color:#3b82f6; font-size:10px; display:block; margin-top:4px; font-weight:bold;';
+                                    inputSector.parentNode.appendChild(msg);
+                                }
+                                msg.textContent = '✨ Sugerido según mapa';
+                                setTimeout(() => { if(msg) msg.textContent = ''; }, 6000);
+                            }
+                        }
                     }
                     
                     updateDrawLayer();
