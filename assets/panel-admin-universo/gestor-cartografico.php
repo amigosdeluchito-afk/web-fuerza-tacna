@@ -25,7 +25,7 @@ require_admin();
         .panel-formulario { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; padding: 25px; display: none; flex-direction: column; overflow-y: auto; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; }
         .panel-formulario.active { display: flex; }
         
-        .panel-lista { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; display: none; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; height: 100%; overflow: hidden; }
+        .panel-lista { width: 350px; background: #0f172a; border-left: 1px solid #1e293b; display: none; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 20; height: 100%; overflow: hidden; outline: 3px solid red; }
         .panel-lista.active { display: flex; }
         
         .form-group { margin-bottom: 15px; }
@@ -136,17 +136,17 @@ require_admin();
         </div>
         
         <div class="panel-lista" id="panelLista">
-            <div style="flex-shrink: 0; padding: 25px 25px 15px 25px;">
+            <div style="flex-shrink: 0; padding: 25px 25px 15px 25px; outline: 2px solid yellow;">
                 <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Referencias Guardadas</h3>
             </div>
-            <div id="listaReferenciasContainer" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 25px 15px 25px;"></div>
-            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a; position: sticky; bottom: 0; z-index: 5;">
+            <div id="listaReferenciasContainer" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 25px 15px 25px; outline: 2px solid lime;"></div>
+            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a; position: sticky; bottom: 0; z-index: 5; outline: 2px solid cyan;">
                 <button type="button" class="btn btn-secondary" onclick="cerrarLista()">❌ Volver al Mapa</button>
             </div>
         </div>
         
         <div class="panel-lista" id="panelListaRV">
-            <div style="flex-shrink: 0; padding: 25px 25px 0 25px;">
+            <div style="flex-shrink: 0; padding: 25px 25px 0 25px; outline: 2px solid yellow;">
                 <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Vías Guardadas</h3>
                 
                 <!-- Controles de Búsqueda y Filtros -->
@@ -167,9 +167,9 @@ require_admin();
                 </div>
             </div>
 
-            <div id="listaRvContainer" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 25px 15px 25px;"></div>
+            <div id="listaRvContainer" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 25px 15px 25px; outline: 2px solid lime;"></div>
             
-            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a; position: sticky; bottom: 0; z-index: 5;">
+            <div style="flex-shrink: 0; padding: 15px 25px 25px 25px; border-top: 1px solid #1e293b; background: #0f172a; position: sticky; bottom: 0; z-index: 5; outline: 2px solid cyan;">
                 <button type="button" class="btn btn-secondary" onclick="cerrarListaRV()">❌ Volver al Mapa</button>
             </div>
         </div>
