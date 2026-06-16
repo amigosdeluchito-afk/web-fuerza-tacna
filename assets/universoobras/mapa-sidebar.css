@@ -316,6 +316,25 @@
 }
 .btn-share:hover { background: #10b981; color: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
 
+/* Galería Pública Red Vial */
+.rd-rv-gallery {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.rd-rv-gallery::-webkit-scrollbar { height: 6px; }
+.rd-rv-gallery::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.rd-rv-thumb {
+  width: 64px; height: 64px; flex-shrink: 0; border-radius: 8px;
+  background-color: #f1f5f9; background-size: cover; background-position: center;
+  cursor: pointer; transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.rd-rv-thumb:hover { transform: translateY(-2px); opacity: 1 !important; }
+
 /* === Apartado: Volver a la Web (Dentro del Sidebar) === */
 .fp-home-btn {
   display: grid;

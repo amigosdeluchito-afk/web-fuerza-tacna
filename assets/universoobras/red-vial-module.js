@@ -735,6 +735,7 @@ function abrirPanelRedVial(props = {}) {
             <div class="rd-rv-body">
                 ${descSafe ? `<p>${descSafe}</p>` : `<p style="color:#94a3b8; font-style:italic;">No hay descripción oficial disponible para este tramo.</p>`}
             </div>
+            <div id="rv-gallery-container" style="display: none; padding: 0 20px 15px 20px;"></div>
             <div class="rd-rv-footer">
                 <button id="btnCompartirRV" class="btn-share">🔗 Compartir Vía</button>
             </div>
@@ -755,14 +756,44 @@ function abrirPanelRedVial(props = {}) {
             .then(res => res.json())
             .then(data => {
                 if (data.ok && data.fotos && data.fotos.length > 0) {
-                    // Buscar la foto marcada como portada
-                    const portada = data.fotos.find(f => f.tipo === 'portada');
+                    // Buscar la foto marcada como portada, o usar la primera como fallback
+                    const portada = data.fotos.find(f => f.tipo === 'portada') || data.fotos[0];
+                    const heroEl = document.getElementById('rv-hero-container');
+                    
                     if (portada) {
-                        const heroEl = document.getElementById('rv-hero-container');
                         if (heroEl) {
                             const imgUrl = `IMG/red-vial/${idEncoded}/${encodeURIComponent(portada.archivo)}`;
                             heroEl.style.backgroundImage = `url('${imgUrl}')`;
                             heroEl.style.display = 'block';
+                        }
+
+                        // Mostrar mini galería si hay más de 1 foto
+                        if (data.fotos.length > 1) {
+                            const galContainer = document.getElementById('rv-gallery-container');
+                            if (galContainer) {
+                                let galHtml = '<div class="rd-rv-gallery">';
+                                data.fotos.forEach((f) => {
+                                    const thumbUrl = `IMG/red-vial/${idEncoded}/${encodeURIComponent(f.archivo_thumb)}`;
+                                    const fullUrl = `IMG/red-vial/${idEncoded}/${encodeURIComponent(f.archivo)}`;
+                                    const isActive = f.id === portada.id;
+                                    const borderStyle = isActive ? `border: 2px solid ${colorSafe}; opacity: 1;` : `border: 2px solid transparent; opacity: 0.6;`;
+                                    galHtml += `<div class="rd-rv-thumb" data-full="${fullUrl}" style="background-image: url('${thumbUrl}'); ${borderStyle}"></div>`;
+                                });
+                                galHtml += '</div>';
+                                galContainer.innerHTML = galHtml;
+                                galContainer.style.display = 'block';
+
+                                const thumbs = galContainer.querySelectorAll('.rd-rv-thumb');
+                                thumbs.forEach(th => {
+                                    th.addEventListener('click', function() {
+                                        const fullSrc = this.getAttribute('data-full');
+                                        if (heroEl) heroEl.style.backgroundImage = `url('${fullSrc}')`;
+                                        thumbs.forEach(t => { t.style.border = '2px solid transparent'; t.style.opacity = '0.6'; });
+                                        this.style.border = `2px solid ${colorSafe}`;
+                                        this.style.opacity = '1';
+                                    });
+                                });
+                            }
                         }
                     }
                 }
