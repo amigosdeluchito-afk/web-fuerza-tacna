@@ -343,7 +343,16 @@ require_admin();
             });
 
             map.on('mousedown', 'draw-points-hit', (e) => {
-                if (currentMode !== 'vias' || e.button !== 0) return;
+                const button = e.originalEvent ? e.originalEvent.button : 0;
+                
+                console.log('NODE MOUSEDOWN', {
+                    eButton: e.button,
+                    originalButton: e.originalEvent?.button,
+                    currentMode,
+                    features: e.features
+                });
+
+                if (currentMode !== 'vias' || button !== 0) return;
                 e.preventDefault();
                 if (e.originalEvent) {
                     e.originalEvent.preventDefault();
