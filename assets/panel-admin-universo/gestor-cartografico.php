@@ -447,6 +447,22 @@ require_admin();
                     updateDrawLayer();
                 }
             });
+            
+            map.on('contextmenu', 'draw-control-hit', (e) => {
+                if (currentMode !== 'vias') return;
+                
+                const idx = e.features[0].properties.segmentIndex;
+                
+                console.log('REMOVE CURVE', idx);
+                console.log('BEFORE CONTROL', rvNodes[idx].control);
+                
+                rvNodes[idx].control = null;
+                
+                console.log('AFTER CONTROL', rvNodes[idx].control);
+                
+                updateControlPointLayer(idx);
+                updateDrawLayer();
+            });
         }
         
         initGestorCartografico();
