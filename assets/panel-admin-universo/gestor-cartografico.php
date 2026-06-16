@@ -198,7 +198,7 @@ require_admin();
                     "tramos-viales": { type: "geojson", data: "mapa_redvial_api.php?action=geojson" },
                     "draw-source": { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } } },
                     "draw-line-hit-source": { type: "geojson", data: { type: "FeatureCollection", features: [] } },
-                    "draw-points": { type: "geojson", data: { type: "FeatureCollection", features: [] } }
+                    "draw-points": { type: "geojson", data: { type: "FeatureCollection", features: [] } },
                     "draw-control-source": { type: "geojson", data: { type: "FeatureCollection", features: [] } }
                 },
                 layers: [
