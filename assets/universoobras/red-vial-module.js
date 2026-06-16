@@ -705,10 +705,10 @@ function rv_formatMoney(val) {
     if (isNaN(num) || num <= 0) return '';
     if (num >= 1000000) {
         let m = num / 1000000;
-        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Millones';
+        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' M';
     } else if (num >= 1000) {
         let m = num / 1000;
-        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' Mil';
+        return 'S/ ' + (m % 1 === 0 ? m : m.toFixed(1)) + ' K';
     }
     return 'S/ ' + num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
@@ -756,36 +756,40 @@ function abrirPanelRedVial(props = {}) {
     else if (estLow.includes('buena pro')) estadoClass = 'pill--buenapro';
     else if (estLow.includes('transferencia')) estadoClass = 'pill--transferencia';
 
-    // Bloques Condicionales HTML
+    // ==========================================
+    // CONSTRUCCIÓN CONDICIONAL DE BLOQUES
+    // ==========================================
     let htmlMensaje = '';
     if (rv_hasValue(mensajeSafe)) htmlMensaje = `<div class="rd-rv-hook" style="color: ${colorSafe};">${mensajeSafe}</div>`;
 
-    let gridItems = '';
-    if (rv_hasValue(longitudSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>📏 Longitud</strong><span>${longitudSafe}</span></div>`;
-    if (rv_hasValue(benefSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>👥 Beneficiarios</strong><span>${benefSafe}</span></div>`;
-    if (rv_hasValue(montoSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>💰 Inversión</strong><span>${montoSafe}</span></div>`;
-    if (rv_hasValue(inicioSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>📅 Inicio</strong><span>${inicioSafe}</span></div>`;
-    if (rv_hasValue(entregaSafe)) gridItems += `<div class="rd-rv-grid-item"><strong>🏁 Entrega</strong><span>${entregaSafe}</span></div>`;
-
-    let htmlDatosRapidos = '';
-    if (gridItems !== '') htmlDatosRapidos = `<div class="rd-rv-quick-data">${gridItems}</div>`;
-
-    let htmlTramo = '';
-    if (rv_hasValue(desdeSafe) && rv_hasValue(hastaSafe) && rv_hasValue(sectorSafe)) {
-        htmlTramo = `<div class="rd-rv-tramo">📍 Comprende el tramo desde <strong>${desdeSafe}</strong> hasta <strong>${hastaSafe}</strong>, en el sector <strong>${sectorSafe}</strong>.</div>`;
-    } else if (rv_hasValue(desdeSafe) && rv_hasValue(hastaSafe)) {
-        htmlTramo = `<div class="rd-rv-tramo">📍 Comprende el tramo desde <strong>${desdeSafe}</strong> hasta <strong>${hastaSafe}</strong>.</div>`;
-    } else if (rv_hasValue(sectorSafe)) {
-        htmlTramo = `<div class="rd-rv-tramo">📍 Ubicado en el sector: <strong>${sectorSafe}</strong>.</div>`;
-    }
-
-    let htmlAvance = '';
+    // NIVEL 1: PROTAGONISTAS VISUALES (Métricas Principales)
+    let metricsItems = '';
+    if (rv_hasValue(montoSafe)) metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">💰 Inversión</span></div>`;
+    if (rv_hasValue(longitudSafe)) metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">📏 Longitud</span></div>`;
     if (hasAvance) {
         let avanceTxt = `${avance}%`;
-        if (estLow.includes('entregado') && parseInt(avance) === 100) avanceTxt = 'Obra Culminada';
-        htmlAvance = `<div class="rd-rv-progress-container"><div class="rd-rv-progress-header"><strong>📊 Avance Físico</strong><span>${avanceTxt}</span></div><div class="rd-rv-progress-bar-bg"><div class="rd-rv-progress-bar-fill" style="width: ${avance}%; background-color: ${colorSafe};"></div></div></div>`;
+        if (estLow.includes('entregado') && parseInt(avance) === 100) avanceTxt = '100%';
+        metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val" style="color:${colorSafe};">${avanceTxt}</span><span class="rd-rv-metric-lbl">📊 Avance</span></div>`;
     }
+    let htmlMetrics = metricsItems ? `<div class="rd-rv-metrics-row">${metricsItems}</div>` : '';
 
+    // NIVEL 2: DATOS SECUNDARIOS Y CONTEXTO
+    let secItems = '';
+    if (rv_hasValue(benefSafe)) secItems += `<div class="rd-rv-sec-item"><span>👥</span> <div><strong>Beneficiarios:</strong> ${benefSafe}</div></div>`;
+    if (rv_hasValue(inicioSafe)) secItems += `<div class="rd-rv-sec-item"><span>📅</span> <div><strong>Inicio:</strong> ${inicioSafe}</div></div>`;
+    if (rv_hasValue(entregaSafe)) secItems += `<div class="rd-rv-sec-item"><span>🏁</span> <div><strong>Entrega:</strong> ${entregaSafe}</div></div>`;
+    let htmlSecondary = secItems ? `<div class="rd-rv-sec-list">${secItems}</div>` : '';
+
+    let htmlTramo = '';
+    let tramoTxt = '';
+    if (rv_hasValue(desdeSafe) && rv_hasValue(hastaSafe)) tramoTxt = `Desde <strong>${desdeSafe}</strong> hasta <strong>${hastaSafe}</strong>`;
+    if (rv_hasValue(sectorSafe)) {
+        if (tramoTxt) tramoTxt += ` &middot; Sector <strong>${sectorSafe}</strong>`;
+        else tramoTxt = `Sector: <strong>${sectorSafe}</strong>`;
+    }
+    if (tramoTxt) htmlTramo = `<div class="rd-rv-tramo-compact"><span>📍</span> <div>${tramoTxt}</div></div>`;
+
+    // NIVEL 3: NARRATIVA (Descripción y Antes/Ahora)
     let htmlAntesAhora = '';
     if (rv_hasValue(antesSafe) || rv_hasValue(ahoraSafe)) {
         htmlAntesAhora = `<div class="rd-rv-antes-ahora">`;
@@ -796,12 +800,16 @@ function abrirPanelRedVial(props = {}) {
 
     let htmlDesc = '';
     if (rv_hasValue(descSafe)) {
-        htmlDesc = `<div class="rd-rv-desc" style="margin-bottom: 18px;"><p style="margin:0;">${descSafe}</p></div>`;
+        htmlDesc = `
+        <div class="rd-rv-desc-block">
+            <div id="rvDescText" class="rd-rv-desc-clamp"><p>${descSafe}</p></div>
+            <button id="rvBtnMoreDesc" class="rd-rv-btn-more" style="display: none;">Ver más</button>
+        </div>`;
     }
 
     let htmlNoData = '';
-    if (!hasAvance && !rv_hasValue(descSafe) && gridItems === '' && htmlTramo === '' && htmlAntesAhora === '') {
-        htmlNoData = `<p style="color:#94a3b8; font-style:italic;">No hay información adicional disponible para este tramo.</p>`;
+    if (!htmlMetrics && !htmlSecondary && !htmlTramo && !htmlDesc && !htmlAntesAhora) {
+        htmlNoData = `<p style="color:#94a3b8; font-style:italic; font-size:13px; margin-top:5px;">No hay información adicional disponible para este tramo.</p>`;
     }
 
     panel.innerHTML = `
@@ -809,10 +817,8 @@ function abrirPanelRedVial(props = {}) {
             <button id="btnCerrarRV" class="sheet-close" title="Cerrar panel" style="z-index: 10;">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <!-- Contenedor Hero Image (Cargado en modo Lazy) -->
-            <div id="rv-hero-container" style="display: none; width: 100%; height: 200px; background-color: #f1f5f9; background-size: cover; background-position: center; position: relative;">
-                <!-- Sutil degradado para que se funda con la cabecera -->
-                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to bottom, transparent, rgba(253, 245, 247, 0.7));"></div>
+            <div id="rv-hero-container" class="rd-rv-hero" style="display: none;">
+                <div class="rd-rv-hero-gradient"></div>
             </div>
             <div class="rd-rv-header" style="border-left-color: ${colorSafe};">
                 <div class="rd-rv-pills">
@@ -823,14 +829,14 @@ function abrirPanelRedVial(props = {}) {
                 ${htmlMensaje}
             </div>
             <div class="rd-rv-body">
-                ${htmlAvance}
-                ${htmlDatosRapidos}
+                ${htmlMetrics}
+                ${htmlSecondary}
                 ${htmlTramo}
                 ${htmlDesc}
                 ${htmlAntesAhora}
                 ${htmlNoData}
             </div>
-            <div id="rv-gallery-container" style="display: none; padding: 0 20px 15px 20px;"></div>
+            <div id="rv-gallery-container" style="display: none; padding: 0 15px 15px 15px;"></div>
             <div class="rd-rv-footer">
                 <button id="btnCompartirRV" class="btn-share">🔗 Compartir Vía</button>
             </div>
@@ -844,6 +850,22 @@ function abrirPanelRedVial(props = {}) {
     panel.querySelector('#btnCompartirRV').addEventListener('click', () => {
         window.rv_compartirViaSeguro(idEncoded, props.nombre || 'Tramo Vial'); 
     });
+    
+    // Lógica "Ver más" de la descripción
+    const btnMore = panel.querySelector('#rvBtnMoreDesc');
+    const descText = panel.querySelector('#rvDescText');
+    if (btnMore && descText) {
+        setTimeout(() => {
+            if (descText.scrollHeight > descText.clientHeight) {
+                btnMore.style.display = 'block';
+            }
+        }, 20); // Retraso mínimo para asegurar render del DOM
+        
+        btnMore.addEventListener('click', () => {
+            descText.classList.toggle('rd-rv-desc-clamp');
+            btnMore.textContent = descText.classList.contains('rd-rv-desc-clamp') ? 'Ver más' : 'Ver menos';
+        });
+    }
     
     // Petición Asíncrona (Lazy Load) de la Galería Pública
     if (rawId) {
