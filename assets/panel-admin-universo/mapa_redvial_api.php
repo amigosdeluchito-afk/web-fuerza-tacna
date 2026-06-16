@@ -4,6 +4,31 @@ require_once __DIR__ . '/config.php';
 
 $action = $_GET['action'] ?? '';
 
+// Auto-reparación de esquema para RV3-C2 y RV3-C3 (Se ejecuta antes de Insert/Update)
+function ensure_rv_columns($db) {
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN descripcion TEXT NULL AFTER color"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN datos_edicion JSON NULL AFTER coordenadas"); } catch (Exception $e) {}
+    try { 
+        $db->exec("ALTER TABLE panel_tramos_viales 
+            ADD COLUMN mensaje_principal VARCHAR(255) NULL AFTER descripcion,
+            ADD COLUMN distrito VARCHAR(120) NULL AFTER sector,
+            ADD COLUMN sector VARCHAR(150) NULL AFTER mensaje_principal,
+            ADD COLUMN tramo_desde VARCHAR(150) NULL AFTER sector,
+            ADD COLUMN tramo_hasta VARCHAR(150) NULL AFTER tramo_desde,
+            ADD COLUMN longitud VARCHAR(50) NULL AFTER tramo_hasta,
+            ADD COLUMN longitud_valor DECIMAL(10,2) NULL AFTER longitud,
+            ADD COLUMN longitud_unidad VARCHAR(30) NULL AFTER longitud_valor,
+            ADD COLUMN longitud_cuadras DECIMAL(10,1) NULL AFTER longitud_unidad,
+            ADD COLUMN beneficiarios VARCHAR(100) NULL AFTER longitud,
+            ADD COLUMN situacion_antes TEXT NULL AFTER beneficiarios,
+            ADD COLUMN situacion_ahora TEXT NULL AFTER situacion_antes,
+            ADD COLUMN avance_fisico TINYINT(3) NULL AFTER situacion_ahora,
+            ADD COLUMN monto_inversion DECIMAL(15,2) NULL AFTER avance_fisico,
+            ADD COLUMN fecha_inicio DATE NULL AFTER monto_inversion,
+            ADD COLUMN fecha_entrega DATE NULL AFTER fecha_inicio;"); 
+    } catch (Exception $e) {}
+}
+
 if ($action === 'create') {
     require_admin();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -49,6 +74,7 @@ if ($action === 'create') {
 
     try {
         $db = get_db_connection();
+        ensure_rv_columns($db); // Garantiza que las columnas existan antes de guardar
         $stmt = $db->prepare("INSERT INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, descripcion, coordenadas, datos_edicion, activo, mensaje_principal, distrito, sector, tramo_desde, tramo_hasta, longitud, longitud_valor, longitud_unidad, longitud_cuadras, beneficiarios, situacion_antes, situacion_ahora, avance_fisico, monto_inversion, fecha_inicio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $string_id, $nombre, $tipo, $estado, $color, $descripcion, $json_coords, $json_edicion,
@@ -106,6 +132,7 @@ if ($action === 'update') {
 
     try {
         $db = get_db_connection();
+        ensure_rv_columns($db); // Garantiza que las columnas existan antes de actualizar
         $stmt = $db->prepare("UPDATE panel_tramos_viales SET nombre=?, tipo=?, estado=?, color=?, descripcion=?, coordenadas=?, datos_edicion=?, mensaje_principal=?, distrito=?, sector=?, tramo_desde=?, tramo_hasta=?, longitud=?, longitud_valor=?, longitud_unidad=?, longitud_cuadras=?, beneficiarios=?, situacion_antes=?, situacion_ahora=?, avance_fisico=?, monto_inversion=?, fecha_inicio=?, fecha_entrega=? WHERE string_id=?");
         $stmt->execute([
             $nombre, $tipo, $estado, $color, $descripcion, $json_coords, $json_edicion,

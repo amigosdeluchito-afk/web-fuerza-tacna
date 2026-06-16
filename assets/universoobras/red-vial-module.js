@@ -783,23 +783,44 @@ function abrirPanelRedVial(props = {}) {
     if (rv_hasValue(sectorSafe)) locParts.push(`Sector ${sectorSafe}`);
     let htmlUbicacion = locParts.length > 0 ? `<div class="rd-rv-location"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg> ${locParts.join(' &middot; ')}</div>` : '';
 
-    // NIVEL 1: PROTAGONISTAS VISUALES (Métricas Principales)
-    let metricsItems = '';
-    if (rv_hasValue(montoSafe)) metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">💰 Inversión</span></div>`;
-    if (rv_hasValue(longitudSafe)) {
-        let cuadrasHtml = '';
-        const cVal = props.longitud_cuadras;
-        if (rv_hasValue(cVal) && parseFloat(cVal) > 0) cuadrasHtml = `<span class="rd-rv-metric-sub">Equivale a aprox. ${cVal} cuadras</span>`;
-        metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">📏 Longitud</span>${cuadrasHtml}</div>`;
+    // ==========================================
+    // JERARQUÍA DE MÉTRICAS (RV3-C3.2)
+    // ==========================================
+    
+    // NIVEL 1: PROTAGONISTAS (Inversión y Longitud)
+    let htmlNivel1 = '';
+    if (rv_hasValue(montoSafe) || rv_hasValue(longitudSafe)) {
+        htmlNivel1 += `<div class="rd-rv-metrics-primary">`;
+        if (rv_hasValue(montoSafe)) {
+            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">💰 Inversión</span></div>`;
+        }
+        if (rv_hasValue(longitudSafe)) {
+            let cuadrasHtml = '';
+            const cVal = props.longitud_cuadras;
+            if (rv_hasValue(cVal) && parseFloat(cVal) > 0) cuadrasHtml = `<span class="rd-rv-metric-sub">Equivale aprox. a ${cVal} cuadras</span>`;
+            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">📏 Longitud</span>${cuadrasHtml}</div>`;
+        }
+        htmlNivel1 += `</div>`;
     }
+
+    // NIVEL 2: AVANCE FÍSICO (Secundario pero altamente visible)
+    let htmlNivel2 = '';
     if (hasAvance) {
         let avanceTxt = `${avance}%`;
         if (estLow.includes('entregado') && parseInt(avance) === 100) avanceTxt = '100%';
-        metricsItems += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val" style="color:${colorSafe};">${avanceTxt}</span><span class="rd-rv-metric-lbl">📊 Avance</span></div>`;
+        htmlNivel2 = `
+        <div class="rd-rv-metrics-secondary">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span class="rd-rv-metric-lbl">📊 Avance</span>
+                <span style="color:${colorSafe}; font-size:14px; font-weight:900; line-height:1;">${avanceTxt}</span>
+            </div>
+            <div style="height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
+                <div style="height:100%; width:${avance}%; background-color:${colorSafe}; border-radius:999px;"></div>
+            </div>
+        </div>`;
     }
-    let htmlMetrics = metricsItems ? `<div class="rd-rv-metrics-row">${metricsItems}</div>` : '';
 
-    // NIVEL 2: DATOS SECUNDARIOS Y CONTEXTO
+    // NIVEL 3: DATOS SECUNDARIOS Y CONTEXTO
     let secItems = '';
     if (rv_hasValue(benefSafe)) secItems += `<div class="rd-rv-sec-item"><span>👥</span> <div><strong>Beneficiarios:</strong> ${benefSafe}</div></div>`;
     if (rv_hasValue(inicioSafe)) secItems += `<div class="rd-rv-sec-item"><span>📅</span> <div><strong>Inicio:</strong> ${inicioSafe}</div></div>`;
@@ -856,7 +877,8 @@ function abrirPanelRedVial(props = {}) {
                 ${htmlMensaje}
             </div>
             <div class="rd-rv-body">
-                ${htmlMetrics}
+                ${htmlNivel1}
+                ${htmlNivel2}
                 ${htmlSecondary}
                 ${htmlTramo}
                 ${htmlDesc}
