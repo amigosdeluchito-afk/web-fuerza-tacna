@@ -210,11 +210,50 @@ require_admin();
             <h3 style="margin-top:0; color:#f8fafc; font-size:18px; border-bottom:1px solid #1e293b; padding-bottom:10px;">🛣️ Guardar Tramo Vial</h3>
             <form id="rvForm">
                 <input type="hidden" id="rvId" value="">
-                <div class="form-group"><label>Nombre de la Vía (Detectado)</label><input type="text" id="rvNombre" class="form-control" required></div>
-                <div class="form-group"><label>Tipo de Vía</label><select id="rvTipo" class="form-control"><option value="Local">Local</option><option value="Provincial">Provincial</option><option value="Regional">Regional</option></select></div>
-                <div class="form-group"><label>Estado Actual</label><select id="rvEstado" class="form-control"><option value="En estudios">En estudios</option><option value="Buena Pro">Buena Pro</option><option value="En ejecución">En ejecución</option><option value="Paralizado">Paralizado</option><option value="Transferencia">Transferencia</option><option value="Entregado">Entregado</option></select></div>
-                <div class="form-group"><label>Color en Mapa</label><input type="color" id="rvColor" class="form-control" value="#616161" style="padding:0; height:40px;"></div>
-                <div class="form-group"><label>Descripción / Observación (Opcional)</label><textarea id="rvDesc" class="form-control" rows="3" placeholder="Contexto de la obra..."></textarea></div>
+                
+                <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
+                    <div style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 4px;">📍 1. Datos Básicos</div>
+                    <div class="form-group"><label>Nombre de la Vía</label><input type="text" id="rvNombre" class="form-control" required></div>
+                    <div class="form-group"><label>Tipo de Vía</label><select id="rvTipo" class="form-control"><option value="Local">Local</option><option value="Provincial">Provincial</option><option value="Regional">Regional</option></select></div>
+                    <div class="form-group"><label>Estado Actual</label><select id="rvEstado" class="form-control"><option value="En estudios">En estudios</option><option value="Buena Pro">Buena Pro</option><option value="En ejecución">En ejecución</option><option value="Paralizado">Paralizado</option><option value="Transferencia">Transferencia</option><option value="Entregado">Entregado</option></select></div>
+                    <div class="form-group"><label>Color en Mapa</label><input type="color" id="rvColor" class="form-control" value="#616161" style="padding:0; height:40px;"></div>
+                </div>
+
+                <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
+                    <div style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 4px;">🎯 2. Impacto y Mensaje</div>
+                    <div class="form-group"><label>Mensaje Principal (Opcional)</label><input type="text" id="rvMensaje" class="form-control" placeholder="Ej: Más conectados, menos tráfico..."></div>
+                    <div class="form-group"><label>Descripción Detallada (Opcional)</label><textarea id="rvDesc" class="form-control" rows="3" placeholder="Contexto de la obra..."></textarea></div>
+                    <div class="form-group"><label>Beneficiarios (Opcional)</label><input type="text" id="rvBeneficiarios" class="form-control" placeholder="Ej: Más de 5,000 vecinos"></div>
+                </div>
+
+                <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
+                    <div style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 4px;">🛣️ 3. Alcance del Tramo</div>
+                    <div class="form-group"><label>Sector / Zona (Opcional)</label><input type="text" id="rvSector" class="form-control" placeholder="Ej: Cono Sur"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="form-group" style="flex:1;"><label>Desde</label><input type="text" id="rvDesde" class="form-control" placeholder="Referencia inicio"></div>
+                        <div class="form-group" style="flex:1;"><label>Hasta</label><input type="text" id="rvHasta" class="form-control" placeholder="Referencia fin"></div>
+                    </div>
+                    <div class="form-group"><label>Longitud (Opcional)</label><input type="text" id="rvLongitud" class="form-control" placeholder="Ej: 1.2 km o 850 metros"></div>
+                </div>
+
+                <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
+                    <div style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 4px;">💰 4. Inversión y Ejecución</div>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="form-group" style="flex:1;"><label>Avance %</label><input type="number" id="rvAvance" class="form-control" min="0" max="100" placeholder="0-100"></div>
+                        <div class="form-group" style="flex:1;"><label>Monto (S/)</label><input type="number" id="rvMonto" class="form-control" step="0.01" placeholder="Ej: 1500000.50"></div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <div class="form-group" style="flex:1;"><label>F. Inicio</label><input type="date" id="rvInicio" class="form-control"></div>
+                        <div class="form-group" style="flex:1;"><label>F. Entrega</label><input type="date" id="rvEntrega" class="form-control"></div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
+                    <div style="font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 4px;">🔄 5. Contexto</div>
+                    <div class="form-group"><label>Situación Antes (Opcional)</label><textarea id="rvAntes" class="form-control" rows="2" placeholder="Ej: Pista con baches y sin veredas..."></textarea></div>
+                    <div class="form-group"><label>Situación Ahora (Opcional)</label><textarea id="rvAhora" class="form-control" rows="2" placeholder="Ej: Asfalto en caliente e iluminación..."></textarea></div>
+                </div>
+                
                 <button type="submit" class="btn btn-primary" id="btnGuardarRv" style="margin-top:10px;">💾 Guardar Tramo</button>
                 <button type="button" class="btn btn-secondary" onclick="rvCancel()">❌ Cancelar y Descartar</button>
             </form>
@@ -856,6 +895,20 @@ require_admin();
             document.getElementById('rvColor').value = feature.properties.color || '#3b82f6';
             document.getElementById('rvDesc').value = feature.properties.descripcion || '';
             
+            // RV3-C2: Nuevos campos estratégicos seguros
+            document.getElementById('rvMensaje').value = feature.properties.mensaje_principal || '';
+            document.getElementById('rvSector').value = feature.properties.sector || '';
+            document.getElementById('rvDesde').value = feature.properties.tramo_desde || '';
+            document.getElementById('rvHasta').value = feature.properties.tramo_hasta || '';
+            document.getElementById('rvLongitud').value = feature.properties.longitud || '';
+            document.getElementById('rvBeneficiarios').value = feature.properties.beneficiarios || '';
+            document.getElementById('rvAntes').value = feature.properties.situacion_antes || '';
+            document.getElementById('rvAhora').value = feature.properties.situacion_ahora || '';
+            document.getElementById('rvAvance').value = feature.properties.avance_fisico || '';
+            document.getElementById('rvMonto').value = feature.properties.monto_inversion || '';
+            document.getElementById('rvInicio').value = feature.properties.fecha_inicio || '';
+            document.getElementById('rvEntrega').value = feature.properties.fecha_entrega || '';
+            
             document.getElementById('panelListaRV').classList.remove('active');
             document.getElementById('rvDrawPanel').style.display = 'flex';
             document.getElementById('panelFormularioRV').classList.add('active');
@@ -998,7 +1051,27 @@ require_admin();
             btn.disabled = true; btn.textContent = isEdit ? '⏳ Actualizando Tramo...' : '⏳ Guardando Tramo...';
             
             const bakedCoords = getBakedCoords(rvNodes);
-            const payload = { nombre: document.getElementById('rvNombre').value, tipo: document.getElementById('rvTipo').value, estado: document.getElementById('rvEstado').value, color: document.getElementById('rvColor').value, descripcion: document.getElementById('rvDesc').value, coordenadas: bakedCoords, datos_edicion: rvNodes };
+            const payload = { 
+                nombre: document.getElementById('rvNombre').value, 
+                tipo: document.getElementById('rvTipo').value, 
+                estado: document.getElementById('rvEstado').value, 
+                color: document.getElementById('rvColor').value, 
+                descripcion: document.getElementById('rvDesc').value, 
+                coordenadas: bakedCoords, 
+                datos_edicion: rvNodes,
+                mensaje_principal: document.getElementById('rvMensaje').value,
+                sector: document.getElementById('rvSector').value,
+                tramo_desde: document.getElementById('rvDesde').value,
+                tramo_hasta: document.getElementById('rvHasta').value,
+                longitud: document.getElementById('rvLongitud').value,
+                beneficiarios: document.getElementById('rvBeneficiarios').value,
+                situacion_antes: document.getElementById('rvAntes').value,
+                situacion_ahora: document.getElementById('rvAhora').value,
+                avance_fisico: document.getElementById('rvAvance').value,
+                monto_inversion: document.getElementById('rvMonto').value,
+                fecha_inicio: document.getElementById('rvInicio').value,
+                fecha_entrega: document.getElementById('rvEntrega').value
+            };
             if (isEdit) payload.id = document.getElementById('rvId').value;
             
             try {
