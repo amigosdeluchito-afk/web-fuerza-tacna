@@ -43,6 +43,21 @@ require_admin();
         .btn-primary:hover { background: #059669; }
         .btn-secondary { background: #334155; color: white; margin-top: 10px; }
         .btn-secondary:hover { background: #475569; }
+        
+        /* TOAST NOTIFICATIONS (RV4-A) */
+        .toast-container { position: fixed; top: 70px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { min-width: 250px; max-width: 350px; background: #1e293b; color: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: flex-start; gap: 10px; pointer-events: auto; animation: toast-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); border-left: 4px solid #3b82f6; }
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.info { border-left-color: #3b82f6; }
+        .toast-icon { font-size: 18px; line-height: 1; }
+        .toast-content { flex: 1; font-size: 13px; line-height: 1.4; }
+        .toast-close { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 0; line-height: 1; }
+        .toast-close:hover { color: #fff; }
+        .toast.hiding { animation: toast-out 0.3s forwards; }
+        @keyframes toast-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toast-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -301,12 +316,37 @@ require_admin();
         let draggedControlIndex = -1;
         let hoveredSegmentIndex = -1;
         let highlightTimeout;
+        
+        // ==========================================
+        // SISTEMA DE NOTIFICACIONES TOAST (RV4-A)
+        // ==========================================
+        window.showToast = function(message, type = 'info') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container';
+                document.body.appendChild(container);
+            }
+            
+            const icons = { 'success': '✅', 'error': '❌', 'warning': '⚠️', 'info': 'ℹ️' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<div class="toast-icon">${icons[type] || icons['info']}</div><div class="toast-content">${message}</div><button class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</button>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if(toast.parentElement) {
+                    toast.classList.add('hiding');
+                    setTimeout(() => { if(toast.parentElement) toast.remove(); }, 300);
+                }
+            }, 3500);
+        };
 
         async function initGestorCartografico() {
             // Importar PMTiles dinámicamente (compatible con ES Modules)
             const pmtiles = await import('https://unpkg.com/pmtiles@3.0.6/dist/index.js');
             window.pmtiles = pmtiles;
-            console.log("typeof pmtiles:", typeof window.pmtiles);
 
             // Configuración PMTiles y MapLibre
             const protocol = new pmtiles.Protocol();
@@ -348,16 +388,6 @@ require_admin();
                     { id: "draw-control-hit", type: "circle", source: "draw-control-source", paint: { "circle-radius": 16, "circle-color": "rgba(0,0,0,0)" } }
                 ]
             };
-
-            console.log("--- INICIO AUDITORÍA DE CAPAS ---");
-            mapStyle.layers.forEach((layerConfig, index) => {
-                console.log(`\nCapa Index: [${index}]`);
-                console.log(`ID: ${layerConfig.id}`);
-                console.log(`Source-layer: ${layerConfig['source-layer'] || 'N/A'}`);
-                if (layerConfig.filter) console.log(`Filter: ${JSON.stringify(layerConfig.filter)}`);
-                console.log(`Objeto Completo:\n`, JSON.stringify(layerConfig, null, 2));
-            });
-            console.log("--- FIN AUDITORÍA DE CAPAS ---\n");
 
             map = new maplibregl.Map({
                 container: 'map',
@@ -470,13 +500,6 @@ require_admin();
             map.on('mousedown', 'draw-points-hit', (e) => {
                 const button = e.originalEvent ? e.originalEvent.button : 0;
                 
-                console.log('NODE MOUSEDOWN', {
-                    eButton: e.button,
-                    originalButton: e.originalEvent?.button,
-                    currentMode,
-                    features: e.features
-                });
-
                 if (currentMode !== 'vias' || button !== 0) return;
                 e.preventDefault();
                 if (e.originalEvent) {
@@ -504,8 +527,6 @@ require_admin();
                 isDraggingControlNode = true;
                 draggedControlIndex = e.features[0].properties.segmentIndex;
                 map.getCanvas().style.cursor = 'grabbing';
-                
-                console.log('CONTROL DRAG START', draggedControlIndex);
             });
             
             map.on('mousemove', (e) => {
@@ -518,7 +539,6 @@ require_admin();
                     rvNodes[draggedControlIndex].control = [e.lngLat.lng, e.lngLat.lat];
                     updateControlPointLayer(draggedControlIndex);
                     updateDrawLayer();
-                    console.log('CONTROL MOVING', e.lngLat.lng, e.lngLat.lat);
                 } else {
                     const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
                     const hitNodes = map.queryRenderedFeatures(bbox, { layers: ['draw-points-hit'] });
@@ -554,7 +574,6 @@ require_admin();
                     setTimeout(() => justDragged = false, 100);
                 }
                 if (isDraggingControlNode) {
-                    console.log('CONTROL SAVED', rvNodes[draggedControlIndex].control);
                     isDraggingControlNode = false;
                     draggedControlIndex = -1;
                     if (map) { map.getCanvas().style.cursor = 'crosshair'; map.dragPan.enable(); }
@@ -579,12 +598,7 @@ require_admin();
                 
                 const idx = e.features[0].properties.segmentIndex;
                 
-                console.log('REMOVE CURVE', idx);
-                console.log('BEFORE CONTROL', rvNodes[idx].control);
-                
                 rvNodes[idx].control = null;
-                
-                console.log('AFTER CONTROL', rvNodes[idx].control);
                 
                 updateControlPointLayer(idx);
                 updateDrawLayer();
@@ -655,7 +669,6 @@ require_admin();
             
             let controlPoint = p1 ? p1 : [(p0[0] + p2[0]) / 2, (p0[1] + p2[1]) / 2];
             
-            console.log('RV2.8-B: Mostrando Punto Fantasma', { segmentIndex: idx, coord: controlPoint });
             
             if (map && map.getSource('draw-control-source')) {
                 map.getSource('draw-control-source').setData({ type: "Feature", properties: { segmentIndex: idx }, geometry: { type: "Point", coordinates: controlPoint } });
@@ -718,10 +731,6 @@ require_admin();
             const inputSector = document.getElementById('rvSector');
             if (inputSector && inputSector.value.trim() === '' && rvNodes.length > 0) {
                 
-                // 1. Log de Auditoría general de capas (A pedido)
-                console.log("=== DIAGNÓSTICO DE CAPAS DISPONIBLES ===");
-                console.log(map.getStyle().layers.map(l => ({ id: l.id, type: l.type, sourceLayer: l['source-layer'] })).filter(l => l.sourceLayer === 'places'));
-                
                 // 2. Usar el nodo central del tramo
                 const midIndex = Math.floor(rvNodes.length / 2);
                 const midNode = rvNodes[midIndex].nodo;
@@ -730,8 +739,6 @@ require_admin();
                 
                 // 3. Auditoría profunda en consola
                 const allPlaces = map.queryRenderedFeatures(bbox, { layers: ['places-text', 'places-hitbox'] });
-                console.log("=== DIAGNÓSTICO BBOX 80px (PLACES) ===");
-                allPlaces.forEach(f => console.log(`Encontrado: ${f.properties.name} | Kind: ${f.properties.kind} | Layer: ${f.layer.id}`));
                 
                 // 4. Asignación si existe match válido
                 let suggestedSector = null;
@@ -997,8 +1004,8 @@ require_admin();
                     if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson'); 
                     fetchListaRV(); 
                     rvCancel();
-                } else { alert('Error: ' + data.error); }
-            } catch(e) { alert('Error de conexión'); }
+                } else { showToast('Error: ' + data.error, 'error'); }
+            } catch(e) { showToast('Error de conexión al servidor.', 'error'); }
         }
         
         // ==========================================
@@ -1108,15 +1115,15 @@ require_admin();
                 if (data.ok) {
                     if (map && map.getSource('referencias')) map.getSource('referencias').setData('mapa_referencias_api.php?action=geojson');
                     cerrarPanel();
-                } else { alert('Error: ' + data.error); }
-            } catch (err) { alert('Error de conexión'); } 
+                } else { showToast('Error: ' + data.error, 'error'); }
+            } catch (err) { showToast('Error de conexión al servidor.', 'error'); } 
             finally { btn.disabled = false; btn.textContent = isEdit ? '💾 Actualizar Referencia' : '💾 Guardar Referencia'; }
         });
 
         // Enviar Formulario de Red Vial
         document.getElementById('rvForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (rvNodes.length < 2) return alert("Necesitas al menos 2 puntos para guardar una vía.");
+            if (rvNodes.length < 2) return showToast("Necesitas al menos 2 puntos para guardar una vía.", "warning");
             
             const btn = document.getElementById('btnGuardarRv');
             const isEdit = document.getElementById('rvId').value !== '';
@@ -1156,9 +1163,9 @@ require_admin();
                 if (data.ok) {
                     if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson');
                     rvCancel();
-                    alert(isEdit ? "🛣️ ¡Tramo actualizado con éxito!" : "🛣️ ¡Tramo guardado con éxito!");
-                } else { alert('Error: ' + data.error); }
-            } catch (err) { alert('Error de conexión al guardar.'); } 
+                    showToast(isEdit ? "Tramo actualizado con éxito." : "Tramo guardado con éxito.", "success");
+                } else { showToast('Error: ' + data.error, 'error'); }
+            } catch (err) { showToast('Error de conexión al guardar.', 'error'); } 
             finally { btn.disabled = false; btn.textContent = isEdit ? '💾 Actualizar Tramo' : '💾 Guardar Tramo'; }
         });
     </script>
