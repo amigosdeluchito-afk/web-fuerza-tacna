@@ -855,7 +855,7 @@ function abrirPanelRedVial(props = {}) {
     }
 
     let htmlNoData = '';
-    if (!htmlMetrics && !htmlSecondary && !htmlTramo && !htmlDesc && !htmlAntesAhora) {
+    if (!htmlNivel1 && !htmlNivel2 && !htmlSecondary && !htmlTramo && !htmlDesc && !htmlAntesAhora) {
         htmlNoData = `<p style="color:#94a3b8; font-style:italic; font-size:13px; margin-top:5px;">No hay información adicional disponible para este tramo.</p>`;
     }
 
