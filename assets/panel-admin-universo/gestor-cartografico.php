@@ -379,7 +379,7 @@ require_admin();
                 draggedControlIndex = e.features[0].properties.segmentIndex;
                 map.getCanvas().style.cursor = 'grabbing';
                 
-                console.log('RV2.8-B: START DRAG CONTROL', { segmentIndex: draggedControlIndex, dragPanDisabled: true });
+                console.log('CONTROL DRAG START', draggedControlIndex);
             });
             
             map.on('mousemove', (e) => {
@@ -392,7 +392,7 @@ require_admin();
                     rvNodes[draggedControlIndex].control = [e.lngLat.lng, e.lngLat.lat];
                     updateControlPointLayer(draggedControlIndex);
                     updateDrawLayer();
-                    console.log('RV2.8-B: Recalculando Bézier', { segmento: draggedControlIndex, control: rvNodes[draggedControlIndex].control });
+                    console.log('CONTROL MOVING', e.lngLat.lng, e.lngLat.lat);
                 } else {
                     const bbox = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
                     const hitNodes = map.queryRenderedFeatures(bbox, { layers: ['draw-points-hit'] });
@@ -417,20 +417,20 @@ require_admin();
                         }
                     }
                 }
-                if (isDraggingControlNode) {
-                    console.log('RV2.8-B: FIN DRAG CONTROL, reactivando dragPan');
-                    isDraggingControlNode = false;
-                    draggedControlIndex = -1;
-                    if (map) { map.getCanvas().style.cursor = 'crosshair'; map.dragPan.enable(); }
-                    justDragged = true;
-                    setTimeout(() => justDragged = false, 100);
-                }
             });
             
             window.addEventListener('mouseup', () => {
                 if (isDraggingRVNode) {
                     isDraggingRVNode = false;
                     draggedRVNodeIndex = -1;
+                    if (map) { map.getCanvas().style.cursor = 'crosshair'; map.dragPan.enable(); }
+                    justDragged = true;
+                    setTimeout(() => justDragged = false, 100);
+                }
+                if (isDraggingControlNode) {
+                    console.log('CONTROL SAVED', rvNodes[draggedControlIndex].control);
+                    isDraggingControlNode = false;
+                    draggedControlIndex = -1;
                     if (map) { map.getCanvas().style.cursor = 'crosshair'; map.dragPan.enable(); }
                     justDragged = true;
                     setTimeout(() => justDragged = false, 100);
