@@ -8,25 +8,24 @@ $action = $_GET['action'] ?? '';
 function ensure_rv_columns($db) {
     try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN descripcion TEXT NULL AFTER color"); } catch (Exception $e) {}
     try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN datos_edicion JSON NULL AFTER coordenadas"); } catch (Exception $e) {}
-    try { 
-        $db->exec("ALTER TABLE panel_tramos_viales 
-            ADD COLUMN mensaje_principal VARCHAR(255) NULL AFTER descripcion,
-            ADD COLUMN distrito VARCHAR(120) NULL AFTER sector,
-            ADD COLUMN sector VARCHAR(150) NULL AFTER mensaje_principal,
-            ADD COLUMN tramo_desde VARCHAR(150) NULL AFTER sector,
-            ADD COLUMN tramo_hasta VARCHAR(150) NULL AFTER tramo_desde,
-            ADD COLUMN longitud VARCHAR(50) NULL AFTER tramo_hasta,
-            ADD COLUMN longitud_valor DECIMAL(10,2) NULL AFTER longitud,
-            ADD COLUMN longitud_unidad VARCHAR(30) NULL AFTER longitud_valor,
-            ADD COLUMN longitud_cuadras DECIMAL(10,1) NULL AFTER longitud_unidad,
-            ADD COLUMN beneficiarios VARCHAR(100) NULL AFTER longitud,
-            ADD COLUMN situacion_antes TEXT NULL AFTER beneficiarios,
-            ADD COLUMN situacion_ahora TEXT NULL AFTER situacion_antes,
-            ADD COLUMN avance_fisico TINYINT(3) NULL AFTER situacion_ahora,
-            ADD COLUMN monto_inversion DECIMAL(15,2) NULL AFTER avance_fisico,
-            ADD COLUMN fecha_inicio DATE NULL AFTER monto_inversion,
-            ADD COLUMN fecha_entrega DATE NULL AFTER fecha_inicio;"); 
-    } catch (Exception $e) {}
+    
+    // Migraciones seguras individuales (A prueba de fallos de orden o pre-existencia)
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN mensaje_principal VARCHAR(255) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN sector VARCHAR(150) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN distrito VARCHAR(120) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN tramo_desde VARCHAR(150) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN tramo_hasta VARCHAR(150) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN longitud VARCHAR(50) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN longitud_valor DECIMAL(10,2) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN longitud_unidad VARCHAR(30) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN longitud_cuadras DECIMAL(10,1) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN beneficiarios VARCHAR(100) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN situacion_antes TEXT NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN situacion_ahora TEXT NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN avance_fisico TINYINT(3) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN monto_inversion DECIMAL(15,2) NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN fecha_inicio DATE NULL"); } catch (Exception $e) {}
+    try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN fecha_entrega DATE NULL"); } catch (Exception $e) {}
 }
 
 if ($action === 'create') {
@@ -252,30 +251,8 @@ if ($action === 'geojson') {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-        // Migración silenciosa por si la tabla ya existía sin la columna descripcion
-        try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN descripcion TEXT NULL AFTER color"); } catch (Exception $e) {}
-        try { $db->exec("ALTER TABLE panel_tramos_viales ADD COLUMN datos_edicion JSON NULL AFTER coordenadas"); } catch (Exception $e) {}
-        
-        // Migración silenciosa RV3-C2
-        try { 
-            $db->exec("ALTER TABLE panel_tramos_viales 
-                ADD COLUMN mensaje_principal VARCHAR(255) NULL AFTER descripcion,
-                ADD COLUMN distrito VARCHAR(120) NULL AFTER sector,
-                ADD COLUMN sector VARCHAR(150) NULL AFTER mensaje_principal,
-                ADD COLUMN tramo_desde VARCHAR(150) NULL AFTER sector,
-                ADD COLUMN tramo_hasta VARCHAR(150) NULL AFTER tramo_desde,
-                ADD COLUMN longitud VARCHAR(50) NULL AFTER tramo_hasta,
-                ADD COLUMN longitud_valor DECIMAL(10,2) NULL AFTER longitud,
-                ADD COLUMN longitud_unidad VARCHAR(30) NULL AFTER longitud_valor,
-                ADD COLUMN longitud_cuadras DECIMAL(10,1) NULL AFTER longitud_unidad,
-                ADD COLUMN beneficiarios VARCHAR(100) NULL AFTER longitud,
-                ADD COLUMN situacion_antes TEXT NULL AFTER beneficiarios,
-                ADD COLUMN situacion_ahora TEXT NULL AFTER situacion_antes,
-                ADD COLUMN avance_fisico TINYINT(3) NULL AFTER situacion_ahora,
-                ADD COLUMN monto_inversion DECIMAL(15,2) NULL AFTER avance_fisico,
-                ADD COLUMN fecha_inicio DATE NULL AFTER monto_inversion,
-                ADD COLUMN fecha_entrega DATE NULL AFTER fecha_inicio;"); 
-        } catch (Exception $e) {}
+        // Garantizar toda la estructura usando el helper unificado
+        ensure_rv_columns($db);
 
         // 2. Sembrar los datos idénticos al archivo estático original (Si la tabla está vacía)
         $db->exec("INSERT IGNORE INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, coordenadas) VALUES
