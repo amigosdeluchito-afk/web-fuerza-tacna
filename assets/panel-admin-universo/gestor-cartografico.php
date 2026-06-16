@@ -196,6 +196,7 @@ require_admin();
         let isDraggingControlNode = false;
         let draggedControlIndex = -1;
         let hoveredSegmentIndex = -1;
+        let highlightTimeout;
 
         async function initGestorCartografico() {
             // Importar PMTiles dinámicamente (compatible con ES Modules)
@@ -213,6 +214,7 @@ require_admin();
                 sources: {
                     "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy.php" },
                     "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" },
+                    "highlight-source": { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } } },
                     "tramos-viales": { type: "geojson", data: "mapa_redvial_api.php?action=geojson" },
                     "draw-source": { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } } },
                     "draw-line-hit-source": { type: "geojson", data: { type: "FeatureCollection", features: [] } },
@@ -230,6 +232,7 @@ require_admin();
                     { id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 11, "symbol-placement": "line"}, paint: {"text-color": "#3f3f46", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
                     { id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", filter: ["has", "name"], layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 12}, paint: {"text-color": "#666666", "text-halo-color": "#FFFFFF", "text-halo-width": 2} },
                     { id: "tramos-viales-layer", type: "line", source: "tramos-viales", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["get", "color"], "line-width": 4 } },
+                    { id: "highlight-layer", type: "line", source: "highlight-source", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffc300", "line-width": 8, "line-opacity": 0.9 } },
                     { id: "ref-circles", type: "circle", source: "referencias", paint: { "circle-color": "#10b981", "circle-radius": 6, "circle-stroke-width": 2, "circle-stroke-color": "#020617" } },
                     { id: "ref-labels", type: "symbol", source: "referencias", layout: { "text-field": ["get", "short_name"], "text-font": ["Noto Sans Regular"], "text-size": 13, "text-offset": [0, 1], "text-anchor": "top" }, paint: { "text-color": "#1e293b", "text-halo-color": "#ffffff", "text-halo-width": 3 } },
                     { id: "draw-line-layer", type: "line", source: "draw-source", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#3b82f6", "line-width": 4, "line-dasharray": [2, 2] } },
@@ -754,7 +757,11 @@ require_admin();
                 
                 html += `<div style="background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; display:flex; justify-content:space-between; align-items:center; opacity:${opacity};">
                     <div><strong style="color:#f8fafc;">🛣️ ${p.nombre}</strong>${badgeActivo}<br><span style="color:#94a3b8; font-size:11px;">Tipo: ${p.tipo} | Estado: ${p.estado}</span></div>
-                    <div style="display:flex; gap:6px;"><button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button>${btnToggle}</div>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn" style="padding:6px; background:#4f46e5; color:white; min-width:30px;" onclick="centrarEnRV('${p.id}')" title="Ver en mapa">👁️</button>
+                        <button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button>
+                        ${btnToggle}
+                    </div>
                 </div>`;
             });
             
@@ -762,6 +769,32 @@ require_admin();
             
             cont.innerHTML = html;
             if (contadorEl) contadorEl.textContent = `Mostrando ${count} de ${total} vías`;
+        }
+
+        function centrarEnRV(id) {
+            const feature = rvGeoJSON.features.find(f => f.properties.id === id);
+            if (!feature) return;
+
+            const coords = feature.geometry.coordinates;
+            if (coords.length < 2) return;
+
+            cerrarListaRV();
+
+            const bounds = coords.reduce((bounds, coord) => {
+                return bounds.extend(coord);
+            }, new maplibregl.LngLatBounds(coords[0], coords[0]));
+
+            map.fitBounds(bounds, { padding: 100, maxZoom: 16 });
+
+            const highlightSource = map.getSource('highlight-source');
+            if (highlightSource) {
+                highlightSource.setData(feature.geometry);
+
+                if (highlightTimeout) clearTimeout(highlightTimeout);
+                highlightTimeout = setTimeout(() => {
+                    highlightSource.setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] } });
+                }, 3000);
+            }
         }
 
         function editarRV(id) {
