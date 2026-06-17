@@ -140,16 +140,10 @@ window.LuchitoGames.registerGame('trivia', {
         }
 
         function showFinalScore() {
-            container.innerHTML = `
-                <div class="lg-game-wrapper lg-trivia-game lg-animated-view">
-                    <div class="lg-trivia-final-screen">
-                        <h2>¡Juego Terminado!</h2>
-                        <p>Tu puntaje final es: <strong style="color:#ffc300; font-size:1.4rem; background:#801039; padding:2px 10px; border-radius:8px;">${score} de ${questions.length}</strong></p>
-                        <button class="lg-btn-primary" id="lg-trivia-restart">Jugar otra vez</button>
-                    </div>
-                </div>
-            `;
-            container.querySelector('#lg-trivia-restart').addEventListener('click', startGame);
+            // Cada respuesta correcta vale 100 puntos
+            const finalScore = score * 100;
+            // Llamar al sistema de ranking global
+            window.LuchitoGames.showRankingPrompt(finalScore, 'trivia', container);
         }
 
         startGame();

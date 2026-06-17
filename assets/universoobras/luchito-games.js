@@ -175,7 +175,76 @@ window.LuchitoGames = {
         }
     },
 
-    // Arquitectura base para el Sistema de Ranking (MVP UI)
+    escapeHTML: function(str) {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, 
+            tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag)
+        );
+    },
+
+    saveAndShowRanking: function(gameId, score) {
+        const nameInput = document.getElementById('lg-ranking-name');
+        const playerName = nameInput.value.trim();
+        if (!playerName) {
+            nameInput.style.borderColor = 'red';
+            nameInput.placeholder = '¡Escribe un nombre!';
+            return;
+        }
+
+        const rankingKey = `luchito_ranking_${gameId}`;
+        let rankings = [];
+        try {
+            rankings = JSON.parse(localStorage.getItem(rankingKey)) || [];
+        } catch (e) {
+            rankings = [];
+        }
+
+        rankings.push({ name: playerName, score: parseInt(score), date: new Date().toISOString() });
+        rankings.sort((a, b) => b.score - a.score);
+        const top10 = rankings.slice(0, 10);
+        localStorage.setItem(rankingKey, JSON.stringify(top10));
+
+        this.renderRankingScreen(gameId);
+    },
+
+    renderRankingScreen: function(gameId) {
+        const container = document.getElementById('lg-game-container');
+        if (!container) return;
+
+        const rankingKey = `luchito_ranking_${gameId}`;
+        const rankings = JSON.parse(localStorage.getItem(rankingKey)) || [];
+        const gameTitle = this.games[gameId] ? this.games[gameId].title : 'Ranking';
+
+        let rankingHTML = `
+            <div class="lg-animated-view" style="text-align: center; padding: 1rem;">
+                <h2 style="color: #801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.6rem; margin-bottom: 1rem; text-transform: uppercase;">🏆 Top 10 - ${this.escapeHTML(gameTitle)} 🏆</h2>`;
+
+        if (rankings.length === 0) {
+            rankingHTML += `<p>¡Sé el primero en dejar tu marca!</p>`;
+        } else {
+            rankingHTML += `<ol style="list-style: none; padding: 0; max-width: 400px; margin: 0 auto;">`;
+            rankings.forEach((entry, index) => {
+                const medal = ['🥇', '🥈', '🥉'][index] || `${index + 1}.`;
+                rankingHTML += `
+                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem; background: ${index % 2 === 0 ? '#fdf5f7' : '#fff'}; border-radius: 8px; margin-bottom: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <span style="font-weight: bold; color: #801039; font-size: 1.1rem;">${medal} ${this.escapeHTML(entry.name)}</span>
+                        <span style="font-weight: 900; color: #ffc300; background: #801039; padding: 2px 8px; border-radius: 6px;">${entry.score} pts</span>
+                    </li>`;
+            });
+            rankingHTML += `</ol>`;
+        }
+
+        rankingHTML += `
+                <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
+                    <button class="lg-btn" onclick="window.LuchitoGames.renderHome()">Volver al menú</button>
+                    <button class="lg-btn-primary" onclick="window.LuchitoGames.openGame('${gameId}')">Jugar otra vez</button>
+                </div>
+            </div>`;
+        container.innerHTML = rankingHTML;
+    },
+
     showRankingPrompt: function(score, gameId, container) {
         container.innerHTML = `
             <div class="lg-animated-view" style="text-align: center; padding: 2rem 1rem;">
@@ -184,13 +253,13 @@ window.LuchitoGames = {
                 
                 <div style="margin: 2rem auto; background: #fdf5f7; padding: 1.5rem; border-radius: 12px; border: 1px solid #ffc300; max-width: 400px;">
                     <p style="margin-top: 0; font-weight: 600; color: #555;">Escribe tu nombre para aparecer en el ranking:</p>
-                    <input type="text" id="lg-ranking-name" placeholder="Tu nombre o apodo" style="width: 100%; max-width: 300px; padding: 0.8rem; border: 2px solid #801039; border-radius: 50px; font-size: 1rem; text-align: center; outline: none; margin-bottom: 1rem;">
-                    <button class="lg-btn-primary" style="width: 100%; max-width: 300px; display: block; margin: 0 auto;" onclick="alert('¡Excelente! (Tu puntaje se guardará cuando la BD esté activa)')">Guardar Puntaje</button>
+                    <input type="text" id="lg-ranking-name" placeholder="Tu nombre o apodo" maxlength="15" style="width: 100%; max-width: 300px; padding: 0.8rem; border: 2px solid #801039; border-radius: 50px; font-size: 1rem; text-align: center; outline: none; margin-bottom: 1rem;">
+                    <button class="lg-btn-primary" style="width: 100%; max-width: 300px; display: block; margin: 0 auto;" onclick="window.LuchitoGames.saveAndShowRanking('${gameId}', ${score})">Guardar Puntaje</button>
                 </div>
 
                 <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;">
-                    <button class="lg-btn" onclick="window.LuchitoGames.renderHome()">Volver al menú</button>
-                    <button class="lg-btn-primary" onclick="window.LuchitoGames.openGame('${gameId}')">Jugar otra vez</button>
+                    <button class="lg-btn" onclick="window.LuchitoGames.openGame('${gameId}')">Jugar sin guardar</button>
+                    <button class="lg-back-btn" style="padding: 0.5rem 1rem;" onclick="window.LuchitoGames.renderHome()">Volver al menú</button>
                 </div>
             </div>
         `;
