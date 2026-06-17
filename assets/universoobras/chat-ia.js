@@ -16,9 +16,17 @@ function initChatIA() {
 
     chatContainer.dataset.initialized = 'true';
 
-    // Reinicio del chat en cada recarga dura de la página (F5)
-    sessionStorage.removeItem('ft_chat_history');
-    sessionStorage.removeItem('ft_chat_state');
+    // Detectar si el usuario presionó F5 (Recargar) vs Navegación normal (Click)
+    let isReload = false;
+    if (window.performance) {
+        const navEntries = performance.getEntriesByType("navigation");
+        if (navEntries.length > 0 && navEntries[0].type === "reload") isReload = true;
+        else if (performance.navigation && performance.navigation.type === 1) isReload = true;
+    }
+    if (isReload) {
+        sessionStorage.removeItem('ft_chat_history');
+        sessionStorage.removeItem('ft_chat_state');
+    }
 
     // Quitamos el escudo de invisibilidad una vez que el CSS ya está aplicado
     setTimeout(() => {
