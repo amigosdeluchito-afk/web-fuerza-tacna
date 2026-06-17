@@ -1,6 +1,10 @@
 window.LuchitoGames = {
     games: {}, // Almacén de juegos cargados
 
+    registerGame: function(id, config) {
+        this.games[id] = config;
+    },
+
     init: function() {
         if (document.getElementById('luchito-games-overlay')) return;
 
@@ -87,14 +91,13 @@ window.LuchitoGames = {
 
     openGame: async function(gameId, level = 'medium') {
         const view = document.getElementById('luchito-games-view');
-        const titles = { 'tictactoe': 'Tres en Raya', 'memory': 'Memoria' };
         
         view.innerHTML = `
             <div class="lg-game-screen">
                 <div class="lg-game-nav">
                     <div class="lg-nav-left">
                         <button class="lg-back-btn" onclick="window.LuchitoGames.renderHome()">⬅ Volver</button>
-                        <h3 class="lg-game-title">${titles[gameId] || 'Minijuego'}</h3>
+                        <h3 class="lg-game-title" id="lg-dynamic-title">Cargando...</h3>
                     </div>
                     <button class="lg-close-btn-game" onclick="window.LuchitoGames.close()">✖</button>
                 </div>
@@ -117,13 +120,18 @@ window.LuchitoGames = {
                     document.body.appendChild(script);
                 });
             } catch (e) {
-                document.getElementById('lg-game-container').innerHTML = `<p style="text-align: center; color: #801039; font-weight: bold; margin-top: 20px;">Error al cargar el minijuego. Verifica tu conexión.<br><small style="color: #ff6b6b; display: block; margin-top: 10px;">Ruta intentada: ${e.message}</small></p>`;
+                document.getElementById('lg-game-container').innerHTML = `<p style="text-align: center; color: #801039; font-weight: bold; margin-top: 20px;">No se encontró el archivo del juego.<br><small style="color: #ff6b6b; display: block; margin-top: 10px;">Ruta intentada: ${scriptUrl}</small></p>`;
+                document.getElementById('lg-dynamic-title').textContent = 'Error';
                 return;
             }
         }
 
-        const container = document.getElementById('lg-game-container');
-        container.innerHTML = '';
-        this.games[gameId].init(container, level);
+        const game = this.games[gameId];
+        if (game) {
+            document.getElementById('lg-dynamic-title').textContent = game.title || 'Minijuego';
+            const container = document.getElementById('lg-game-container');
+            container.innerHTML = '';
+            if (typeof game.render === 'function') game.render(container, level);
+        }
     }
 };
