@@ -662,7 +662,12 @@ function injectGlobalAssets() {
                 <div class="ft-chat-body" id="ft-chat-messages">
                     <div class="ft-message ai-message">
                         <div class="ft-avatar">🤖</div>
-                        <div class="ft-bubble">¡Hola! Soy Luchito, el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?</div>
+                        <div class="ft-bubble">
+                            ¡Hola! Soy Luchito, el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                                <button class="ft-action-btn" data-action="jugar_luchito" style="background: rgba(128, 16, 57, 0.1); border: 1px solid #801039; color: #801039; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">🎮 Jugar con Luchito</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="ft-chat-footer">
@@ -679,6 +684,21 @@ function injectGlobalAssets() {
         const chatJS = document.createElement('script');
         chatJS.src = 'assets/universoobras/chat-ia.js?v=4'; // Aesthetic UI update
         document.body.appendChild(chatJS);
+
+        // 4. Inyectar JS y CSS de Luchito Games
+        if (!document.getElementById('luchito-games-css')) {
+            const gamesCSS = document.createElement('link');
+            gamesCSS.id = 'luchito-games-css';
+            gamesCSS.rel = 'stylesheet';
+            gamesCSS.href = basePath + 'assets/luchito-games/luchito-games.css?v=1';
+            document.head.appendChild(gamesCSS);
+        }
+        if (!document.getElementById('luchito-games-js')) {
+            const gamesJS = document.createElement('script');
+            gamesJS.id = 'luchito-games-js';
+            gamesJS.src = basePath + 'assets/luchito-games/luchito-games.js?v=1';
+            document.body.appendChild(gamesJS);
+        }
     }
 }
 injectGlobalAssets(); // Se ejecuta inmediatamente al cargar el JS

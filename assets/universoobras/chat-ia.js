@@ -23,6 +23,17 @@ function initChatIA() {
         chatContainer.style.pointerEvents = '';
     }, 150);
 
+    // Vincular eventos a botones iniciales si existen
+    const existingBtns = messagesBody.querySelectorAll('.ft-action-btn');
+    existingBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const actionType = e.target.getAttribute('data-action');
+            if (typeof navigateTo === 'function') navigateTo(actionType);
+        });
+        btn.addEventListener('mouseenter', () => { btn.style.background = '#801039'; btn.style.color = '#ffc300'; });
+        btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(128, 16, 57, 0.1)'; btn.style.color = '#801039'; });
+    });
+
     // --- CÁLCULO DE LA RAÍZ DEL PROYECTO (Anti-Bug de Rutas y Etiquetas Base) ---
     let projectRoot = window.location.href.split('?')[0].split('#')[0];
     if (projectRoot.includes('/assets/')) {
@@ -96,6 +107,15 @@ function initChatIA() {
         });
 
     const navigateTo = (actionType) => {
+        if (actionType === 'jugar_luchito') {
+            if (typeof openLuchitoGames === 'function') {
+                openLuchitoGames();
+            } else {
+                console.warn('El módulo Juega con Luchito no ha cargado aún.');
+            }
+            return;
+        }
+
         const routes = {
             'ir_a_obras': projectRoot + 'assets/universoobras/mapa-obras.html',
             'ir_a_candidatos': projectRoot + 'candidatos.html',
