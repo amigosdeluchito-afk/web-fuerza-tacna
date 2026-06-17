@@ -34,8 +34,6 @@ function initChatIA() {
             const actionType = e.target.getAttribute('data-action');
             if (typeof navigateTo === 'function') navigateTo(actionType);
         });
-        btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(0,0,0,0.08)'; btn.style.borderColor = 'rgba(0,0,0,0.15)'; });
-        btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(0,0,0,0.04)'; btn.style.borderColor = 'rgba(0,0,0,0.08)'; });
     });
 
     // --- CÁLCULO DE LA RAÍZ DEL PROYECTO (Anti-Bug de Rutas y Etiquetas Base) ---
@@ -185,7 +183,7 @@ function initChatIA() {
         if (finalActions.length > 0) {
             htmlContent += `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">`;
             finalActions.forEach((act) => {
-                htmlContent += `<button class="ft-action-btn" data-action="${act.type}" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">${act.label}</button>`;
+                htmlContent += `<button class="ft-action-btn" data-action="${act.type}">${act.label}</button>`;
             });
             htmlContent += `</div>`;
         }
@@ -200,8 +198,6 @@ function initChatIA() {
                     const actionType = e.target.getAttribute('data-action');
                     if (typeof navigateTo === 'function') navigateTo(actionType);
                 });
-                btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(0,0,0,0.08)'; btn.style.borderColor = 'rgba(0,0,0,0.15)'; });
-                btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(0,0,0,0.04)'; btn.style.borderColor = 'rgba(0,0,0,0.08)'; });
             });
         }
         

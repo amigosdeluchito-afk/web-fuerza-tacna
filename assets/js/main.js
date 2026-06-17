@@ -607,6 +607,31 @@ function injectGlobalAssets() {
             #ft-chat-messages::-webkit-scrollbar-track { background: transparent; }
             #ft-chat-messages::-webkit-scrollbar-thumb { background-color: rgba(128, 16, 57, 0.3); border-radius: 10px; }
             #ft-chat-messages::-webkit-scrollbar-thumb:hover { background-color: rgba(128, 16, 57, 0.6); }
+            
+            /* --- ESTÉTICA PREMIUM PARA SUGGESTION CHIPS --- */
+            .ft-action-btn {
+                background: #ffffff !important;
+                border: 1px solid rgba(128, 16, 57, 0.15) !important;
+                color: #334155 !important;
+                padding: 8px 16px !important;
+                border-radius: 20px !important;
+                font-size: 13px !important;
+                font-weight: 600 !important;
+                cursor: pointer !important;
+                transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1) !important;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important;
+                outline: none !important;
+                -webkit-tap-highlight-color: transparent !important;
+                position: relative;
+                overflow: hidden;
+            }
+            .ft-action-btn::before, .ft-action-btn::after { display: none !important; content: none !important; }
+            .ft-action-btn:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 15px rgba(255, 195, 0, 0.2), 0 2px 4px rgba(128, 16, 57, 0.1) !important;
+                border-color: rgba(255, 195, 0, 0.5) !important; color: #801039 !important; background: #fffdf5 !important;
+            }
+            .ft-action-btn:active { transform: scale(0.97) !important; box-shadow: 0 1px 2px rgba(255, 195, 0, 0.1) !important; transition-duration: 0.1s !important; }
         `;
         document.head.appendChild(style);
     }
@@ -666,9 +691,9 @@ function injectGlobalAssets() {
                         <div class="ft-bubble">
                             ¡Hola! Soy Luchito, el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-                                        <button class="ft-action-btn" data-action="jugar_luchito" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">🎮 Jugar con Luchito</button>
-                                        <button class="ft-action-btn" data-action="ir_a_obras" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">🗺️ Explorar Obras</button>
-                                        <button class="ft-action-btn" data-action="ir_a_candidatos" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">🏛️ Conocer Candidatos</button>
+                                        <button class="ft-action-btn" data-action="jugar_luchito">🎮 Jugar con Luchito</button>
+                                        <button class="ft-action-btn" data-action="ir_a_obras">🗺️ Explorar Obras</button>
+                                        <button class="ft-action-btn" data-action="ir_a_candidatos">🏛️ Conocer Candidatos</button>
                             </div>
                         </div>
                     </div>
