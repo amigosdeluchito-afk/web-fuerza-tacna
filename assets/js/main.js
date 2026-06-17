@@ -695,6 +695,7 @@ function injectGlobalAssets() {
                                         <button class="ft-action-btn" data-action="ir_a_obras">🗺️ Explorar Obras</button>
                                         <button class="ft-action-btn" data-action="ir_a_candidatos">🏛️ Conocer Candidatos</button>
                             </div>
+                                    <div style="margin-top: 12px; font-size: 12.5px; color: #64748b; font-style: italic;">...o si prefieres, escríbeme tu duda aquí abajo, vecino. 👇</div>
                         </div>
                     </div>
                 </div>
