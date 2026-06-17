@@ -7,8 +7,7 @@ window.LuchitoGames.registerGame('rock-paper-scissors', {
             style.id = styleId;
             style.innerHTML = `
                 .lg-rps-game { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; padding: 0.5rem; box-sizing: border-box; width: 100%; max-width: 550px; margin: 0 auto; }
-                .lg-rps-header { text-align: center; color: #801039; }
-                .lg-rps-header h1 { font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+                .lg-rps-header { text-align: center; color: #801039; margin-bottom: 0.5rem; }
                 .lg-rps-header p { font-size: 0.95rem; margin: 0.1rem 0 0.2rem 0; opacity: 0.85; font-weight: bold; }
                 
                 .lg-rps-scoreboard-new { display: flex; align-items: center; justify-content: center; background: #801039; color: #fff; padding: 0.6rem 2rem; border-radius: 50px; font-family: 'Arial Black Web', sans-serif; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
@@ -78,7 +77,6 @@ window.LuchitoGames.registerGame('rock-paper-scissors', {
         container.innerHTML = `
             <div class="lg-rps-game">
                 <div class="lg-rps-header">
-                    <h1>Piedra, Papel o Tijera</h1>
                     <p>Elige tu jugada y reta a Luchito</p>
                 </div>
                 <div class="lg-rps-scoreboard-new">

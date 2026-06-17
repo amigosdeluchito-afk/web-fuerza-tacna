@@ -7,11 +7,13 @@ window.LuchitoGames.registerGame('tictactoe', {
         let gameActive = true;
 
         container.innerHTML = `
-            <div class="lg-ttt-status" id="lg-ttt-status">Tu turno (X)</div>
-            <div class="lg-ttt-board" id="lg-ttt-board">
-                ${board.map((_, i) => `<div class="lg-ttt-cell" data-index="${i}"></div>`).join('')}
+            <div class="lg-game-wrapper" style="position: relative; text-align: center;">
+                <div class="lg-ttt-status" id="lg-ttt-status">Tu turno (X)</div>
+                <div class="lg-ttt-board" id="lg-ttt-board">
+                    ${board.map((_, i) => `<div class="lg-ttt-cell" data-index="${i}"></div>`).join('')}
+                </div>
+                <button class="lg-btn-primary" id="lg-ttt-reset" style="margin-top: 1.5rem;">Reiniciar Juego</button>
             </div>
-            <button class="lg-btn" id="lg-ttt-reset">Reiniciar Juego</button>
         `;
 
         const cells = container.querySelectorAll('.lg-ttt-cell');
@@ -70,13 +72,23 @@ window.LuchitoGames.registerGame('tictactoe', {
                     roundWon = true; winningLine = winCondition; break;
                 }
             }
-            if (roundWon) { winningLine.forEach(idx => { container.querySelector(`.lg-ttt-cell[data-index="${idx}"]`).classList.add('win'); }); statusDisplay.textContent = currentPlayer === 'X' ? '¡Ganaste, vecino! 🎉' : '¡Luchito te ganó! 🐻'; gameActive = false; return; }
-            if (!board.includes('')) { statusDisplay.textContent = '¡Empate!'; gameActive = false; return; }
+
+            const showFinalMessage = (message) => {
+                gameActive = false;
+                const wrapper = container.querySelector('.lg-game-wrapper');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'lg-final-message';
+                messageDiv.innerHTML = `<h3>${message}</h3>`;
+                wrapper.appendChild(messageDiv);
+            };
+
+            if (roundWon) { winningLine.forEach(idx => { container.querySelector(`.lg-ttt-cell[data-index="${idx}"]`).classList.add('win'); }); showFinalMessage(currentPlayer === 'X' ? '¡Ganaste, vecino! 🎉' : '¡Luchito te ganó! 🐻'); return; }
+            if (!board.includes('')) { showFinalMessage('¡Empate!'); return; }
         }
 
         function resetGame() {
-            board = ['', '', '', '', '', '', '', '', '']; currentPlayer = 'X'; gameActive = true; statusDisplay.textContent = 'Tu turno (X)';
-            cells.forEach(cell => { cell.textContent = ''; cell.classList.remove('x', 'o', 'win'); });
+            // Re-render the game to reset everything including the final message overlay
+            window.LuchitoGames.games['tictactoe'].render(container, level);
         }
     }
 });

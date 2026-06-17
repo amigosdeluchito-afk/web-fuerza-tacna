@@ -6,7 +6,7 @@ window.LuchitoGames.registerGame('trivia', {
             const style = document.createElement('style');
             style.id = styleId;
             style.innerHTML = `
-                .lg-trivia-game { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 0.5rem; box-sizing: border-box; width: 100%; max-width: 550px; margin: 0 auto; font-family: system-ui, -apple-system, sans-serif; }
+                .lg-trivia-game { font-family: system-ui, -apple-system, sans-serif; }
                 .lg-trivia-header { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: bold; color: #801039; }
                 .lg-trivia-progress { background: #fdf5f7; padding: 4px 10px; border-radius: 20px; }
                 .lg-trivia-score { background: #ffc300; color: #801039; padding: 4px 10px; border-radius: 20px; }
@@ -20,9 +20,9 @@ window.LuchitoGames.registerGame('trivia', {
                 .lg-trivia-option:disabled { cursor: not-allowed; }
                 .lg-trivia-feedback { margin-top: 0.6rem; font-weight: bold; font-size: 0.95rem; min-height: 1.2rem; }
                 .lg-trivia-actions { margin-top: 0.6rem; display: flex; justify-content: center; }
-                .lg-trivia-final-screen { text-align: center; padding: 1rem; }
-                .lg-trivia-final-screen h2 { font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; color: #801039; margin-top: 0; }
-                .lg-trivia-final-screen p { font-size: 1.1rem; margin-bottom: 1.5rem; }
+                .lg-trivia-final-screen { text-align: center; padding: 2rem 1rem; }
+                .lg-trivia-final-screen h2 { font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; color: #801039; margin-top: 0; text-transform: uppercase; }
+                .lg-trivia-final-screen p { font-size: 1.2rem; margin-bottom: 2rem; font-weight: bold; }
             `;
             document.head.appendChild(style);
         }
@@ -80,7 +80,7 @@ window.LuchitoGames.registerGame('trivia', {
         function showQuestion() {
             const question = questions[currentQuestionIndex];
             container.innerHTML = `
-                <div class="lg-trivia-game">
+                <div class="lg-game-wrapper lg-trivia-game">
                     <div class="lg-trivia-header">
                         <div class="lg-trivia-progress">Pregunta ${currentQuestionIndex + 1} / ${questions.length}</div>
                         <div class="lg-trivia-score">Puntaje: ${score}</div>
@@ -92,7 +92,7 @@ window.LuchitoGames.registerGame('trivia', {
                         </div>
                         <div class="lg-trivia-feedback" id="lg-trivia-feedback"></div>
                         <div class="lg-trivia-actions">
-                            <button class="lg-btn" id="lg-trivia-next" style="display:none; padding: 0.4rem 1.5rem; font-size: 0.9rem;">Siguiente</button>
+                            <button class="lg-btn-primary" id="lg-trivia-next" style="display:none; padding: 0.6rem 2rem; font-size: 0.9rem;">Siguiente</button>
                         </div>
                     </div>
                 </div>
@@ -141,11 +141,11 @@ window.LuchitoGames.registerGame('trivia', {
 
         function showFinalScore() {
             container.innerHTML = `
-                <div class="lg-trivia-game">
+                <div class="lg-game-wrapper lg-trivia-game lg-animated-view">
                     <div class="lg-trivia-final-screen">
                         <h2>¡Juego Terminado!</h2>
-                        <p>Tu puntaje final es: <strong>${score} de ${questions.length}</strong></p>
-                        <button class="lg-btn" id="lg-trivia-restart">Jugar otra vez</button>
+                        <p>Tu puntaje final es: <strong style="color:#ffc300; font-size:1.4rem; background:#801039; padding:2px 10px; border-radius:8px;">${score} de ${questions.length}</strong></p>
+                        <button class="lg-btn-primary" id="lg-trivia-restart">Jugar otra vez</button>
                     </div>
                 </div>
             `;

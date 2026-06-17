@@ -6,7 +6,7 @@ window.LuchitoGames.registerGame('find-luchito', {
             const style = document.createElement('style');
             style.id = styleId;
             style.innerHTML = `
-                .lg-find-game { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; padding: 0.5rem; width: 100%; max-width: 550px; margin: 0 auto; font-family: system-ui, sans-serif; }
+                .lg-find-game { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; font-family: system-ui, sans-serif; }
                 .lg-find-header { display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 1rem; font-weight: bold; color: #801039; background: #fdf5f7; padding: 0.6rem 1.2rem; border-radius: 50px; border: 2px solid #ffc300; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
                 .lg-find-stat { display: flex; align-items: center; gap: 0.4rem; font-size: 1.1rem; }
                 .lg-find-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 0.4rem; width: 100%; margin-top: 0.5rem; padding: 1rem; background: #fff; border: 2px solid #801039; border-radius: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -37,7 +37,7 @@ window.LuchitoGames.registerGame('find-luchito', {
         board[luchitoIndex] = '🐻'; 
 
         container.innerHTML = `
-            <div class="lg-find-game lg-animated-view">
+            <div class="lg-game-wrapper lg-find-game lg-animated-view">
                 <div class="lg-find-header">
                     <div class="lg-find-stat">⏱️ <span id="lg-find-time">${time}s</span></div>
                     <div style="font-family:'Arial Black Web', sans-serif; text-transform:uppercase;">¿Dónde está Luchito?</div>

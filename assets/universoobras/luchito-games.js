@@ -26,6 +26,20 @@ window.LuchitoGames = {
                     animation: none !important;
                     background: transparent !important;
                 }
+                /* --- ESTILOS DE ESTABILIZACIÓN (JUEGO 12) --- */
+                .lg-game-wrapper { max-width: 600px; margin: 0 auto; padding: 0 1rem; box-sizing: border-box; width: 100%; }
+                .lg-game-card.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(80%); }
+                .lg-game-nav .lg-game-title { font-family: 'Arial Black Web', sans-serif; font-size: 1.4rem; color: #801039; text-transform: uppercase; letter-spacing: 1px; }
+                .lg-btn-primary {
+                    position: relative; background: #ffc300; color: #801039; border: 2px solid #ffc300; padding: 0.8rem 2.5rem; border-radius: 50px; font-family: 'Arial Black Web', sans-serif; font-weight: 900; font-size: 1rem; text-transform: uppercase; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 4px 15px rgba(255, 195, 0, 0.3); outline: none !important; -webkit-tap-highlight-color: transparent;
+                }
+                .lg-btn-primary::before, .lg-btn-primary::after { display: none !important; }
+                .lg-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 195, 0, 0.5); background: #fff; border-color: #ffc300; }
+                .lg-btn-primary:active { transform: scale(0.97); transition-duration: 0.1s; }
+                .lg-final-message { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 10; animation: lgFadeSlideIn 0.5s ease forwards; }
+                .lg-final-message h3 { font-family: 'Arial Black Web', sans-serif; font-size: 2rem; color: #801039; margin: 0 0 1rem 0; }
+                /* --- FIN ESTILOS DE ESTABILIZACIÓN --- */
+
                 @keyframes lgFadeSlideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
                 .lg-animated-view { animation: lgFadeSlideIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
@@ -123,7 +137,7 @@ window.LuchitoGames = {
                 <div class="lg-game-nav">
                     <div class="lg-nav-left">
                         <button class="lg-back-btn" onclick="window.LuchitoGames.renderHome()">⬅ Volver</button>
-                        <h3 class="lg-game-title" id="lg-dynamic-title">Cargando...</h3>
+                        <div class="lg-game-title" id="lg-dynamic-title">Cargando...</div>
                     </div>
                     <button class="lg-close-btn-game" onclick="window.LuchitoGames.close()">✖</button>
                 </div>
@@ -170,12 +184,14 @@ window.LuchitoGames = {
                 
                 <div style="margin: 2rem auto; background: #fdf5f7; padding: 1.5rem; border-radius: 12px; border: 1px solid #ffc300; max-width: 400px;">
                     <p style="margin-top: 0; font-weight: 600; color: #555;">Escribe tu nombre para aparecer en el ranking:</p>
-                    <input type="text" id="lg-ranking-name" placeholder="Tu nombre o apodo" style="width: 100%; max-width: 250px; padding: 0.8rem; border: 2px solid #801039; border-radius: 50px; font-size: 1rem; text-align: center; outline: none; margin-bottom: 1rem;">
-                    <button class="lg-btn" style="width: 100%; max-width: 250px; display: block; margin: 0 auto;" onclick="alert('¡Excelente! (Tu puntaje se guardará cuando la BD esté activa)')">Guardar Puntaje</button>
+                    <input type="text" id="lg-ranking-name" placeholder="Tu nombre o apodo" style="width: 100%; max-width: 300px; padding: 0.8rem; border: 2px solid #801039; border-radius: 50px; font-size: 1rem; text-align: center; outline: none; margin-bottom: 1rem;">
+                    <button class="lg-btn-primary" style="width: 100%; max-width: 300px; display: block; margin: 0 auto;" onclick="alert('¡Excelente! (Tu puntaje se guardará cuando la BD esté activa)')">Guardar Puntaje</button>
                 </div>
 
-                <button class="lg-btn" style="background:#fff; color:#801039; border:2px solid #801039;" onclick="window.LuchitoGames.openGame('${gameId}')">Jugar otra vez</button>
-                <button class="lg-back-btn" style="display:block; margin: 1rem auto 0 auto; padding: 0.5rem 1rem;" onclick="window.LuchitoGames.renderHome()">Volver al menú</button>
+                <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;">
+                    <button class="lg-btn" onclick="window.LuchitoGames.renderHome()">Volver al menú</button>
+                    <button class="lg-btn-primary" onclick="window.LuchitoGames.openGame('${gameId}')">Jugar otra vez</button>
+                </div>
             </div>
         `;
     }

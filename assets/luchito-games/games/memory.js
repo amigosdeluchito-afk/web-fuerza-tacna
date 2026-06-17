@@ -9,20 +9,22 @@ window.LuchitoGames.registerGame('memory', {
         cardsArray.sort(() => Math.random() - 0.5);
 
         let html = `
-            <div class="lg-memory-status">Movimientos: <span id="lg-mem-moves">0</span></div>
-            <div class="lg-memory-board">
-                ${cardsArray.map((e, index) => `
-                    <div class="lg-memory-card" data-val="${e}" data-index="${index}">
-                        <div class="lg-memory-card-inner">
-                            <div class="lg-memory-card-front">❓</div>
-                            <div class="lg-memory-card-back">${e}</div>
+            <div class="lg-game-wrapper">
+                <div class="lg-memory-status" style="text-align: center; font-weight: bold; color: #801039; margin-bottom: 1rem;">Movimientos: <span id="lg-mem-moves">0</span></div>
+                <div class="lg-memory-board">
+                    ${cardsArray.map((e, index) => `
+                        <div class="lg-memory-card" data-val="${e}" data-index="${index}">
+                            <div class="lg-memory-card-inner">
+                                <div class="lg-memory-card-front">❓</div>
+                                <div class="lg-memory-card-back">${e}</div>
+                            </div>
                         </div>
-                    </div>
-                `).join('')}
-            </div>
-            <div id="lg-mem-win" style="display:none; text-align:center; margin-top:20px; animation: heroFadeUp 0.5s ease forwards;">
-                <p style="color:#801039; font-weight:900; font-size:18px; text-transform: uppercase;">¡Memoria de Elefante! 🎉</p>
-                <button class="lg-btn" id="lg-mem-reset">Jugar otra vez</button>
+                    `).join('')}
+                </div>
+                <div id="lg-mem-win" style="display:none; text-align:center; margin-top:20px; animation: lgFadeSlideIn 0.5s ease forwards;">
+                    <h3 style="color:#801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; text-transform: uppercase;">¡Memoria de Elefante! 🎉</h3>
+                    <button class="lg-btn-primary" id="lg-mem-reset">Jugar otra vez</button>
+                </div>
             </div>
         `;
         container.innerHTML = html;
