@@ -105,18 +105,19 @@ window.LuchitoGames = {
         `;
 
         if (!this.games[gameId]) {
-            const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
-            const scriptUrl = `${basePath}assets/universoobras/games/${gameId}.js?v=1`;
+            const GAMES_BASE_PATH = '/assets/luchito-games/games/';
+            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=1`;
+            
             try {
                 await new Promise((resolve, reject) => {
                     const script = document.createElement('script');
                     script.src = scriptUrl;
                     script.onload = resolve;
-                    script.onerror = reject;
+                    script.onerror = () => reject(new Error(scriptUrl));
                     document.body.appendChild(script);
                 });
             } catch (e) {
-                document.getElementById('lg-game-container').innerHTML = '<p style="color:red;">Error al cargar el juego. Verifica tu conexión.</p>';
+                document.getElementById('lg-game-container').innerHTML = `<p style="text-align: center; color: #801039; font-weight: bold; margin-top: 20px;">Error al cargar el minijuego. Verifica tu conexión.<br><small style="color: #ff6b6b; display: block; margin-top: 10px;">Ruta intentada: ${e.message}</small></p>`;
                 return;
             }
         }
