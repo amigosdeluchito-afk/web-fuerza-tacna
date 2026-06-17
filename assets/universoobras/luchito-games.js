@@ -1,4 +1,6 @@
 window.LuchitoGames = {
+    games: {}, // Almacén de juegos cargados
+
     init: function() {
         if (document.getElementById('luchito-games-overlay')) return;
 
@@ -53,10 +55,10 @@ window.LuchitoGames = {
                         <div class="lg-game-name">Tres en Raya</div>
                         <div class="lg-game-play">Jugar Ahora</div>
                     </div>
-                    <div class="lg-game-card disabled">
+                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('memory')">
                         <div class="lg-game-icon">🧠</div>
                         <div class="lg-game-name">Memoria</div>
-                        <div class="lg-game-badge">Próximamente</div>
+                        <div class="lg-game-play">Jugar Ahora</div>
                     </div>
                     <div class="lg-game-card disabled">
                         <div class="lg-game-icon">❓</div>
@@ -83,120 +85,44 @@ window.LuchitoGames = {
         `;
     },
 
-    openGame: function(gameId) {
+    openGame: async function(gameId, level = 'medium') {
         const view = document.getElementById('luchito-games-view');
+        const titles = { 'tictactoe': 'Tres en Raya', 'memory': 'Memoria' };
         
-        if (gameId === 'tictactoe') {
-            view.innerHTML = `
-                <div class="lg-game-screen">
-                    <div class="lg-game-nav">
-                        <button class="lg-back-btn" onclick="window.LuchitoGames.renderHome()">⬅ Volver a juegos</button>
-                        <h3 class="lg-game-title">Tres en Raya</h3>
+        view.innerHTML = `
+            <div class="lg-game-screen">
+                <div class="lg-game-nav">
+                    <div class="lg-nav-left">
+                        <button class="lg-back-btn" onclick="window.LuchitoGames.renderHome()">⬅ Volver</button>
+                        <h3 class="lg-game-title">${titles[gameId] || 'Minijuego'}</h3>
                     </div>
-                    <div id="lg-game-container" class="lg-game-container"></div>
+                    <button class="lg-close-btn-game" onclick="window.LuchitoGames.close()">✖</button>
                 </div>
-            `;
-            this.initTicTacToe(document.getElementById('lg-game-container'));
-        }
-    },
-
-    // --- LÓGICA DE JUEGOS ---
-
-    initTicTacToe: function(container) {
-        let board = ['', '', '', '', '', '', '', '', ''];
-        let currentPlayer = 'X'; 
-        let gameActive = true;
-
-        container.innerHTML = `
-            <div class="lg-ttt-status" id="lg-ttt-status">Tu turno (X)</div>
-            <div class="lg-ttt-board" id="lg-ttt-board">
-                ${board.map((_, i) => `<div class="lg-ttt-cell" data-index="${i}"></div>`).join('')}
+                <div id="lg-game-container" class="lg-game-container">
+                    <div style="color: #801039; font-weight: bold; margin-top: 20px;">Cargando juego... 🐻</div>
+                </div>
             </div>
-            <button class="lg-btn" id="lg-ttt-reset">Reiniciar Juego</button>
         `;
 
-        const cells = container.querySelectorAll('.lg-ttt-cell');
-        const statusDisplay = container.querySelector('#lg-ttt-status');
-        const resetBtn = container.querySelector('#lg-ttt-reset');
-
-        const winningConditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]
-        ];
-
-        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-        resetBtn.addEventListener('click', resetGame);
-
-        function handleCellClick(e) {
-            const clickedCell = e.target;
-            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
-
-            if (board[clickedCellIndex] !== '' || !gameActive || currentPlayer !== 'X') return;
-            handleMove(clickedCell, clickedCellIndex, 'X');
-            
-            if (gameActive) {
-                currentPlayer = 'O';
-                statusDisplay.textContent = 'Luchito está pensando...';
-                setTimeout(luchitoMove, 600); 
-            }
-        }
-
-        function handleMove(cell, index, player) {
-            board[index] = player;
-            cell.textContent = player;
-            cell.classList.add(player.toLowerCase());
-            checkResult();
-        }
-
-        function luchitoMove() {
-            if (!gameActive) return;
-            let emptyCells = [];
-            board.forEach((val, index) => { if (val === '') emptyCells.push(index); });
-
-            if (emptyCells.length > 0) {
-                const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                const cell = container.querySelector(`.lg-ttt-cell[data-index="${randomIndex}"]`);
-                handleMove(cell, randomIndex, 'O');
-                if (gameActive) {
-                    currentPlayer = 'X';
-                    statusDisplay.textContent = 'Tu turno (X)';
-                }
-            }
-        }
-
-        function checkResult() {
-            let roundWon = false;
-            let winningLine = [];
-            for (let i = 0; i < winningConditions.length; i++) {
-                const winCondition = winningConditions[i];
-                let a = board[winCondition[0]];
-                let b = board[winCondition[1]];
-                let c = board[winCondition[2]];
-                if (a === '' || b === '' || c === '') continue;
-                if (a === b && b === c) { roundWon = true; winningLine = winCondition; break; }
-            }
-
-            if (roundWon) {
-                winningLine.forEach(idx => { container.querySelector(`.lg-ttt-cell[data-index="${idx}"]`).classList.add('win'); });
-                statusDisplay.textContent = currentPlayer === 'X' ? '¡Ganaste, vecino! 🎉' : '¡Luchito te ganó! 🐻';
-                gameActive = false;
-                return;
-            }
-
-            if (!board.includes('')) {
-                statusDisplay.textContent = '¡Empate!';
-                gameActive = false;
+        if (!this.games[gameId]) {
+            const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
+            const scriptUrl = `${basePath}assets/universoobras/games/${gameId}.js?v=1`;
+            try {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = scriptUrl;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.body.appendChild(script);
+                });
+            } catch (e) {
+                document.getElementById('lg-game-container').innerHTML = '<p style="color:red;">Error al cargar el juego. Verifica tu conexión.</p>';
                 return;
             }
         }
 
-        function resetGame() {
-            board = ['', '', '', '', '', '', '', '', ''];
-            currentPlayer = 'X';
-            gameActive = true;
-            statusDisplay.textContent = 'Tu turno (X)';
-            cells.forEach(cell => { cell.textContent = ''; cell.classList.remove('x', 'o', 'win'); });
-        }
+        const container = document.getElementById('lg-game-container');
+        container.innerHTML = '';
+        this.games[gameId].init(container, level);
     }
 };
