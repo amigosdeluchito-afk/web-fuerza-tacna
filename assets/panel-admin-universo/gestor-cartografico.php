@@ -197,14 +197,14 @@ require_admin();
                 <!-- Controles de Búsqueda y Filtros -->
                 <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
                     <input type="text" id="filtroNombreRV" class="form-control" placeholder="🔍 Buscar por nombre..." oninput="renderListaRV()">
-                    <div style="display: flex; gap: 8px;">
-                        <select id="filtroTipoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <select id="filtroTipoRV" class="form-control" style="padding: 6px; font-size: 12px; flex: 1 1 130px;" onchange="renderListaRV()">
                             <option value="">Todos los tipos</option><option value="Local">Local</option><option value="Provincial">Provincial</option><option value="Regional">Regional</option>
                         </select>
-                        <select id="filtroEstadoRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                        <select id="filtroEstadoRV" class="form-control" style="padding: 6px; font-size: 12px; flex: 1 1 130px;" onchange="renderListaRV()">
                             <option value="">Todos los estados</option><option value="En estudios">En estudios</option><option value="Buena Pro">Buena Pro</option><option value="En ejecución">En ejecución</option><option value="Paralizado">Paralizado</option><option value="Transferencia">Transferencia</option><option value="Entregado">Entregado</option>
                         </select>
-                        <select id="filtroVisibilidadRV" class="form-control" style="padding: 6px; font-size: 12px;" onchange="renderListaRV()">
+                        <select id="filtroVisibilidadRV" class="form-control" style="padding: 6px; font-size: 12px; flex: 1 1 130px;" onchange="renderListaRV()">
                             <option value="">Visibilidad (Todas)</option><option value="1">Solo Activas</option><option value="0">Solo Inactivas</option>
                         </select>
                     </div>
