@@ -45,9 +45,11 @@ window.LuchitoGames.registerGame('rock-paper-scissors', {
                 .final-result { font-family: 'Arial Black Web', sans-serif; font-size: 1.5rem; color: #801039; margin-top: 0.5rem; animation: fadeInZoom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; text-transform: uppercase; letter-spacing: 1px; }
                 
                 .lg-rps-actions-new { min-height: 45px; margin-top: 0.2rem; }
-                .lg-btn-primary { background: #ffc300; color: #801039; border: 2px solid #ffc300; padding: 0.8rem 2.5rem; border-radius: 50px; font-family: 'Arial Black Web', sans-serif; font-weight: 900; font-size: 1rem; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(255, 195, 0, 0.3); outline: none; }
-                .lg-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255, 195, 0, 0.5); background: #fff; }
-                .lg-btn-primary:active { transform: translateY(1px); }
+                .lg-btn-primary { position: relative; background: #ffc300; color: #801039; border: 2px solid #ffc300; padding: 0.8rem 2.5rem; border-radius: 50px; font-family: 'Arial Black Web', sans-serif; font-weight: 900; font-size: 1rem; text-transform: uppercase; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 4px 15px rgba(255, 195, 0, 0.3); outline: none !important; -webkit-tap-highlight-color: transparent; }
+                .lg-btn-primary::before, .lg-btn-primary::after { display: none !important; content: none !important; }
+                .lg-btn-primary * { position: relative; z-index: 2; pointer-events: none; }
+                .lg-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 195, 0, 0.5); background: #fff; border-color: #ffc300; }
+                .lg-btn-primary:active { transform: scale(0.97); transition-duration: 0.1s; }
                 
                 @keyframes fadeInZoom { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
                 @keyframes pulseOpacity { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }

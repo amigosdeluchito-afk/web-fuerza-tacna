@@ -10,6 +10,29 @@ window.LuchitoGames = {
 
         // Inyectar overlay global directamente en el body
         const overlayHTML = `
+            <style id="lg-global-anti-ripple">
+                /* --- FIX ANTIRRIPPLE GLOBAL PARA LA ZONA ARCADE --- */
+                #luchito-games-overlay button, 
+                #luchito-games-overlay .lg-game-card {
+                    -webkit-tap-highlight-color: transparent !important;
+                    outline: none !important;
+                }
+                #luchito-games-overlay button::before, 
+                #luchito-games-overlay button::after,
+                #luchito-games-overlay .lg-game-card::before,
+                #luchito-games-overlay .lg-game-card::after {
+                    display: none !important;
+                    content: none !important;
+                    animation: none !important;
+                    background: transparent !important;
+                }
+                #luchito-games-overlay .lg-btn, #luchito-games-overlay .lg-back-btn, #luchito-games-overlay .lg-close-btn-game {
+                    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease !important;
+                }
+                #luchito-games-overlay .lg-btn:hover, #luchito-games-overlay .lg-back-btn:hover, #luchito-games-overlay .lg-close-btn-game:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
+                #luchito-games-overlay .lg-btn:active, #luchito-games-overlay .lg-back-btn:active, #luchito-games-overlay .lg-close-btn-game:active { transform: scale(0.97) !important; }
+                #luchito-games-overlay button:focus-visible { outline: 2px solid #ffc300 !important; outline-offset: 2px; }
+            </style>
             <div id="luchito-games-overlay" class="lg-overlay">
                 <div id="luchito-games-modal" class="lg-global-modal">
                     <div class="lg-global-header">
