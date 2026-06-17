@@ -902,14 +902,15 @@ async function initCandidatos(container) {
             if (data.ok && data.candidatos && data.candidatos.length > 0) {
                 // Filtramos solo los visibles y los guardamos en memoria global
                 window.CANDIDATOS_LIST = data.candidatos.filter(c => c.estado == 1);
+                window.CANDIDATOS_CACHE = window.CANDIDATOS_CACHE || {};
                 
                 window.CANDIDATOS_LIST.forEach(c => {
                     const fotoUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://placehold.co/400x400/801039/ffc300?text=Fuerza+Tacna';
                     const fotoHover = c.foto_portada ? `assets/universoobras/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
-                        <img src="${fotoUrl}" alt="${c.nombres}" class="img-default">
-                        <img src="${fotoHover}" alt="${c.nombres}" class="img-hover">
+                        <img src="${fotoUrl}" alt="${c.nombres}" class="img-default" fetchpriority="high" decoding="async">
+                        <img src="${fotoHover}" alt="${c.nombres}" class="img-hover" loading="lazy" decoding="async">
                             <div class="candidate-info">
                                 <h3>${c.nombres}</h3>
                                 <p>${c.cargo_flotante}</p>
@@ -957,6 +958,17 @@ async function initCandidatos(container) {
 
         // --- 3D Hover Effect ---
         cards.forEach(card => {
+            // --- NUEVO: Precargar datos de la ficha al pasar el mouse ---
+            card.addEventListener('mouseenter', () => {
+                const cid = card.getAttribute('data-id');
+                if (cid && !window.CANDIDATOS_CACHE[cid] && !card.dataset.prefetching) {
+                    card.dataset.prefetching = 'true';
+                    fetch(`assets/panel-admin-universo/api_candidatos.php?action=obtener&id=${cid}`)
+                        .then(r => r.json())
+                        .then(d => { if (d.ok) window.CANDIDATOS_CACHE[cid] = d.candidato; });
+                }
+            });
+
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -1118,12 +1130,18 @@ window.showCandidateDetail = async function(candidatoId) {
     const nextCandidate = candidates[(currentIndex + 1) % candidates.length];
 
     // Petición al servidor para traer TODA la información profunda (Propuestas, Cronología, etc)
-    let fullCandidato = null;
-    try {
-        const resp = await fetch(`assets/panel-admin-universo/api_candidatos.php?action=obtener&id=${candidatoId}`);
-        const data = await resp.json();
-        if (data.ok) fullCandidato = data.candidato;
-    } catch(e) { console.error(e); }
+    window.CANDIDATOS_CACHE = window.CANDIDATOS_CACHE || {};
+    let fullCandidato = window.CANDIDATOS_CACHE[candidatoId];
+
+    if (!fullCandidato) {
+        document.body.style.cursor = 'wait'; // Feedback de carga si el usuario clica antes de terminar el prefetch
+        try {
+            const resp = await fetch(`assets/panel-admin-universo/api_candidatos.php?action=obtener&id=${candidatoId}`);
+            const data = await resp.json();
+            if (data.ok) { fullCandidato = data.candidato; window.CANDIDATOS_CACHE[candidatoId] = fullCandidato; }
+        } catch(e) { console.error(e); }
+        document.body.style.cursor = '';
+    }
     
     if (!fullCandidato) {
         alert("Error al cargar la información del candidato.");
