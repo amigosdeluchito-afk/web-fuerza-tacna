@@ -97,6 +97,11 @@ window.LuchitoGames.registerGame('find-luchito', {
         });
 
         timerId = setInterval(() => {
+            // FIX: Destruir el cronómetro fantasma si el usuario sale del juego
+            if (!document.body.contains(timeEl)) {
+                clearInterval(timerId);
+                return;
+            }
             if (isGameOver) return;
             time--;
             timeEl.textContent = time + 's';

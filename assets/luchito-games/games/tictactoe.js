@@ -9,10 +9,12 @@ window.LuchitoGames.registerGame('tictactoe', {
         container.innerHTML = `
             <div class="lg-game-wrapper" style="position: relative; text-align: center;">
                 <div class="lg-ttt-status" id="lg-ttt-status">Tu turno (X)</div>
-                <div class="lg-ttt-board" id="lg-ttt-board">
-                    ${board.map((_, i) => `<div class="lg-ttt-cell" data-index="${i}"></div>`).join('')}
+                <div style="max-width: 320px; margin: 1rem auto; width: 100%;">
+                    <div class="lg-ttt-board" id="lg-ttt-board">
+                        ${board.map((_, i) => `<div class="lg-ttt-cell" data-index="${i}"></div>`).join('')}
+                    </div>
                 </div>
-                <button class="lg-btn-primary" id="lg-ttt-reset" style="margin-top: 1.5rem;">Reiniciar Juego</button>
+                <button class="lg-btn-primary" id="lg-ttt-reset" style="margin-top: 1.5rem; position: relative; z-index: 20;">Reiniciar Juego</button>
             </div>
         `;
 
