@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div>
                             <label>Dificultad Base</label>
-                            <select class="form-control form-control-sm" data-field="default_difficulty">
+                            <select data-field="default_difficulty">
                                 <option value="easy" ${game.default_difficulty === 'easy' ? 'selected' : ''}>🟢 Fácil</option>
                                 <option value="medium" ${game.default_difficulty === 'medium' || !game.default_difficulty ? 'selected' : ''}>🟡 Medio</option>
                                 <option value="hard" ${game.default_difficulty === 'hard' ? 'selected' : ''}>🔴 Difícil</option>
