@@ -44,6 +44,22 @@ require_admin();
         .btn-secondary { background: #334155; color: white; margin-top: 10px; }
         .btn-secondary:hover { background: #475569; }
         
+        /* DASHBOARD RESUMEN VIAS (RV4-B) */
+        .rv-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+        .rv-sum-card { background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; border-radius: 6px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .rv-sum-val { font-size: 16px; font-weight: 900; color: #f8fafc; line-height: 1; margin-bottom: 2px; }
+        .rv-sum-lbl { font-size: 8.5px; color: #94a3b8; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+        .rv-sum-card.c-blue { border-bottom-color: rgba(59, 130, 246, 0.5); }
+        .rv-sum-card.c-blue .rv-sum-val { color: #60a5fa; }
+        .rv-sum-card.c-green { border-bottom-color: rgba(16, 185, 129, 0.5); }
+        .rv-sum-card.c-green .rv-sum-val { color: #10b981; }
+        .rv-sum-card.c-red { border-bottom-color: rgba(239, 68, 68, 0.5); }
+        .rv-sum-card.c-red .rv-sum-val { color: #ef4444; }
+        .rv-sum-card.c-orange { border-bottom-color: rgba(245, 158, 11, 0.5); }
+        .rv-sum-card.c-orange .rv-sum-val { color: #f59e0b; }
+        .rv-sum-card.c-purple { border-bottom-color: rgba(168, 85, 247, 0.5); }
+        .rv-sum-card.c-purple .rv-sum-val { color: #a855f7; }
+        
         /* TOAST NOTIFICATIONS (RV4-A) */
         .toast-container { position: fixed; top: 70px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { min-width: 250px; max-width: 350px; background: #1e293b; color: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: flex-start; gap: 10px; pointer-events: auto; animation: toast-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); border-left: 4px solid #3b82f6; }
@@ -168,6 +184,16 @@ require_admin();
             <div class="rv-list-header">
                 <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">📋 Vías Guardadas</h3>
                 
+                <!-- Resumen Dashboard (RV4-B) -->
+                <div class="rv-summary-grid">
+                    <div class="rv-sum-card c-blue"><span class="rv-sum-val" id="sumRvTotal">0</span><span class="rv-sum-lbl">Total</span></div>
+                    <div class="rv-sum-card c-green"><span class="rv-sum-val" id="sumRvActivas">0</span><span class="rv-sum-lbl">Activas</span></div>
+                    <div class="rv-sum-card c-red"><span class="rv-sum-val" id="sumRvInactivas">0</span><span class="rv-sum-lbl">Inactivas</span></div>
+                    <div class="rv-sum-card c-purple"><span class="rv-sum-val" id="sumRvEntregadas">0</span><span class="rv-sum-lbl">Entregadas</span></div>
+                    <div class="rv-sum-card c-green"><span class="rv-sum-val" id="sumRvEjecucion">0</span><span class="rv-sum-lbl">Ejecución</span></div>
+                    <div class="rv-sum-card c-orange"><span class="rv-sum-val" id="sumRvOtros">0</span><span class="rv-sum-lbl">Proyectadas</span></div>
+                </div>
+
                 <!-- Controles de Búsqueda y Filtros -->
                 <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
                     <input type="text" id="filtroNombreRV" class="form-control" placeholder="🔍 Buscar por nombre..." oninput="renderListaRV()">
@@ -852,6 +878,33 @@ require_admin();
         }
 
         // ==========================================
+        // DASHBOARD RESUMEN DE VÍAS (RV4-B)
+        // ==========================================
+        function actualizarResumenVias() {
+            if (!rvGeoJSON || !rvGeoJSON.features) {
+                ['Total', 'Activas', 'Inactivas', 'Entregadas', 'Ejecucion', 'Otros'].forEach(id => {
+                    const el = document.getElementById('sumRv' + id);
+                    if(el) el.textContent = '0';
+                });
+                return;
+            }
+            
+            let c = { total: 0, activas: 0, inactivas: 0, entregadas: 0, ejecucion: 0, otros: 0 };
+            rvGeoJSON.features.forEach(f => {
+                c.total++;
+                const p = f.properties || {};
+                if (p.activo === 1) c.activas++; else c.inactivas++;
+                
+                const est = (p.estado || '').toLowerCase();
+                if (est.includes('entregado')) c.entregadas++;
+                else if (est.includes('ejecución') || est.includes('construccion')) c.ejecucion++;
+                else c.otros++;
+            });
+            
+            document.getElementById('sumRvTotal').textContent = c.total; document.getElementById('sumRvActivas').textContent = c.activas; document.getElementById('sumRvInactivas').textContent = c.inactivas; document.getElementById('sumRvEntregadas').textContent = c.entregadas; document.getElementById('sumRvEjecucion').textContent = c.ejecucion; document.getElementById('sumRvOtros').textContent = c.otros;
+        }
+
+        // ==========================================
         // LÓGICA DE LISTADO Y EDICIÓN RED VIAL
         // ==========================================
         async function fetchListaRV() {
@@ -877,6 +930,9 @@ require_admin();
         function renderListaRV() {
             const cont = document.getElementById('listaRvContainer');
             const contadorEl = document.getElementById('contadorRV');
+            
+            // Actualizar dashboard con datos en crudo (sin importar los filtros actuales)
+            actualizarResumenVias();
             
             if (!rvGeoJSON || !rvGeoJSON.features || rvGeoJSON.features.length === 0) {
                 cont.innerHTML = '<p style="color:#64748b; font-size:12px;">No hay vías guardadas.</p>';
