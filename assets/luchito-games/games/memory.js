@@ -45,24 +45,12 @@ window.LuchitoGames.registerGame('memory', {
                             </div>
                         `).join('')}
                     </div>
-                    <div id="lg-mem-win" class="lg-final-message" style="display:none;">
-                        <h3 style="color:#801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; text-transform: uppercase;">¡Nivel ${currentLevel} Superado! 🎉</h3>
-                        <div style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button class="lg-btn" id="lg-mem-menu">Volver a juegos</button>
-                            <button class="lg-btn-primary" id="lg-mem-next">Siguiente Nivel</button>
-                        </div>
-                    </div>
                 </div>
             `;
             container.innerHTML = html;
 
             const cardsEl = container.querySelectorAll('.lg-memory-card');
             cardsEl.forEach(c => c.addEventListener('click', flipCard));
-            
-            container.querySelector('#lg-mem-menu').addEventListener('click', () => window.LuchitoGames.renderHome());
-            container.querySelector('#lg-mem-next').addEventListener('click', () => {
-                if (currentLevel < 5) startLevel(currentLevel + 1);
-            });
         }
 
         function flipCard() {
@@ -97,7 +85,13 @@ window.LuchitoGames.registerGame('memory', {
                     
                     setTimeout(() => {
                         if (currentLevel < 5) {
-                            container.querySelector('#lg-mem-win').style.display = 'flex';
+                            const wrapper = container.querySelector('.lg-game-wrapper');
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = 'lg-final-message';
+                            msgDiv.style.display = 'flex';
+                            msgDiv.innerHTML = `<h3>¡Nivel ${currentLevel} Superado!</h3>`;
+                            wrapper.appendChild(msgDiv);
+                            setTimeout(() => startLevel(currentLevel + 1), 1200);
                         } else {
                             window.LuchitoGames.showRankingPrompt(totalScore, 'memory', container);
                         }

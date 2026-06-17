@@ -25,11 +25,11 @@ window.LuchitoGames.registerGame('find-luchito', {
         const emojis = ['👨', '👩', '👴', '👵', '👮', '🕵️', '👨‍🌾', '👩‍🍳', '👨‍🔧', '👷', '👨‍🏫', '👩‍🎤', '👲', '💂', '👨‍🚒', '👩‍⚕️', '👨‍💻', '👩‍🚀'];
         
         const levelConfigs = [
-            { grid: 12, time: 30 },
-            { grid: 20, time: 25 },
-            { grid: 30, time: 20 },
-            { grid: 42, time: 18 },
-            { grid: 56, time: 15 }
+            { grid: 30, time: 30 },
+            { grid: 45, time: 25 },
+            { grid: 60, time: 20 },
+            { grid: 80, time: 18 },
+            { grid: 100, time: 15 }
         ];
         
         let currentLevel = 1;
@@ -53,6 +53,14 @@ window.LuchitoGames.registerGame('find-luchito', {
             luchitoIndex = Math.floor(Math.random() * gridSize);
             board[luchitoIndex] = '🐻'; 
 
+            // Ajuste dinámico de tamaño para que quepa la multitud
+            let cellSize = '45px', fontSize = '1.8rem', minmax = '45px';
+            if (gridSize > 70) { // Niveles 4, 5
+                cellSize = '30px'; fontSize = '1.1rem'; minmax = '30px';
+            } else if (gridSize > 45) { // Nivel 3
+                cellSize = '35px'; fontSize = '1.4rem'; minmax = '35px';
+            }
+
             container.innerHTML = `
                 <div class="lg-game-wrapper lg-find-game lg-animated-view">
                     <div style="width: 100%; text-align: center; color: #801039; font-weight: bold;">Nivel ${currentLevel}/5 | Puntos: ${totalScore}</div>
@@ -61,17 +69,10 @@ window.LuchitoGames.registerGame('find-luchito', {
                         <div style="font-family:'Arial Black Web', sans-serif; text-transform:uppercase;">¿Dónde está Luchito?</div>
                         <div class="lg-find-stat">❤️ <span id="lg-find-attempts">${attempts}</span></div>
                     </div>
-                    <div class="lg-find-grid" id="lg-find-grid" style="grid-template-columns: repeat(auto-fill, minmax(${gridSize > 40 ? '35px' : '45px'}, 1fr));">
-                        ${board.map((emoji, i) => `<div class="lg-find-cell" data-index="${i}" style="height: ${gridSize > 40 ? '35px' : '45px'}; font-size: ${gridSize > 40 ? '1.4rem' : '1.8rem'};">${emoji}</div>`).join('')}
+                    <div class="lg-find-grid" id="lg-find-grid" style="grid-template-columns: repeat(auto-fill, minmax(${minmax}, 1fr));">
+                        ${board.map((emoji, i) => `<div class="lg-find-cell" data-index="${i}" style="height: ${cellSize}; font-size: ${fontSize};">${emoji}</div>`).join('')}
                     </div>
                     <div id="lg-find-msg" style="height: 20px; font-weight: bold; color: #801039; margin-top: 0.5rem;"></div>
-                    <div id="lg-find-win" class="lg-final-message" style="display:none;">
-                        <h3 id="lg-find-win-title" style="color:#801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; text-transform: uppercase;"></h3>
-                        <div style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button class="lg-btn" id="lg-find-menu">Volver a juegos</button>
-                            <button class="lg-btn-primary" id="lg-find-next">Siguiente Nivel</button>
-                        </div>
-                    </div>
                 </div>
             `;
 
@@ -88,21 +89,17 @@ window.LuchitoGames.registerGame('find-luchito', {
 
             function endGame(win) {
                 stopGame();
-                const winEl = container.querySelector('#lg-find-win');
-                const titleEl = container.querySelector('#lg-find-win-title');
-                const nextBtn = container.querySelector('#lg-find-next');
+                const msgEl = container.querySelector('#lg-find-msg');
                 
                 if (win) {
                     msgEl.textContent = '¡Encontraste a Luchito! 🎉';
                     msgEl.style.color = '#155724';
                     totalScore += (time * 10) + (attempts * 50); 
                     
-                    setTimeout(() => {
+                    setTimeout(() => { // Pausa para celebrar
                         if (currentLevel < 5) {
-                            titleEl.textContent = `¡Nivel ${currentLevel} Superado! 🎉`;
-                            nextBtn.textContent = "Siguiente Nivel";
-                            nextBtn.onclick = () => startLevel(currentLevel + 1);
-                            winEl.style.display = 'flex';
+                            msgEl.textContent = `¡Nivel ${currentLevel} Superado! Preparando siguiente...`;
+                            setTimeout(() => startLevel(currentLevel + 1), 1200); // Carga el siguiente nivel
                         } else {
                             window.LuchitoGames.showRankingPrompt(totalScore, 'find-luchito', container);
                         }
@@ -113,16 +110,12 @@ window.LuchitoGames.registerGame('find-luchito', {
                     const luchitoCell = container.querySelector(`.lg-find-cell[data-index="${luchitoIndex}"]`);
                     if (luchitoCell) luchitoCell.classList.add('found');
                     
-                    setTimeout(() => {
-                        titleEl.textContent = "¡Juego Terminado!";
-                        nextBtn.textContent = "Reintentar Nivel 1";
-                        nextBtn.onclick = () => { totalScore = 0; startLevel(1); };
-                        winEl.style.display = 'flex';
-                    }, 1500);
+                    setTimeout(() => { // Pausa para ver el resultado
+                        totalScore = 0; // Reinicia puntaje
+                        startLevel(1); // Vuelve al nivel 1
+                    }, 2500);
                 }
             }
-            
-            container.querySelector('#lg-find-menu').addEventListener('click', () => window.LuchitoGames.renderHome());
 
             cells.forEach(cell => {
                 cell.addEventListener('click', () => {

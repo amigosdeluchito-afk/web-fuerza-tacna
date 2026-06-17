@@ -100,23 +100,11 @@ window.LuchitoGames.registerGame('trivia', {
                             <button class="lg-btn-primary" id="lg-trivia-next" style="display:none; padding: 0.6rem 2rem; font-size: 0.9rem;">Siguiente</button>
                         </div>
                     </div>
-                    <div id="lg-trivia-win" class="lg-final-message" style="display:none;">
-                        <h3 style="color:#801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; text-transform: uppercase;">¡Nivel ${currentLevel} Superado! 🎉</h3>
-                        <div style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button class="lg-btn" id="lg-trivia-menu">Volver a juegos</button>
-                            <button class="lg-btn-primary" id="lg-trivia-next-level">Siguiente Nivel</button>
-                        </div>
-                    </div>
                 </div>
             `;
 
             container.querySelectorAll('.lg-trivia-option').forEach(btn => {
                 btn.addEventListener('click', selectAnswer);
-            });
-            
-            container.querySelector('#lg-trivia-menu').addEventListener('click', () => window.LuchitoGames.renderHome());
-            container.querySelector('#lg-trivia-next-level').addEventListener('click', () => {
-                startLevel(currentLevel + 1);
             });
 
             container.querySelector('#lg-trivia-next').addEventListener('click', () => {
@@ -125,7 +113,13 @@ window.LuchitoGames.registerGame('trivia', {
                     showQuestion();
                 } else {
                     if (currentLevel < 5) {
-                        container.querySelector('#lg-trivia-win').style.display = 'flex';
+                        const wrapper = container.querySelector('.lg-game-wrapper');
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = 'lg-final-message';
+                        msgDiv.style.display = 'flex';
+                        msgDiv.innerHTML = `<h3>¡Nivel ${currentLevel} Superado!</h3>`;
+                        wrapper.appendChild(msgDiv);
+                        setTimeout(() => startLevel(currentLevel + 1), 1200);
                     } else {
                         showFinalScore();
                     }
