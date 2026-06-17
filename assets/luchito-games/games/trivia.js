@@ -6,23 +6,23 @@ window.LuchitoGames.registerGame('trivia', {
             const style = document.createElement('style');
             style.id = styleId;
             style.innerHTML = `
-                .lg-trivia-game { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1rem; box-sizing: border-box; width: 100%; max-width: 600px; margin: 0 auto; font-family: system-ui, -apple-system, sans-serif; }
-                .lg-trivia-header { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; color: #801039; }
+                .lg-trivia-game { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 0.5rem; box-sizing: border-box; width: 100%; max-width: 550px; margin: 0 auto; font-family: system-ui, -apple-system, sans-serif; }
+                .lg-trivia-header { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: bold; color: #801039; }
                 .lg-trivia-progress { background: #fdf5f7; padding: 4px 10px; border-radius: 20px; }
                 .lg-trivia-score { background: #ffc300; color: #801039; padding: 4px 10px; border-radius: 20px; }
-                .lg-trivia-question-box { width: 100%; background: #fff; border: 2px solid #801039; border-radius: 1rem; padding: 1.5rem; text-align: center; margin-top: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-                .lg-trivia-question-text { font-size: 1.2rem; font-weight: bold; color: #333; margin: 0 0 1.5rem 0; }
-                .lg-trivia-options { display: grid; grid-template-columns: 1fr; gap: 0.8rem; }
-                .lg-trivia-option { background: #fdf5f7; border: 2px solid transparent; border-radius: 0.8rem; padding: 0.8rem; font-size: 1rem; font-weight: 600; color: #555; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+                .lg-trivia-question-box { width: 100%; background: #fff; border: 2px solid #801039; border-radius: 1rem; padding: 1rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+                .lg-trivia-question-text { font-size: 1.05rem; font-weight: bold; color: #333; margin: 0 0 0.8rem 0; line-height: 1.3; }
+                .lg-trivia-options { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
+                .lg-trivia-option { background: #fdf5f7; border: 2px solid transparent; border-radius: 0.6rem; padding: 0.5rem 0.8rem; font-size: 0.95rem; font-weight: 600; color: #555; cursor: pointer; transition: all 0.2s ease; text-align: left; }
                 .lg-trivia-option:hover:not(:disabled) { background: #f8e8e8; border-color: #801039; }
                 .lg-trivia-option.correct { background: #d4edda; border-color: #155724; color: #155724; font-weight: bold; }
                 .lg-trivia-option.incorrect { background: #f8d7da; border-color: #721c24; color: #721c24; }
                 .lg-trivia-option:disabled { cursor: not-allowed; }
-                .lg-trivia-feedback { margin-top: 1rem; font-weight: bold; }
-                .lg-trivia-actions { margin-top: 1.5rem; }
-                .lg-trivia-final-screen { text-align: center; }
-                .lg-trivia-final-screen h2 { font-family: 'Arial Black Web', sans-serif; font-size: 2rem; color: #801039; }
-                .lg-trivia-final-screen p { font-size: 1.2rem; margin-bottom: 2rem; }
+                .lg-trivia-feedback { margin-top: 0.6rem; font-weight: bold; font-size: 0.95rem; min-height: 1.2rem; }
+                .lg-trivia-actions { margin-top: 0.6rem; display: flex; justify-content: center; }
+                .lg-trivia-final-screen { text-align: center; padding: 1rem; }
+                .lg-trivia-final-screen h2 { font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; color: #801039; margin-top: 0; }
+                .lg-trivia-final-screen p { font-size: 1.1rem; margin-bottom: 1.5rem; }
             `;
             document.head.appendChild(style);
         }
@@ -91,9 +91,9 @@ window.LuchitoGames.registerGame('trivia', {
                             ${question.options.map((opt, i) => `<button class="lg-trivia-option" data-index="${i}">${opt}</button>`).join('')}
                         </div>
                         <div class="lg-trivia-feedback" id="lg-trivia-feedback"></div>
-                    </div>
-                    <div class="lg-trivia-actions">
-                        <button class="lg-btn" id="lg-trivia-next" style="display:none;">Siguiente</button>
+                        <div class="lg-trivia-actions">
+                            <button class="lg-btn" id="lg-trivia-next" style="display:none; padding: 0.4rem 1.5rem; font-size: 0.9rem;">Siguiente</button>
+                        </div>
                     </div>
                 </div>
             `;
