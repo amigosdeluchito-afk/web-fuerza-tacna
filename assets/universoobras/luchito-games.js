@@ -26,6 +26,9 @@ window.LuchitoGames = {
                     animation: none !important;
                     background: transparent !important;
                 }
+                @keyframes lgFadeSlideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+                .lg-animated-view { animation: lgFadeSlideIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
                 #luchito-games-overlay .lg-btn, #luchito-games-overlay .lg-back-btn, #luchito-games-overlay .lg-close-btn-game {
                     transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease !important;
                 }
@@ -71,7 +74,7 @@ window.LuchitoGames = {
     renderHome: function() {
         const view = document.getElementById('luchito-games-view');
         view.innerHTML = `
-            <div class="lg-home">
+            <div class="lg-home lg-animated-view">
                 <div class="lg-home-header">
                     <h2>¡Bienvenido a la Zona Arcade, vecino!</h2>
                     <p>Elige un minijuego para pasar el rato mientras seguimos trabajando por Tacna.</p>
@@ -97,10 +100,10 @@ window.LuchitoGames = {
                         <div class="lg-game-name">Piedra, Papel o Tijera</div>
                         <div class="lg-game-play">Jugar Ahora</div>
                     </div>
-                    <div class="lg-game-card disabled">
+                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('find-luchito')">
                         <div class="lg-game-icon">🐻</div>
                         <div class="lg-game-name">Encuentra a Luchito</div>
-                        <div class="lg-game-badge">Próximamente</div>
+                        <div class="lg-game-play">Jugar Ahora</div>
                     </div>
                     <div class="lg-game-card disabled">
                         <div class="lg-game-icon">🧩</div>
@@ -116,7 +119,7 @@ window.LuchitoGames = {
         const view = document.getElementById('luchito-games-view');
         
         view.innerHTML = `
-            <div class="lg-game-screen">
+            <div class="lg-game-screen lg-animated-view">
                 <div class="lg-game-nav">
                     <div class="lg-nav-left">
                         <button class="lg-back-btn" onclick="window.LuchitoGames.renderHome()">⬅ Volver</button>
@@ -156,5 +159,24 @@ window.LuchitoGames = {
             container.innerHTML = '';
             if (typeof game.render === 'function') game.render(container, level);
         }
+    },
+
+    // Arquitectura base para el Sistema de Ranking (MVP UI)
+    showRankingPrompt: function(score, gameId, container) {
+        container.innerHTML = `
+            <div class="lg-animated-view" style="text-align: center; padding: 2rem 1rem;">
+                <h2 style="color: #801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; margin-bottom: 0.5rem; text-transform: uppercase;">¡Juego Terminado!</h2>
+                <p style="font-size: 1.2rem; font-weight: bold; color: #333;">Tu puntaje fue: <span style="color:#ffc300; font-size:1.5rem; background:#801039; padding:2px 10px; border-radius:8px;">${score}</span></p>
+                
+                <div style="margin: 2rem auto; background: #fdf5f7; padding: 1.5rem; border-radius: 12px; border: 1px solid #ffc300; max-width: 400px;">
+                    <p style="margin-top: 0; font-weight: 600; color: #555;">Escribe tu nombre para aparecer en el ranking:</p>
+                    <input type="text" id="lg-ranking-name" placeholder="Tu nombre o apodo" style="width: 100%; max-width: 250px; padding: 0.8rem; border: 2px solid #801039; border-radius: 50px; font-size: 1rem; text-align: center; outline: none; margin-bottom: 1rem;">
+                    <button class="lg-btn" style="width: 100%; max-width: 250px; display: block; margin: 0 auto;" onclick="alert('¡Excelente! (Tu puntaje se guardará cuando la BD esté activa)')">Guardar Puntaje</button>
+                </div>
+
+                <button class="lg-btn" style="background:#fff; color:#801039; border:2px solid #801039;" onclick="window.LuchitoGames.openGame('${gameId}')">Jugar otra vez</button>
+                <button class="lg-back-btn" style="display:block; margin: 1rem auto 0 auto; padding: 0.5rem 1rem;" onclick="window.LuchitoGames.renderHome()">Volver al menú</button>
+            </div>
+        `;
     }
 };
