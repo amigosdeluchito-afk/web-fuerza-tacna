@@ -161,18 +161,18 @@ window.LuchitoGames.registerGame('rock-paper-scissors', {
                 }
 
                 resultDisplay.innerHTML = `
-                    <div class="result-choices">
-                        <span>Tú: <span class="emoji">${playerEmoji}</span></span>
-                        <span>Luchito: <span class="emoji">${luchitoEmoji}</span></span>
+                    <div class="vs-zone">
+                        <div class="vs-side"><span>Tú</span><span class="emoji">${playerEmoji}</span></div>
+                        <div class="vs-center">VS</div>
+                        <div class="vs-side"><span class="emoji">${luchitoEmoji}</span><span>Luchito</span></div>
                     </div>
-                    <p class="final-result">${resultText}</p>
+                    <div class="final-result">${resultText}</div>
                 `;
 
                 updateScores();
                 
-                choiceCards.forEach(btn => btn.disabled = false);
                 resetBtn.style.display = 'inline-block';
-            }, 1000);
+            }, 800);
         }
 
         function getWinner(player, luchito) {
