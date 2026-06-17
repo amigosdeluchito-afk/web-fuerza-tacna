@@ -6,55 +6,108 @@ require_admin();
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Juegos - Fuerza Tacna</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body { background-color: #f8f9fa; }
-        .container { max-width: 1200px; }
-        .card { margin-bottom: 1.5rem; }
-        .card-header { background-color: #801039; color: #ffc300; font-weight: bold; }
-        .form-control-sm { height: calc(1.5em + .5rem + 2px); padding: .25rem .5rem; font-size: .875rem; }
-        .btn-save-all { position: fixed; bottom: 20px; right: 20px; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1050; }
-        .game-card { transition: box-shadow 0.2s ease; }
-        .game-card:focus-within { box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.5); }
-    </style>
+  <meta charset="UTF-8">
+  <title>Panel de Juegos – Universo de Obras</title>
+  <style>
+    body { background:#050816; color:#fff; font-family:system-ui,sans-serif; margin:0; padding-bottom: 80px; }
+    header { padding:16px 24px; border-bottom:1px solid #111827; display:flex; justify-content:space-between; align-items:center; background:#020617; position:sticky; top:0; z-index:100; }
+    nav a { color:#9ca3af; margin-right:16px; text-decoration:none; font-size:14px; }
+    nav a.active { color:#ffffff; font-weight:600; }
+    nav a:hover { color:#e5e7eb; }
+    .user { font-size:13px; color:#9ca3af; }
+    .user a { color:#9ca3af; text-decoration:none; }
+    
+    main { padding:24px; max-width:1200px; margin:0 auto; }
+    h1 { margin-top:0; font-size: 22px; display: flex; justify-content: space-between; align-items: center; color: #f9fafb; }
+    
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+    .game-card { background: #0b1020; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: border-color 0.2s; }
+    .game-card:focus-within { border-color: #3b82f6; }
+    
+    .game-card-header { background: #0f172a; padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 8px; font-size: 15px; color: #e2e8f0; }
+    .game-card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    
+    label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block; }
+    input, select, textarea { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: #3b82f6; }
+    
+    .form-row { display: flex; gap: 12px; }
+    .form-row > div { flex: 1; }
+    
+    .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; transition: background 0.2s; text-decoration: none; display: inline-block; }
+    .btn-secondary { background: #334155; color: white; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-success:disabled { background: #064e3b; color: #94a3b8; cursor: not-allowed; }
+
+    .floating-save { position: fixed; bottom: 30px; right: 30px; padding: 12px 24px; font-size: 15px; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 100; transition: transform 0.2s; }
+    .floating-save:not(:disabled):hover { transform: translateY(-2px); }
+    
+    .toast-msg { position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .toast-msg.show { transform: translateX(0); }
+    .toast-msg.error { background: #ef4444; }
+  </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3">🎮 Panel de Configuración de Juegos</h1>
-            <a href="index.php" class="btn btn-secondary">Volver al Panel Principal</a>
-        </div>
 
-        <div id="games-list" class="row">
-            <p>Cargando juegos...</p>
-        </div>
-    </div>
+<header>
+  <style>.nav-scroll::-webkit-scrollbar { height: 4px; } .nav-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }</style>
+  <nav class="nav-scroll" style="display:flex; align-items:center; overflow-x:auto; white-space:nowrap; width:100%; margin-right:15px; scrollbar-width:thin; scrollbar-color:#334155 transparent; padding-bottom: 4px;">
+    <a href="index.php">📷 Fotos</a>
+    <a href="agregar_obra.php">➕ Agregar Obra</a>
+    <a href="editar_obra.php">✏️ Editar Obra</a>
+    <a href="gestionar_visibilidad.php">👁️ Visibilidad</a>
+    <a href="segmentos.php">🗂️ Segmentos</a>
+    <a href="cronologia.php">⏳ Cronología</a>
+    <a href="editar_candidato.php">👥 Candidatos</a>
+    <a href="ia_respuestas.php">🧠 Cerebro IA</a>
+    <a href="ia_cerebro_obras.php">🏗️ Obras IA</a>
+    <a href="ia_conocimiento.php">📚 Base IA</a>
+    <a href="ia_fuentes.php">🔗 Fuentes IA</a>
+    <a href="ia_estadisticas.php">📊 Stats IA</a>
+    <a href="gestor-cartografico.php">📍 Gestor Mapa</a>
+    <a href="panel-juegos.php" class="active">🎮 Panel de Juegos</a>
+    <?php if (is_admin()): ?>
+    <a href="usuarios.php">👤 Usuarios</a>
+    <a href="historial.php">🕒 Historial</a>
+    <a href="ver_accesos.php">🕵️ Accesos</a>
+    <?php endif; ?>
+  </nav>
+  <div class="user">
+    <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php">Salir</a>
+  </div>
+</header>
 
-    <button id="save-all-btn" class="btn btn-warning btn-lg btn-save-all" disabled>
-        Guardar Cambios
-    </button>
+<main>
+  <h1>
+    <span>🎮 Configuración de Juegos</span>
+    <a href="index.php" class="btn btn-secondary">Volver al Panel</a>
+  </h1>
+  
+  <p style="color: #94a3b8; font-size: 14px; margin-top: -10px;">
+    Aquí puedes gestionar la Zona Arcade pública. Modifica el estado, orden y descripciones.
+  </p>
 
-    <div class="toast-container">
-        <div id="save-toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
-            <div class="toast-header">
-                <strong class="mr-auto">Panel de Juegos</strong>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="toast-body">
-                <!-- Mensaje dinámico -->
-            </div>
-        </div>
-    </div>
+  <div id="games-grid" class="games-grid">
+    <p style="color: #9ca3af; padding: 20px;">Cargando juegos...</p>
+  </div>
+</main>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="panel-juegos.js?v=1"></script>
+<button id="save-all-btn" class="btn btn-success floating-save" disabled>
+  💾 Guardar Cambios
+</button>
+
+<div id="toast-msg" class="toast-msg">Mensaje</div>
+
+<script src="panel-juegos.js?v=1"></script>
+
+<script>
+    // Ajuste de scroll horizontal de nav activo
+    document.addEventListener("DOMContentLoaded", function() {
+        const activeItem = document.querySelector('.nav-scroll a.active');
+        if(activeItem) activeItem.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+    });
+</script>
 </body>
 </html>
