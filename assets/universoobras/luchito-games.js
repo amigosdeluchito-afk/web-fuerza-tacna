@@ -85,8 +85,56 @@ window.LuchitoGames = {
         document.body.style.overflow = ''; 
     },
 
-    renderHome: function() {
+    renderHome: async function() {
         const view = document.getElementById('luchito-games-view');
+        
+        // Indicador de carga súper rápido
+        view.innerHTML = `<div style="text-align:center; padding: 2rem; color:#801039; font-weight:bold;">Cargando juegos... 🐻</div>`;
+
+        let gamesConfig = [];
+        
+        try {
+            const response = await fetch('/assets/panel-admin-universo/juegos_api.php');
+            if (!response.ok) throw new Error('Error HTTP: ' + response.status);
+            
+            const data = await response.json();
+            if (data && data.ok && Array.isArray(data.games)) {
+                gamesConfig = data.games;
+                console.log("Juega con Luchito: Configuración cargada desde panel.");
+            } else {
+                throw new Error('Estructura JSON inválida.');
+            }
+        } catch (error) {
+            console.warn("Juega con Luchito: Usando fallback local. Motivo:", error.message);
+            gamesConfig = [
+                { game_id: 'tictactoe', title: 'Tres en Raya', status: 'active', icon: '❌⭕', default_difficulty: 'medium' },
+                { game_id: 'memory', title: 'Memoria', status: 'active', icon: '🧠', default_difficulty: 'medium' },
+                { game_id: 'trivia', title: 'Trivia', status: 'active', icon: '❓', default_difficulty: 'medium' },
+                { game_id: 'rock-paper-scissors', title: 'Piedra, Papel o Tijera', status: 'active', icon: '✌️🤚', default_difficulty: 'medium' },
+                { game_id: 'find-luchito', title: 'Encuentra a Luchito', status: 'active', icon: '🐻', default_difficulty: 'medium' },
+                { game_id: 'puzzle', title: 'Rompecabezas', status: 'soon', icon: '🧩', default_difficulty: 'medium' }
+            ];
+        }
+
+        const gamesHTML = gamesConfig.map(game => {
+            if (game.status === 'disabled') return ''; // No renderizar si está oculto/deshabilitado
+
+            const isActive = game.status === 'active';
+            const cardClass = isActive ? 'lg-game-card active' : 'lg-game-card disabled';
+            const actionHTML = isActive 
+                ? `<div class="lg-game-play">Jugar Ahora</div>`
+                : `<div class="lg-game-badge">Próximamente</div>`;
+            const clickAction = isActive ? `onclick="window.LuchitoGames.openGame('${game.game_id}', '${game.default_difficulty || 'medium'}')"` : '';
+
+            return `
+                <div class="${cardClass}" ${clickAction}>
+                    <div class="lg-game-icon">${game.icon}</div>
+                    <div class="lg-game-name">${game.title}</div>
+                    ${actionHTML}
+                </div>
+            `;
+        }).join('');
+
         view.innerHTML = `
             <div class="lg-home lg-animated-view">
                 <div class="lg-home-header">
@@ -94,36 +142,7 @@ window.LuchitoGames = {
                     <p>Elige un minijuego para pasar el rato mientras seguimos trabajando por Tacna.</p>
                 </div>
                 <div class="lg-games-grid">
-                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('tictactoe')">
-                        <div class="lg-game-icon">❌⭕</div>
-                        <div class="lg-game-name">Tres en Raya</div>
-                        <div class="lg-game-play">Jugar Ahora</div>
-                    </div>
-                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('memory')">
-                        <div class="lg-game-icon">🧠</div>
-                        <div class="lg-game-name">Memoria</div>
-                        <div class="lg-game-play">Jugar Ahora</div>
-                    </div>
-                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('trivia')">
-                        <div class="lg-game-icon">❓</div>
-                        <div class="lg-game-name">Trivia</div>
-                        <div class="lg-game-play">Jugar Ahora</div>
-                    </div>
-                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('rock-paper-scissors')">
-                        <div class="lg-game-icon">✌️🤚</div>
-                        <div class="lg-game-name">Piedra, Papel o Tijera</div>
-                        <div class="lg-game-play">Jugar Ahora</div>
-                    </div>
-                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('find-luchito')">
-                        <div class="lg-game-icon">🐻</div>
-                        <div class="lg-game-name">Encuentra a Luchito</div>
-                        <div class="lg-game-play">Jugar Ahora</div>
-                    </div>
-                    <div class="lg-game-card disabled">
-                        <div class="lg-game-icon">🧩</div>
-                        <div class="lg-game-name">Rompecabezas</div>
-                        <div class="lg-game-badge">Próximamente</div>
-                    </div>
+                    ${gamesHTML}
                 </div>
             </div>
         `;
