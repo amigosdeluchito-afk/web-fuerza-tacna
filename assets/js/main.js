@@ -597,41 +597,13 @@ function injectGlobalAssets() {
             #ft-chat-container.ft-chat-open { pointer-events: auto !important; }
             #ft-chat-messages { 
                 overflow-y: auto !important; 
-                display: flex !important; 
-                flex-direction: column !important; 
                 overscroll-behavior: contain; 
                 scroll-behavior: smooth;
             }
-            #ft-chat-messages > :first-child { margin-top: auto !important; }
             #ft-chat-messages::-webkit-scrollbar { width: 6px; }
             #ft-chat-messages::-webkit-scrollbar-track { background: transparent; }
             #ft-chat-messages::-webkit-scrollbar-thumb { background-color: rgba(128, 16, 57, 0.3); border-radius: 10px; }
             #ft-chat-messages::-webkit-scrollbar-thumb:hover { background-color: rgba(128, 16, 57, 0.6); }
-            
-            /* --- ESTÉTICA PREMIUM PARA SUGGESTION CHIPS --- */
-            .ft-action-btn {
-                background: #ffffff !important;
-                border: 1px solid rgba(128, 16, 57, 0.15) !important;
-                color: #334155 !important;
-                padding: 8px 16px !important;
-                border-radius: 20px !important;
-                font-size: 13px !important;
-                font-weight: 600 !important;
-                cursor: pointer !important;
-                transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1) !important;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important;
-                outline: none !important;
-                -webkit-tap-highlight-color: transparent !important;
-                position: relative;
-                overflow: hidden;
-            }
-            .ft-action-btn::before, .ft-action-btn::after { display: none !important; content: none !important; }
-            .ft-action-btn:hover {
-                transform: translateY(-2px) !important;
-                box-shadow: 0 6px 15px rgba(255, 195, 0, 0.2), 0 2px 4px rgba(128, 16, 57, 0.1) !important;
-                border-color: rgba(255, 195, 0, 0.5) !important; color: #801039 !important; background: #fffdf5 !important;
-            }
-            .ft-action-btn:active { transform: scale(0.97) !important; box-shadow: 0 1px 2px rgba(255, 195, 0, 0.1) !important; transition-duration: 0.1s !important; }
         `;
         document.head.appendChild(style);
     }
@@ -713,21 +685,6 @@ function injectGlobalAssets() {
         const chatJS = document.createElement('script');
         chatJS.src = 'assets/universoobras/chat-ia.js?v=4'; // Aesthetic UI update
         document.body.appendChild(chatJS);
-
-        // 4. Inyectar JS y CSS de Luchito Games
-        if (!document.getElementById('luchito-games-css')) {
-            const gamesCSS = document.createElement('link');
-            gamesCSS.id = 'luchito-games-css';
-            gamesCSS.rel = 'stylesheet';
-            gamesCSS.href = basePath + 'assets/universoobras/luchito-games.css?v=2';
-            document.head.appendChild(gamesCSS);
-        }
-        if (!document.getElementById('luchito-games-js')) {
-            const gamesJS = document.createElement('script');
-            gamesJS.id = 'luchito-games-js';
-            gamesJS.src = basePath + 'assets/universoobras/luchito-games.js?v=2';
-            document.body.appendChild(gamesJS);
-        }
     }
 }
 injectGlobalAssets(); // Se ejecuta inmediatamente al cargar el JS

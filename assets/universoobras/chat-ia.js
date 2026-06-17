@@ -55,6 +55,33 @@ function initChatIA() {
     }
     if (!projectRoot.endsWith('/')) projectRoot += '/';
 
+    // --- AUTO INYECCIÓN DE ESTILOS Y DEPENDENCIAS DEL CHAT ---
+    if (!document.getElementById('ft-chat-dynamic-styles')) {
+        const style = document.createElement('style');
+        style.id = 'ft-chat-dynamic-styles';
+        style.innerHTML = `
+            /* --- ESTÉTICA ORIGINAL INSTITUCIONAL (SIN MANCHA OSCURA) --- */
+            .ft-action-btn { background: rgba(128, 16, 57, 0.1) !important; border: 1px solid #801039 !important; color: #801039 !important; padding: 8px 14px !important; border-radius: 20px !important; font-size: 12.5px !important; font-weight: bold !important; cursor: pointer !important; transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1) !important; outline: none !important; -webkit-tap-highlight-color: transparent !important; position: relative; overflow: hidden; }
+            .ft-action-btn::before, .ft-action-btn::after { display: none !important; content: none !important; }
+            .ft-action-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 10px rgba(128, 16, 57, 0.15) !important; background: #801039 !important; color: #ffc300 !important; border-color: #801039 !important; }
+            .ft-action-btn:active { transform: scale(0.96) !important; box-shadow: none !important; transition-duration: 0.1s !important; }
+        `;
+        document.head.appendChild(style);
+    }
+    if (!document.getElementById('luchito-games-css')) {
+        const gamesCSS = document.createElement('link');
+        gamesCSS.id = 'luchito-games-css';
+        gamesCSS.rel = 'stylesheet';
+        gamesCSS.href = projectRoot + 'assets/universoobras/luchito-games.css?v=2';
+        document.head.appendChild(gamesCSS);
+    }
+    if (!document.getElementById('luchito-games-js')) {
+        const gamesJS = document.createElement('script');
+        gamesJS.id = 'luchito-games-js';
+        gamesJS.src = projectRoot + 'assets/universoobras/luchito-games.js?v=2';
+        document.body.appendChild(gamesJS);
+    }
+
     const escapeHTML = (str) => {
         return str.replace(/[&<>'"]/g, tag => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -161,7 +188,7 @@ function initChatIA() {
         chatContainer.classList.remove('ft-chat-open');
         chatContainer.classList.add('ft-chat-closed');
 
-        if (typeof barba !== 'undefined' && barba.go) {
+        if (typeof barba !== 'undefined' && barba.go && !finalDest.includes('mapa-obras.html')) {
             barba.go(finalDest);
         } else {
             window.location.href = finalDest;
