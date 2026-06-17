@@ -91,15 +91,16 @@ window.scrollTo(0, 0);
 // Esto evita que tengas que copiar y pegar código en cada página HTML individualmente.
 // El JS se encargará de poner la píldora, el WhatsApp y el loader automáticamente.
 function injectGlobalAssets() {
+    // FIX: Se calcula la ruta al fondo 'pattern.svg' dinámicamente y la hacemos global para toda la función.
+    // Esto evita errores 404 al navegar a páginas en subcarpetas (como el mapa de obras),
+    // ya que la ruta relativa se ajusta automáticamente.
+    const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
+
     // Inyectar estilos globales si no existen en la página actual
     if (!document.getElementById('le-lab-dynamic-styles')) {
         const style = document.createElement('style');
         style.id = 'le-lab-dynamic-styles';
 
-        // FIX: Se calcula la ruta al fondo 'pattern.svg' dinámicamente.
-        // Esto evita errores 404 al navegar a páginas en subcarpetas (como el mapa de obras),
-        // ya que la ruta relativa se ajusta automáticamente.
-        const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
         const patternUrl = `${basePath}assets/img/pattern.svg`;
 
         style.innerHTML = `
