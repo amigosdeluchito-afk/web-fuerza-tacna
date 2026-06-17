@@ -571,6 +571,53 @@ function injectGlobalAssets() {
             .timeline-modal-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; margin: 15px 0; }
             .timeline-modal-content::-webkit-scrollbar-thumb { background: rgba(255,195,0,0.5); border-radius: 10px; }
             .timeline-modal-content::-webkit-scrollbar-thumb:hover { background: rgba(255,195,0,0.8); }
+
+            /* --- Mejoras de Lectura y Contenido Expandible --- */
+            .bio-container { font-size: 1.05rem; line-height: 1.7; color: #ddd; max-width: 85ch; }
+            .bio-content.is-clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; text-overflow: ellipsis; }
+            .bio-content ul, .proposal-description ul, .timeline-text ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+            .bio-content ul li, .proposal-description ul li, .timeline-text ul li { margin-bottom: 0.5rem; }
+            
+            .proposal-description {
+                font-size: 0.9rem !important; margin: 0; line-height: 1.6 !important; color: #bbb !important;
+                font-weight: 300; flex-grow: 1; transition: max-height 0.4s ease-in-out;
+            }
+            .proposal-description.is-clamped {
+                max-height: 110px; /* Altura máxima inicial */
+                overflow: hidden; position: relative;
+            }
+            .proposal-description.is-clamped::after {
+                content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40px;
+                background: linear-gradient(to bottom, transparent, #801039); pointer-events: none;
+            }
+            .proposal-card:hover .proposal-description.is-clamped::after {
+                 background: linear-gradient(to bottom, transparent, rgba(255,195,0,0.06));
+            }
+            .proposal-card { align-items: flex-start; } /* Alinea todo al inicio */
+
+            .timeline .timeline-item.is-hidden { display: none; }
+            .timeline.is-expanded .timeline-item.is-hidden { display: block; }
+
+            .read-more-btn {
+                background: rgba(255, 195, 0, 0.1); border: 1px solid rgba(255, 195, 0, 0.3);
+                color: #ffc300; padding: 0.4rem 1rem; border-radius: 50px;
+                font-size: 0.8rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+                text-transform: uppercase; cursor: pointer; margin-top: 1rem;
+                display: inline-block; transition: all 0.3s ease;
+            }
+            .read-more-btn:hover { background: #ffc300; color: #801039; }
+            .proposal-card .read-more-btn { margin-top: auto; padding-top: 0.5rem; align-self: center; }
+
+            .timeline-text { color: #bbb; line-height: 1.7; font-size: 1rem; margin: 0; font-weight: 300; max-width: 60ch; }
+
+            @media (max-width: 991px) {
+                .bio-container { font-size: 0.9rem; line-height: 1.6; }
+                .proposal-description { font-size: 0.8rem !important; line-height: 1.5 !important; }
+                .proposal-description.is-clamped { max-height: 80px; }
+                .timeline-text { font-size: 0.9rem; line-height: 1.6; }
+            }
+            /* --- Fin Mejoras de Lectura --- */
+
             @media (max-width: 991px) {
                 .timeline-modal-layout { flex-direction: column !important; gap: 1.5rem !important; text-align: center !important; }
                 .timeline-modal-left img { max-height: 40vh !important; }
@@ -1017,6 +1064,47 @@ async function initCandidatos(container) {
     }, 150); // El retraso de 150ms garantiza que el CSS y anchos se apliquen primero
 }
 
+/**
+ * Formatea texto plano para respetar saltos de línea y listas con viñetas.
+ * Es seguro contra XSS, ya que escapa todo el HTML antes de aplicar formato.
+ * @param {string} text - El texto de entrada desde la base de datos.
+ * @returns {string} - Una cadena HTML segura con formato.
+ */
+function formatTextContent(text) {
+    if (!text || typeof text !== 'string') return '';
+
+    const escapeHTML = (str) => str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag] || tag));
+
+    const lines = text.split('\n');
+    let html = '';
+    let inList = false;
+
+    for (const line of lines) {
+        const isListItem = /^\s*[*•-]\s+/.test(line);
+
+        if (isListItem) {
+            if (!inList) {
+                html += '<ul class="formatted-list">';
+                inList = true;
+            }
+            const content = escapeHTML(line.replace(/^\s*[*•-]\s+/, ''));
+            html += `<li>${content}</li>`;
+        } else {
+            if (inList) {
+                html += '</ul>';
+                inList = false;
+            }
+            html += escapeHTML(line.trim()) + '<br>';
+        }
+    }
+
+    if (inList) html += '</ul>';
+    
+    return html.replace(/(<br>\s*)+$/,''); // Limpia <br> finales
+}
+
 // --- LÓGICA DE DETALLE Y MINIATURAS ---
 // Esta función es global para que pueda ser llamada desde los eventos onclick de las miniaturas
 window.showCandidateDetail = async function(candidatoId) {
@@ -1089,27 +1177,40 @@ window.showCandidateDetail = async function(candidatoId) {
         badgesHTML += `<span class="badge">${e.icono} ${e.texto}</span>`;
     });
 
+    // --- Lógica de Trayectoria con "Ver más" ---
     let trayectoriaHTML = '';
-    (fullCandidato.trayectoria || []).forEach(t => {
-        trayectoriaHTML += `
-            <div class="timeline-item stagger-el">
-                <div class="timeline-year">${t.periodo}</div>
-                <div class="timeline-body">
-                    <div class="timeline-content-left">
-                        <p class="timeline-text">${t.descripcion}</p>
-                    </div>
-                </div>
-            </div>`;
-    });
-    if (!trayectoriaHTML) trayectoriaHTML = '<p class="text-muted" style="color:#bbb;">Aún no se ha registrado trayectoria.</p>';
+    const trayectoriaItems = fullCandidato.trayectoria || [];
+    const isLongTrayectoria = trayectoriaItems.length > 3;
 
+    if (trayectoriaItems.length > 0) {
+        trayectoriaItems.forEach((t, index) => {
+            const isHidden = isLongTrayectoria && index >= 3;
+            trayectoriaHTML += `
+                <div class="timeline-item stagger-el ${isHidden ? 'is-hidden' : ''}">
+                    <div class="timeline-year">${t.periodo}</div>
+                    <div class="timeline-body">
+                        <div class="timeline-content-left">
+                            <div class="timeline-text">${formatTextContent(t.descripcion)}</div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+        if (isLongTrayectoria) {
+            trayectoriaHTML += '<button class="read-more-btn" data-target="trajectory">Ver trayectoria completa</button>';
+        }
+    }
+
+    // --- Lógica de Propuestas con "Ver más" y formato de texto ---
     let propuestasHTML = '';
     (fullCandidato.propuestas || []).forEach(p => {
-        propuestasHTML += `
-            <div class="proposal-card stagger-el">
+        const formattedDesc = formatTextContent(p.descripcion);
+        const isLongDesc = p.descripcion && p.descripcion.length > 220; // Umbral de caracteres para "Ver más"
+        trayectoriaHTML += `
+            <div class="proposal-card stagger-el" style="height: auto;">
                 <div class="proposal-icon">${p.icono || '✨'}</div>
                 <h6>${p.titulo}</h6>
-                <p>${p.descripcion}</p>
+                <div class="proposal-description ${isLongDesc ? 'is-clamped' : ''}">${formattedDesc}</div>
+                ${isLongDesc ? '<button class="read-more-btn" data-target="proposal">Ver más</button>' : ''}
             </div>`;
     });
     if (!propuestasHTML) propuestasHTML = '<p class="text-muted" style="color:#bbb;">Aún no se han registrado propuestas.</p>';
@@ -1129,6 +1230,18 @@ window.showCandidateDetail = async function(candidatoId) {
                         <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="100%" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
                     </div>
                 </div>
+            </div>`;
+    }
+
+    // --- Lógica de Biografía con "Ver más" ---
+    let biografiaHTML = '';
+    if (fullCandidato.biografia && fullCandidato.biografia.trim()) {
+        const formattedBio = formatTextContent(fullCandidato.biografia);
+        const isLongBio = fullCandidato.biografia.length > 400; // Umbral de caracteres
+        biografiaHTML = `
+            <div class="bio-container stagger-el">
+                <div class="bio-content ${isLongBio ? 'is-clamped' : ''}">${formattedBio}</div>
+                ${isLongBio ? '<button class="read-more-btn" data-target="bio">Ver más</button>' : ''}
             </div>`;
     }
 
@@ -1155,21 +1268,19 @@ window.showCandidateDetail = async function(candidatoId) {
                         <span class="quote-author">— ${fullCandidato.nombres} | ${fullCandidato.cargo_flotante}</span>
                     </div>
                     
-                    <p class="stagger-el" style="margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5; color: #ddd; max-width: 85ch;">
-                        ${fullCandidato.biografia || ''}
-                    </p>
+                    ${biografiaHTML}
                 </div>
             </div>
 
             <div class="candidate-bottom-row">
-                <div id="sec-trayectoria" class="info-block">
-                    <div class="block-title stagger-el">⏱️ Trayectoria Profesional</div>
-                    <div class="timeline">
-                        ${trayectoriaHTML}
+                ${trayectoriaHTML ? `
+                    <div id="sec-trayectoria" class="info-block">
+                        <div class="block-title stagger-el">⏱️ Trayectoria Profesional</div>
+                        <div class="timeline">${trayectoriaHTML}</div>
                     </div>
-                </div>
+                ` : ''}
 
-                <div id="sec-propuestas" class="info-block">
+                <div id="sec-propuestas" class="info-block" style="min-height: 200px;">
                     <div class="block-title stagger-el">🚀 Ejes de Propuesta</div>
                     <div class="proposals-grid">
                         ${propuestasHTML}
@@ -1209,6 +1320,32 @@ window.showCandidateDetail = async function(candidatoId) {
     wrapper.style.display = 'block';
     
     // ¡NUEVO! Inicializar carruseles de la trayectoria que acaban de inyectarse dinámicamente
+    wrapper.addEventListener('click', function(e) {
+        if (!e.target.matches('.read-more-btn')) return;
+
+        const btn = e.target;
+        const targetType = btn.dataset.target;
+
+        if (targetType === 'bio') {
+            const content = btn.previousElementSibling;
+            content.classList.toggle('is-clamped');
+            btn.textContent = content.classList.contains('is-clamped') ? 'Ver más' : 'Ver menos';
+        } else if (targetType === 'proposal') {
+            const card = btn.closest('.proposal-card');
+            const content = card.querySelector('.proposal-description');
+            content.classList.toggle('is-clamped');
+            btn.textContent = content.classList.contains('is-clamped') ? 'Ver más' : 'Ver menos';
+        } else if (targetType === 'trajectory') {
+            const timeline = btn.closest('.timeline');
+            timeline.classList.toggle('is-expanded');
+            btn.textContent = timeline.classList.contains('is-expanded') ? 'Ver menos' : 'Ver trayectoria completa';
+        }
+    });
+
+
+
+
+
     initTimelineCarousels(wrapper);
 
     // --- Magia UX: Ocultar todas las secciones que están DEBAJO para no distraer ---
