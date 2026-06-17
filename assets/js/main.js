@@ -393,14 +393,15 @@ function injectGlobalAssets() {
             .info-block { margin-bottom: 4rem; }
             .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.2rem; color: #ffc300; margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
             
-            .proposals-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
-            .proposal-card { background: rgba(255,255,255,0.02); padding: 2rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+            .proposals-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+            .proposal-card { background: rgba(255,255,255,0.02); padding: 1.8rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; gap: 1rem; }
             .proposal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ffc300; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
             .proposal-card:hover { transform: translateY(-6px); border-color: rgba(255,195,0,0.5); background: rgba(255,195,0,0.06); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
             .proposal-card:hover::before { transform: scaleX(1); }
-            .proposal-icon { font-size: 2.8rem; margin-bottom: 1.5rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center bottom; }
-            .proposal-card:hover .proposal-icon { transform: scale(1.1) translateY(-2px); }
-            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.1rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+            .proposal-header { display: flex; align-items: center; gap: 1rem; }
+            .proposal-icon { font-size: 2.2rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); flex-shrink: 0; line-height: 1; }
+            .proposal-card:hover .proposal-icon { transform: scale(1.15) rotate(5deg); }
+            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1rem; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
             .proposal-card p { font-size: 0.95rem !important; margin: 0; line-height: 1.7 !important; color: #bbb !important; font-weight: 300; flex-grow: 1; }
             
             .timeline { border-left: 2px solid rgba(255,195,0,0.2); padding-left: 2.5rem; margin-left: 1rem; display: flex; flex-direction: column; }
@@ -501,10 +502,11 @@ function injectGlobalAssets() {
                 .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 0; overflow: hidden; }
                 .fb-widget-container iframe { width: 100% !important; max-width: 100%; border-radius: 0; }
                 .proposals-grid { grid-template-columns: 1fr; gap: 1rem; }
-                .proposal-card { padding: 0.8rem; border-radius: 0.6rem; }
-                .proposal-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
-                .proposal-card h6 { font-size: 0.75rem; margin-bottom: 0.2rem; }
-                .proposal-card p { font-size: 0.65rem !important; line-height: 1.2 !important; }
+                .proposal-card { padding: 1.2rem; border-radius: 0.8rem; gap: 0.8rem; }
+                .proposal-header { gap: 0.8rem; }
+                .proposal-icon { font-size: 1.6rem; margin-bottom: 0; }
+                .proposal-card h6 { font-size: 0.85rem; margin-bottom: 0; }
+                .proposal-card p { font-size: 0.8rem !important; line-height: 1.4 !important; }
                 .candidate-quote { margin: 1rem 0; padding: 0.8rem 0.8rem 0.8rem 2rem; font-size: 0.95rem; }
                 .candidate-quote::before { font-size: 3rem; left: 0.3rem; }
             }
@@ -1206,9 +1208,11 @@ window.showCandidateDetail = async function(candidatoId) {
         const formattedDesc = formatTextContent(p.descripcion);
         const isLongDesc = p.descripcion && p.descripcion.length > 220; // Umbral de caracteres para "Ver más"
         propuestasHTML += `
-            <div class="proposal-card stagger-el" style="height: auto;">
-                <div class="proposal-icon">${p.icono || '✨'}</div>
-                <h6>${p.titulo}</h6>
+            <div class="proposal-card stagger-el">
+                <div class="proposal-header">
+                    <div class="proposal-icon">${p.icono || '✨'}</div>
+                    <h6>${p.titulo}</h6>
+                </div>
                 <div class="proposal-description ${isLongDesc ? 'is-clamped' : ''}">${formattedDesc}</div>
                 ${isLongDesc ? '<button class="read-more-btn" data-target="proposal">Ver más</button>' : ''}
             </div>`;
