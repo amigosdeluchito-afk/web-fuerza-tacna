@@ -1205,7 +1205,7 @@ window.showCandidateDetail = async function(candidatoId) {
     (fullCandidato.propuestas || []).forEach(p => {
         const formattedDesc = formatTextContent(p.descripcion);
         const isLongDesc = p.descripcion && p.descripcion.length > 220; // Umbral de caracteres para "Ver más"
-        trayectoriaHTML += `
+        propuestasHTML += `
             <div class="proposal-card stagger-el" style="height: auto;">
                 <div class="proposal-icon">${p.icono || '✨'}</div>
                 <h6>${p.titulo}</h6>
