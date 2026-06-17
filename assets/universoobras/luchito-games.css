@@ -1,165 +1,228 @@
 /* =========================================================
-   LUCHITO GAMES - ESTILOS
+   LUCHITO GAMES - OVERLAY Y MODAL GLOBAL
    ========================================================= */
 
-.lg-modal {
-    position: absolute;
-    bottom: 0;
+.lg-overlay {
+    position: fixed;
+    top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: #ffffff;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-    border-radius: inherit; /* Se acopla al diseño de la ventana de chat */
-    overflow: hidden;
-}
-
-.lg-modal.open {
-    transform: translateY(0);
-}
-
-.lg-header {
-    background: #801039;
-    color: #ffc300;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #ffc300;
-}
-
-.lg-title {
-    font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.lg-close {
-    background: transparent;
-    border: none;
-    color: #ffc300;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999999;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s;
-}
-
-.lg-close:hover {
-    transform: scale(1.1) rotate(90deg);
-}
-
-.lg-content {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-    background: #fdf5f7;
-}
-
-.lg-view {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
-    overflow-y: auto;
-    padding: 15px;
-    box-sizing: border-box;
+    transition: opacity 0.35s ease;
 }
 
-.lg-view.active {
+.lg-overlay.open {
     opacity: 1;
     pointer-events: auto;
 }
 
-.lg-subtitle {
-    font-family: system-ui, sans-serif;
-    font-weight: 700;
-    color: #801039;
-    text-align: center;
-    margin: 0 0 20px 0;
-    font-size: 14px;
+.lg-global-modal {
+    background: #fdf5f7;
+    width: 95%;
+    max-width: 850px;
+    height: 85vh;
+    max-height: 750px;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    border: 2px solid rgba(255, 195, 0, 0.5);
 }
 
-.lg-game-grid {
+.lg-overlay.open .lg-global-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Header del Modal */
+.lg-global-header {
+    background: #801039;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #ffc300;
+}
+
+.lg-global-title {
+    color: #ffc300;
+    font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.lg-global-close {
+    background: transparent;
+    border: none;
+    color: #ffc300;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: transform 0.2s;
+}
+
+.lg-global-close:hover {
+    transform: scale(1.2) rotate(90deg);
+    color: #fff;
+}
+
+/* Contenedor de Vistas */
+.lg-global-view {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    padding: 30px;
+}
+
+/* --- PANTALLA PRINCIPAL (HOME) --- */
+.lg-home-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.lg-home-header h2 {
+    color: #801039;
+    font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+    font-size: 24px;
+    margin: 0 0 10px 0;
+}
+
+.lg-home-header p {
+    color: #444;
+    font-family: system-ui, sans-serif;
+    font-size: 15px;
+    margin: 0;
+}
+
+.lg-games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
 }
 
 .lg-game-card {
     background: #ffffff;
-    border: 2px solid rgba(128, 16, 57, 0.1);
-    border-radius: 12px;
-    padding: 15px;
+    border-radius: 16px;
+    padding: 25px 20px;
     text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    position: relative;
+    border: 2px solid rgba(128, 16, 57, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
-.lg-game-card:hover {
-    transform: translateY(-4px);
-    border-color: #801039;
-    box-shadow: 0 8px 20px rgba(128, 16, 57, 0.15);
+.lg-game-card.active {
+    cursor: pointer;
+}
+
+.lg-game-card.active:hover {
+    transform: translateY(-8px);
+    border-color: #ffc300;
+    box-shadow: 0 12px 25px rgba(128, 16, 57, 0.15);
+}
+
+.lg-game-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f5f5f5;
+    filter: grayscale(1);
 }
 
 .lg-game-icon {
-    font-size: 32px;
-    margin-bottom: 10px;
+    font-size: 50px;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.lg-game-card.active:hover .lg-game-icon {
+    transform: scale(1.15);
 }
 
 .lg-game-name {
     font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
-    font-size: 12px;
+    font-size: 15px;
     color: #801039;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.lg-game-play {
+    background: #801039;
+    color: #ffc300;
+    font-family: system-ui, sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: inline-block;
     text-transform: uppercase;
 }
 
-.lg-game-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
+.lg-game-badge {
+    background: #666;
+    color: #fff;
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 12px;
+    display: inline-block;
+    text-transform: uppercase;
 }
 
-.lg-back {
+/* --- PANTALLA DE JUEGO (TRES EN RAYA) --- */
+.lg-game-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.lg-game-nav {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.lg-back-btn {
     background: #ffc300;
     border: none;
     color: #801039;
-    font-weight: 900;
-    padding: 5px 10px;
+    font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
+    font-size: 12px;
+    padding: 8px 15px;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 12px;
-    margin-right: 10px;
+    margin-right: 15px;
     transition: all 0.2s;
 }
 
-.lg-back:hover {
+.lg-back-btn:hover {
     background: #801039;
     color: #ffc300;
 }
 
 .lg-game-title {
     font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
-    font-size: 14px;
+    font-size: 18px;
     color: #801039;
+    margin: 0;
     text-transform: uppercase;
 }
 
-.lg-game-area {
+.lg-game-container {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -167,63 +230,45 @@
     justify-content: center;
 }
 
-/* =========================================================
-   TRES EN RAYA
-   ========================================================= */
-
 .lg-ttt-status {
     font-family: system-ui, sans-serif;
     font-weight: 800;
     color: #801039;
-    margin-bottom: 15px;
-    font-size: 16px;
+    margin-bottom: 20px;
+    font-size: 20px;
     text-align: center;
 }
 
 .lg-ttt-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 10px;
     background: #801039;
-    padding: 8px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 24px rgba(128, 16, 57, 0.2);
+    padding: 10px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(128, 16, 57, 0.2);
 }
 
 .lg-ttt-cell {
-    width: 70px;
-    height: 70px;
+    width: 90px;
+    height: 90px;
     background: #ffffff;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
-    font-size: 36px;
+    font-size: 48px;
     cursor: pointer;
     transition: background 0.2s;
     user-select: none;
 }
 
-.lg-ttt-cell:hover {
-    background: #fdf5f7;
-}
-
-.lg-ttt-cell.x {
-    color: #801039;
-}
-
-.lg-ttt-cell.o {
-    color: #ffc300;
-    text-shadow: 0px 2px 4px rgba(0,0,0,0.2);
-}
-
-.lg-ttt-cell.win {
-    background: #ffc300;
-    color: #801039;
-    animation: winPulse 0.5s ease;
-}
+.lg-ttt-cell:hover { background: #fdf5f7; }
+.lg-ttt-cell.x { color: #801039; }
+.lg-ttt-cell.o { color: #ffc300; text-shadow: 0px 3px 6px rgba(0,0,0,0.2); }
+.lg-ttt-cell.win { background: #ffc300; color: #801039; animation: winPulse 0.5s ease; }
 
 @keyframes winPulse {
     0% { transform: scale(1); }
@@ -235,17 +280,36 @@
     background: #801039;
     color: #ffc300;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 25px;
     border-radius: 30px;
     font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 10px rgba(128, 16, 57, 0.2);
+    box-shadow: 0 5px 15px rgba(128, 16, 57, 0.3);
 }
 
 .lg-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(128, 16, 57, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(128, 16, 57, 0.4);
+}
+
+/* --- RESPONSIVE PARA MÓVILES --- */
+@media (max-width: 768px) {
+    .lg-global-modal {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+    .lg-global-view {
+        padding: 20px 15px;
+    }
+    .lg-ttt-cell {
+        width: 75px;
+        height: 75px;
+        font-size: 38px;
+    }
 }

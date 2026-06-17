@@ -108,8 +108,8 @@ function initChatIA() {
 
     const navigateTo = (actionType) => {
         if (actionType === 'jugar_luchito') {
-            if (typeof openLuchitoGames === 'function') {
-                openLuchitoGames();
+            if (typeof window.LuchitoGames !== 'undefined') {
+                window.LuchitoGames.open();
             } else {
                 console.warn('El módulo Juega con Luchito no ha cargado aún.');
             }
