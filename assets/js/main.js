@@ -666,7 +666,9 @@ function injectGlobalAssets() {
                         <div class="ft-bubble">
                             ¡Hola! Soy Luchito, el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-                                <button class="ft-action-btn" data-action="jugar_luchito" style="background: rgba(128, 16, 57, 0.1); border: 1px solid #801039; color: #801039; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">🎮 Jugar con Luchito</button>
+                                        <button class="ft-action-btn" data-action="jugar_luchito" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">🎮 Jugar con Luchito</button>
+                                        <button class="ft-action-btn" data-action="ir_a_obras" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">🗺️ Explorar Obras</button>
+                                        <button class="ft-action-btn" data-action="ir_a_candidatos" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">🏛️ Conocer Candidatos</button>
                             </div>
                         </div>
                     </div>
