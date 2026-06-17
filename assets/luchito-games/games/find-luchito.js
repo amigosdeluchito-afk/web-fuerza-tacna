@@ -25,11 +25,20 @@ window.LuchitoGames.registerGame('find-luchito', {
         const emojis = ['👨', '👩', '👴', '👵', '👮', '🕵️', '👨‍🌾', '👩‍🍳', '👨‍🔧', '👷', '👨‍🏫', '👩‍🎤', '👲', '💂', '👨‍🚒', '👩‍⚕️', '👨‍💻', '👩‍🚀'];
         let time = 15;
         let attempts = 3;
+        let gridSize = 40; 
+        
+        // Ajustar dificultad
+        if (level === 'easy') {
+            time = 20;
+            gridSize = 25;
+        } else if (level === 'hard') {
+            time = 10;
+            gridSize = 60;
+        }
+        
         let timerId;
         let isGameOver = false;
 
-        // Tamaño de cuadrícula (40 elementos)
-        const gridSize = 40; 
         let board = Array(gridSize).fill('').map(() => emojis[Math.floor(Math.random() * emojis.length)]);
         
         // Posicionar a Luchito en un lugar aleatorio

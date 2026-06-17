@@ -58,9 +58,31 @@ window.LuchitoGames.registerGame('tictactoe', {
             board.forEach((val, index) => { if (val === '') emptyCells.push(index); });
 
             if (emptyCells.length > 0) {
-                const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                const cell = container.querySelector(`.lg-ttt-cell[data-index="${randomIndex}"]`);
-                handleMove(cell, randomIndex, 'O');
+                let moveIndex = -1;
+                
+                // Función para encontrar jugada ganadora o de bloqueo
+                const findWinningMove = (player) => {
+                    for (let i = 0; i < winningConditions.length; i++) {
+                        const [a, b, c] = winningConditions[i];
+                        if (board[a] === player && board[b] === player && board[c] === '') return c;
+                        if (board[a] === player && board[c] === player && board[b] === '') return b;
+                        if (board[b] === player && board[c] === player && board[a] === '') return a;
+                    }
+                    return -1;
+                };
+
+                // Dificultad Hard: Intenta ganar o bloquear. Medium: 50% de probabilidad.
+                if (level === 'hard' || (level === 'medium' && Math.random() > 0.5)) {
+                    moveIndex = findWinningMove('O'); // Ganar
+                    if (moveIndex === -1) moveIndex = findWinningMove('X'); // Bloquear
+                    if (level === 'hard' && moveIndex === -1 && board[4] === '') moveIndex = 4; // Centro
+                }
+                
+                // Si no hay jugada inteligente (o es easy), elige al azar
+                if (moveIndex === -1) moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                
+                const cell = container.querySelector(`.lg-ttt-cell[data-index="${moveIndex}"]`);
+                handleMove(cell, moveIndex, 'O');
                 if (gameActive) { currentPlayer = 'X'; statusDisplay.textContent = 'Tu turno (X)'; }
             }
         }

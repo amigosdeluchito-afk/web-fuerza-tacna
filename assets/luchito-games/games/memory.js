@@ -3,7 +3,12 @@ window.LuchitoGames.registerGame('memory', {
     title: 'Memoria',
     render: function(container, level = 'medium') {
         // Emojis de Fuerza Tacna
-        const baseEmojis = ['🐻', '🏗️', '🚜', '🌳', '🏫', '👷'];
+        let baseEmojis = ['🐻', '🏗️', '🚜', '🌳', '🏫', '👷'];
+        
+        // Ajustar dificultad
+        if (level === 'easy') baseEmojis = ['🐻', '🏗️', '🚜', '🌳'];
+        else if (level === 'hard') baseEmojis = ['🐻', '🏗️', '🚜', '🌳', '🏫', '👷', '🌉', '🚌'];
+        
         // Duplicamos y mezclamos (Fisher-Yates)
         let cardsArray = [...baseEmojis, ...baseEmojis];
         cardsArray.sort(() => Math.random() - 0.5);
