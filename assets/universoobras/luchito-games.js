@@ -87,10 +87,10 @@ window.LuchitoGames = {
                         <div class="lg-game-name">Memoria</div>
                         <div class="lg-game-play">Jugar Ahora</div>
                     </div>
-                    <div class="lg-game-card disabled">
+                    <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('trivia')">
                         <div class="lg-game-icon">❓</div>
                         <div class="lg-game-name">Trivia</div>
-                        <div class="lg-game-badge">Próximamente</div>
+                        <div class="lg-game-play">Jugar Ahora</div>
                     </div>
                     <div class="lg-game-card active" onclick="window.LuchitoGames.openGame('rock-paper-scissors')">
                         <div class="lg-game-icon">✌️🤚</div>
