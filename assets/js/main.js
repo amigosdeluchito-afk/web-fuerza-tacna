@@ -596,10 +596,13 @@ function injectGlobalAssets() {
             /* --- Ajustes Visuales Chat IA (Scroll y Orden Inferior) --- */
             #ft-chat-container.ft-chat-open { pointer-events: auto !important; }
             #ft-chat-messages { 
+                display: flex !important;
+                flex-direction: column !important;
                 overflow-y: auto !important; 
                 overscroll-behavior: contain; 
                 scroll-behavior: smooth;
             }
+            #ft-chat-messages > :first-child { margin-top: auto !important; }
             #ft-chat-messages::-webkit-scrollbar { width: 6px; }
             #ft-chat-messages::-webkit-scrollbar-track { background: transparent; }
             #ft-chat-messages::-webkit-scrollbar-thumb { background-color: rgba(128, 16, 57, 0.3); border-radius: 10px; }
