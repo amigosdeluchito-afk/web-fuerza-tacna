@@ -16,6 +16,10 @@ function initChatIA() {
 
     chatContainer.dataset.initialized = 'true';
 
+    // Reinicio del chat en cada recarga dura de la página (F5)
+    sessionStorage.removeItem('ft_chat_history');
+    sessionStorage.removeItem('ft_chat_state');
+
     // Quitamos el escudo de invisibilidad una vez que el CSS ya está aplicado
     setTimeout(() => {
         chatContainer.style.opacity = '';
@@ -30,8 +34,8 @@ function initChatIA() {
             const actionType = e.target.getAttribute('data-action');
             if (typeof navigateTo === 'function') navigateTo(actionType);
         });
-        btn.addEventListener('mouseenter', () => { btn.style.background = '#801039'; btn.style.color = '#ffc300'; });
-        btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(128, 16, 57, 0.1)'; btn.style.color = '#801039'; });
+        btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(0,0,0,0.08)'; btn.style.borderColor = 'rgba(0,0,0,0.15)'; });
+        btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(0,0,0,0.04)'; btn.style.borderColor = 'rgba(0,0,0,0.08)'; });
     });
 
     // --- CÁLCULO DE LA RAÍZ DEL PROYECTO (Anti-Bug de Rutas y Etiquetas Base) ---
@@ -181,7 +185,7 @@ function initChatIA() {
         if (finalActions.length > 0) {
             htmlContent += `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">`;
             finalActions.forEach((act) => {
-                htmlContent += `<button class="ft-action-btn" data-action="${act.type}" style="background: rgba(128, 16, 57, 0.1); border: 1px solid #801039; color: #801039; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">${act.label}</button>`;
+                htmlContent += `<button class="ft-action-btn" data-action="${act.type}" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #334155; padding: 8px 14px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">${act.label}</button>`;
             });
             htmlContent += `</div>`;
         }
@@ -196,8 +200,8 @@ function initChatIA() {
                     const actionType = e.target.getAttribute('data-action');
                     if (typeof navigateTo === 'function') navigateTo(actionType);
                 });
-                btn.addEventListener('mouseenter', () => { btn.style.background = '#801039'; btn.style.color = '#ffc300'; });
-                btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(128, 16, 57, 0.1)'; btn.style.color = '#801039'; });
+                btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(0,0,0,0.08)'; btn.style.borderColor = 'rgba(0,0,0,0.15)'; });
+                btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(0,0,0,0.04)'; btn.style.borderColor = 'rgba(0,0,0,0.08)'; });
             });
         }
         
