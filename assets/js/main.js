@@ -393,7 +393,7 @@ function injectGlobalAssets() {
             .info-block { margin-bottom: 4rem; }
             .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.2rem; color: #ffc300; margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
             
-            .proposals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+            .proposals-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
             .proposal-card { background: rgba(255,255,255,0.02); padding: 2rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
             .proposal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ffc300; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
             .proposal-card:hover { transform: translateY(-6px); border-color: rgba(255,195,0,0.5); background: rgba(255,195,0,0.06); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
@@ -500,7 +500,7 @@ function injectGlobalAssets() {
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
                 .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 0; overflow: hidden; }
                 .fb-widget-container iframe { width: 100% !important; max-width: 100%; border-radius: 0; }
-                .proposals-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+                .proposals-grid { grid-template-columns: 1fr; gap: 1rem; }
                 .proposal-card { padding: 0.8rem; border-radius: 0.6rem; }
                 .proposal-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
                 .proposal-card h6 { font-size: 0.75rem; margin-bottom: 0.2rem; }
@@ -902,7 +902,7 @@ async function initCandidatos(container) {
                 window.CANDIDATOS_LIST = data.candidatos.filter(c => c.estado == 1);
                 
                 window.CANDIDATOS_LIST.forEach(c => {
-                    const fotoUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
+                    const fotoUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://placehold.co/400x400/801039/ffc300?text=Fuerza+Tacna';
                     const fotoHover = c.foto_portada ? `assets/universoobras/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
@@ -1162,7 +1162,7 @@ window.showCandidateDetail = async function(candidatoId) {
     let sidebarHTML = `<div class="candidato-sidebar animate-detail-element">`;
     candidates.forEach(c => {
         const isActive = c.id == candidatoId ? 'active' : '';
-        const thumbUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://via.placeholder.com/400';
+        const thumbUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://placehold.co/400x400/801039/ffc300?text=Fuerza+Tacna';
         sidebarHTML += `
             <div class="mini-card ${isActive}" onclick="window.showCandidateDetail('${c.id}')">
                 <img src="${thumbUrl}" alt="${c.nombres}" loading="lazy" decoding="async">
@@ -1170,7 +1170,7 @@ window.showCandidateDetail = async function(candidatoId) {
     });
     sidebarHTML += `</div>`;
     
-    const fotoPrincipal = fullCandidato.foto_perfil ? `assets/universoobras/IMG/candidatos/${fullCandidato.foto_perfil}` : 'https://via.placeholder.com/400';
+    const fotoPrincipal = fullCandidato.foto_perfil ? `assets/universoobras/IMG/candidatos/${fullCandidato.foto_perfil}` : 'https://placehold.co/400x400/801039/ffc300?text=Fuerza+Tacna';
 
     let badgesHTML = '';
     (fullCandidato.etiquetas || []).forEach(e => {
@@ -1297,7 +1297,7 @@ window.showCandidateDetail = async function(candidatoId) {
                 <div class="stagger-el">
                     <div class="next-candidate-module" onclick="window.showCandidateDetail('${nextCandidate.id}')">
                         <div class="next-candidate-info">
-                            <img src="${nextCandidate.foto_perfil ? `assets/universoobras/IMG/candidatos/${nextCandidate.foto_perfil}` : 'https://via.placeholder.com/100'}" alt="${nextCandidate.nombres}" class="next-candidate-avatar" loading="lazy" decoding="async">
+                            <img src="${nextCandidate.foto_perfil ? `assets/universoobras/IMG/candidatos/${nextCandidate.foto_perfil}` : 'https://placehold.co/100x100/801039/ffc300?text=FT'}" alt="${nextCandidate.nombres}" class="next-candidate-avatar" loading="lazy" decoding="async">
                             <div class="next-candidate-text">
                                 <h5>Siguiente Perfil</h5>
                                 <h3>${nextCandidate.nombres}</h3>
