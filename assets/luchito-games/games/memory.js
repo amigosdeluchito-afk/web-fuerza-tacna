@@ -1,49 +1,69 @@
 // Juego de Memoria - Registrado en luchito-games
 window.LuchitoGames.registerGame('memory', {
     title: 'Memoria',
-    render: function(container, level = 'medium') {
-        // Emojis de Fuerza Tacna
-        let baseEmojis = ['🐻', '🏗️', '🚜', '🌳', '🏫', '👷'];
+    render: function(container, default_difficulty = 'medium') {
+        const fullEmojiPool = ['🐻', '🏗️', '🚜', '🌳', '🏫', '👷', '🌉', '🚌', '🏥', '⚽', '🚓', '🚒', '🛒', '🏛️'];
+        const levelConfigs = [4, 6, 8, 10, 12]; // Pares a encontrar por nivel
         
-        // Ajustar dificultad
-        if (level === 'easy') baseEmojis = ['🐻', '🏗️', '🚜', '🌳'];
-        else if (level === 'hard') baseEmojis = ['🐻', '🏗️', '🚜', '🌳', '🏫', '👷', '🌉', '🚌'];
-        
-        // Duplicamos y mezclamos (Fisher-Yates)
-        let cardsArray = [...baseEmojis, ...baseEmojis];
-        cardsArray.sort(() => Math.random() - 0.5);
-
-        let html = `
-            <div class="lg-game-wrapper">
-                <div class="lg-memory-status" style="text-align: center; font-weight: bold; color: #801039; margin-bottom: 1rem;">Movimientos: <span id="lg-mem-moves">0</span></div>
-                <div class="lg-memory-board">
-                    ${cardsArray.map((e, index) => `
-                        <div class="lg-memory-card" data-val="${e}" data-index="${index}">
-                            <div class="lg-memory-card-inner">
-                                <div class="lg-memory-card-front">❓</div>
-                                <div class="lg-memory-card-back">${e}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div id="lg-mem-win" style="display:none; text-align:center; margin-top:20px; animation: lgFadeSlideIn 0.5s ease forwards;">
-                    <h3 style="color:#801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; text-transform: uppercase;">¡Memoria de Elefante! 🎉</h3>
-                    <button class="lg-btn-primary" id="lg-mem-reset">Jugar otra vez</button>
-                </div>
-            </div>
-        `;
-        container.innerHTML = html;
-
-        let hasFlippedCard = false;
-        let lockBoard = false;
-        let firstCard, secondCard;
+        let currentLevel = 1;
+        let totalScore = 0;
         let moves = 0;
         let matchedPairs = 0;
+        let firstCard, secondCard;
+        let hasFlippedCard = false;
+        let lockBoard = false;
 
-        const cardsEl = container.querySelectorAll('.lg-memory-card');
-        const movesEl = document.getElementById('lg-mem-moves');
-        const winEl = document.getElementById('lg-mem-win');
-        const resetBtn = document.getElementById('lg-mem-reset');
+        function startLevel(lvl) {
+            currentLevel = lvl;
+            moves = 0;
+            matchedPairs = 0;
+            hasFlippedCard = false;
+            lockBoard = false;
+            firstCard = null;
+            secondCard = null;
+
+            const numPairs = levelConfigs[lvl - 1];
+            let levelEmojis = fullEmojiPool.slice(0, numPairs);
+            
+            let cardsArray = [...levelEmojis, ...levelEmojis];
+            cardsArray.sort(() => Math.random() - 0.5);
+
+            let html = `
+                <div class="lg-game-wrapper">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; color: #801039; margin-bottom: 1rem; font-size: 0.9rem;">
+                        <span>Nivel ${currentLevel}/5</span>
+                        <span>Movs: <span id="lg-mem-moves">0</span></span>
+                        <span>Puntos: ${totalScore}</span>
+                    </div>
+                    <div class="lg-memory-board">
+                        ${cardsArray.map((e, index) => `
+                            <div class="lg-memory-card" data-val="${e}" data-index="${index}">
+                                <div class="lg-memory-card-inner">
+                                    <div class="lg-memory-card-front">❓</div>
+                                    <div class="lg-memory-card-back">${e}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div id="lg-mem-win" class="lg-final-message" style="display:none;">
+                        <h3 style="color:#801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; text-transform: uppercase;">¡Nivel ${currentLevel} Superado! 🎉</h3>
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="lg-btn" id="lg-mem-menu">Volver a juegos</button>
+                            <button class="lg-btn-primary" id="lg-mem-next">Siguiente Nivel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            const cardsEl = container.querySelectorAll('.lg-memory-card');
+            cardsEl.forEach(c => c.addEventListener('click', flipCard));
+            
+            container.querySelector('#lg-mem-menu').addEventListener('click', () => window.LuchitoGames.renderHome());
+            container.querySelector('#lg-mem-next').addEventListener('click', () => {
+                if (currentLevel < 5) startLevel(currentLevel + 1);
+            });
+        }
 
         function flipCard() {
             if (lockBoard) return;
@@ -59,7 +79,7 @@ window.LuchitoGames.registerGame('memory', {
 
             secondCard = this;
             moves++;
-            movesEl.textContent = moves;
+            container.querySelector('#lg-mem-moves').textContent = moves;
             checkForMatch();
         }
 
@@ -69,10 +89,24 @@ window.LuchitoGames.registerGame('memory', {
                 firstCard.removeEventListener('click', flipCard);
                 secondCard.removeEventListener('click', flipCard);
                 matchedPairs++;
-                if (matchedPairs === baseEmojis.length) setTimeout(() => winEl.style.display = 'block', 400);
+                
+                totalScore += 50; // Puntos fijos por par
+                if (matchedPairs === levelConfigs[currentLevel - 1]) {
+                    const parIdeal = levelConfigs[currentLevel - 1] + 2;
+                    if (moves <= parIdeal) totalScore += 100; // Bono de desempeño
+                    
+                    setTimeout(() => {
+                        if (currentLevel < 5) {
+                            container.querySelector('#lg-mem-win').style.display = 'flex';
+                        } else {
+                            window.LuchitoGames.showRankingPrompt(totalScore, 'memory', container);
+                        }
+                    }, 400);
+                }
                 resetBoard();
             } else {
                 lockBoard = true;
+                totalScore = Math.max(0, totalScore - 5); // Penalización por equivocarse
                 setTimeout(() => {
                     firstCard.classList.remove('flipped');
                     secondCard.classList.remove('flipped');
@@ -82,7 +116,6 @@ window.LuchitoGames.registerGame('memory', {
         }
         function resetBoard() { [hasFlippedCard, lockBoard] = [false, false]; [firstCard, secondCard] = [null, null]; }
 
-        cardsEl.forEach(c => c.addEventListener('click', flipCard));
-        resetBtn.addEventListener('click', () => this.render(container, level)); // Reiniciar juego
+        startLevel(currentLevel);
     }
 });

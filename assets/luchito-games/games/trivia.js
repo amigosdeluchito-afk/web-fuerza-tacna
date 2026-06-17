@@ -66,23 +66,28 @@ window.LuchitoGames.registerGame('trivia', {
         ];
 
         let questions = [];
-        let currentQuestionIndex = 0;
+        let currentQuestionIndexInLevel = 0;
         let score = 0;
+        let currentLevel = 1;
+        
+        const levelConfigs = [3, 4, 5, 5, 7];
 
-        function startGame() {
-            // Seleccionar 5 preguntas al azar
-            questions = [...allQuestions].sort(() => 0.5 - Math.random()).slice(0, 5);
-            currentQuestionIndex = 0;
-            score = 0;
+        function startLevel(lvl) {
+            currentLevel = lvl;
+            currentQuestionIndexInLevel = 0;
+            const qCount = levelConfigs[lvl - 1];
+            // Barajar la base y elegir la cantidad específica
+            questions = [...allQuestions].sort(() => 0.5 - Math.random()).slice(0, qCount);
             showQuestion();
         }
 
         function showQuestion() {
-            const question = questions[currentQuestionIndex];
+            const question = questions[currentQuestionIndexInLevel];
             container.innerHTML = `
                 <div class="lg-game-wrapper lg-trivia-game">
+                    <div style="width: 100%; text-align: center; color: #801039; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">Nivel ${currentLevel}/5</div>
                     <div class="lg-trivia-header">
-                        <div class="lg-trivia-progress">Pregunta ${currentQuestionIndex + 1} / ${questions.length}</div>
+                        <div class="lg-trivia-progress">Pregunta ${currentQuestionIndexInLevel + 1} / ${questions.length}</div>
                         <div class="lg-trivia-score">Puntaje: ${score}</div>
                     </div>
                     <div class="lg-trivia-question-box">
@@ -95,19 +100,35 @@ window.LuchitoGames.registerGame('trivia', {
                             <button class="lg-btn-primary" id="lg-trivia-next" style="display:none; padding: 0.6rem 2rem; font-size: 0.9rem;">Siguiente</button>
                         </div>
                     </div>
+                    <div id="lg-trivia-win" class="lg-final-message" style="display:none;">
+                        <h3 style="color:#801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; text-transform: uppercase;">¡Nivel ${currentLevel} Superado! 🎉</h3>
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="lg-btn" id="lg-trivia-menu">Volver a juegos</button>
+                            <button class="lg-btn-primary" id="lg-trivia-next-level">Siguiente Nivel</button>
+                        </div>
+                    </div>
                 </div>
             `;
 
             container.querySelectorAll('.lg-trivia-option').forEach(btn => {
                 btn.addEventListener('click', selectAnswer);
             });
+            
+            container.querySelector('#lg-trivia-menu').addEventListener('click', () => window.LuchitoGames.renderHome());
+            container.querySelector('#lg-trivia-next-level').addEventListener('click', () => {
+                startLevel(currentLevel + 1);
+            });
 
             container.querySelector('#lg-trivia-next').addEventListener('click', () => {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < questions.length) {
+                currentQuestionIndexInLevel++;
+                if (currentQuestionIndexInLevel < questions.length) {
                     showQuestion();
                 } else {
-                    showFinalScore();
+                    if (currentLevel < 5) {
+                        container.querySelector('#lg-trivia-win').style.display = 'flex';
+                    } else {
+                        showFinalScore();
+                    }
                 }
             });
         }
@@ -115,7 +136,7 @@ window.LuchitoGames.registerGame('trivia', {
         function selectAnswer(e) {
             const selectedButton = e.target;
             const selectedAnswerIndex = parseInt(selectedButton.dataset.index);
-            const question = questions[currentQuestionIndex];
+            const question = questions[currentQuestionIndexInLevel];
             const feedbackEl = container.querySelector('#lg-trivia-feedback');
 
             container.querySelectorAll('.lg-trivia-option').forEach(btn => {
@@ -146,6 +167,7 @@ window.LuchitoGames.registerGame('trivia', {
             window.LuchitoGames.showRankingPrompt(finalScore, 'trivia', container);
         }
 
-        startGame();
+        score = 0;
+        startLevel(1);
     }
 });
