@@ -691,13 +691,13 @@ function injectGlobalAssets() {
             const gamesCSS = document.createElement('link');
             gamesCSS.id = 'luchito-games-css';
             gamesCSS.rel = 'stylesheet';
-            gamesCSS.href = basePath + 'assets/luchito-games/luchito-games.css?v=1';
+            gamesCSS.href = basePath + 'assets/universoobras/luchito-games.css?v=2';
             document.head.appendChild(gamesCSS);
         }
         if (!document.getElementById('luchito-games-js')) {
             const gamesJS = document.createElement('script');
             gamesJS.id = 'luchito-games-js';
-            gamesJS.src = basePath + 'assets/luchito-games/luchito-games.js?v=1';
+            gamesJS.src = basePath + 'assets/universoobras/luchito-games.js?v=2';
             document.body.appendChild(gamesJS);
         }
     }
