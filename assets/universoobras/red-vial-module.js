@@ -126,13 +126,16 @@ window.rvApplyStyle = function() {
                 type: "geojson",
                 data: "../panel-admin-universo/mapa_referencias_api.php?action=geojson"
             },
+            "tacna-region": {
+                type: "geojson",
+                data: "../data/tacna_region.geojson"
+            },
             "regional-labels": {
                 type: "geojson",
                 data: regionalLabelsGeoJSON
-            }
+            },
             // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
             /*
-            ,
             "tacna-region": {
                 type: "geojson",
                 data: "../data/tacna_region.geojson"
@@ -218,6 +221,27 @@ window.rvApplyStyle = function() {
     if (toggles['parks'] || toggles['srv-salud'] || toggles['srv-edu'] || toggles['srv-deporte']) {
         style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", paint: { "fill-color": landuseColors } });
     }
+
+    style.layers.push({
+        id: "tacna-region-fill",
+        type: "fill",
+        source: "tacna-region",
+        paint: {
+            "fill-color": "#8A1538",
+            "fill-opacity": 0.06
+        }
+    });
+
+    style.layers.push({
+        id: "tacna-region-outline",
+        type: "line",
+        source: "tacna-region",
+        paint: {
+            "line-color": "#8A1538",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 7, 1.2, 9, 2, 11, 3],
+            "line-opacity": 0.85
+        }
+    });
 
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
     
