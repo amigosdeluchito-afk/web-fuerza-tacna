@@ -106,7 +106,27 @@ window.rvApplyStyle = function() {
     };
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
-    if (toggles['water']) style.layers.push({ id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": t.water } });
+    if (toggles['water']) {
+        // Masas de agua: océano, lagos, lagunas
+        style.layers.push({
+            id: "water",
+            type: "fill",
+            source: "protomaps",
+            "source-layer": "water",
+            filter: ["==", ["geometry-type"], "Polygon"],
+            paint: { "fill-color": t.water, "fill-opacity": 0.75 }
+        });
+    
+        // Ríos, canales y cauces lineales
+        style.layers.push({
+            id: "water-line",
+            type: "line",
+            source: "protomaps",
+            "source-layer": "water",
+            filter: ["==", ["geometry-type"], "LineString"],
+            paint: { "line-color": t.water, "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.4, 12, 0.9, 15, 2.2], "line-opacity": 0.55, "line-blur": 0.2 }
+        });
+    }
     
     const landuseColors = ["match", ["get", "kind"]];
     if (toggles['srv-salud']) landuseColors.push("hospital", t.amenity_med, "clinic", t.amenity_med);
