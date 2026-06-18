@@ -130,6 +130,10 @@ window.rvApplyStyle = function() {
                 type: "geojson",
                 data: "../data/tacna_region.geojson"
             },
+            "tacna-provincias": {
+                type: "geojson",
+                data: "../data/tacna_provincias.geojson"
+            },
             "regional-labels": {
                 type: "geojson",
                 data: regionalLabelsGeoJSON
@@ -229,6 +233,22 @@ window.rvApplyStyle = function() {
         paint: {
             "fill-color": "#8A1538",
             "fill-opacity": 0.01
+        }
+    });
+
+    style.layers.push({
+        id: "tacna-provincias-outline",
+        type: "line",
+        source: "tacna-provincias",
+        layout: {
+            "line-join": "miter",
+            "line-cap": "butt"
+        },
+        paint: {
+            "line-color": "#8A1538",
+            "line-width": ["interpolate", ["linear"], ["zoom"], 7, 0.45, 9, 0.7, 11, 1],
+            "line-opacity": 0.35,
+            "line-dasharray": [2, 3]
         }
     });
 
