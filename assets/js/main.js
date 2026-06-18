@@ -683,9 +683,12 @@ function injectGlobalAssets() {
 
     // --- AUTO INYECCIÓN DEL ASISTENTE IA ---
     const injectChatIA = () => {
-        if (!document.getElementById('ft-chat-container')) {
+        if (document.getElementById('ft-chat-container')) return;
+        if (document.getElementById('ft-chat-ia-script')) return;
+
             // 1. Inyectar CSS
             const chatCSS = document.createElement('link');
+            chatCSS.id = 'ft-chat-ia-css';
             chatCSS.rel = 'stylesheet';
             chatCSS.href = 'assets/universoobras/chat-ia.css?v=4'; // Aesthetic UI update
             document.head.appendChild(chatCSS);

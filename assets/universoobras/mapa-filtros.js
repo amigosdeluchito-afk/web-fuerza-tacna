@@ -82,7 +82,8 @@ window.openDock = async function(contentId = 'fpPanel', headerText = 'Filtrar Ob
     
     // Si es la primera vez que abrimos filtros, empezamos la carga YA
     if (contentId === 'fpPanel' && !filtersBuilt) {
-        buildFilterOptions().then(() => { filtersBuilt = true; });
+        filtersBuilt = true;
+        await buildFilterOptions();
     }
 
     showDrawerContent(contentId, headerText, isOpening);
