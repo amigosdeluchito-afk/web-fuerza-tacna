@@ -323,6 +323,12 @@ window.initRedVial = async function() {
 
     if (PERF_RV) performance.mark('rv_mapa_creado');
 
+    if (PERF_RV) {
+        window.redVialMapInstance.once('style.load', () => performance.mark('rv_style_load'));
+        window.redVialMapInstance.once('data', () => { if (!window._rv_first_data) { window._rv_first_data = true; performance.mark('rv_first_data'); }});
+        window.redVialMapInstance.once('render', () => { if (!window._rv_first_render) { window._rv_first_render = true; performance.mark('rv_first_render'); }});
+    }
+
     window.redVialMapInstance.on('load', () => {
         window.redVialMapInstance.resize();
         if (PERF_RV) performance.mark('rv_mapa_load');
@@ -468,25 +474,44 @@ window.initRedVial = async function() {
                         window._rv_perf_ref = true;
                         performance.mark('rv_api_ref_ok');
                     }
+                    if (e.sourceId === 'protomaps' && !window._rv_perf_pmtiles) {
+                        window._rv_perf_pmtiles = true;
+                        performance.mark('rv_pmtiles_source_ok');
+                    }
                 }
             });
 
             window.redVialMapInstance.once('idle', () => {
-                performance.mark('rv_mapa_idle');
-                console.log('\n=== 📊 DIAGNÓSTICO DE RENDIMIENTO (RV5-PERF) ===');
                 try {
-                    performance.measure('1. Inicio a Librerías listas', 'rv_inicio', 'rv_librerias_listas');
-                    performance.measure('2. Instanciación del Mapa', 'rv_librerias_listas', 'rv_mapa_creado');
-                    performance.measure('3. Hasta Evento Load', 'rv_mapa_creado', 'rv_mapa_load');
-                    if (window._rv_perf_vias) performance.measure('4. Carga API Vías', 'rv_mapa_load', 'rv_api_vias_ok');
-                    if (window._rv_perf_ref) performance.measure('5. Carga API Refs', 'rv_mapa_load', 'rv_api_ref_ok');
-                    performance.measure('6. Hasta Mapa Interactivo (Idle)', 'rv_mapa_load', 'rv_mapa_idle');
-                    performance.measure('=> TIEMPO TOTAL', 'rv_inicio', 'rv_mapa_idle');
+                    performance.mark('rv_mapa_idle');
+                    console.log('\n=== 📊 AUDITORÍA FINA DE CARGA (RV5-PERF-A1.1) ===');
                     
-                    const measures = performance.getEntriesByType('measure').filter(m => m.name.match(/^[1-6=]/));
+                    // 1. Network Waterfall
+                    const resources = performance.getEntriesByType('resource')
+                        .filter(r => r.name.match(/pmtiles|maplibre|php|pbf|json|png|webp|css|js|font/i))
+                        .map(r => ({
+                            Recurso: r.name.split('/').pop().split('?')[0].substring(0, 30) || r.name.substring(0, 30),
+                            Duracion_ms: parseFloat(r.duration.toFixed(2)),
+                            Transfer_KB: parseFloat((r.transferSize / 1024).toFixed(1)),
+                            Tipo: r.initiatorType
+                        }))
+                        .sort((a, b) => b.Duracion_ms - a.Duracion_ms)
+                        .slice(0, 15);
+                    
+                    console.log('Top 15 Recursos más pesados/lentos:');
+                    console.table(resources);
+
+                    // 2. Fases Granulares
+                    performance.measure('A. Mapa Creado -> Style Load', 'rv_mapa_creado', 'rv_style_load');
+                    performance.measure('B. Style Load -> First Data', 'rv_style_load', 'rv_first_data');
+                    performance.measure('C. First Data -> First Render', 'rv_first_data', 'rv_first_render');
+                    performance.measure('D. First Render -> Event Load', 'rv_first_render', 'rv_mapa_load');
+                    if (window._rv_perf_pmtiles) performance.measure('E. Carga Base PMTiles Source', 'rv_mapa_creado', 'rv_pmtiles_source_ok');
+                    
+                    const measures = performance.getEntriesByType('measure').filter(m => m.name.match(/^[A-E]\./));
                     console.table(measures.map(m => ({
-                        'Métrica': m.name,
-                        'Duración (ms)': m.duration.toFixed(2)
+                        'Fase Interna MapLibre': m.name,
+                        'Duración (ms)': parseFloat(m.duration.toFixed(2))
                     })));
                 } catch(e) { 
                     console.log('Esperando métricas...', e); 
