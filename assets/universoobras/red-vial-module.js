@@ -129,12 +129,41 @@ window.rvApplyStyle = function() {
             "regional-labels": {
                 type: "geojson",
                 data: regionalLabelsGeoJSON
+            },
+            "tacna-region": {
+                type: "geojson",
+                data: "../data/tacna_region.geojson"
             }
         },
         layers: [
             { id: "bg", type: "background", paint: { "background-color": t.bg } }
         ]
     };
+
+    // =========================================================
+    // DELIMITACIÓN VISUAL DE LA REGIÓN TACNA (RV6-MAP-C1)
+    // =========================================================
+    style.layers.push({
+        id: "tacna-region-fill",
+        type: "fill",
+        source: "tacna-region",
+        paint: { 
+            "fill-color": "#ffc300", 
+            "fill-opacity": 0.03 
+        }
+    });
+    
+    style.layers.push({
+        id: "tacna-region-outline",
+        type: "line",
+        source: "tacna-region",
+        paint: { 
+            "line-color": "#801039", 
+            "line-width": ["interpolate", ["linear"], ["zoom"], 7, 1.5, 10, 2.5, 13, 3.5],
+            "line-opacity": 0.8,
+            "line-dasharray": [3, 2] // Efecto de línea institucional punteada
+        }
+    });
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
     if (toggles['water']) {
