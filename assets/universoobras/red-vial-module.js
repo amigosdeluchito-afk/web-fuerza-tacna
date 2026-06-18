@@ -171,15 +171,16 @@ window.rvApplyStyle = function() {
     
     // 2. Capas Vectoriales Textos
     if (toggles['places-text']) {
-        const isCity = ["==", ["get", "kind"], "city"];
-        const isTown = ["any", ["==", ["get", "kind"], "town"], ["==", ["get", "kind"], "municipality"]];
-        const isMajorPlace = ["any", isCity, isTown];
-        const isVillage = ["==", ["get", "kind"], "village"];
+        // RV6-MAP-B2: Adaptación basada en 'locality' y 'min_zoom' de Protomaps local
+        const isLocality = ["==", ["get", "kind"], "locality"];
+        const isMajorPlace = ["all", isLocality, ["<=", ["coalesce", ["get", "min_zoom"], 99], 8]];
+        const isVillagePlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 8], ["<=", ["coalesce", ["get", "min_zoom"], 99], 11]];
+        const isMinorPlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 11]];
         
+        const isTacna = ["==", ["get", "name"], "Tacna"];
         const textFieldName = ["coalesce", ["get", "name:es"], ["get", "name"]];
         
-        // Priorizamos la jerarquía de población, luego sort_key genérico, y finalmente el último lugar (9999).
-        const sortKeyField = ["coalesce", ["get", "population_rank"], ["get", "sort_key"], 9999];
+        const sortKeyField = ["coalesce", ["get", "sort_key"], 999999];
         
         // Ciudades y Capitales Provinciales (Tacna, Tarata, Candarave, Locumba)
         style.layers.push({ 
@@ -191,17 +192,17 @@ window.rvApplyStyle = function() {
             layout: { 
                 "text-field": textFieldName, 
                 "text-font": ["Noto Sans Regular"], 
-                "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isCity, 18, 14], 10, ["case", isCity, 22, 16], 14, ["case", isCity, 26, 18]], 
+                "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isTacna, 18, 14], 10, ["case", isTacna, 22, 16], 14, ["case", isTacna, 26, 18]], 
                 "text-letter-spacing": 0.05,
-                "text-transform": ["case", isCity, "uppercase", "none"],
+                "text-transform": ["case", isTacna, "uppercase", "none"],
                 "text-allow-overlap": true,
                 "text-ignore-placement": true,
                 "symbol-sort-key": sortKeyField
             }, 
             paint: { 
-                "text-color": ["case", isCity, "#000000", t.text], 
+                "text-color": ["case", isTacna, "#000000", t.text], 
                 "text-halo-color": "#ffffff", 
-                "text-halo-width": ["case", isCity, 4, 3] 
+                "text-halo-width": ["case", isTacna, 4, 3] 
             } 
         });
         
@@ -212,7 +213,7 @@ window.rvApplyStyle = function() {
             source: "protomaps", 
             "source-layer": "places", 
             minzoom: 10.5, 
-            filter: ["all", ["has", "name"], isVillage], 
+            filter: ["all", ["has", "name"], isVillagePlace], 
             layout: { 
                 "text-field": textFieldName, 
                 "text-font": ["Noto Sans Regular"], 
@@ -230,7 +231,7 @@ window.rvApplyStyle = function() {
             source: "protomaps", 
             "source-layer": "places", 
             minzoom: 13, 
-            filter: ["all", ["has", "name"], ["!", isMajorPlace], ["!", isVillage]], 
+            filter: ["all", ["has", "name"], isMinorPlace], 
             layout: { 
                 "text-field": textFieldName, 
                 "text-font": ["Noto Sans Regular"], 
@@ -573,38 +574,6 @@ window.initRedVial = async function() {
         // ⏱️ LÓGICA DE MEDICIÓN (RV5-PERF-A1)
         // =========================================================
         
-        // =========================================================
-        // 🕵️ AUDITORÍA PUNTUAL DE PLACES (RV6-MAP-B2)
-        // =========================================================
-        setTimeout(() => {
-            console.log("\n=== 🕵️ AUDITORÍA DE LUGARES (sourceLayer: places) ===");
-            const features = window.redVialMapInstance.querySourceFeatures('protomaps', { sourceLayer: 'places' });
-            
-            if(features.length === 0) {
-                console.log("⚠️ No se encontraron features en la capa 'places'. Asegúrate de que el PMTiles tenga datos en este nivel de zoom.");
-            } else {
-                console.log(`Top 30 lugares encontrados en el source (Zoom Actual: ${window.redVialMapInstance.getZoom().toFixed(2)}):`);
-                console.table(features.slice(0, 30).map(f => ({
-                    kind: f.properties.kind,
-                    name: f.properties.name,
-                    name_es: f.properties['name:es'],
-                    min_zoom: f.properties.min_zoom,
-                    population_rank: f.properties.population_rank,
-                    sort_key: f.properties.sort_key,
-                    geom: f.geometry.type
-                })));
-
-                const targetNames = ['Tacna', 'Tarata', 'Candarave', 'Locumba'];
-                const targets = features.filter(f => targetNames.includes(f.properties.name));
-                console.log(`Búsqueda específica de Capitales: Encontradas ${targets.length}`);
-                if(targets.length > 0) {
-                    console.table(targets.map(f => ({ kind: f.properties.kind, name: f.properties.name, min_zoom: f.properties.min_zoom, population_rank: f.properties.population_rank, sort_key: f.properties.sort_key })));
-                } else {
-                    console.log("❌ CRÍTICO: Tacna, Tarata, Candarave y Locumba NO están en el vector source en este nivel de zoom.");
-                }
-            }
-        }, 4000);
-
         if (PERF_RV) {
             window.redVialMapInstance.on('sourcedata', (e) => {
                 if (e.isSourceLoaded) {
