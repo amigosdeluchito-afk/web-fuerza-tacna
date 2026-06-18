@@ -191,14 +191,15 @@ window.rvApplyStyle = function() {
             layout: { 
                 "text-field": textFieldName, 
                 "text-font": ["Noto Sans Regular"], 
-                "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isCity, 16, 12], 10, ["case", isCity, 18, 14], 14, ["case", isCity, 22, 16]], 
+                "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isCity, 18, 14], 10, ["case", isCity, 22, 16], 14, ["case", isCity, 26, 18]], 
                 "text-letter-spacing": 0.05,
+                "text-transform": ["case", isCity, "uppercase", "none"],
                 "symbol-sort-key": sortKeyField
             }, 
             paint: { 
-                "text-color": t.text, 
-                "text-halo-color": t.bg, 
-                "text-halo-width": ["case", isCity, 3.5, 2.5] 
+                "text-color": ["case", isCity, "#000000", t.text], 
+                "text-halo-color": "#ffffff", 
+                "text-halo-width": ["case", isCity, 4, 3] 
             } 
         });
         
@@ -217,7 +218,7 @@ window.rvApplyStyle = function() {
                 "text-letter-spacing": 0.05, 
                 "symbol-sort-key": sortKeyField 
             }, 
-            paint: { "text-color": t.places_text || t.text, "text-halo-color": t.bg, "text-halo-width": 2 } 
+            paint: { "text-color": t.places_text || t.text, "text-halo-color": "#ffffff", "text-halo-width": 2.5 } 
         });
 
         // Barrios urbanos, anexos menores y vecindarios (Viñani, Para Chico, etc.)
@@ -235,7 +236,7 @@ window.rvApplyStyle = function() {
                 "text-letter-spacing": 0.05, 
                 "symbol-sort-key": sortKeyField 
             }, 
-            paint: { "text-color": t.places_text || t.text, "text-halo-color": t.bg, "text-halo-width": 2 } 
+            paint: { "text-color": t.places_text || t.text, "text-halo-color": "#ffffff", "text-halo-width": 2 } 
         });
 
         if (toggles['roads']) style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, ["case", isMajorRoad, 11, 0], 13, ["case", isMajorRoad, 13, isAvenida, 11, 0], 15, ["case", isMajorRoad, 14, isAvenida, 13, 10], 17, ["case", isMajorRoad, 16, isAvenida, 14, 12]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
