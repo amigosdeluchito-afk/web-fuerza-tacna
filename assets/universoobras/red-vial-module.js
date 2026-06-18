@@ -117,14 +117,24 @@ window.rvApplyStyle = function() {
             paint: { "fill-color": t.water, "fill-opacity": 0.75 }
         });
     
-        // Ríos, canales y cauces lineales
+        // Ríos, canales y cauces lineales (Brillo / Halo base)
+        style.layers.push({
+            id: "water-line-glow",
+            type: "line",
+            source: "protomaps",
+            "source-layer": "water",
+            filter: ["==", ["geometry-type"], "LineString"],
+            paint: { "line-color": "#9FD8FF", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1.5, 12, 2.5, 15, 4.5], "line-opacity": 0.28, "line-blur": 0.8 }
+        });
+
+        // Ríos, canales y cauces lineales (Línea central)
         style.layers.push({
             id: "water-line",
             type: "line",
             source: "protomaps",
             "source-layer": "water",
             filter: ["==", ["geometry-type"], "LineString"],
-            paint: { "line-color": t.water, "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.4, 12, 0.9, 15, 2.2], "line-opacity": 0.55, "line-blur": 0.2 }
+            paint: { "line-color": "#5FAFEF", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.8, 11, 1.2, 13, 1.8, 15, 3.0], "line-opacity": 0.8, "line-blur": 0.1 }
         });
     }
     
