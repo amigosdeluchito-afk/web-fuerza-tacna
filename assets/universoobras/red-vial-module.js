@@ -178,6 +178,9 @@ window.rvApplyStyle = function() {
         
         const textFieldName = ["coalesce", ["get", "name:es"], ["get", "name"]];
         
+        // Priorizamos la jerarquía de población, luego sort_key genérico, y finalmente el último lugar (9999).
+        const sortKeyField = ["coalesce", ["get", "population_rank"], ["get", "sort_key"], 9999];
+        
         // Ciudades y Capitales Provinciales (Tacna, Tarata, Candarave, Locumba)
         style.layers.push({ 
             id: "places-major-text", 
@@ -190,7 +193,7 @@ window.rvApplyStyle = function() {
                 "text-font": ["Noto Sans Regular"], 
                 "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isCity, 16, 12], 10, ["case", isCity, 18, 14], 14, ["case", isCity, 22, 16]], 
                 "text-letter-spacing": 0.05,
-                "symbol-sort-key": ["get", "sort_rank"]
+                "symbol-sort-key": sortKeyField
             }, 
             paint: { 
                 "text-color": t.text, 
@@ -207,7 +210,13 @@ window.rvApplyStyle = function() {
             "source-layer": "places", 
             minzoom: 10.5, 
             filter: ["all", ["has", "name"], isVillage], 
-            layout: { "text-field": textFieldName, "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 10.5, 11, 14, 13], "text-letter-spacing": 0.05, "symbol-sort-key": ["get", "sort_rank"] }, 
+            layout: { 
+                "text-field": textFieldName, 
+                "text-font": ["Noto Sans Regular"], 
+                "text-size": ["interpolate", ["linear"], ["zoom"], 10.5, 11, 14, 13], 
+                "text-letter-spacing": 0.05, 
+                "symbol-sort-key": sortKeyField 
+            }, 
             paint: { "text-color": t.places_text || t.text, "text-halo-color": t.bg, "text-halo-width": 2 } 
         });
 
@@ -219,7 +228,13 @@ window.rvApplyStyle = function() {
             "source-layer": "places", 
             minzoom: 13, 
             filter: ["all", ["has", "name"], ["!", isMajorPlace], ["!", isVillage]], 
-            layout: { "text-field": textFieldName, "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 13, 10, 15, 12, 17, 14], "text-letter-spacing": 0.05, "symbol-sort-key": ["get", "sort_rank"] }, 
+            layout: { 
+                "text-field": textFieldName, 
+                "text-font": ["Noto Sans Regular"], 
+                "text-size": ["interpolate", ["linear"], ["zoom"], 13, 10, 15, 12, 17, 14], 
+                "text-letter-spacing": 0.05, 
+                "symbol-sort-key": sortKeyField 
+            }, 
             paint: { "text-color": t.places_text || t.text, "text-halo-color": t.bg, "text-halo-width": 2 } 
         });
 
