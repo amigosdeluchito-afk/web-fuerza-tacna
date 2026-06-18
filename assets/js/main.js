@@ -394,14 +394,14 @@ function injectGlobalAssets() {
             .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.2rem; color: #ffc300; margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
             
             .proposals-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-            .proposal-card { background: rgba(255,255,255,0.02); padding: 1.8rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; gap: 1rem; }
-            .proposal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ffc300; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
-            .proposal-card:hover { transform: translateY(-6px); border-color: rgba(255,195,0,0.5); background: rgba(255,195,0,0.06); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+            .proposal-card { background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); padding: 2.2rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; gap: 1.2rem; }
+            .proposal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #ffc300; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; z-index: 2; }
+            .proposal-card:hover { transform: translateY(-8px); border-color: rgba(255,195,0,0.6); background: linear-gradient(145deg, rgba(255,195,0,0.08), rgba(255,255,255,0.02)); box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 20px rgba(255,195,0,0.15); }
             .proposal-card:hover::before { transform: scaleX(1); }
-            .proposal-header { display: flex; align-items: center; gap: 1rem; }
-            .proposal-icon { font-size: 2.2rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); flex-shrink: 0; line-height: 1; }
+            .proposal-header { display: flex; align-items: center; gap: 1.2rem; }
+            .proposal-icon { font-size: 2.6rem; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); flex-shrink: 0; line-height: 1; text-shadow: 0 0 15px rgba(255,195,0,0.4); }
             .proposal-card:hover .proposal-icon { transform: scale(1.15) rotate(5deg); }
-            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1rem; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+            .proposal-card h6 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.15rem; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
             .proposal-card p { font-size: 0.95rem !important; margin: 0; line-height: 1.7 !important; color: #bbb !important; font-weight: 300; flex-grow: 1; }
             
             .timeline { border-left: 2px solid rgba(255,195,0,0.2); padding-left: 2.5rem; margin-left: 1rem; display: flex; flex-direction: column; }
@@ -502,10 +502,10 @@ function injectGlobalAssets() {
                 .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 0; overflow: hidden; }
                 .fb-widget-container iframe { width: 100% !important; max-width: 100%; border-radius: 0; }
                 .proposals-grid { grid-template-columns: 1fr; gap: 1rem; }
-                .proposal-card { padding: 1.2rem; border-radius: 0.8rem; gap: 0.8rem; }
-                .proposal-header { gap: 0.8rem; }
-                .proposal-icon { font-size: 1.6rem; margin-bottom: 0; }
-                .proposal-card h6 { font-size: 0.85rem; margin-bottom: 0; }
+                .proposal-card { padding: 1.5rem; border-radius: 0.8rem; gap: 1rem; }
+                .proposal-header { gap: 1rem; }
+                .proposal-icon { font-size: 2rem; margin-bottom: 0; }
+                .proposal-card h6 { font-size: 1rem; margin-bottom: 0; }
                 .proposal-card p { font-size: 0.8rem !important; line-height: 1.4 !important; }
                 .candidate-quote { margin: 1rem 0; padding: 0.8rem 0.8rem 0.8rem 2rem; font-size: 0.95rem; }
                 .candidate-quote::before { font-size: 3rem; left: 0.3rem; }
@@ -581,11 +581,11 @@ function injectGlobalAssets() {
             .bio-content ul li, .proposal-description ul li, .timeline-text ul li { margin-bottom: 0.5rem; }
             
             .proposal-description {
-                font-size: 0.9rem !important; margin: 0; line-height: 1.6 !important; color: #bbb !important;
+                font-size: 1.05rem !important; margin: 0; line-height: 1.7 !important; color: #ccc !important;
                 font-weight: 300; flex-grow: 1; transition: max-height 0.4s ease-in-out;
             }
             .proposal-description.is-clamped {
-                max-height: 110px; /* Altura máxima inicial */
+                max-height: 135px; /* Altura máxima inicial más alta para que se vea más texto */
                 overflow: hidden; position: relative;
             }
             .proposal-description.is-clamped::after {
@@ -614,8 +614,8 @@ function injectGlobalAssets() {
 
             @media (max-width: 991px) {
                 .bio-container { font-size: 0.9rem; line-height: 1.6; }
-                .proposal-description { font-size: 0.8rem !important; line-height: 1.5 !important; }
-                .proposal-description.is-clamped { max-height: 80px; }
+                .proposal-description { font-size: 0.95rem !important; line-height: 1.6 !important; }
+                .proposal-description.is-clamped { max-height: 105px; }
                 .timeline-text { font-size: 0.9rem; line-height: 1.6; }
             }
             /* --- Fin Mejoras de Lectura --- */
