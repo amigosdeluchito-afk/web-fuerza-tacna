@@ -682,61 +682,69 @@ function injectGlobalAssets() {
     }
 
     // --- AUTO INYECCIÓN DEL ASISTENTE IA ---
-    if (!document.getElementById('ft-chat-container')) {
-        // 1. Inyectar CSS
-        const chatCSS = document.createElement('link');
-        chatCSS.rel = 'stylesheet';
-        chatCSS.href = 'assets/universoobras/chat-ia.css?v=4'; // Aesthetic UI update
-        document.head.appendChild(chatCSS);
-
-        // 2. Inyectar HTML
-        const chatDiv = document.createElement('div');
-        chatDiv.id = 'ft-chat-container';
-        chatDiv.className = 'ft-chat-closed';
-        chatDiv.style.cssText = 'opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.5s ease;'; // Previene FOUC
-        chatDiv.innerHTML = `
-            <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
-                <div class="ft-fab-avatar">🐻</div>
-            </button>
-            <div id="ft-chat-window">
-                <div class="ft-chat-header">
-                    <div class="ft-chat-title">
-                        <div class="ft-header-avatar">🐻</div>
-                        <div class="ft-header-info">
-                            <span>Luchito IA</span>
-                            <small><span class="ft-online-dot"></span> En línea</small>
-                        </div>
-                    </div>
-                    <button id="ft-chat-close" aria-label="Cerrar chat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                </div>
-                <div class="ft-chat-body" id="ft-chat-messages">
-                    <div class="ft-message ai-message">
-                        <div class="ft-avatar">🤖</div>
-                        <div class="ft-bubble">
-                            ¡Hola! Soy Luchito, el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-                                        <button class="ft-action-btn" data-action="jugar_luchito">🎮 Jugar con Luchito</button>
-                                        <button class="ft-action-btn" data-action="ir_a_obras">🗺️ Explorar Obras</button>
-                                        <button class="ft-action-btn" data-action="ir_a_candidatos">🏛️ Conocer Candidatos</button>
+    const injectChatIA = () => {
+        if (!document.getElementById('ft-chat-container')) {
+            // 1. Inyectar CSS
+            const chatCSS = document.createElement('link');
+            chatCSS.rel = 'stylesheet';
+            chatCSS.href = 'assets/universoobras/chat-ia.css?v=4'; // Aesthetic UI update
+            document.head.appendChild(chatCSS);
+    
+            // 2. Inyectar HTML
+            const chatDiv = document.createElement('div');
+            chatDiv.id = 'ft-chat-container';
+            chatDiv.className = 'ft-chat-closed';
+            chatDiv.style.cssText = 'opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.5s ease;'; // Previene FOUC
+            chatDiv.innerHTML = `
+                <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
+                    <div class="ft-fab-avatar">🐻</div>
+                </button>
+                <div id="ft-chat-window">
+                    <div class="ft-chat-header">
+                        <div class="ft-chat-title">
+                            <div class="ft-header-avatar">🐻</div>
+                            <div class="ft-header-info">
+                                <span>Luchito IA</span>
+                                <small><span class="ft-online-dot"></span> En línea</small>
                             </div>
-                                    <div style="margin-top: 12px; font-size: 12.5px; color: #64748b; font-style: italic;">...o si prefieres, escríbeme tu duda aquí abajo, vecino. 👇</div>
+                        </div>
+                        <button id="ft-chat-close" aria-label="Cerrar chat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                    </div>
+                    <div class="ft-chat-body" id="ft-chat-messages">
+                        <div class="ft-message ai-message">
+                            <div class="ft-avatar">🤖</div>
+                            <div class="ft-bubble">
+                                ¡Hola! Soy Luchito, el asistente inteligente de <strong>Fuerza Tacna</strong>. ¿En qué te puedo ayudar hoy?
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+                                            <button class="ft-action-btn" data-action="jugar_luchito">🎮 Jugar con Luchito</button>
+                                            <button class="ft-action-btn" data-action="ir_a_obras">🗺️ Explorar Obras</button>
+                                            <button class="ft-action-btn" data-action="ir_a_candidatos">🏛️ Conocer Candidatos</button>
+                                </div>
+                                        <div style="margin-top: 12px; font-size: 12.5px; color: #64748b; font-style: italic;">...o si prefieres, escríbeme tu duda aquí abajo, vecino. 👇</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ft-chat-footer">
+                        <div class="ft-input-wrapper">
+                            <input type="text" id="ft-chat-input" placeholder="Pregúntale a Luchito..." autocomplete="off">
+                            <button id="ft-chat-send" aria-label="Enviar mensaje"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg></button>
                         </div>
                     </div>
                 </div>
-                <div class="ft-chat-footer">
-                    <div class="ft-input-wrapper">
-                        <input type="text" id="ft-chat-input" placeholder="Pregúntale a Luchito..." autocomplete="off">
-                        <button id="ft-chat-send" aria-label="Enviar mensaje"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg></button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(chatDiv);
+            `;
+            document.body.appendChild(chatDiv);
+    
+            // 3. Inyectar JS
+            const chatJS = document.createElement('script');
+            chatJS.src = 'assets/universoobras/chat-ia.js?v=4'; // Aesthetic UI update
+            document.body.appendChild(chatJS);
+        }
+    };
 
-        // 3. Inyectar JS
-        const chatJS = document.createElement('script');
-        chatJS.src = 'assets/universoobras/chat-ia.js?v=4'; // Aesthetic UI update
-        document.body.appendChild(chatJS);
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => injectChatIA(), { timeout: 3000 });
+    } else {
+        setTimeout(() => injectChatIA(), 2000);
     }
 }
 injectGlobalAssets(); // Se ejecuta inmediatamente al cargar el JS

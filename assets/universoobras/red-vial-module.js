@@ -11,7 +11,7 @@ window.redVialMapInstance = null;
 window.isRedVialLoading = false; // Bloqueo para evitar doble inicialización
 
 const DEBUG_RV = false; // Flag para silenciar bucles y diagnósticos ruidosos
-const PERF_RV = true;   // Flag para habilitar las marcas de medición de rendimiento (RV5-PERF-A1)
+const PERF_RV = false;  // Apagado para producción (RV5-PERF-A2)
 
 // Constante única para la ruta de la base de datos vectorial
 const PMTILES_URL = '../data/pmtiles_proxy.php';
