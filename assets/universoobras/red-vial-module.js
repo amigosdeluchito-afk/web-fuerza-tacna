@@ -272,11 +272,12 @@ window.rvApplyStyle = function() {
     
     const isMajorRoad = ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]];
     const isHighway = ["==", ["get", "kind"], "highway"];
+    const isRegionalRoad = ["any", isHighway, ["has", "ref"], ["has", "shield_text"]];
     const isAvenida = ["all", ["has", "name"], ["any", ["in", "Avenida", ["get", "name"]], ["in", "Av.", ["get", "name"]], ["in", "Av ", ["get", "name"]]]];
 
     if (toggles['roads']) {
-        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 3.8, 0], 9.5, ["case", isHighway, 5.0, isMajorRoad, 3.0, 0], 11, ["case", isHighway, 6.4, isMajorRoad, 4.6, 0], 13, ["case", isHighway, 8.4, isMajorRoad, 6.4, isAvenida, 3.0, 1.5], 16, ["case", isHighway, 20.0, isMajorRoad, 18.0, isAvenida, 10.0, 6.0]] } });
-        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 2.2, 0], 9.5, ["case", isHighway, 3.0, isMajorRoad, 1.6, 0], 11, ["case", isHighway, 4.1, isMajorRoad, 2.8, 0], 13, ["case", isHighway, 5.6, isMajorRoad, 4.0, isAvenida, 1.5, 0.5], 16, ["case", isHighway, 15.0, isMajorRoad, 13.0, isAvenida, 7.0, 4.0]] } });
+        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 3.8, 0], 9.5, ["case", isRegionalRoad, 5.0, isMajorRoad, 2.0, 0], 11, ["case", isRegionalRoad, 6.4, isMajorRoad, 3.0, 0], 13, ["case", isRegionalRoad, 8.4, isMajorRoad, 4.5, isAvenida, 3.0, 1.5], 16, ["case", isRegionalRoad, 20.0, isMajorRoad, 16.0, isAvenida, 10.0, 6.0]] } });
+        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 2.2, 0], 9.5, ["case", isRegionalRoad, 3.0, isMajorRoad, 1.0, 0], 11, ["case", isRegionalRoad, 4.1, isMajorRoad, 1.8, 0], 13, ["case", isRegionalRoad, 5.6, isMajorRoad, 2.5, isAvenida, 1.5, 0.5], 16, ["case", isRegionalRoad, 15.0, isMajorRoad, 12.0, isAvenida, 7.0, 4.0]] } });
     }
     
     if (toggles['buildings'] || toggles['buildings3d']) {
