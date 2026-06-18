@@ -388,6 +388,23 @@ window.initRedVial = async function() {
             console.log("===================================================\n");
         };
 
+        // =========================================================
+        // 💧 DEBUG DE AGUA (TEMPORAL)
+        // =========================================================
+        window.redVialMapInstance.on('click', (e) => {
+            const waterFeatures = window.redVialMapInstance.queryRenderedFeatures(e.point)
+                .filter(f => f.sourceLayer === 'water' || f.sourceLayer === 'waterway' || f.layer.id === 'water');
+            
+            if (waterFeatures.length > 0) {
+                console.log(`\n💧 === CLIC EN ZONA DE AGUA ===`);
+                waterFeatures.forEach((f, i) => {
+                    console.log(`[${i+1}] Layer ID: ${f.layer.id} | Source-Layer: ${f.sourceLayer}`);
+                    console.log(`    Kind: ${f.properties.kind || 'N/A'} | Detail: ${f.properties.kind_detail || 'N/A'} | Name: ${f.properties.name || 'N/A'}`);
+                    console.log(`    Geometry Type: ${f.geometry.type}`);
+                });
+            }
+        });
+
         if (DEBUG_RV) {
             // Diagnóstico Inicial (Centro de la pantalla tras 2 segundos de carga)
             setTimeout(() => {
