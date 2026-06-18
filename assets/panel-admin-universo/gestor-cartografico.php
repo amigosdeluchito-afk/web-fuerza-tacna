@@ -397,7 +397,7 @@ require_admin();
                 version: 8,
                 glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
                 sources: {
-                    "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy.php" },
+                    "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy_departamento.php" },
                     "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" },
                     "highlight-source": { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } } },
                     "tramos-viales": { type: "geojson", data: "mapa_redvial_api.php?action=geojson" },
@@ -433,8 +433,8 @@ require_admin();
             map = new maplibregl.Map({
                 container: 'map',
                 style: mapStyle,
-                center: [-70.2528, -18.0146],
-                zoom: 12,
+                center: [-70.25, -17.7],
+                zoom: 8.5,
                 dragRotate: false // Desactiva la manito/rotación del clic derecho
             });
             
