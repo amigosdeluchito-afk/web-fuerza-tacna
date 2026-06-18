@@ -129,11 +129,15 @@ window.rvApplyStyle = function() {
             "regional-labels": {
                 type: "geojson",
                 data: regionalLabelsGeoJSON
-            },
+            }
+            // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
+            /*
+            ,
             "tacna-region": {
                 type: "geojson",
                 data: "../data/tacna_region.geojson"
             }
+            */
         },
         layers: [
             { id: "bg", type: "background", paint: { "background-color": t.bg } }
@@ -143,6 +147,8 @@ window.rvApplyStyle = function() {
     // =========================================================
     // DELIMITACIÓN VISUAL DE LA REGIÓN TACNA (RV6-MAP-C1)
     // =========================================================
+    // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
+    /*
     style.layers.push({
         id: "tacna-region-fill",
         type: "fill",
@@ -152,7 +158,10 @@ window.rvApplyStyle = function() {
             "fill-opacity": 0.03 
         }
     });
+    */
     
+    // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
+    /*
     style.layers.push({
         id: "tacna-region-outline",
         type: "line",
@@ -164,6 +173,7 @@ window.rvApplyStyle = function() {
             "line-dasharray": [3, 2] // Efecto de línea institucional punteada
         }
     });
+    */
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
     if (toggles['water']) {
