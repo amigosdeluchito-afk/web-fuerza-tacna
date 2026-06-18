@@ -211,32 +211,80 @@ window.rvApplyStyle = function() {
         const sortKeyField = ["coalesce", ["get", "sort_key"], 999999];
         
         // =========================================================
-        // CAPA ESTRATÉGICA PROPIA (Nombres Hardcoded - Google Maps Style)
+        // ETIQUETAS REGIONALES ESTRATÉGICAS (Divididas por jerarquía)
         // =========================================================
+        
+        // 1. Capital Regional (Tacna)
         style.layers.push({
-            id: "regional-labels-text",
+            id: "regional-labels-capital",
             type: "symbol",
             source: "regional-labels",
-            filter: [">=", ["zoom"], ["get", "minzoom"]],
+            filter: ["==", ["get", "priority"], 1],
             layout: {
                 "text-field": ["get", "name"],
                 "text-font": ["Noto Sans Regular"],
-                "text-size": [
-                    "case",
-                    ["==", ["get", "priority"], 1], ["interpolate", ["linear"], ["zoom"], 8, 18, 10, 22, 14, 26],
-                    ["==", ["get", "priority"], 2], ["interpolate", ["linear"], ["zoom"], 8, 14, 10, 16, 14, 18],
-                    ["interpolate", ["linear"], ["zoom"], 9.5, 11, 12, 14, 14, 16] // priority 3
-                ],
-                "text-transform": ["case", ["==", ["get", "priority"], 1], "uppercase", "none"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 8, 18, 10, 22, 13, 26],
+                "text-transform": "uppercase",
                 "text-letter-spacing": 0.05,
-                "symbol-sort-key": ["get", "priority"],
-                "text-allow-overlap": ["<=", ["get", "priority"], 2],
-                "text-ignore-placement": ["<=", ["get", "priority"], 2]
+                "text-anchor": "center",
+                "text-allow-overlap": true,
+                "text-ignore-placement": true,
+                "symbol-sort-key": ["get", "priority"]
             },
             paint: {
-                "text-color": ["case", ["==", ["get", "priority"], 1], "#000000", t.text],
+                "text-color": "#111827",
                 "text-halo-color": "#ffffff",
-                "text-halo-width": ["case", ["==", ["get", "priority"], 1], 4, ["==", ["get", "priority"], 2], 3, 2.5]
+                "text-halo-width": 3,
+                "text-halo-blur": 0.5
+            }
+        });
+
+        // 2. Capitales Provinciales (Tarata, Candarave, Locumba)
+        style.layers.push({
+            id: "regional-labels-provincial",
+            type: "symbol",
+            source: "regional-labels",
+            filter: ["==", ["get", "priority"], 2],
+            layout: {
+                "text-field": ["get", "name"],
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 8, 13, 10, 16, 13, 20],
+                "text-letter-spacing": 0.05,
+                "text-anchor": "center",
+                "text-allow-overlap": false,
+                "text-ignore-placement": false,
+                "symbol-sort-key": ["get", "priority"]
+            },
+            paint: {
+                "text-color": "#2f3a4a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 3,
+                "text-halo-blur": 0.5
+            }
+        });
+
+        // 3. Centros Poblados y Distritos (Ilabaya, Ite, Sama, etc.)
+        style.layers.push({
+            id: "regional-labels-district",
+            type: "symbol",
+            source: "regional-labels",
+            minzoom: 9.5,
+            filter: ["==", ["get", "priority"], 3],
+            layout: {
+                "text-field": ["get", "name"],
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 9.5, 10, 11, 12, 14, 15],
+                "text-letter-spacing": 0.05,
+                "text-anchor": "center",
+                "text-allow-overlap": false,
+                "text-ignore-placement": false,
+                "symbol-sort-key": ["get", "priority"]
+            },
+            paint: {
+                "text-color": "#2f3a4a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 2,
+                "text-halo-blur": 0.5
             }
         });
 
