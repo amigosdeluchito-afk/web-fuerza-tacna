@@ -14,7 +14,7 @@ const DEBUG_RV = false; // Flag para silenciar bucles y diagnósticos ruidosos
 const PERF_RV = false;  // Apagado para producción (RV5-PERF-A2)
 
 // Constante única para la ruta de la base de datos vectorial
-const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
+const PMTILES_URL = '../data/pmtiles_proxy.php';
 
 // =========================================================
 // ARQUITECTURA DE ESTILOS Y CAPAS (STUDIO)
@@ -346,8 +346,8 @@ window.initRedVial = async function() {
     window.redVialMapInstance = new maplibregl.Map({
         container: 'red-vial-map-container',
         style: window.rvApplyStyle(),
-        center: [-70.25, -17.7],
-        zoom: 8.5,
+        center: [-70.2528, -18.0146], // Centro de Tacna
+        zoom: 14,
         attributionControl: false
     });
 
