@@ -156,8 +156,8 @@ window.rvApplyStyle = function() {
     const isAvenida = ["all", ["has", "name"], ["any", ["in", "Avenida", ["get", "name"]], ["in", "Av.", ["get", "name"]], ["in", "Av ", ["get", "name"]]]];
 
     if (toggles['roads']) {
-        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 4, isAvenida, 2.5, 1.5], 16, ["case", isMajorRoad, 14, isAvenida, 8, 5]] } });
-        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 12, ["case", isMajorRoad, 2.5, isAvenida, 1.2, 0.5], 16, ["case", isMajorRoad, 10, isAvenida, 5, 3]] } });
+        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 2.5, 0], 10, ["case", isHighway, 4.0, isMajorRoad, 2.0, 0], 12, ["case", isHighway, 6.0, isMajorRoad, 4.0, isAvenida, 2.5, 1.5], 16, ["case", isHighway, 16.0, isMajorRoad, 14.0, isAvenida, 8.0, 5.0]] } });
+        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 1.5, 0], 10, ["case", isHighway, 2.5, isMajorRoad, 1.2, 0], 12, ["case", isHighway, 4.0, isMajorRoad, 2.5, isAvenida, 1.2, 0.5], 16, ["case", isHighway, 12.0, isMajorRoad, 10.0, isAvenida, 5.0, 3.0]] } });
     }
     
     if (toggles['buildings'] || toggles['buildings3d']) {
