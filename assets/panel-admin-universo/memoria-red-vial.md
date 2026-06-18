@@ -1,63 +1,406 @@
-# Memoria Técnica: Proyecto Red Vial (Fuerza Tacna)
+# Memoria Técnica Reforzada — Proyecto Red Vial Fuerza Tacna
 
-## 1. Resumen del Proyecto
-El módulo **Red Vial** es un sistema cartográfico interactivo para la plataforma web Fuerza Tacna. Permite al administrador trazar tramos viales (líneas, curvas Bézier), gestionar información técnica/ciudadana y adjuntar fotografías (Antes/Después, Galerías). Al público le presenta un mapa vectorial en 3D (Protomaps/PMTiles) rápido, moderno y altamente optimizado, enfocado en mostrar el impacto real de las obras en la ciudad con un lenguaje humano y accesible.
+## 1. Estado general del módulo
 
-## 2. Arquitectura Actual
-* **Frontend Público:** Vanilla JS, HTML5, CSS3, MapLibre GL JS v3.
-* **Frontend Admin:** Vanilla JS interactivo, Drag & Drop (reordenamiento de fotos y capas), Toasts personalizados.
-* **Backend:** PHP puro (sin frameworks). API RESTful (JSON).
-* **Base de Datos:** MySQL (Tablas: `panel_tramos_viales`, `panel_tramos_viales_fotos`, `panel_mapa_referencias`).
-* **Mapas (Tiles):** Archivos `.pmtiles` servidos de forma local (Offline) mediante un proxy en PHP (`pmtiles_proxy.php`). No hay dependencia económica de Google Maps ni Mapbox.
-* **Procesamiento de Imágenes:** Librería GD de PHP. Conversión automática a formato `.webp` y generación de miniaturas (thumbnails).
+El módulo **Red Vial** forma parte de la plataforma Fuerza Tacna / Universo Obras. Permite gestionar tramos viales desde el panel administrativo y mostrarlos al público en un mapa interactivo moderno con MapLibre + PMTiles.
 
-## 3. Archivos Involucrados
-### Backend / APIs
-* `assets/panel-admin-universo/mapa_redvial_api.php`: CRUD de tramos viales, migraciones automáticas.
-* `assets/panel-admin-universo/fotos_redvial_api.php`: Subida, conversión WebP, reordenamiento D&D, marcado de portada.
-* `assets/panel-admin-universo/mapa_referencias_api.php`: CRUD para hitos urbanos (Puntos/Titanes).
+Actualmente el sistema ya permite:
 
-### Frontend Administrador
-* `assets/panel-admin-universo/gestor-cartografico.php`: Interfaz unificada para dibujar vías, colocar hitos, ver dashboard, gestionar fotos en vivo y editar atributos.
+* Crear tramos viales.
+* Editar tramos existentes.
+* Activar/desactivar vías sin eliminarlas.
+* Dibujar líneas rectas.
+* Usar curvas Bézier manuales.
+* Guardar datos técnicos y ciudadanos.
+* Adjuntar fotos por tramo.
+* Definir foto portada.
+* Mostrar galería pública.
+* Mostrar ficha pública compacta con datos estratégicos.
+* Mostrar distrito, sector, longitud, inversión, beneficiarios, fechas, antes/ahora textual.
+* Usar toasts en el admin.
+* Usar confirmaciones elegantes en el admin.
+* Mostrar dashboard/resumen rápido de vías guardadas.
 
-### Frontend Público
-* `assets/universoobras/red-vial-module.js`: Sandbox principal. Inicializa el mapa, renderiza PMTiles, aplica perfiles visuales (Ciudadano, Técnico, Impacto) y construye el panel de la obra.
-* `assets/universoobras/mapa-sidebar.css` y `mapa-obras.css`: Estilos visuales compartidos y animaciones.
+---
 
-## 4. Fases Ejecutadas
-* **Fase RV1 (Core Cartográfico):** 
-  * Implementación de MapLibre y PMTiles. 
-  * Herramienta de dibujo de vías con nodos rectos y nodos de control para curvas cuadráticas (Bézier).
-* **Fase RV2 (Multimedia):** 
-  * Integración de BD para fotos de red vial. 
-  * Conversor WebP con redimensionamiento dinámico (WEB_MAX, THUMB_MAX). 
-  * Sistema Drag & Drop para reordenar fotos y selector de foto principal.
-* **Fase RV3 (Expansión de Datos y Formato Ciudadano):** 
-  * Inclusión de variables estratégicas (Mensaje principal, Avance físico, Inversión, Fechas, Beneficiarios, Antes/Ahora).
-  * Compactación visual del panel (Ficha editorial en vez de listado pesado).
-  * Autocompletado inteligente de "Sector" detectando los barrios de la capa PMTiles.
-  * Conversión a "lenguaje ciudadano" (ej. 15600000 -> S/ 15.6 millones, auto-sufijo de "metros" o "km").
-* **Fase RV4-A1 (UX Admin - Toasts):** 
-  * Reemplazo de los molestos `alert()` nativos por un sistema de notificaciones en cascada elegante (`showToast`).
-* **Fase RV4-B1 (Dashboard Admin):** 
-  * Inyección de tarjetas de resumen rápido en la lista de vías (Total, Activas, Entregadas, En Ejecución) procesadas en crudo desde el GeoJSON en memoria JS.
+## 2. Arquitectura actual
 
-## 5. Decisiones Técnicas Clave
-1. **Migraciones Silenciosas (Auto-reparación):** Para evitar accesos manuales a phpMyAdmin, la API inyecta las columnas faltantes usando bloques `try/catch` individuales antes de cada INSERT o UPDATE.
-2. **Capa Invisible (Hitbox) para PMTiles:** MapLibre ignora nombres de calles o barrios ocultos por colisión de textos. Se inyectó una capa circular de opacidad 0 (`places-hitbox`) para garantizar que la detección espacial de sectores funcione siempre.
-3. **Vanilla JS sin Frameworks Reactivos:** Se mantiene para asegurar una integración limpia con la arquitectura existente de "Barba.js" (Transiciones de página fluidas) y evitar dependencias de compilación (npm/webpack) en el servidor de producción.
-4. **Unificación de Galería en Vía (Inline):** En lugar de forzar al admin a ir a una página separada, el Gestor Cartográfico carga dinámicamente las herramientas de foto cuando se selecciona un tramo.
+### Frontend público
 
-## 6. Bugs Críticos Resueltos
-* `SQLSTATE Column not found (distrito)`: Solucionado separando la migración monolítica de `ALTER TABLE` en consultas individuales atrapadas por excepciones, garantizando robustez independientemente del estado previo de la BD.
-* `htmlMetrics is not defined`: Ocurría por una variable desactualizada en el chequeo de panel sin datos; resuelto usando la nueva jerarquía de capas (`htmlNivel1`, `htmlNivel2`).
-* **Filtros Recortados (Admin):** Selectores apretados se corrigieron aplicando `flex-wrap` y anchos flexibles base (`flex: 1 1 130px`) para saltar de línea limpiamente en pantallas estrechas.
+* Vanilla JS.
+* MapLibre GL JS.
+* PMTiles locales.
+* Panel público construido desde `red-vial-module.js`.
+* Estilos principales en `mapa-sidebar.css` y `mapa-obras.css`.
 
-## 7. Tareas Pendientes (Backlog Inmediato)
-* **[RV4-A2]** Reemplazar los `confirm()` nativos de borrado de vías y fotos por Modales elegantes de HTML/CSS con backdrop oscuro.
-* **[RV4-B2]** Enriquecer el Dashboard de vías inyectando una métrica de "Con foto / Sin foto". Requiere cruzar la información con un `LEFT JOIN` en el endpoint de listado en PHP.
-* **[RV3-C4]** Implementar en el panel público de la obra un **Slider Interactivo "Antes / Después"** que permita deslizar una barra para revelar ambas fotos.
-* **[RV3-C5]** Crear un sistema de **Lightbox (Pantalla Completa)** para las fotos públicas.
+### Frontend admin
 
-## 8. Próximos Pasos (Sugeridos)
-Se sugiere iniciar la próxima sesión atacando **RV4-A2 (Modales Custom)** para cerrar la limpieza de UX de alertas del sistema operativo en el panel administrativo, o saltar directamente al impacto público con el **Slider de Antes/Después**.
+* `gestor-cartografico.php`.
+* Vanilla JS.
+* Dibujo de tramos.
+* Edición de nodos.
+* Curvas Bézier.
+* Gestión de fotos en vivo.
+* Toasts personalizados.
+* Modales de confirmación.
+* Dashboard de vías guardadas.
+
+### Backend
+
+* PHP puro.
+* APIs JSON.
+* MySQL.
+* Migraciones silenciosas con `try/catch`.
+
+### Mapas
+
+* PMTiles local.
+* Proxy estable mediante:
+
+`assets/data/pmtiles_proxy.php`
+
+No tocar el proxy salvo que el problema sea específicamente de carga PMTiles.
+
+---
+
+## 3. Archivos principales
+
+### APIs
+
+* `assets/panel-admin-universo/mapa_redvial_api.php`
+* `assets/panel-admin-universo/fotos_redvial_api.php`
+* `assets/panel-admin-universo/mapa_referencias_api.php`
+
+### Admin
+
+* `assets/panel-admin-universo/gestor-cartografico.php`
+
+### Público
+
+* `assets/universoobras/red-vial-module.js`
+* `assets/universoobras/mapa-sidebar.css`
+* `assets/universoobras/mapa-obras.css`
+
+### PMTiles
+
+* `assets/data/tacna.pmtiles`
+* `assets/data/pmtiles_proxy.php`
+
+---
+
+## 4. Base de datos relevante
+
+Tablas principales:
+
+* `panel_tramos_viales`
+* `panel_tramos_viales_fotos`
+* `panel_mapa_referencias`
+
+Campos importantes de `panel_tramos_viales`:
+
+* `id`
+* `nombre`
+* `tipo`
+* `estado`
+* `activo`
+* `coordenadas`
+* `datos_edicion`
+* `descripcion`
+* `mensaje_principal`
+* `sector`
+* `distrito`
+* `tramo_desde`
+* `tramo_hasta`
+* `longitud`
+* `longitud_valor`
+* `longitud_unidad`
+* `longitud_cuadras`
+* `beneficiarios`
+* `situacion_antes`
+* `situacion_ahora`
+* `avance_fisico`
+* `monto_inversion`
+* `fecha_inicio`
+* `fecha_entrega`
+
+Importante:
+
+* No eliminar `longitud`, porque sirve como fallback.
+* Usar `longitud_valor`, `longitud_unidad` y `longitud_cuadras` como sistema nuevo.
+* `distrito` se maneja manualmente con select.
+* `sector` puede sugerirse desde PMTiles, pero siempre debe ser editable.
+
+---
+
+## 5. Fases completadas
+
+### RV1 — Core Cartográfico
+
+Completado:
+
+* MapLibre + PMTiles.
+* Render público de Red Vial.
+* Lectura dinámica desde MySQL.
+* Filtros por tipo de vía.
+* Fallback estable.
+
+### RV2 — Editor admin
+
+Completado:
+
+* Dibujo de tramos.
+* Edición de nodos.
+* Activar/desactivar vías.
+* Lista de vías guardadas.
+* Curvas Bézier manuales.
+* Guardado de `datos_edicion`.
+* Línea cocida/interpolada en `coordenadas`.
+
+### RV2.9 — Lista admin mejorada
+
+Completado:
+
+* Vías guardadas.
+* Búsqueda.
+* Filtros.
+* Activar/desactivar.
+* Centrar vía.
+* Editar.
+* Gestión visual compacta.
+
+### RV3 — Ficha pública y datos ciudadanos
+
+Completado:
+
+* Foto portada.
+* Mini galería.
+* Mensaje principal.
+* Inversión formateada.
+* Longitud con unidad.
+* Equivalencia en cuadras.
+* Beneficiarios.
+* Fechas.
+* Distrito y sector.
+* Tramo desde/hasta.
+* Antes/Ahora textual.
+* Compartir vía.
+* Panel público compacto y editorial.
+
+### RV3-C2.2 — Distrito y sector
+
+Completado:
+
+* Distrito con select manual.
+* Sector/Zona editable.
+* Sugerencia de sector mediante PMTiles cuando sea posible.
+* No sobrescribir sector si el admin ya escribió manualmente.
+
+### RV4-A1 — Toasts admin
+
+Completado:
+
+* Sistema `showToast`.
+* Reemplazo progresivo de `alert()`.
+* Mensajes success, warning, error, info.
+
+### RV4-A2 — Confirmaciones elegantes
+
+Completado:
+
+* Reemplazo de `confirm()` nativo por modal propio.
+* Confirmación para acciones delicadas.
+* Diseño integrado al admin.
+* No se tocó BD ni APIs.
+
+### RV4-B1 — Dashboard rápido admin
+
+Completado:
+
+* Total de vías.
+* Activas.
+* Inactivas.
+* Entregadas.
+* En ejecución.
+* Proyectadas.
+* Cálculo desde `rvGeoJSON.features`.
+* Dashboard compacto en “Vías Guardadas”.
+
+### RV4-B1.1 — Ajuste visual dashboard/filtros
+
+Completado:
+
+* Filtros ya no aparecen cortados.
+* Mejor responsive.
+* No se rompió el scroll.
+* No se tocó backend.
+
+---
+
+## 6. Bugs críticos ya resueltos
+
+### Error SQL `Unknown column distrito`
+
+Solución:
+
+* Migraciones separadas.
+* `ALTER TABLE` individuales.
+* `try/catch`.
+* Evitar migración monolítica.
+
+### Error JS `htmlMetrics is not defined`
+
+Solución:
+
+* Unificación de variables del panel público.
+* Uso correcto de bloques de jerarquía visual como `htmlNivel1`, `htmlNivel2` o nombres equivalentes existentes.
+* No usar variables inexistentes dentro del template.
+
+### Filtros recortados
+
+Solución:
+
+* `flex-wrap`.
+* Anchos flexibles.
+* Layout responsive.
+
+### Sector no sugerido
+
+Solución:
+
+* Revisar layers reales.
+* Usar capa auxiliar/hitbox si aplica.
+* No prometer detección 100%.
+* Si no encuentra sector, dejar manual.
+
+---
+
+## 7. Decisiones técnicas importantes
+
+1. No usar React ni frameworks nuevos.
+2. Mantener Vanilla JS.
+3. No tocar PMTiles proxy salvo problema específico de PMTiles.
+4. Mantener Barba.js compatible.
+5. No duplicar listeners de clic sobre vías públicas.
+6. No crear otra función paralela si ya existe `abrirPanelRedVial(props)`.
+7. No romper `datos_edicion`, porque guarda la receta de curvas Bézier.
+8. No cambiar `coordenadas` sin entender que contiene la línea cocida/interpolada.
+9. No eliminar campos antiguos si sirven como fallback.
+10. Todo cambio debe ser microfase, no refactor gigante.
+
+---
+
+## 8. Zonas delicadas que NO deben tocarse sin permiso
+
+No tocar salvo que el problema sea específicamente ahí:
+
+* `pmtiles_proxy.php`
+* URL del PMTiles.
+* `.htaccess`
+* carga base de PMTiles.
+* Curvas Bézier.
+* `datos_edicion`.
+* Gestión de nodos.
+* API de fotos.
+* Conversión WebP.
+* Galería pública.
+* Panel público si el cambio es solo admin.
+* Admin si el cambio es solo ficha pública.
+* Sistema de referencias urbanas si el cambio es solo Red Vial.
+* Estilos globales de toda la página.
+
+---
+
+## 9. Backlog pausado
+
+No implementar todavía salvo indicación directa:
+
+* Fotos Antes/Después visuales.
+* Slider interactivo Antes/Después.
+* Lightbox público.
+* Con foto / Sin foto en dashboard.
+* Previsualizar ficha pública desde admin.
+* Pulido final completo de ficha pública.
+* Leyenda pública avanzada.
+* Filtros ciudadanos públicos nuevos.
+
+---
+
+## 10. Protocolo obligatorio antes de modificar
+
+Antes de tocar código, responder siempre:
+
+1. Qué archivo se tocará.
+2. Qué función o bloque exacto se tocará.
+3. Qué NO se tocará.
+4. Qué riesgo existe.
+5. Cómo se probará.
+6. Si requiere BD o no.
+7. Si requiere API o no.
+8. Si es admin o público.
+9. Si afecta PMTiles o no.
+10. Si afecta fotos o curvas o no.
+
+No aplicar cambios masivos sin diagnóstico.
+
+---
+
+## 11. Pruebas mínimas después de cada cambio
+
+Después de cualquier cambio, probar:
+
+### Admin
+
+* Cargar Gestor Cartográfico.
+* Entrar a Vías.
+* Crear tramo.
+* Editar tramo.
+* Guardar.
+* Activar/desactivar.
+* Ver toast.
+* Ver modal si aplica.
+* Confirmar que lista se actualiza.
+* Confirmar que dashboard se actualiza.
+
+### Curvas
+
+* Crear curva.
+* Mover nodo.
+* Mover control Bézier.
+* Guardar.
+* Recargar.
+* Ver que la curva se conserva.
+
+### Fotos
+
+* Subir foto.
+* Ver miniatura.
+* Marcar portada.
+* Activar/desactivar.
+* Confirmar que no se rompe la galería.
+
+### Público
+
+* Abrir mapa público.
+* Clic en vía.
+* Ver panel.
+* Ver portada.
+* Ver galería.
+* Ver inversión.
+* Ver longitud.
+* Ver distrito/sector.
+* Ver que no haya errores en consola.
+
+---
+
+## 12. Regla de oro
+
+Cada mejora debe ser una microfase aislada.
+
+Nunca mezclar en un mismo parche:
+
+* BD + diseño público + fotos + curvas.
+* Admin + público sin necesidad.
+* PMTiles + UI.
+* Refactor grande + feature nueva.
+
+Primero diagnosticar, luego aplicar el cambio mínimo.

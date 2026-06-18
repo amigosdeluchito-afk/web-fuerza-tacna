@@ -10,6 +10,9 @@
 window.redVialMapInstance = null;
 window.isRedVialLoading = false; // Bloqueo para evitar doble inicialización
 
+const DEBUG_RV = false; // Flag para silenciar bucles y diagnósticos ruidosos
+const PERF_RV = true;   // Flag para habilitar las marcas de medición de rendimiento (RV5-PERF-A1)
+
 // Constante única para la ruta de la base de datos vectorial
 const PMTILES_URL = '../data/pmtiles_proxy.php';
 
@@ -273,6 +276,8 @@ window.initRedVial = async function() {
     if (window.redVialMapInstance || window.isRedVialLoading) return;
     window.isRedVialLoading = true;
     
+    if (PERF_RV) performance.mark('rv_inicio');
+    
     // Asegurar que MapLibre esté disponible (fallback por si no se cargó globalmente).
     if (typeof window.maplibregl === 'undefined') {
         if (typeof window.loadMapLibre === 'function') {
@@ -303,6 +308,8 @@ window.initRedVial = async function() {
         window.pmtilesProtocolRegistered = true;
     }
 
+    if (PERF_RV) performance.mark('rv_librerias_listas');
+
     console.log("[Red Vial] Inicializando mapa Vectorial PMTiles Offline...");
     
     // 3. Instanciar mapa con la arquitectura de Estilos Dinámicos
@@ -314,8 +321,11 @@ window.initRedVial = async function() {
         attributionControl: false
     });
 
+    if (PERF_RV) performance.mark('rv_mapa_creado');
+
     window.redVialMapInstance.on('load', () => {
         window.redVialMapInstance.resize();
+        if (PERF_RV) performance.mark('rv_mapa_load');
 
         // Asignar eventos de clic (las capas ya vienen integradas en rvApplyStyle)
         window.redVialMapInstance.on('mouseenter', 'tramos-viales-layer', () => { window.redVialMapInstance.getCanvas().style.cursor = 'pointer'; });
@@ -372,16 +382,18 @@ window.initRedVial = async function() {
             console.log("===================================================\n");
         };
 
-        // Diagnóstico Inicial (Centro de la pantalla tras 2 segundos de carga)
-        setTimeout(() => {
-            const centerPoint = window.redVialMapInstance.project(window.redVialMapInstance.getCenter());
-            inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(centerPoint), "CENTRO DEL MAPA (INICIO)");
-        }, 2000);
+        if (DEBUG_RV) {
+            // Diagnóstico Inicial (Centro de la pantalla tras 2 segundos de carga)
+            setTimeout(() => {
+                const centerPoint = window.redVialMapInstance.project(window.redVialMapInstance.getCenter());
+                inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(centerPoint), "CENTRO DEL MAPA (INICIO)");
+            }, 2000);
 
-        // Diagnóstico por Clic (Global y pasivo, NO rompe los paneles)
-        window.redVialMapInstance.on('click', (e) => {
-            inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(e.point), "CLIC DEL USUARIO");
-        });
+            // Diagnóstico por Clic (Global y pasivo, NO rompe los paneles)
+            window.redVialMapInstance.on('click', (e) => {
+                inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(e.point), "CLIC DEL USUARIO");
+            });
+        }
         
         // =========================================================
         // 🔍 AUDITORÍA AUTOMÁTICA DE HITOS URBANOS (FASE D)
@@ -414,48 +426,73 @@ window.initRedVial = async function() {
             });
         };
 
-        window.redVialMapInstance.on('moveend', scanFeatures);
-        setTimeout(scanFeatures, 3000); // Primer escaneo automático
+        if (DEBUG_RV) {
+            window.redVialMapInstance.on('moveend', scanFeatures);
+            setTimeout(scanFeatures, 3000); // Primer escaneo automático
+        }
         
         // =========================================================
         // 🔍 AUDITORÍA OBJETIVA FASE D: REFERENCIAS URBANAS
         // =========================================================
-        setTimeout(() => {
-            console.log("\n=== AUDITORÍA OBJETIVA: REFERENCIAS URBANAS ===");
-            const layers = window.redVialMapInstance.getStyle().layers;
-            console.log("Captura 1: Stack de capas completo", layers);
+        if (DEBUG_RV) {
+            setTimeout(() => {
+                console.log("\n=== AUDITORÍA OBJETIVA: REFERENCIAS URBANAS ===");
+                const layers = window.redVialMapInstance.getStyle().layers;
+                console.log("Captura 1: Stack de capas completo", layers);
+    
+                const refLayerId = 'ref-urbanas-pois';
+                const refLayer = layers.find(l => l.id === refLayerId);
+                
+                if (!refLayer) {
+                    console.log(`1. ¿La capa existe?: NO SE ENCONTRÓ '${refLayerId}'`);
+                    return;
+                }
+    
+                console.log("1. ¿La capa existe?: SÍ");
+                console.log("2. ID exacto:", refLayer.id);
+                console.log("3. source-layer exacto:", refLayer['source-layer']);
+            }, 3500);
+        }
 
-            const refLayerId = 'ref-urbanas-pois';
-            const refLayer = layers.find(l => l.id === refLayerId);
-            
-            if (!refLayer) {
-                console.log(`1. ¿La capa existe?: NO SE ENCONTRÓ '${refLayerId}'`);
-                return;
-            }
+        // =========================================================
+        // ⏱️ LÓGICA DE MEDICIÓN (RV5-PERF-A1)
+        // =========================================================
+        if (PERF_RV) {
+            window.redVialMapInstance.on('sourcedata', (e) => {
+                if (e.isSourceLoaded) {
+                    if (e.sourceId === 'tramos-viales' && !window._rv_perf_vias) {
+                        window._rv_perf_vias = true;
+                        performance.mark('rv_api_vias_ok');
+                    }
+                    if (e.sourceId === 'referencias-estrategicas' && !window._rv_perf_ref) {
+                        window._rv_perf_ref = true;
+                        performance.mark('rv_api_ref_ok');
+                    }
+                }
+            });
 
-            console.log("1. ¿La capa existe?: SÍ");
-            console.log("2. ID exacto:", refLayer.id);
-            console.log("3. source-layer exacto:", refLayer['source-layer']);
-            console.log("4. filter exacto:", JSON.stringify(refLayer.filter));
-            console.log("5. text-field exacto:", JSON.stringify(window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-field')));
-            console.log("Captura 2: Propiedad text-field directa", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-field'));
-            console.log("6. text-font exacto:", JSON.stringify(window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-font')));
-            console.log("7. Propiedades Anti-Colisión:");
-            console.log("   - text-allow-overlap:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-allow-overlap'));
-            console.log("   - text-ignore-placement:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'text-ignore-placement'));
-            console.log("   - icon-allow-overlap:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'icon-allow-overlap'));
-            console.log("   - icon-ignore-placement:", window.redVialMapInstance.getLayoutProperty(refLayer.id, 'icon-ignore-placement'));
-            console.log("8. minzoom real:", refLayer.minzoom);
-            
-            const index = layers.findIndex(l => l.id === refLayerId);
-            console.log(`9. Posición en el stack: Índice ${index} de ${layers.length - 1}`);
-            console.log("10. Renderizado relativo (Posiciones):");
-            console.log(`    - ${refLayerId}: ${index}`);
-            console.log(`    - places-text: ${layers.findIndex(l => l.id === 'places-text')}`);
-            console.log(`    - roads-text: ${layers.findIndex(l => l.id === 'roads-text')}`);
-            console.log(`    - pois-text: ${layers.findIndex(l => l.id === 'pois-text')}`);
-            console.log("===============================================\n");
-        }, 3500);
+            window.redVialMapInstance.once('idle', () => {
+                performance.mark('rv_mapa_idle');
+                console.log('\n=== 📊 DIAGNÓSTICO DE RENDIMIENTO (RV5-PERF) ===');
+                try {
+                    performance.measure('1. Inicio a Librerías listas', 'rv_inicio', 'rv_librerias_listas');
+                    performance.measure('2. Instanciación del Mapa', 'rv_librerias_listas', 'rv_mapa_creado');
+                    performance.measure('3. Hasta Evento Load', 'rv_mapa_creado', 'rv_mapa_load');
+                    if (window._rv_perf_vias) performance.measure('4. Carga API Vías', 'rv_mapa_load', 'rv_api_vias_ok');
+                    if (window._rv_perf_ref) performance.measure('5. Carga API Refs', 'rv_mapa_load', 'rv_api_ref_ok');
+                    performance.measure('6. Hasta Mapa Interactivo (Idle)', 'rv_mapa_load', 'rv_mapa_idle');
+                    performance.measure('=> TIEMPO TOTAL', 'rv_inicio', 'rv_mapa_idle');
+                    
+                    const measures = performance.getEntriesByType('measure').filter(m => m.name.match(/^[1-6=]/));
+                    console.table(measures.map(m => ({
+                        'Métrica': m.name,
+                        'Duración (ms)': m.duration.toFixed(2)
+                    })));
+                } catch(e) { 
+                    console.log('Esperando métricas...', e); 
+                }
+            });
+        }
 
         window.isRedVialLoading = false;
     });
