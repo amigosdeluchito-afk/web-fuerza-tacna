@@ -17,6 +17,26 @@ const PERF_RV = false;  // Apagado para producción (RV5-PERF-A2)
 const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
 
 // =========================================================
+// GEOJSON DE ETIQUETAS ESTRATÉGICAS (RV6-MAP-B2.2)
+// =========================================================
+const regionalLabelsGeoJSON = {
+    "type": "FeatureCollection",
+    "features": [
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.2528, -18.0146] }, "properties": { "name": "Tacna", "type": "capital_regional", "priority": 1, "minzoom": 8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.0325, -17.4744] }, "properties": { "name": "Tarata", "type": "capital_provincial", "priority": 2, "minzoom": 8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.2500, -17.2681] }, "properties": { "name": "Candarave", "type": "capital_provincial", "priority": 2, "minzoom": 8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.7633, -17.6136] }, "properties": { "name": "Locumba", "type": "capital_provincial", "priority": 2, "minzoom": 8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5144, -17.4208] }, "properties": { "name": "Ilabaya", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.9631, -17.8361] }, "properties": { "name": "Ite", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5361, -17.8967] }, "properties": { "name": "Sama", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1539, -17.8931] }, "properties": { "name": "Pachía", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-69.9575, -17.7817] }, "properties": { "name": "Palca", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6756, -18.1636] }, "properties": { "name": "Boca del Río", "type": "centro_poblado", "priority": 3, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6133, -17.2475] }, "properties": { "name": "Toquepala", "type": "centro_poblado", "priority": 3, "minzoom": 9.5 } }
+    ]
+};
+
+// =========================================================
 // ARQUITECTURA DE ESTILOS Y CAPAS (STUDIO)
 // =========================================================
 window.rvStyleConfig = {
@@ -98,6 +118,10 @@ window.rvApplyStyle = function() {
             "referencias-estrategicas": {
                 type: "geojson",
                 data: "../panel-admin-universo/mapa_referencias_api.php?action=geojson"
+            },
+            "regional-labels": {
+                type: "geojson",
+                data: regionalLabelsGeoJSON
             }
         },
         layers: [
@@ -156,8 +180,8 @@ window.rvApplyStyle = function() {
     const isAvenida = ["all", ["has", "name"], ["any", ["in", "Avenida", ["get", "name"]], ["in", "Av.", ["get", "name"]], ["in", "Av ", ["get", "name"]]]];
 
     if (toggles['roads']) {
-        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 2.5, 0], 10, ["case", isHighway, 4.0, isMajorRoad, 2.0, 0], 12, ["case", isHighway, 6.0, isMajorRoad, 4.0, isAvenida, 2.5, 1.5], 16, ["case", isHighway, 16.0, isMajorRoad, 14.0, isAvenida, 8.0, 5.0]] } });
-        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 1.5, 0], 10, ["case", isHighway, 2.5, isMajorRoad, 1.2, 0], 12, ["case", isHighway, 4.0, isMajorRoad, 2.5, isAvenida, 1.2, 0.5], 16, ["case", isHighway, 12.0, isMajorRoad, 10.0, isAvenida, 5.0, 3.0]] } });
+        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 2.8, 0], 9.5, ["case", isHighway, 3.5, isMajorRoad, 2.0, 0], 11, ["case", isHighway, 4.5, isMajorRoad, 3.0, 0], 13, ["case", isHighway, 6.0, isMajorRoad, 4.5, isAvenida, 3.0, 1.5], 16, ["case", isHighway, 18.0, isMajorRoad, 16.0, isAvenida, 10.0, 6.0]] } });
+        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isHighway, 1.5, 0], 9.5, ["case", isHighway, 2.0, isMajorRoad, 1.0, 0], 11, ["case", isHighway, 2.8, isMajorRoad, 1.8, 0], 13, ["case", isHighway, 4.0, isMajorRoad, 2.5, isAvenida, 1.5, 0.5], 16, ["case", isHighway, 14.0, isMajorRoad, 12.0, isAvenida, 7.0, 4.0]] } });
     }
     
     if (toggles['buildings'] || toggles['buildings3d']) {
@@ -173,15 +197,49 @@ window.rvApplyStyle = function() {
     if (toggles['places-text']) {
         // RV6-MAP-B2: Adaptación basada en 'locality' y 'min_zoom' de Protomaps local
         const isLocality = ["==", ["get", "kind"], "locality"];
-        const isMajorPlace = ["all", isLocality, ["<=", ["coalesce", ["get", "min_zoom"], 99], 8]];
-        const isVillagePlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 8], ["<=", ["coalesce", ["get", "min_zoom"], 99], 11]];
-        const isMinorPlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 11]];
+        
+        // Exclusión para evitar duplicados de nuestras etiquetas estratégicas en el texto base
+        const isCustomLabel = ["match", ["get", "name"], ["Tacna", "Tarata", "Candarave", "Locumba", "Ilabaya", "Ite", "Sama", "Pachía", "Palca", "Boca del Río", "Toquepala"], true, false];
+        
+        const isMajorPlace = ["all", isLocality, ["<=", ["coalesce", ["get", "min_zoom"], 99], 8], ["!", isCustomLabel]];
+        const isVillagePlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 8], ["<=", ["coalesce", ["get", "min_zoom"], 99], 11], ["!", isCustomLabel]];
+        const isMinorPlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 11], ["!", isCustomLabel]];
         
         const isTacna = ["==", ["get", "name"], "Tacna"];
         const textFieldName = ["coalesce", ["get", "name:es"], ["get", "name"]];
         
         const sortKeyField = ["coalesce", ["get", "sort_key"], 999999];
         
+        // =========================================================
+        // CAPA ESTRATÉGICA PROPIA (Nombres Hardcoded - Google Maps Style)
+        // =========================================================
+        style.layers.push({
+            id: "regional-labels-text",
+            type: "symbol",
+            source: "regional-labels",
+            filter: [">=", ["zoom"], ["get", "minzoom"]],
+            layout: {
+                "text-field": ["get", "name"],
+                "text-font": ["Noto Sans Regular"],
+                "text-size": [
+                    "case",
+                    ["==", ["get", "priority"], 1], ["interpolate", ["linear"], ["zoom"], 8, 18, 10, 22, 14, 26],
+                    ["==", ["get", "priority"], 2], ["interpolate", ["linear"], ["zoom"], 8, 14, 10, 16, 14, 18],
+                    ["interpolate", ["linear"], ["zoom"], 9.5, 11, 12, 14, 14, 16] // priority 3
+                ],
+                "text-transform": ["case", ["==", ["get", "priority"], 1], "uppercase", "none"],
+                "text-letter-spacing": 0.05,
+                "symbol-sort-key": ["get", "priority"],
+                "text-allow-overlap": ["<=", ["get", "priority"], 2],
+                "text-ignore-placement": ["<=", ["get", "priority"], 2]
+            },
+            paint: {
+                "text-color": ["case", ["==", ["get", "priority"], 1], "#000000", t.text],
+                "text-halo-color": "#ffffff",
+                "text-halo-width": ["case", ["==", ["get", "priority"], 1], 4, ["==", ["get", "priority"], 2], 3, 2.5]
+            }
+        });
+
         // Ciudades y Capitales Provinciales (Tacna, Tarata, Candarave, Locumba)
         style.layers.push({ 
             id: "places-major-text", 
@@ -243,7 +301,7 @@ window.rvApplyStyle = function() {
         });
 
         if (toggles['roads']) {
-            style.layers.push({ id: "roads-shields", type: "symbol", source: "protomaps", "source-layer": "roads", minzoom: 8, filter: ["all", ["any", ["has", "ref"], ["has", "shield_text"]], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]]], layout: { "symbol-placement": "line", "text-field": ["coalesce", ["get", "shield_text"], ["get", "ref"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 8, 8, 14, 11], "text-rotation-alignment": "viewport", "text-pitch-alignment": "viewport", "symbol-spacing": 400 }, paint: { "text-color": "#475569", "text-halo-color": "#ffffff", "text-halo-width": 2.5 } });
+            style.layers.push({ id: "roads-shields", type: "symbol", source: "protomaps", "source-layer": "roads", minzoom: 8.5, filter: ["all", ["any", ["has", "ref"], ["has", "shield_text"]], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]]], layout: { "symbol-placement": "line", "text-field": ["coalesce", ["get", "shield_text"], ["get", "ref"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 8.5, 9, 14, 11], "text-rotation-alignment": "viewport", "text-pitch-alignment": "viewport", "symbol-spacing": 600 }, paint: { "text-color": "#475569", "text-halo-color": "#ffffff", "text-halo-width": 2.5 } });
             style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, ["case", isMajorRoad, 11, 0], 13, ["case", isMajorRoad, 13, isAvenida, 11, 0], 15, ["case", isMajorRoad, 14, isAvenida, 13, 10], 17, ["case", isMajorRoad, 16, isAvenida, 14, 12]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
         }
     }
