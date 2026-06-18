@@ -228,7 +228,7 @@ window.rvApplyStyle = function() {
         source: "tacna-region",
         paint: {
             "fill-color": "#8A1538",
-            "fill-opacity": 0.06
+            "fill-opacity": 0.01
         }
     });
 
@@ -236,10 +236,15 @@ window.rvApplyStyle = function() {
         id: "tacna-region-outline",
         type: "line",
         source: "tacna-region",
+        layout: {
+            "line-join": "miter",
+            "line-cap": "butt"
+        },
         paint: {
             "line-color": "#8A1538",
-            "line-width": ["interpolate", ["linear"], ["zoom"], 7, 1.2, 9, 2, 11, 3],
-            "line-opacity": 0.85
+            "line-width": ["interpolate", ["linear"], ["zoom"], 7, 0.8, 9, 1.1, 11, 1.4],
+            "line-opacity": 0.55,
+            "line-dasharray": [3, 2]
         }
     });
 
