@@ -26,13 +26,20 @@ const regionalLabelsGeoJSON = {
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.0325, -17.4744] }, "properties": { "name": "Tarata", "type": "capital_provincial", "priority": 2, "minzoom": 8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.2500, -17.2681] }, "properties": { "name": "Candarave", "type": "capital_provincial", "priority": 2, "minzoom": 8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.7633, -17.6136] }, "properties": { "name": "Locumba", "type": "capital_provincial", "priority": 2, "minzoom": 8 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5144, -17.4208] }, "properties": { "name": "Ilabaya", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.9631, -17.8361] }, "properties": { "name": "Ite", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5361, -17.8967] }, "properties": { "name": "Sama", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1539, -17.8931] }, "properties": { "name": "Pachía", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-69.9575, -17.7817] }, "properties": { "name": "Palca", "type": "distrito_principal", "priority": 3, "minzoom": 9.5 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6756, -18.1636] }, "properties": { "name": "Boca del Río", "type": "centro_poblado", "priority": 3, "minzoom": 9.5 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6133, -17.2475] }, "properties": { "name": "Toquepala", "type": "centro_poblado", "priority": 3, "minzoom": 9.5 } }
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5144, -17.4208] }, "properties": { "name": "Ilabaya", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.9631, -17.8361] }, "properties": { "name": "Ite", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5361, -17.8967] }, "properties": { "name": "Sama", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1539, -17.8931] }, "properties": { "name": "Pachía", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-69.9575, -17.7817] }, "properties": { "name": "Palca", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.4357, -18.1565] }, "properties": { "name": "La Yarada", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1878, -17.9542] }, "properties": { "name": "Calana", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.0461, -17.4428] }, "properties": { "name": "Ticaco", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.2444, -17.3197] }, "properties": { "name": "Quilahuani", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6756, -18.1636] }, "properties": { "name": "Boca del Río", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6133, -17.2475] }, "properties": { "name": "Toquepala", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1067, -17.8744] }, "properties": { "name": "Miculla", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.7850, -17.6711] }, "properties": { "name": "Camiara", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6186, -17.3828] }, "properties": { "name": "Mirave", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } }
     ]
 };
 
@@ -199,7 +206,7 @@ window.rvApplyStyle = function() {
         const isLocality = ["==", ["get", "kind"], "locality"];
         
         // Exclusión para evitar duplicados de nuestras etiquetas estratégicas en el texto base
-        const isCustomLabel = ["match", ["get", "name"], ["Tacna", "Tarata", "Candarave", "Locumba", "Ilabaya", "Ite", "Sama", "Pachía", "Palca", "Boca del Río", "Toquepala"], true, false];
+        const isCustomLabel = ["match", ["get", "name"], ["Tacna", "Tarata", "Candarave", "Locumba", "Ilabaya", "Ite", "Sama", "Pachía", "Palca", "La Yarada", "Calana", "Ticaco", "Quilahuani", "Boca del Río", "Toquepala", "Miculla", "Camiara", "Mirave"], true, false];
         
         const isMajorPlace = ["all", isLocality, ["<=", ["coalesce", ["get", "min_zoom"], 99], 8], ["!", isCustomLabel]];
         const isVillagePlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 8], ["<=", ["coalesce", ["get", "min_zoom"], 99], 11], ["!", isCustomLabel]];
@@ -268,12 +275,11 @@ window.rvApplyStyle = function() {
             id: "regional-labels-district",
             type: "symbol",
             source: "regional-labels",
-            minzoom: 9.5,
             filter: ["==", ["get", "priority"], 3],
             layout: {
                 "text-field": ["get", "name"],
                 "text-font": ["Noto Sans Regular"],
-                "text-size": ["interpolate", ["linear"], ["zoom"], 9.5, 10, 11, 12, 14, 15],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 8.8, 10, 11, 12, 14, 15],
                 "text-letter-spacing": 0.05,
                 "text-anchor": "center",
                 "text-allow-overlap": false,
@@ -284,6 +290,30 @@ window.rvApplyStyle = function() {
                 "text-color": "#2f3a4a",
                 "text-halo-color": "#ffffff",
                 "text-halo-width": 2,
+                "text-halo-blur": 0.5
+            }
+        });
+
+        // 4. Centros Poblados Secundarios (Boca del Río, Toquepala, Miculla, etc.)
+        style.layers.push({
+            id: "regional-labels-minor",
+            type: "symbol",
+            source: "regional-labels",
+            filter: ["==", ["get", "priority"], 4],
+            layout: {
+                "text-field": ["get", "name"],
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 9.5, 9, 12, 12, 15, 14],
+                "text-letter-spacing": 0.05,
+                "text-anchor": "center",
+                "text-allow-overlap": false,
+                "text-ignore-placement": false,
+                "symbol-sort-key": ["get", "priority"]
+            },
+            paint: {
+                "text-color": "#475569",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1.5,
                 "text-halo-blur": 0.5
             }
         });
