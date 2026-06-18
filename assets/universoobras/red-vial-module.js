@@ -194,6 +194,8 @@ window.rvApplyStyle = function() {
                 "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isCity, 18, 14], 10, ["case", isCity, 22, 16], 14, ["case", isCity, 26, 18]], 
                 "text-letter-spacing": 0.05,
                 "text-transform": ["case", isCity, "uppercase", "none"],
+                "text-allow-overlap": true,
+                "text-ignore-placement": true,
                 "symbol-sort-key": sortKeyField
             }, 
             paint: { 
@@ -570,6 +572,39 @@ window.initRedVial = async function() {
         // =========================================================
         // ⏱️ LÓGICA DE MEDICIÓN (RV5-PERF-A1)
         // =========================================================
+        
+        // =========================================================
+        // 🕵️ AUDITORÍA PUNTUAL DE PLACES (RV6-MAP-B2)
+        // =========================================================
+        setTimeout(() => {
+            console.log("\n=== 🕵️ AUDITORÍA DE LUGARES (sourceLayer: places) ===");
+            const features = window.redVialMapInstance.querySourceFeatures('protomaps', { sourceLayer: 'places' });
+            
+            if(features.length === 0) {
+                console.log("⚠️ No se encontraron features en la capa 'places'. Asegúrate de que el PMTiles tenga datos en este nivel de zoom.");
+            } else {
+                console.log(`Top 30 lugares encontrados en el source (Zoom Actual: ${window.redVialMapInstance.getZoom().toFixed(2)}):`);
+                console.table(features.slice(0, 30).map(f => ({
+                    kind: f.properties.kind,
+                    name: f.properties.name,
+                    name_es: f.properties['name:es'],
+                    min_zoom: f.properties.min_zoom,
+                    population_rank: f.properties.population_rank,
+                    sort_key: f.properties.sort_key,
+                    geom: f.geometry.type
+                })));
+
+                const targetNames = ['Tacna', 'Tarata', 'Candarave', 'Locumba'];
+                const targets = features.filter(f => targetNames.includes(f.properties.name));
+                console.log(`Búsqueda específica de Capitales: Encontradas ${targets.length}`);
+                if(targets.length > 0) {
+                    console.table(targets.map(f => ({ kind: f.properties.kind, name: f.properties.name, min_zoom: f.properties.min_zoom, population_rank: f.properties.population_rank, sort_key: f.properties.sort_key })));
+                } else {
+                    console.log("❌ CRÍTICO: Tacna, Tarata, Candarave y Locumba NO están en el vector source en este nivel de zoom.");
+                }
+            }
+        }, 4000);
+
         if (PERF_RV) {
             window.redVialMapInstance.on('sourcedata', (e) => {
                 if (e.isSourceLoaded) {
