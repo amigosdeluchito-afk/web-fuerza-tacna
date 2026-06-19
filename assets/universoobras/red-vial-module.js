@@ -716,6 +716,43 @@ window.rvBuildTramoFilter = function(featureId) {
     ];
 };
 
+// Utilidades seguras: evitan lanzar excepciones si MapLibre no está en estado esperado
+window.rvSafeSetPaint = function(layerId, prop, value) {
+    try {
+        const map = window.redVialMapInstance;
+        if (!map || typeof map.getLayer !== 'function' || !map.getLayer(layerId)) return false;
+        map.setPaintProperty(layerId, prop, value);
+        return true;
+    } catch (err) {
+        console.warn('[rvSafeSetPaint] fallo', layerId, prop, err);
+        return false;
+    }
+};
+
+window.rvSafeSetFilter = function(layerId, filter) {
+    try {
+        const map = window.redVialMapInstance;
+        if (!map || typeof map.getLayer !== 'function' || !map.getLayer(layerId)) return false;
+        map.setFilter(layerId, filter);
+        return true;
+    } catch (err) {
+        console.warn('[rvSafeSetFilter] fallo', layerId, err);
+        return false;
+    }
+};
+
+window.rvSafeSetSourceData = function(sourceId, data) {
+    try {
+        const map = window.redVialMapInstance;
+        if (!map || typeof map.getSource !== 'function' || !map.getSource(sourceId)) return false;
+        map.getSource(sourceId).setData(data);
+        return true;
+    } catch (err) {
+        console.warn('[rvSafeSetSourceData] fallo', sourceId, err);
+        return false;
+    }
+};
+
 window.rvHoveredTramoId = null;
 window.rvSelectedTramoId = null;
 window.rvFlowAnimationId = null;
@@ -769,7 +806,7 @@ window.rvUpdateFlowAnimationState = function() {
 
 window.rvUpdateNodeSource = function(coords, props = {}) {
     const map = window.redVialMapInstance;
-    if (!map || !map.getSource('tramos-viales-nodes')) return;
+    if (!map) return;
     const features = coords.map((coord, index) => ({
         type: 'Feature',
         geometry: { type: 'Point', coordinates: coord },
@@ -778,8 +815,7 @@ window.rvUpdateNodeSource = function(coords, props = {}) {
             nodeLabel: props[index === 0 ? 'inicio' : 'fin'] || ''
         }
     }));
-    const source = map.getSource('tramos-viales-nodes');
-    source.setData({ type: 'FeatureCollection', features });
+    window.rvSafeSetSourceData('tramos-viales-nodes', { type: 'FeatureCollection', features });
 };
 
 window.rvClearTramoNodes = function() {
@@ -797,16 +833,10 @@ window.rvSetTramoSelection = function(feature) {
     window.rvSelectedTramoId = featureId;
     window.rvSelectedTramoFeature = feature;
 
-    if (map.getLayer('tramos-viales-selected')) {
-        map.setFilter('tramos-viales-selected', window.rvBuildTramoFilter(featureId));
-    }
-    if (map.getLayer('tramos-viales-flow')) {
-        map.setFilter('tramos-viales-flow', window.rvBuildTramoFilter(featureId));
-    }
-    if (map.getLayer('tramos-viales-layer')) {
-        map.setPaintProperty('tramos-viales-layer', 'line-opacity', 0.35);
-        map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.18);
-    }
+    window.rvSafeSetFilter('tramos-viales-selected', window.rvBuildTramoFilter(featureId));
+    window.rvSafeSetFilter('tramos-viales-flow', window.rvBuildTramoFilter(featureId));
+    window.rvSafeSetPaint('tramos-viales-layer', 'line-opacity', 0.35);
+    window.rvSafeSetPaint('tramos-viales-bg', 'line-opacity', 0.18);
     window.rvUpdateFlowAnimationState();
     window.rvUpdateSelectedTramoNodes(feature);
 };
@@ -816,17 +846,11 @@ window.rvClearTramoSelection = function() {
     window.rvSelectedTramoId = null;
     window.rvSelectedTramoFeature = null;
     if (!map) return;
-    if (map.getLayer('tramos-viales-selected')) {
-        map.setFilter('tramos-viales-selected', ['==', ['get', 'id'], '__none__']);
-    }
-    if (map.getLayer('tramos-viales-flow')) {
-        map.setFilter('tramos-viales-flow', ['==', ['get', 'id'], '__none__']);
-    }
+    window.rvSafeSetFilter('tramos-viales-selected', ['==', ['get', 'id'], '__none__']);
+    window.rvSafeSetFilter('tramos-viales-flow', ['==', ['get', 'id'], '__none__']);
     window.rvClearTramoNodes();
-    if (map.getLayer('tramos-viales-layer')) {
-        map.setPaintProperty('tramos-viales-layer', 'line-opacity', 1);
-        map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.65);
-    }
+    window.rvSafeSetPaint('tramos-viales-layer', 'line-opacity', 1);
+    window.rvSafeSetPaint('tramos-viales-bg', 'line-opacity', 0.65);
     window.rvUpdateFlowAnimationState();
 };
 
