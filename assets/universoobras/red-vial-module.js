@@ -765,62 +765,117 @@ window.rvFlowAnimationStep = 0;
 window.rvSelectedTramoFeature = null;
 window.rvAnimationSpeed = 'normal'; // 'normal', 'hover', 'selected'
 window.rvAnimationFrameCounter = 0; // Counter to control speed
+window.rvFlowCanvas = null;
+window.rvFlowCanvasCtx = null;
+window.rvFlowCanvasRAF = null;
+window.rvFlowCanvasOffset = 0;
 
-window.rvStartFlowAnimation = function() {
-    if (window.rvFlowAnimationId !== null) return;
+// Canvas-based flow animation (draws animated dashed lines on a canvas overlay)
+window.rvCreateFlowCanvas = function() {
     const map = window.redVialMapInstance;
     if (!map || !map.getContainer) return;
+    if (window.rvFlowCanvas) return;
+    const container = map.getContainer();
+    const canvas = document.createElement('canvas');
+    canvas.id = 'rv-flow-canvas';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = 500; // above map layers
+    container.appendChild(canvas);
+    window.rvFlowCanvas = canvas;
+    window.rvFlowCanvasCtx = canvas.getContext('2d');
+    window.rvResizeFlowCanvas();
+};
 
-    // Limited set of dash patterns to avoid exhausting LineAtlas
-    const dashPatterns = [
-        [8, 4], [6, 4], [10, 4], [8, 3], [12, 4], [9, 4]
-    ];
-    let patternIndex = 0;
+window.rvResizeFlowCanvas = function() {
+    const canvas = window.rvFlowCanvas;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    const ctx = window.rvFlowCanvasCtx;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+};
 
+window.rvDrawFlowCanvas = function() {
+    const map = window.redVialMapInstance;
+    const canvas = window.rvFlowCanvas;
+    const ctx = window.rvFlowCanvasCtx;
+    if (!map || !canvas || !ctx) return;
+    // clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // query visible tramo features (limit to layer to reduce noise)
+    let features = [];
+    try {
+        features = map.queryRenderedFeatures({ layers: ['tramos-viales-layer'] });
+    } catch (e) { features = []; }
+    if (!features || features.length === 0) return;
+    // animation offset
+    const offset = window.rvFlowCanvasOffset || 0;
+    // draw each feature line
+    features.forEach(f => {
+        if (!f.geometry || f.geometry.type !== 'LineString') return;
+        const coords = f.geometry.coordinates;
+        if (!coords || coords.length < 2) return;
+        ctx.beginPath();
+        coords.forEach((c, i) => {
+            const p = map.project({ lng: c[0], lat: c[1] });
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+        });
+        // style
+        const color = (f.properties && (f.properties.color || f.properties.color_hex)) || '#ffffff';
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        // glow
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 12; // glow thickness
+        ctx.globalAlpha = 0.18;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+        ctx.setLineDash([16, 8]);
+        ctx.lineDashOffset = -offset;
+        ctx.stroke();
+        ctx.restore();
+        // main stroke
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 6;
+        ctx.globalAlpha = 1;
+        ctx.setLineDash([12, 8]);
+        ctx.lineDashOffset = -offset;
+        ctx.stroke();
+    });
+};
+
+window.rvStartFlowAnimation = function() {
+    if (window.rvFlowCanvasRAF) return;
+    window.rvCreateFlowCanvas();
     const step = () => {
-        if (!map) {
-            window.rvFlowAnimationId = null;
-            return;
-        }
-
-        const styleReady = (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) ||
-                         (typeof map.loaded === 'function' && map.loaded());
-        if (!styleReady) {
-            window.rvFlowAnimationId = window.requestAnimationFrame(step);
-            return;
-        }
-
-        // Choose frame interval by speed state
-        let frameInterval = 6; // normal: slower
-        if (window.rvAnimationSpeed === 'hover') frameInterval = 3;
-        if (window.rvAnimationSpeed === 'selected') frameInterval = 2;
-
-        window.rvAnimationFrameCounter = (window.rvAnimationFrameCounter + 1) % 1000000;
-        if (window.rvAnimationFrameCounter % frameInterval === 0) {
-            const dash = dashPatterns[patternIndex % dashPatterns.length];
-            patternIndex++;
-            try {
-                if (map.getLayer('tramos-viales-layer')) {
-                    map.setPaintProperty('tramos-viales-layer', 'line-dasharray', dash);
-                }
-                if (map.getLayer('tramos-viales-flow')) {
-                    map.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
-                }
-                if (map.getLayer('tramos-viales-hover')) {
-                    map.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
-                }
-                if (map.getLayer('tramos-viales-selected')) {
-                    map.setPaintProperty('tramos-viales-selected', 'line-dasharray', dash);
-                }
-            } catch (e) {
-                console.debug('[rvStartFlowAnimation] skip frame', e.message);
-            }
-        }
-
-        window.rvFlowAnimationId = window.requestAnimationFrame(step);
+        // speed map
+        const speedMap = { normal: 0.6, hover: 1.6, selected: 2.4 };
+        const speed = speedMap[window.rvAnimationSpeed] || speedMap.normal;
+        window.rvFlowCanvasOffset = (window.rvFlowCanvasOffset + speed) % 10000;
+        window.rvDrawFlowCanvas();
+        window.rvFlowCanvasRAF = window.requestAnimationFrame(step);
     };
+    window.rvFlowCanvasRAF = window.requestAnimationFrame(step);
+};
 
-    window.rvFlowAnimationId = window.requestAnimationFrame(step);
+window.rvStopFlowAnimation = function() {
+    if (window.rvFlowCanvasRAF) {
+        window.cancelAnimationFrame(window.rvFlowCanvasRAF);
+        window.rvFlowCanvasRAF = null;
+    }
+    // do not remove canvas to preserve overlay; it can be cleared instead
+    if (window.rvFlowCanvasCtx && window.rvFlowCanvas) {
+        window.rvFlowCanvasCtx.clearRect(0, 0, window.rvFlowCanvas.width, window.rvFlowCanvas.height);
+    }
 };
 
 window.rvStopFlowAnimation = function() {
@@ -1190,6 +1245,17 @@ window.initRedVial = async function() {
         });
         window.rvScheduleTerritorialLayers(window.redVialMapInstance);
         if (PERF_RV) performance.mark('rv_mapa_load');
+
+        // Resize canvas on map resize/move/zoom
+        const map = window.redVialMapInstance;
+        const resizeCanvasHandler = () => {
+            window.rvResizeFlowCanvas();
+            window.rvDrawFlowCanvas();
+        };
+        map.on('move', resizeCanvasHandler);
+        map.on('moveend', resizeCanvasHandler);
+        map.on('zoom', resizeCanvasHandler);
+        map.on('resize', resizeCanvasHandler);
 
         // Asignar eventos de clic (las capas ya vienen integradas en rvApplyStyle)
         window.redVialMapInstance.on('mouseenter', 'tramos-viales-layer', () => {
