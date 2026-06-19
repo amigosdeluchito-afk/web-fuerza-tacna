@@ -724,13 +724,16 @@ window.rvSelectedTramoFeature = null;
 
 window.rvStartFlowAnimation = function() {
     if (window.rvFlowAnimationId !== null) return;
-    if (!window.redVialMapInstance || !window.redVialMapInstance.getContainer) return;
+    const map = window.redVialMapInstance;
+    if (!map || !map.getContainer) return;
     const step = () => {
-        if (!window.redVialMapInstance || !window.redVialMapInstance.loaded()) {
+        if (!map) {
             window.rvFlowAnimationId = null;
             return;
         }
-        if (!window.redVialMapInstance.getLayer('tramos-viales-flow')) {
+        // Ensure style is loaded and layer exists (support both APIs safely)
+        const styleReady = (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) || (typeof map.loaded === 'function' && map.loaded());
+        if (!styleReady || !map.getLayer || !map.getLayer('tramos-viales-flow')) {
             window.rvFlowAnimationId = null;
             return;
         }
