@@ -639,7 +639,6 @@ window.rvApplyStyle = function() {
             'line-width': isImpacto ? 12 : 10,
             'line-opacity': 0.65,
             'line-blur': isImpacto ? 6 : 4,
-            'line-dasharray': [1, 4]
         }
     });
     style.layers.push({
@@ -652,7 +651,6 @@ window.rvApplyStyle = function() {
             'line-width': isImpacto ? 12 : 10,
             'line-opacity': 0.92,
             'line-blur': isImpacto ? 3 : 2,
-            'line-dasharray': [1, 4]
         }
     });
     style.layers.push({
@@ -665,7 +663,6 @@ window.rvApplyStyle = function() {
             'line-width': isImpacto ? 10 : 8,
             'line-opacity': 0.7,
             'line-blur': isImpacto ? 4 : 2,
-            'line-dasharray': [1, 4]
         }
     });
     style.layers.push({
@@ -727,8 +724,13 @@ window.rvSelectedTramoFeature = null;
 
 window.rvStartFlowAnimation = function() {
     if (window.rvFlowAnimationId !== null) return;
+    if (!window.redVialMapInstance || !window.redVialMapInstance.getContainer) return;
     const step = () => {
         if (!window.redVialMapInstance || !window.redVialMapInstance.loaded()) {
+            window.rvFlowAnimationId = null;
+            return;
+        }
+        if (!window.redVialMapInstance.getLayer('tramos-viales-flow')) {
             window.rvFlowAnimationId = null;
             return;
         }
