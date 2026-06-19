@@ -667,8 +667,7 @@ window.rvApplyStyle = function() {
             'line-width': isImpacto ? 10 : 8,
             'line-opacity': 0.35,
             'line-blur': isImpacto ? 4 : 2,
-            'line-dasharray': [8, 4],
-            'line-dashoffset': 0
+            'line-dasharray': [8, 4]
         }
     });
     style.layers.push({
@@ -771,47 +770,56 @@ window.rvStartFlowAnimation = function() {
     if (window.rvFlowAnimationId !== null) return;
     const map = window.redVialMapInstance;
     if (!map || !map.getContainer) return;
-    
-    let dashOffset = 0;
+
+    // Limited set of dash patterns to avoid exhausting LineAtlas
+    const dashPatterns = [
+        [8, 4], [6, 4], [10, 4], [8, 3], [12, 4], [9, 4]
+    ];
+    let patternIndex = 0;
+
     const step = () => {
         if (!map) {
             window.rvFlowAnimationId = null;
             return;
         }
-        
+
         const styleReady = (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) ||
                          (typeof map.loaded === 'function' && map.loaded());
         if (!styleReady) {
             window.rvFlowAnimationId = window.requestAnimationFrame(step);
             return;
         }
-        
-        // Speed values match CodePen-style animation: slower by default, faster on hover/selection
-        const speedMap = {
-            normal: 0.25,
-            hover: 0.8,
-            selected: 1.4
-        };
-        const speed = speedMap[window.rvAnimationSpeed] || speedMap.normal;
-        dashOffset = (dashOffset + speed) % 100;
-        
-        try {
-            if (map.getLayer('tramos-viales-flow')) {
-                map.setPaintProperty('tramos-viales-flow', 'line-dashoffset', dashOffset);
+
+        // Choose frame interval by speed state
+        let frameInterval = 6; // normal: slower
+        if (window.rvAnimationSpeed === 'hover') frameInterval = 3;
+        if (window.rvAnimationSpeed === 'selected') frameInterval = 2;
+
+        window.rvAnimationFrameCounter = (window.rvAnimationFrameCounter + 1) % 1000000;
+        if (window.rvAnimationFrameCounter % frameInterval === 0) {
+            const dash = dashPatterns[patternIndex % dashPatterns.length];
+            patternIndex++;
+            try {
+                if (map.getLayer('tramos-viales-layer')) {
+                    map.setPaintProperty('tramos-viales-layer', 'line-dasharray', dash);
+                }
+                if (map.getLayer('tramos-viales-flow')) {
+                    map.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
+                }
+                if (map.getLayer('tramos-viales-hover')) {
+                    map.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
+                }
+                if (map.getLayer('tramos-viales-selected')) {
+                    map.setPaintProperty('tramos-viales-selected', 'line-dasharray', dash);
+                }
+            } catch (e) {
+                console.debug('[rvStartFlowAnimation] skip frame', e.message);
             }
-            if (map.getLayer('tramos-viales-hover')) {
-                map.setPaintProperty('tramos-viales-hover', 'line-dashoffset', dashOffset);
-            }
-            if (map.getLayer('tramos-viales-selected')) {
-                map.setPaintProperty('tramos-viales-selected', 'line-dashoffset', dashOffset);
-            }
-        } catch (e) {
-            console.debug('[rvStartFlowAnimation] skip frame', e.message);
         }
-        
+
         window.rvFlowAnimationId = window.requestAnimationFrame(step);
     };
-    
+
     window.rvFlowAnimationId = window.requestAnimationFrame(step);
 };
 
