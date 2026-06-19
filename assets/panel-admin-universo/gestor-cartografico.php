@@ -435,20 +435,24 @@ require_admin();
             'water': ['water'],
             'parks': ['parks'],
             'roads': ['roads-minor', 'roads-major'],
+            'transit': ['transit'],
+            'boundaries': ['tacna-region-fill', 'tacna-provincias-outline', 'tacna-region-outline'],
             'places-text': ['places-text'],
-            'ref-urbanas': ['ref-circles', 'ref-labels']
+            'ref-urbanas': ['ref-circles', 'ref-labels'],
+            'srv-edu': ['landuse-edu'],
+            'srv-salud': ['landuse-salud'],
+            'srv-deporte': ['landuse-deporte']
         };
 
-        const RV_PUBLIC_SERVICE_KEYS = [
-            'srv-edu',
-            'srv-salud',
-            'srv-seguridad',
-            'srv-gobierno',
-            'srv-mercados',
-            'srv-deporte',
-            'srv-transporte',
-            'srv-negocios'
-        ];
+        const RV_PUBLIC_SERVICE_KINDS = {
+            'srv-edu': ['school', 'university', 'college', 'kindergarten'],
+            'srv-salud': ['hospital', 'clinic'],
+            'srv-seguridad': ['police', 'fire_station'],
+            'srv-gobierno': ['townhall', 'town_hall'],
+            'srv-mercados': ['marketplace', 'market'],
+            'srv-deporte': ['stadium', 'pitch'],
+            'srv-transporte': ['bus_station']
+        };
 
         function setAdminLayerVisibility(layerId, visible) {
             if (!map || !map.getLayer(layerId)) return;
@@ -477,7 +481,30 @@ require_admin();
 
             setAdminLayerVisibility('buildings', !!(layers.buildings || layers.buildings3d));
             setAdminLayerVisibility('roads-text', !!(layers.roads && layers['places-text']));
-            setAdminLayerVisibility('pois-text', !!(layers['places-text'] && RV_PUBLIC_SERVICE_KEYS.some(key => !!layers[key])));
+
+            const enabledPoiKinds = [];
+            Object.entries(RV_PUBLIC_SERVICE_KINDS).forEach(([key, kinds]) => {
+                if (layers[key]) enabledPoiKinds.push(...kinds);
+            });
+
+            if (layers['srv-negocios']) {
+                enabledPoiKinds.push(
+                    'restaurant', 'cafe', 'fast_food', 'bar', 'pub', 'pharmacy', 'dentist', 'doctors',
+                    'veterinary', 'bakery', 'supermarket', 'convenience', 'butcher', 'bank', 'atm',
+                    'hotel', 'motel', 'gas_station', 'car_wash', 'parking', 'hairdresser', 'clothes',
+                    'shoes', 'cinema', 'theatre', 'gym', 'sports_centre'
+                );
+            }
+
+            if (layers.parks) {
+                enabledPoiKinds.push('park', 'recreation_ground');
+            }
+
+            const showPois = !!(layers['places-text'] && enabledPoiKinds.length);
+            setAdminLayerVisibility('pois-text', showPois);
+            if (showPois && map.getLayer('pois-text')) {
+                map.setFilter('pois-text', ['all', ['has', 'name'], ['match', ['get', 'kind'], enabledPoiKinds, true, false]]);
+            }
         }
 
         function renderConfigPublica(config) {
@@ -574,6 +601,8 @@ require_admin();
                 sources: {
                     "protomaps": { type: "vector", url: "pmtiles://../data/pmtiles_proxy_departamento.php" },
                     "referencias": { type: "geojson", data: "mapa_referencias_api.php?action=geojson" },
+                    "tacna-region": { type: "geojson", data: "../data/tacna_region.geojson" },
+                    "tacna-provincias": { type: "geojson", data: "../data/tacna_provincias.geojson" },
                     "highlight-source": { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } } },
                     "tramos-viales": { type: "geojson", data: "mapa_redvial_api.php?action=geojson" },
                     "draw-source": { type: "geojson", data: { type: "Feature", geometry: { type: "LineString", coordinates: [] } } },
@@ -584,8 +613,15 @@ require_admin();
                 layers: [
                     { id: "bg", type: "background", paint: { "background-color": "#F2EFE9" } },
                     { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#B9D9F7" } },
-                    { id: "parks", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["any", ["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "hospital"]], "paint": { "fill-color": ["match", ["get", "kind"], "hospital", "#F4C7C3", "school", "#F6E6A8", "university", "#F6E6A8", "#C2E2BA"] } },
+                    { id: "parks", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["match", ["get", "kind"], ["park", "grass", "recreation_ground", "cemetery", "forest", "wood"], true, false], "paint": { "fill-color": "#C2E2BA" } },
+                    { id: "landuse-salud", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["match", ["get", "kind"], ["hospital", "clinic"], true, false], "paint": { "fill-color": "#F4C7C3" } },
+                    { id: "landuse-edu", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["match", ["get", "kind"], ["school", "university", "college", "kindergarten"], true, false], "paint": { "fill-color": "#F6E6A8" } },
+                    { id: "landuse-deporte", type: "fill", "source": "protomaps", "source-layer": "landuse", "filter": ["match", ["get", "kind"], ["stadium", "pitch"], true, false], "paint": { "fill-color": "#C2E2BA" } },
+                    { id: "tacna-region-fill", type: "fill", source: "tacna-region", paint: { "fill-color": "#8A1538", "fill-opacity": 0.01 } },
+                    { id: "tacna-provincias-outline", type: "line", source: "tacna-provincias", layout: { "line-join": "miter", "line-cap": "butt" }, paint: { "line-color": "#8A1538", "line-width": ["interpolate", ["linear"], ["zoom"], 7, 0.45, 9, 0.7, 11, 1], "line-opacity": 0.35, "line-dasharray": [2, 3] } },
+                    { id: "tacna-region-outline", type: "line", source: "tacna-region", layout: { "line-join": "miter", "line-cap": "butt" }, paint: { "line-color": "#8A1538", "line-width": ["interpolate", ["linear"], ["zoom"], 7, 0.8, 9, 1.1, 11, 1.4], "line-opacity": 0.55, "line-dasharray": [3, 2] } },
                     { id: "buildings", type: "fill", source: "protomaps", "source-layer": "buildings", paint: { "fill-color": "#e6e4df", "fill-opacity": 0.6 } },
+                    { id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": "#f87171", "line-dasharray": [2, 2] } },
                     { id: "roads-minor", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#FFFFFF", "line-width": 2 } },
                     { id: "roads-major", type: "line", source: "protomaps", "source-layer": "roads", filter: ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]], paint: { "line-color": "#CDD7E3", "line-width": 4 } },
                     { id: "places-text", type: "symbol", source: "protomaps", "source-layer": "places", layout: {"text-field": ["get","name"], "text-font": ["Noto Sans Regular"], "text-size": 14}, paint: {"text-color": "#1e293b", "text-halo-color": "#F2EFE9", "text-halo-width": 2} },

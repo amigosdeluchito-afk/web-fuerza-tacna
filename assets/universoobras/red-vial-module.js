@@ -245,15 +245,20 @@ window.rvApplyStyle = function() {
         });
     }
     
-    const landuseColors = ["match", ["get", "kind"]];
-    if (toggles['srv-salud']) landuseColors.push("hospital", t.amenity_med, "clinic", t.amenity_med);
-    if (toggles['srv-edu']) landuseColors.push("school", t.amenity_edu, "university", t.amenity_edu, "college", t.amenity_edu, "kindergarten", t.amenity_edu);
-    if (toggles['srv-deporte']) landuseColors.push("stadium", t.parks, "pitch", t.parks);
-    if (toggles['parks']) landuseColors.push("park", t.parks, "grass", t.parks, "recreation_ground", t.parks, "cemetery", t.parks, "forest", t.parks, "wood", t.parks);
-    landuseColors.push("rgba(0,0,0,0)");
-    
-    if (toggles['parks'] || toggles['srv-salud'] || toggles['srv-edu'] || toggles['srv-deporte']) {
-        style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", paint: { "fill-color": landuseColors } });
+    if (toggles['parks']) {
+        style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["match", ["get", "kind"], ["park", "grass", "recreation_ground", "cemetery", "forest", "wood"], true, false], paint: { "fill-color": t.parks } });
+    }
+
+    if (toggles['srv-salud']) {
+        style.layers.push({ id: "landuse-salud", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["match", ["get", "kind"], ["hospital", "clinic"], true, false], paint: { "fill-color": t.amenity_med } });
+    }
+
+    if (toggles['srv-edu']) {
+        style.layers.push({ id: "landuse-edu", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["match", ["get", "kind"], ["school", "university", "college", "kindergarten"], true, false], paint: { "fill-color": t.amenity_edu } });
+    }
+
+    if (toggles['srv-deporte']) {
+        style.layers.push({ id: "landuse-deporte", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["match", ["get", "kind"], ["stadium", "pitch"], true, false], paint: { "fill-color": t.parks } });
     }
 
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
@@ -592,6 +597,7 @@ function rv_addLayerBefore(map, layer, beforeIds = []) {
 
 window.rvAddTerritorialLayers = function(map = window.redVialMapInstance) {
     if (!map || !map.isStyleLoaded()) return;
+    if (!window.rvStyleConfig.toggles.boundaries) return;
 
     if (!map.getSource('tacna-region')) {
         map.addSource('tacna-region', {
