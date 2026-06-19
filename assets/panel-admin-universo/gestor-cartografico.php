@@ -132,6 +132,10 @@ require_admin();
                     </select>
                 </div>
 
+                <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 16px 0 8px;">Vista inicial</div>
+                <div id="rvPublicInitialView" style="display:grid; gap:8px;"></div>
+                <button type="button" class="btn btn-secondary" style="margin-top:8px;" onclick="capturarVistaPublicaActual()">Usar vista actual del mapa</button>
+
                 <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 16px 0 8px;">Capas visibles al cargar</div>
                 <div id="rvPublicLayers" style="display:grid; gap:8px;"></div>
 
@@ -452,6 +456,13 @@ require_admin();
             roadMinorWidthBoost: 1
         };
 
+        const RV_PUBLIC_DEFAULT_VIEW = {
+            center: [-70.30, -17.65],
+            zoom: 8.5,
+            pitch: 0,
+            bearing: 0
+        };
+
         let rvPublicConfig = null;
 
         const RV_PUBLIC_ADMIN_PREVIEW_LAYERS = {
@@ -494,17 +505,31 @@ require_admin();
                 style[key] = input.type === 'range' ? Number(input.value) : input.value;
             });
 
+            const initialView = { ...RV_PUBLIC_DEFAULT_VIEW };
+            const viewBox = document.getElementById('rvPublicInitialView');
+            if (viewBox) {
+                initialView.center = [
+                    Number(viewBox.querySelector('[data-view-key="lng"]')?.value || RV_PUBLIC_DEFAULT_VIEW.center[0]),
+                    Number(viewBox.querySelector('[data-view-key="lat"]')?.value || RV_PUBLIC_DEFAULT_VIEW.center[1])
+                ];
+                initialView.zoom = Number(viewBox.querySelector('[data-view-key="zoom"]')?.value || RV_PUBLIC_DEFAULT_VIEW.zoom);
+                initialView.pitch = Number(viewBox.querySelector('[data-view-key="pitch"]')?.value || RV_PUBLIC_DEFAULT_VIEW.pitch);
+                initialView.bearing = Number(viewBox.querySelector('[data-view-key="bearing"]')?.value || RV_PUBLIC_DEFAULT_VIEW.bearing);
+            }
+
             return {
                 defaultProfile: document.getElementById('rvPublicProfile')?.value || 'ciudadano',
+                initialView,
                 layers,
                 style
             };
         }
 
-        function aplicarPreviewConfigPublica(config) {
+        function aplicarPreviewConfigPublica(config, applyView = false) {
             if (!map || !config || !config.layers) return;
             const layers = config.layers;
             const style = { ...RV_PUBLIC_DEFAULT_STYLE, ...(config.style || {}) };
+            const initialView = { ...RV_PUBLIC_DEFAULT_VIEW, ...(config.initialView || {}) };
 
             Object.entries(RV_PUBLIC_ADMIN_PREVIEW_LAYERS).forEach(([key, layerIds]) => {
                 layerIds.forEach(layerId => setAdminLayerVisibility(layerId, !!layers[key]));
@@ -544,6 +569,15 @@ require_admin();
                 map.setPaintProperty('roads-minor', 'line-color', style.roadMinor);
                 map.setPaintProperty('roads-minor', 'line-width', 2 + Number(style.roadMinorWidthBoost || 0));
             }
+
+            if (applyView && Array.isArray(initialView.center)) {
+                map.jumpTo({
+                    center: initialView.center,
+                    zoom: Number(initialView.zoom),
+                    pitch: Number(initialView.pitch),
+                    bearing: Number(initialView.bearing)
+                });
+            }
         }
 
         function renderConfigPublica(config) {
@@ -554,12 +588,30 @@ require_admin();
 
             profile.value = rvPublicConfig.defaultProfile || 'ciudadano';
             const layers = rvPublicConfig.layers || {};
+            const initialView = { ...RV_PUBLIC_DEFAULT_VIEW, ...(rvPublicConfig.initialView || {}) };
             layersBox.innerHTML = Object.keys(RV_PUBLIC_LAYER_LABELS).map(key => `
                 <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid #1e293b; border-radius:6px; background:#020617; color:#cbd5e1; font-size:13px;">
                     <input type="checkbox" data-public-layer="${key}" ${layers[key] ? 'checked' : ''} style="width:16px; height:16px;">
                     <span>${RV_PUBLIC_LAYER_LABELS[key]}</span>
                 </label>
             `).join('');
+
+            const viewBox = document.getElementById('rvPublicInitialView');
+            if (viewBox) {
+                viewBox.innerHTML = `
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <label style="font-size:12px; color:#cbd5e1;">Lng<input class="form-control" data-view-key="lng" type="number" step="0.000001" value="${initialView.center[0]}"></label>
+                        <label style="font-size:12px; color:#cbd5e1;">Lat<input class="form-control" data-view-key="lat" type="number" step="0.000001" value="${initialView.center[1]}"></label>
+                        <label style="font-size:12px; color:#cbd5e1;">Zoom<input class="form-control" data-view-key="zoom" type="number" min="5" max="18" step="0.1" value="${initialView.zoom}"></label>
+                        <label style="font-size:12px; color:#cbd5e1;">Rotacion<input class="form-control" data-view-key="bearing" type="number" min="-360" max="360" step="1" value="${initialView.bearing}"></label>
+                    </div>
+                    <label style="font-size:12px; color:#cbd5e1;">Inclinacion<input class="form-control" data-view-key="pitch" type="number" min="0" max="75" step="1" value="${initialView.pitch}"></label>
+                `;
+
+                viewBox.querySelectorAll('input[data-view-key]').forEach(input => {
+                    input.addEventListener('change', () => aplicarPreviewConfigPublica(getConfigPublicaFromControls(), true));
+                });
+            }
 
             const styleBox = document.getElementById('rvPublicStyle');
             const style = { ...RV_PUBLIC_DEFAULT_STYLE, ...(rvPublicConfig.style || {}) };
@@ -601,7 +653,7 @@ require_admin();
             });
 
             profile.onchange = () => aplicarPreviewConfigPublica(getConfigPublicaFromControls());
-            aplicarPreviewConfigPublica(rvPublicConfig);
+            aplicarPreviewConfigPublica(rvPublicConfig, true);
         }
 
         async function cargarConfigPublica() {
@@ -625,9 +677,26 @@ require_admin();
             document.getElementById('panelConfigPublica').classList.remove('active');
         };
 
+        window.capturarVistaPublicaActual = function() {
+            if (!map) return;
+            const center = map.getCenter();
+            const viewBox = document.getElementById('rvPublicInitialView');
+            if (!viewBox) return;
+
+            viewBox.querySelector('[data-view-key="lng"]').value = center.lng.toFixed(6);
+            viewBox.querySelector('[data-view-key="lat"]').value = center.lat.toFixed(6);
+            viewBox.querySelector('[data-view-key="zoom"]').value = map.getZoom().toFixed(2);
+            viewBox.querySelector('[data-view-key="pitch"]').value = Math.round(map.getPitch());
+            viewBox.querySelector('[data-view-key="bearing"]').value = Math.round(map.getBearing());
+
+            showToast('Vista actual capturada. Guarda para aplicarla al mapa publico.', 'info');
+            aplicarPreviewConfigPublica(getConfigPublicaFromControls(), true);
+        };
+
         window.guardarConfigPublica = async function() {
             const draftConfig = getConfigPublicaFromControls();
             const profile = draftConfig.defaultProfile;
+            const initialView = draftConfig.initialView;
             const layers = draftConfig.layers;
             const style = draftConfig.style;
 
@@ -639,12 +708,12 @@ require_admin();
                 const res = await fetch('red_vial_public_config_api.php?action=save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ defaultProfile: profile, layers, style })
+                    body: JSON.stringify({ defaultProfile: profile, initialView, layers, style })
                 });
                 const data = await res.json();
                 if (!data.ok) throw new Error(data.error || 'No se pudo guardar');
                 renderConfigPublica(data.config);
-                aplicarPreviewConfigPublica(data.config);
+                aplicarPreviewConfigPublica(data.config, true);
                 showToast('Vista publica guardada. El mapa publico usara esta configuracion al recargar.', 'success');
             } catch (error) {
                 showToast('Error al guardar la vista publica.', 'error');

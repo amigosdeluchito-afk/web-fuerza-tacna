@@ -1,5 +1,14 @@
 {
   "defaultProfile": "ciudadano",
+  "initialView": {
+    "center": [
+      -70.3,
+      -17.65
+    ],
+    "zoom": 8.5,
+    "pitch": 0,
+    "bearing": 0
+  },
   "layers": {
     "roads": true,
     "buildings": true,

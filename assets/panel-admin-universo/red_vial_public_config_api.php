@@ -7,6 +7,12 @@ $configFile = $dataDir . DIRECTORY_SEPARATOR . 'red_vial_public_config.json';
 
 $defaultConfig = [
     'defaultProfile' => 'ciudadano',
+    'initialView' => [
+        'center' => [-70.30, -17.65],
+        'zoom' => 8.5,
+        'pitch' => 0,
+        'bearing' => 0
+    ],
     'layers' => [
         'roads' => true,
         'buildings' => true,
@@ -55,6 +61,28 @@ function rv_public_config_merge($base, $incoming) {
 
     if (($base['layers']['buildings'] ?? false) && ($base['layers']['buildings3d'] ?? false)) {
         $base['layers']['buildings3d'] = false;
+    }
+
+    if (isset($incoming['initialView']) && is_array($incoming['initialView'])) {
+        $view = $incoming['initialView'];
+        if (isset($view['center']) && is_array($view['center']) && count($view['center']) >= 2) {
+            $lng = (float)$view['center'][0];
+            $lat = (float)$view['center'][1];
+            if ($lng >= -72 && $lng <= -68 && $lat >= -20 && $lat <= -15) {
+                $base['initialView']['center'] = [$lng, $lat];
+            }
+        }
+
+        if (isset($view['zoom'])) {
+            $base['initialView']['zoom'] = max(5, min(18, (float)$view['zoom']));
+        }
+        if (isset($view['pitch'])) {
+            $base['initialView']['pitch'] = max(0, min(75, (float)$view['pitch']));
+        }
+        if (isset($view['bearing'])) {
+            $bearing = fmod((float)$view['bearing'], 360);
+            $base['initialView']['bearing'] = $bearing;
+        }
     }
 
     if (isset($incoming['style']) && is_array($incoming['style'])) {

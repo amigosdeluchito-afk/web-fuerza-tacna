@@ -52,6 +52,12 @@ const regionalLabelsGeoJSON = {
 // =========================================================
 window.rvStyleConfig = {
     theme: 'ciudadano',
+    initialView: {
+        center: [-70.30, -17.65],
+        zoom: 8.5,
+        pitch: 0,
+        bearing: 0
+    },
     toggles: {
         'roads': true,
         'buildings': true,
@@ -94,6 +100,22 @@ window.rvApplyPublicMapConfig = function(config) {
 
     if (window.rvStyleConfig.toggles.buildings && window.rvStyleConfig.toggles.buildings3d) {
         window.rvStyleConfig.toggles.buildings3d = false;
+    }
+
+    if (config.initialView && typeof config.initialView === 'object') {
+        const view = config.initialView;
+        if (Array.isArray(view.center) && view.center.length >= 2) {
+            const lng = Number(view.center[0]);
+            const lat = Number(view.center[1]);
+            if (Number.isFinite(lng) && Number.isFinite(lat)) {
+                window.rvStyleConfig.initialView.center = [lng, lat];
+            }
+        }
+
+        ['zoom', 'pitch', 'bearing'].forEach(key => {
+            const value = Number(view[key]);
+            if (Number.isFinite(value)) window.rvStyleConfig.initialView[key] = value;
+        });
     }
 
     if (config.style && typeof config.style === 'object') {
@@ -766,8 +788,10 @@ window.initRedVial = async function() {
     window.redVialMapInstance = new maplibregl.Map({
         container: 'red-vial-map-container',
         style: window.rvApplyStyle(),
-        center: [-70.30, -17.65],
-        zoom: 8.5,
+        center: window.rvStyleConfig.initialView.center,
+        zoom: window.rvStyleConfig.initialView.zoom,
+        pitch: window.rvStyleConfig.initialView.pitch,
+        bearing: window.rvStyleConfig.initialView.bearing,
         attributionControl: false
     });
 
