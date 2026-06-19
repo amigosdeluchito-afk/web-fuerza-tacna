@@ -615,7 +615,7 @@ window.rvApplyStyle = function() {
             'line-color': isImpacto ? ['get', 'color'] : t.routeBg,
             'line-width': isImpacto ? 14 : 9,
             'line-blur': isImpacto ? 6 : 0,
-            'line-opacity': 0
+            'line-opacity': 0.65
         }
     });
     style.layers.push({
@@ -626,7 +626,7 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': isImpacto ? '#ffffff' : ['get', 'color'],
             'line-width': isImpacto ? 3 : 4,
-            'line-opacity': 0
+            'line-opacity': 1
         }
     });
     style.layers.push({
@@ -639,7 +639,9 @@ window.rvApplyStyle = function() {
             'line-width': isImpacto ? 12 : 10,
             'line-opacity': 0.65,
             'line-blur': isImpacto ? 6 : 4,
-        }
+            'line-dasharray': [3, 3]
+        },
+        'filter': ['==', ['get', 'id'], '__none__']
     });
     style.layers.push({
         'id': 'tramos-viales-selected',
@@ -651,7 +653,9 @@ window.rvApplyStyle = function() {
             'line-width': isImpacto ? 12 : 10,
             'line-opacity': 0.92,
             'line-blur': isImpacto ? 3 : 2,
-        }
+            'line-dasharray': [4, 4]
+        },
+        'filter': ['==', ['get', 'id'], '__none__']
     });
     style.layers.push({
         'id': 'tramos-viales-flow',
@@ -661,10 +665,11 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 10 : 8,
-            'line-opacity': 0.7,
+            'line-opacity': 0.8,
             'line-blur': isImpacto ? 4 : 2,
-            'line-dasharray': [2, 4]
-        }
+            'line-dasharray': [3, 3]
+        },
+        'filter': ['==', ['get', 'id'], '__none__']
     });
     style.layers.push({
         'id': 'tramos-viales-nodes',
@@ -764,34 +769,51 @@ window.rvStartFlowAnimation = function() {
     if (window.rvFlowAnimationId !== null) return;
     const map = window.redVialMapInstance;
     if (!map || !map.getContainer) return;
+    
+    // Dash patterns with increasing complexity for better visual effect
     const dashPatterns = [
-        [2, 4], [3, 4], [4, 4], [2, 3], [3, 3], [4, 3], [1, 4], [2, 5]
+        [3, 3], [2, 4], [4, 2], [2, 3], [3, 2], [1, 4], [4, 1], [2, 2]
     ];
+    
     let patternIndex = 0;
     const step = () => {
         if (!map) {
             window.rvFlowAnimationId = null;
             return;
         }
-        const styleReady = (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) || (typeof map.loaded === 'function' && map.loaded());
-        if (!styleReady || !map.getLayer || !map.getLayer('tramos-viales-flow')) {
-            window.rvFlowAnimationId = null;
+        
+        // Check map readiness
+        const styleReady = (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) || 
+                         (typeof map.loaded === 'function' && map.loaded());
+        if (!styleReady) {
+            window.rvFlowAnimationId = window.requestAnimationFrame(step);
             return;
         }
-        const dash = dashPatterns[patternIndex % dashPatterns.length];
-        patternIndex++;
-        try {
-            if (map.getLayer('tramos-viales-flow')) {
-                map.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
+        
+        // Update dash pattern every 2 frames for smoother animation
+        if (patternIndex % 2 === 0) {
+            const dash = dashPatterns[Math.floor(patternIndex / 2) % dashPatterns.length];
+            try {
+                // Apply animation to main layer always
+                if (map.getLayer('tramos-viales-layer')) {
+                    map.setPaintProperty('tramos-viales-layer', 'line-dasharray', dash);
+                }
+                // Also apply to hover and flow for when they're active
+                if (map.getLayer('tramos-viales-flow')) {
+                    map.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
+                }
+                if (map.getLayer('tramos-viales-hover')) {
+                    map.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
+                }
+            } catch (e) {
+                console.debug('[rvStartFlowAnimation] skip frame', e.message);
             }
-            if (map.getLayer('tramos-viales-hover')) {
-                map.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
-            }
-        } catch (e) {
-            console.debug('[rvStartFlowAnimation] skip frame', e.message);
         }
+        
+        patternIndex++;
         window.rvFlowAnimationId = window.requestAnimationFrame(step);
     };
+    
     window.rvFlowAnimationId = window.requestAnimationFrame(step);
 };
 
@@ -803,12 +825,9 @@ window.rvStopFlowAnimation = function() {
 };
 
 window.rvUpdateFlowAnimationState = function() {
-    const hasAnyFlow = !!window.rvSelectedTramoId || !!window.rvHoveredTramoId;
-    if (hasAnyFlow) {
-        window.rvStartFlowAnimation();
-    } else {
-        window.rvStopFlowAnimation();
-    }
+    // Animation always runs for visual effect (optional: only when there's selection)
+    // For now, keep it running so the dash animation is always visible
+    window.rvStartFlowAnimation();
 };
 
 window.rvUpdateNodeSource = function(coords, props = {}) {
@@ -1156,6 +1175,8 @@ window.initRedVial = async function() {
         window.redVialMapInstance.once('idle', () => {
             window.clearTimeout(rvBaseMapRecoveryTimer);
             window.rvAnimateTramoEntry();
+            // Start flow animation loop
+            window.rvStartFlowAnimation();
         });
         window.rvScheduleTerritorialLayers(window.redVialMapInstance);
         if (PERF_RV) performance.mark('rv_mapa_load');
