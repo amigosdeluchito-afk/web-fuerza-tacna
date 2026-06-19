@@ -18,5 +18,16 @@
     "srv-deporte": true,
     "srv-transporte": true,
     "srv-negocios": true
+  },
+  "style": {
+    "roadHighway": "#89A5BE",
+    "roadHighwayCase": "#7893AA",
+    "roadMain": "#94AEC4",
+    "roadMainCase": "#819BB1",
+    "roadSecondary": "#C7D6E1",
+    "roadSecondaryCase": "#B5C7D5",
+    "roadMinor": "#C6CED3",
+    "roadMinorCase": "#D8E0E5",
+    "roadMinorWidthBoost": 1
   }
 }

@@ -134,6 +134,9 @@ require_admin();
 
                 <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 16px 0 8px;">Capas visibles al cargar</div>
                 <div id="rvPublicLayers" style="display:grid; gap:8px;"></div>
+
+                <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 18px 0 8px;">Estilo de vias</div>
+                <div id="rvPublicStyle" style="display:grid; gap:10px;"></div>
             </div>
             <div class="rv-list-footer">
                 <button type="button" class="btn btn-primary" onclick="guardarConfigPublica()">Guardar vista publica</button>
@@ -429,6 +432,26 @@ require_admin();
             'srv-negocios': 'Negocios'
         };
 
+        const RV_PUBLIC_STYLE_FIELDS = {
+            roadHighway: 'Via regional / carretera',
+            roadMain: 'Via principal',
+            roadSecondary: 'Via secundaria',
+            roadMinor: 'Via pequena',
+            roadMinorCase: 'Borde via pequena'
+        };
+
+        const RV_PUBLIC_DEFAULT_STYLE = {
+            roadHighway: '#89A5BE',
+            roadHighwayCase: '#7893AA',
+            roadMain: '#94AEC4',
+            roadMainCase: '#819BB1',
+            roadSecondary: '#C7D6E1',
+            roadSecondaryCase: '#B5C7D5',
+            roadMinor: '#C6CED3',
+            roadMinorCase: '#D8E0E5',
+            roadMinorWidthBoost: 1
+        };
+
         let rvPublicConfig = null;
 
         const RV_PUBLIC_ADMIN_PREVIEW_LAYERS = {
@@ -465,15 +488,23 @@ require_admin();
                 layers[input.getAttribute('data-public-layer')] = input.checked;
             });
 
+            const style = { ...RV_PUBLIC_DEFAULT_STYLE };
+            document.querySelectorAll('#rvPublicStyle input[data-style-key]').forEach(input => {
+                const key = input.getAttribute('data-style-key');
+                style[key] = input.type === 'range' ? Number(input.value) : input.value;
+            });
+
             return {
                 defaultProfile: document.getElementById('rvPublicProfile')?.value || 'ciudadano',
-                layers
+                layers,
+                style
             };
         }
 
         function aplicarPreviewConfigPublica(config) {
             if (!map || !config || !config.layers) return;
             const layers = config.layers;
+            const style = { ...RV_PUBLIC_DEFAULT_STYLE, ...(config.style || {}) };
 
             Object.entries(RV_PUBLIC_ADMIN_PREVIEW_LAYERS).forEach(([key, layerIds]) => {
                 layerIds.forEach(layerId => setAdminLayerVisibility(layerId, !!layers[key]));
@@ -505,6 +536,14 @@ require_admin();
             if (showPois && map.getLayer('pois-text')) {
                 map.setFilter('pois-text', ['all', ['has', 'name'], ['match', ['get', 'kind'], enabledPoiKinds, true, false]]);
             }
+
+            if (map.getLayer('roads-major')) {
+                map.setPaintProperty('roads-major', 'line-color', style.roadMain);
+            }
+            if (map.getLayer('roads-minor')) {
+                map.setPaintProperty('roads-minor', 'line-color', style.roadMinor);
+                map.setPaintProperty('roads-minor', 'line-width', 2 + Number(style.roadMinorWidthBoost || 0));
+            }
         }
 
         function renderConfigPublica(config) {
@@ -521,6 +560,31 @@ require_admin();
                     <span>${RV_PUBLIC_LAYER_LABELS[key]}</span>
                 </label>
             `).join('');
+
+            const styleBox = document.getElementById('rvPublicStyle');
+            const style = { ...RV_PUBLIC_DEFAULT_STYLE, ...(rvPublicConfig.style || {}) };
+            if (styleBox) {
+                styleBox.innerHTML = `
+                    ${Object.entries(RV_PUBLIC_STYLE_FIELDS).map(([key, label]) => `
+                        <label style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border:1px solid #1e293b; border-radius:6px; background:#020617; color:#cbd5e1; font-size:13px;">
+                            <span>${label}</span>
+                            <input type="color" data-style-key="${key}" value="${style[key]}" style="width:42px; height:28px; padding:0; border:0; background:transparent;">
+                        </label>
+                    `).join('')}
+                    <label style="display:grid; gap:6px; padding:8px 10px; border:1px solid #1e293b; border-radius:6px; background:#020617; color:#cbd5e1; font-size:13px;">
+                        <span>Grosor extra de vias pequenas: <strong id="rvMinorWidthValue">${style.roadMinorWidthBoost}</strong></span>
+                        <input type="range" data-style-key="roadMinorWidthBoost" min="0" max="2" step="0.25" value="${style.roadMinorWidthBoost}">
+                    </label>
+                `;
+
+                styleBox.querySelectorAll('input[data-style-key]').forEach(input => {
+                    input.addEventListener('input', () => {
+                        const value = document.getElementById('rvMinorWidthValue');
+                        if (value && input.getAttribute('data-style-key') === 'roadMinorWidthBoost') value.textContent = input.value;
+                        aplicarPreviewConfigPublica(getConfigPublicaFromControls());
+                    });
+                });
+            }
 
             layersBox.querySelectorAll('input[data-public-layer]').forEach(input => {
                 input.addEventListener('change', () => {
@@ -565,6 +629,7 @@ require_admin();
             const draftConfig = getConfigPublicaFromControls();
             const profile = draftConfig.defaultProfile;
             const layers = draftConfig.layers;
+            const style = draftConfig.style;
 
             if (layers.buildings && layers.buildings3d) {
                 layers.buildings3d = false;
@@ -574,7 +639,7 @@ require_admin();
                 const res = await fetch('red_vial_public_config_api.php?action=save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ defaultProfile: profile, layers })
+                    body: JSON.stringify({ defaultProfile: profile, layers, style })
                 });
                 const data = await res.json();
                 if (!data.ok) throw new Error(data.error || 'No se pudo guardar');

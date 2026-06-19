@@ -25,6 +25,17 @@ $defaultConfig = [
         'srv-deporte' => true,
         'srv-transporte' => true,
         'srv-negocios' => true
+    ],
+    'style' => [
+        'roadHighway' => '#89A5BE',
+        'roadHighwayCase' => '#7893AA',
+        'roadMain' => '#94AEC4',
+        'roadMainCase' => '#819BB1',
+        'roadSecondary' => '#C7D6E1',
+        'roadSecondaryCase' => '#B5C7D5',
+        'roadMinor' => '#C6CED3',
+        'roadMinorCase' => '#D8E0E5',
+        'roadMinorWidthBoost' => 1
     ]
 ];
 
@@ -44,6 +55,23 @@ function rv_public_config_merge($base, $incoming) {
 
     if (($base['layers']['buildings'] ?? false) && ($base['layers']['buildings3d'] ?? false)) {
         $base['layers']['buildings3d'] = false;
+    }
+
+    if (isset($incoming['style']) && is_array($incoming['style'])) {
+        foreach ($base['style'] as $key => $value) {
+            if (!array_key_exists($key, $incoming['style'])) continue;
+
+            if ($key === 'roadMinorWidthBoost') {
+                $boost = (float)$incoming['style'][$key];
+                $base['style'][$key] = max(0, min(2, $boost));
+                continue;
+            }
+
+            $color = strtoupper(trim((string)$incoming['style'][$key]));
+            if (preg_match('/^#[0-9A-F]{6}$/', $color)) {
+                $base['style'][$key] = $color;
+            }
+        }
     }
 
     return $base;
