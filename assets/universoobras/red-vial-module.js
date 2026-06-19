@@ -604,14 +604,47 @@ window.rvApplyStyle = function() {
         'type': 'line',
         'source': 'tramos-viales',
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
-        'paint': { 'line-color': isImpacto ? ['get', 'color'] : t.routeBg, 'line-width': isImpacto ? 14 : 8, 'line-blur': isImpacto ? 6 : 0, 'line-opacity': isImpacto ? 0.8 : 1 }
+        'paint': {
+            'line-color': isImpacto ? ['get', 'color'] : t.routeBg,
+            'line-width': isImpacto ? 14 : 9,
+            'line-blur': isImpacto ? 6 : 0,
+            'line-opacity': 0
+        }
     });
     style.layers.push({
         'id': 'tramos-viales-layer',
         'type': 'line',
         'source': 'tramos-viales',
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
-        'paint': { 'line-color': isImpacto ? '#ffffff' : ['get', 'color'], 'line-width': isImpacto ? 3 : 4 }
+        'paint': {
+            'line-color': isImpacto ? '#ffffff' : ['get', 'color'],
+            'line-width': isImpacto ? 3 : 4,
+            'line-opacity': 0
+        }
+    });
+    style.layers.push({
+        'id': 'tramos-viales-hover',
+        'type': 'line',
+        'source': 'tramos-viales',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+            'line-color': ['get', 'color'],
+            'line-width': isImpacto ? 12 : 10,
+            'line-opacity': 0.65,
+            'line-blur': isImpacto ? 6 : 4
+        }
+    });
+    style.layers.push({
+        'id': 'tramos-viales-selected',
+        'type': 'line',
+        'source': 'tramos-viales',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+            'line-color': ['get', 'color'],
+            'line-width': isImpacto ? 12 : 10,
+            'line-opacity': 0.92,
+            'line-blur': isImpacto ? 3 : 2
+        }
     });
 
     // =========================================================
@@ -633,12 +666,129 @@ window.rvApplyStyle = function() {
                 if (map.getLayer('tramos-viales-layer')) {
                     map.setFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipo]);
                     map.setFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipo]);
+                    if (map.getLayer('tramos-viales-hover')) map.setFilter('tramos-viales-hover', ['==', ['get', 'tipo'], tipo]);
+                    if (map.getLayer('tramos-viales-selected')) map.setFilter('tramos-viales-selected', ['==', ['get', 'tipo'], tipo]);
                 }
             }
         }, 200);
     }
     return style;
 };
+
+window.rvBuildTramoFilter = function(featureId) {
+    if (!featureId) return ['==', ['get', 'id'], '__none__'];
+    return [
+        'any',
+        ['==', ['get', 'id'], featureId],
+        ['==', ['get', 'string_id'], featureId],
+        ['==', ['get', 'nombre'], featureId]
+    ];
+};
+
+window.rvCreateTramoTooltip = function() {
+    if (document.getElementById('rv-tramo-tooltip')) return;
+    const tip = document.createElement('div');
+    tip.id = 'rv-tramo-tooltip';
+    tip.style.cssText = [
+        'position:absolute',
+        'pointer-events:none',
+        'background: rgba(15, 23, 42, 0.92)',
+        'color: #f8fafc',
+        'border-radius: 12px',
+        'padding: 10px 12px',
+        'font-size: 12px',
+        'line-height: 1.4',
+        'box-shadow: 0 14px 35px rgba(0,0,0,0.16)',
+        'opacity: 0',
+        'transition: opacity 0.16s ease, transform 0.16s ease',
+        'transform: translate(-50%, -120%)',
+        'white-space: nowrap',
+        'z-index: 9999',
+        'max-width: 260px',
+        'text-align: left'
+    ].join(';');
+    document.body.appendChild(tip);
+};
+
+window.rvShowTramoTooltip = function(props, point) {
+    if (!props || !point || !window.redVialMapInstance) return;
+    window.rvCreateTramoTooltip();
+    const tip = document.getElementById('rv-tramo-tooltip');
+    if (!tip) return;
+
+    const label = props.nombre || props.nombre_via || props.tramo || 'Tramo vial';
+    const estado = props.estado || props.estado_actual || '';
+    const longitud = props.longitud_valor ? `${props.longitud_valor}${props.longitud_unidad || ''}` : (props.longitud || '');
+
+    const lines = [];
+    lines.push(`<strong style="display:block; margin-bottom:4px; font-size:13px; color:#eef2ff;">${label}</strong>`);
+    if (estado) lines.push(`<span style="display:block; color:#cbd5e1;">${estado}</span>`);
+    if (longitud) lines.push(`<span style="display:block; color:#a5b4fc;">${longitud}</span>`);
+    lines.push(`<span style="display:block; margin-top:4px; color:#94a3b8;">Click para ver detalles</span>`);
+
+    tip.innerHTML = lines.join('');
+    const container = window.redVialMapInstance.getContainer().getBoundingClientRect();
+    tip.style.left = `${container.left + point.x + 14}px`;
+    tip.style.top = `${container.top + point.y - 12}px`;
+    tip.style.opacity = '1';
+    tip.style.transform = 'translate(-50%, -120%)';
+};
+
+window.rvHideTramoTooltip = function() {
+    const tip = document.getElementById('rv-tramo-tooltip');
+    if (!tip) return;
+    tip.style.opacity = '0';
+};
+
+window.rvClearTramoHover = function() {
+    const map = window.redVialMapInstance;
+    if (!map || !map.getLayer('tramos-viales-hover')) return;
+    map.setFilter('tramos-viales-hover', ['==', ['get', 'id'], '__none__']);
+    window.rvHideTramoTooltip();
+};
+
+window.rvSetTramoSelection = function(feature) {
+    const map = window.redVialMapInstance;
+    if (!map || !feature || !feature.properties) return;
+    const featureId = feature.properties.string_id || feature.properties.id || feature.properties.nombre || '';
+    if (!featureId) return;
+
+    if (map.getLayer('tramos-viales-selected')) {
+        map.setFilter('tramos-viales-selected', window.rvBuildTramoFilter(featureId));
+    }
+    if (map.getLayer('tramos-viales-layer')) {
+        map.setPaintProperty('tramos-viales-layer', 'line-opacity', 0.35);
+        map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.18);
+    }
+};
+
+window.rvClearTramoSelection = function() {
+    const map = window.redVialMapInstance;
+    if (!map) return;
+    if (map.getLayer('tramos-viales-selected')) {
+        map.setFilter('tramos-viales-selected', ['==', ['get', 'id'], '__none__']);
+    }
+    if (map.getLayer('tramos-viales-layer')) {
+        map.setPaintProperty('tramos-viales-layer', 'line-opacity', 1);
+        map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.65);
+    }
+};
+
+window.rvAnimateTramoEntry = function() {
+    const map = window.redVialMapInstance;
+    if (!map) return;
+    const frames = 8;
+    let step = 0;
+    const targetMainOpacity = 1;
+    const targetBgOpacity = window.rvStyleConfig.theme === 'impacto' ? 0.8 : 0.65;
+    const interval = window.setInterval(() => {
+        step += 1;
+        const alpha = Math.min(1, step / frames);
+        if (map.getLayer('tramos-viales-layer')) map.setPaintProperty('tramos-viales-layer', 'line-opacity', alpha * targetMainOpacity);
+        if (map.getLayer('tramos-viales-bg')) map.setPaintProperty('tramos-viales-bg', 'line-opacity', alpha * targetBgOpacity);
+        if (step >= frames) window.clearInterval(interval);
+    }, 90);
+}
 
 function rv_addLayerBefore(map, layer, beforeIds = []) {
     const beforeId = beforeIds.find(id => map.getLayer(id));
@@ -819,18 +969,47 @@ window.initRedVial = async function() {
 
     window.redVialMapInstance.on('load', () => {
         window.redVialMapInstance.resize();
-        window.redVialMapInstance.once('idle', () => window.clearTimeout(rvBaseMapRecoveryTimer));
+        window.redVialMapInstance.once('idle', () => {
+            window.clearTimeout(rvBaseMapRecoveryTimer);
+            window.rvAnimateTramoEntry();
+        });
         window.rvScheduleTerritorialLayers(window.redVialMapInstance);
         if (PERF_RV) performance.mark('rv_mapa_load');
 
         // Asignar eventos de clic (las capas ya vienen integradas en rvApplyStyle)
-        window.redVialMapInstance.on('mouseenter', 'tramos-viales-layer', () => { window.redVialMapInstance.getCanvas().style.cursor = 'pointer'; });
-        window.redVialMapInstance.on('mouseleave', 'tramos-viales-layer', () => { window.redVialMapInstance.getCanvas().style.cursor = ''; });
+        window.redVialMapInstance.on('mouseenter', 'tramos-viales-layer', () => {
+            window.redVialMapInstance.getCanvas().style.cursor = 'pointer';
+        });
+        window.redVialMapInstance.on('mouseleave', 'tramos-viales-layer', () => {
+            window.redVialMapInstance.getCanvas().style.cursor = '';
+            window.rvClearTramoHover();
+        });
+
+        window.redVialMapInstance.on('mousemove', 'tramos-viales-layer', (e) => {
+            if (!e.features || e.features.length === 0) return;
+            const feature = e.features[0];
+            const featureId = feature.properties.string_id || feature.properties.id || feature.properties.nombre || '';
+            if (featureId && window.redVialMapInstance.getLayer('tramos-viales-hover')) {
+                window.redVialMapInstance.setFilter('tramos-viales-hover', window.rvBuildTramoFilter(featureId));
+            }
+            window.rvShowTramoTooltip(feature.properties, e.point);
+        });
 
         window.redVialMapInstance.on('click', 'tramos-viales-layer', (e) => {
-            if (e.features.length > 0) abrirPanelRedVial(e.features[0].properties);
+            if (e.features.length > 0) {
+                const feature = e.features[0];
+                window.rvSetTramoSelection(feature);
+                abrirPanelRedVial(feature.properties);
+            }
         });
-        
+
+        window.redVialMapInstance.on('click', (e) => {
+            const features = window.redVialMapInstance.queryRenderedFeatures(e.point, { layers: ['tramos-viales-layer'] });
+            if (!features || features.length === 0) {
+                window.rvClearTramoSelection();
+            }
+        });
+
         setupRedVialFilters();
         
         // Levantar el Panel de Control Visual (Studio)
