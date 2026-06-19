@@ -665,11 +665,11 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 10 : 8,
-            'line-opacity': 0.8,
+            'line-opacity': 0.35,
             'line-blur': isImpacto ? 4 : 2,
-            'line-dasharray': [3, 3]
-        },
-        'filter': ['==', ['get', 'id'], '__none__']
+            'line-dasharray': [8, 4],
+            'line-dashoffset': 0
+        }
     });
     style.layers.push({
         'id': 'tramos-viales-nodes',
@@ -772,54 +772,41 @@ window.rvStartFlowAnimation = function() {
     const map = window.redVialMapInstance;
     if (!map || !map.getContainer) return;
     
-    // Dash patterns for smooth flow effect
-    const dashPatterns = [
-        [3, 3], [2, 4], [4, 2], [2, 3], [3, 2], [1, 4], [4, 1], [2, 2]
-    ];
-    
-    let patternIndex = 0;
+    let dashOffset = 0;
     const step = () => {
         if (!map) {
             window.rvFlowAnimationId = null;
             return;
         }
         
-        // Check map readiness
-        const styleReady = (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) || 
+        const styleReady = (typeof map.isStyleLoaded === 'function' && map.isStyleLoaded()) ||
                          (typeof map.loaded === 'function' && map.loaded());
         if (!styleReady) {
             window.rvFlowAnimationId = window.requestAnimationFrame(step);
             return;
         }
         
-        // Determine frame interval based on animation speed
-        let frameInterval = 5; // normal: slowest
-        if (window.rvAnimationSpeed === 'hover') frameInterval = 3; // hover: medium
-        if (window.rvAnimationSpeed === 'selected') frameInterval = 2; // selected: fastest
+        // Speed values match CodePen-style animation: slower by default, faster on hover/selection
+        const speedMap = {
+            normal: 0.25,
+            hover: 0.8,
+            selected: 1.4
+        };
+        const speed = speedMap[window.rvAnimationSpeed] || speedMap.normal;
+        dashOffset = (dashOffset + speed) % 100;
         
-        // Increment frame counter
-        window.rvAnimationFrameCounter++;
-        
-        // Update dash pattern based on interval
-        if (window.rvAnimationFrameCounter % frameInterval === 0) {
-            const dash = dashPatterns[patternIndex % dashPatterns.length];
-            patternIndex++;
-            
-            try {
-                // Apply animation to main layer always
-                if (map.getLayer('tramos-viales-layer')) {
-                    map.setPaintProperty('tramos-viales-layer', 'line-dasharray', dash);
-                }
-                // Also apply to hover and flow for when they're active
-                if (map.getLayer('tramos-viales-flow')) {
-                    map.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
-                }
-                if (map.getLayer('tramos-viales-hover')) {
-                    map.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
-                }
-            } catch (e) {
-                console.debug('[rvStartFlowAnimation] skip frame', e.message);
+        try {
+            if (map.getLayer('tramos-viales-flow')) {
+                map.setPaintProperty('tramos-viales-flow', 'line-dashoffset', dashOffset);
             }
+            if (map.getLayer('tramos-viales-hover')) {
+                map.setPaintProperty('tramos-viales-hover', 'line-dashoffset', dashOffset);
+            }
+            if (map.getLayer('tramos-viales-selected')) {
+                map.setPaintProperty('tramos-viales-selected', 'line-dashoffset', dashOffset);
+            }
+        } catch (e) {
+            console.debug('[rvStartFlowAnimation] skip frame', e.message);
         }
         
         window.rvFlowAnimationId = window.requestAnimationFrame(step);
