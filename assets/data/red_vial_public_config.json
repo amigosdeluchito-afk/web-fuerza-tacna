@@ -1,0 +1,22 @@
+{
+  "defaultProfile": "ciudadano",
+  "layers": {
+    "roads": true,
+    "buildings": true,
+    "buildings3d": false,
+    "water": true,
+    "parks": true,
+    "boundaries": false,
+    "transit": false,
+    "places-text": true,
+    "ref-urbanas": true,
+    "srv-edu": true,
+    "srv-salud": true,
+    "srv-seguridad": true,
+    "srv-gobierno": true,
+    "srv-mercados": true,
+    "srv-deporte": true,
+    "srv-transporte": true,
+    "srv-negocios": true
+  }
+}

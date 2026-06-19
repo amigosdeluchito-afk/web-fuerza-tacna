@@ -18,6 +18,7 @@ const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
 const RED_VIAL_SCRIPT_URL = document.currentScript?.src || document.querySelector('script[src*="red-vial-module.js"]')?.src || window.location.href;
 const PMTILES_LIB_URL = new URL('../vendor/pmtiles/pmtiles-3.0.6.js', RED_VIAL_SCRIPT_URL).href;
 const PMTILES_SOURCE_URL = new URL(PMTILES_URL, RED_VIAL_SCRIPT_URL).href;
+const RV_PUBLIC_CONFIG_URL = new URL('../panel-admin-universo/red_vial_public_config_api.php?action=get', RED_VIAL_SCRIPT_URL).href;
 
 // =========================================================
 // GEOJSON DE ETIQUETAS ESTRATÉGICAS (RV6-MAP-B2.2)
@@ -69,6 +70,40 @@ window.rvStyleConfig = {
         'srv-deporte': true,
         'srv-transporte': true,
         'srv-negocios': true
+    }
+};
+
+window.rvApplyPublicMapConfig = function(config) {
+    if (!config || typeof config !== 'object') return;
+
+    const validProfiles = ['ciudadano', 'tecnico', 'impacto'];
+    if (validProfiles.includes(config.defaultProfile)) {
+        window.rvStyleConfig.theme = config.defaultProfile;
+    }
+
+    if (config.layers && typeof config.layers === 'object') {
+        Object.keys(window.rvStyleConfig.toggles).forEach(key => {
+            if (Object.prototype.hasOwnProperty.call(config.layers, key)) {
+                window.rvStyleConfig.toggles[key] = !!config.layers[key];
+            }
+        });
+    }
+
+    if (window.rvStyleConfig.toggles.buildings && window.rvStyleConfig.toggles.buildings3d) {
+        window.rvStyleConfig.toggles.buildings3d = false;
+    }
+};
+
+window.rvLoadPublicMapConfig = async function() {
+    try {
+        const res = await fetch(RV_PUBLIC_CONFIG_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data && data.ok && data.config) {
+            window.rvApplyPublicMapConfig(data.config);
+        }
+    } catch (error) {
+        console.warn('[Red Vial] No se pudo cargar configuracion publica; usando valores por defecto.', error);
     }
 };
 
@@ -663,6 +698,8 @@ window.initRedVial = async function() {
     }
 
     // 1. Cargar el lector de PMTiles dinámicamente si no existe
+    await window.rvLoadPublicMapConfig();
+
     if (typeof window.pmtiles === 'undefined') {
         console.log("[Red Vial] Cargando librería PMTiles...");
         try {
@@ -1034,6 +1071,10 @@ function initRedVialStudio() {
         </div>
     `;
     container.appendChild(panel);
+
+    panel.querySelectorAll('.rv-profile-btn').forEach(btn => {
+        btn.classList.toggle('is-active', btn.getAttribute('data-profile') === window.rvStyleConfig.theme);
+    });
 
     // Evento para colapsar/expandir el panel
     panel.querySelector('#rv-panel-header-btn').addEventListener('click', () => {

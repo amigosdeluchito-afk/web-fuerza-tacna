@@ -114,7 +114,32 @@ require_admin();
 
         <div class="instrucciones">📍 Haz clic en cualquier lugar de Tacna para anclar un nuevo Titán</div>
         <button id="btnVerLista" onclick="abrirListaActual()" style="position:absolute; top: 20px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #3b82f6; color: #93c5fd; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;">📋 Ver Lista de Puntos</button>
+        <button id="btnVistaPublica" onclick="abrirConfigPublica()" style="position:absolute; top: 68px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #a855f7; color: #d8b4fe; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;">Vista Publica</button>
         <div id="map"></div>
+
+        <div class="panel-lista" id="panelConfigPublica">
+            <div class="rv-list-header">
+                <h3 style="margin-top: 0; color: #f8fafc; font-size: 18px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">Vista publica Red Vial</h3>
+                <p style="color:#94a3b8; font-size:12px; line-height:1.45; margin-top:0;">Define lo que vera el ciudadano cuando recargue el mapa publico.</p>
+            </div>
+            <div class="rv-list-scroll">
+                <div class="form-group">
+                    <label>Perfil inicial</label>
+                    <select id="rvPublicProfile" class="form-control">
+                        <option value="ciudadano">Ciudadano</option>
+                        <option value="tecnico">Tecnico</option>
+                        <option value="impacto">Impacto</option>
+                    </select>
+                </div>
+
+                <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 16px 0 8px;">Capas visibles al cargar</div>
+                <div id="rvPublicLayers" style="display:grid; gap:8px;"></div>
+            </div>
+            <div class="rv-list-footer">
+                <button type="button" class="btn btn-primary" onclick="guardarConfigPublica()">Guardar vista publica</button>
+                <button type="button" class="btn btn-secondary" onclick="cerrarConfigPublica()">Volver al Mapa</button>
+            </div>
+        </div>
         
         <!-- Panel Flotante de Dibujo RV -->
         <div id="rvDrawPanel" style="display:none; position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:10; background:rgba(15,23,42,0.9); padding:10px 15px; border-radius:8px; border:1px solid #3b82f6; box-shadow:0 4px 15px rgba(0,0,0,0.5); gap:10px; align-items:center;">
@@ -382,6 +407,91 @@ require_admin();
                     setTimeout(() => { if(toast.parentElement) toast.remove(); }, 300);
                 }
             }, 3500);
+        };
+
+        const RV_PUBLIC_LAYER_LABELS = {
+            'water': 'Agua',
+            'parks': 'Parques',
+            'buildings': 'Edificios 2D',
+            'buildings3d': 'Edificios 3D',
+            'roads': 'Calles',
+            'transit': 'Transporte ferreo',
+            'boundaries': 'Limites distritales',
+            'places-text': 'Nombres',
+            'ref-urbanas': 'Referencias clave',
+            'srv-edu': 'Servicios educativos',
+            'srv-salud': 'Servicios de salud',
+            'srv-seguridad': 'Seguridad',
+            'srv-gobierno': 'Gobierno',
+            'srv-mercados': 'Mercados',
+            'srv-deporte': 'Deporte',
+            'srv-transporte': 'Transporte',
+            'srv-negocios': 'Negocios'
+        };
+
+        let rvPublicConfig = null;
+
+        function renderConfigPublica(config) {
+            rvPublicConfig = config || {};
+            const profile = document.getElementById('rvPublicProfile');
+            const layersBox = document.getElementById('rvPublicLayers');
+            if (!profile || !layersBox) return;
+
+            profile.value = rvPublicConfig.defaultProfile || 'ciudadano';
+            const layers = rvPublicConfig.layers || {};
+            layersBox.innerHTML = Object.keys(RV_PUBLIC_LAYER_LABELS).map(key => `
+                <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid #1e293b; border-radius:6px; background:#020617; color:#cbd5e1; font-size:13px;">
+                    <input type="checkbox" data-public-layer="${key}" ${layers[key] ? 'checked' : ''} style="width:16px; height:16px;">
+                    <span>${RV_PUBLIC_LAYER_LABELS[key]}</span>
+                </label>
+            `).join('');
+        }
+
+        async function cargarConfigPublica() {
+            const res = await fetch('red_vial_public_config_api.php?action=get', { cache: 'no-store' });
+            const data = await res.json();
+            if (!data.ok) throw new Error(data.error || 'No se pudo cargar la configuracion');
+            renderConfigPublica(data.config);
+        }
+
+        window.abrirConfigPublica = async function() {
+            document.querySelectorAll('.panel-formulario, .panel-lista').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('panelConfigPublica').classList.add('active');
+            try {
+                await cargarConfigPublica();
+            } catch (error) {
+                showToast('No se pudo cargar la configuracion publica.', 'error');
+            }
+        };
+
+        window.cerrarConfigPublica = function() {
+            document.getElementById('panelConfigPublica').classList.remove('active');
+        };
+
+        window.guardarConfigPublica = async function() {
+            const profile = document.getElementById('rvPublicProfile').value;
+            const layers = {};
+            document.querySelectorAll('#rvPublicLayers input[data-public-layer]').forEach(input => {
+                layers[input.getAttribute('data-public-layer')] = input.checked;
+            });
+
+            if (layers.buildings && layers.buildings3d) {
+                layers.buildings3d = false;
+            }
+
+            try {
+                const res = await fetch('red_vial_public_config_api.php?action=save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ defaultProfile: profile, layers })
+                });
+                const data = await res.json();
+                if (!data.ok) throw new Error(data.error || 'No se pudo guardar');
+                renderConfigPublica(data.config);
+                showToast('Vista publica guardada. El mapa publico usara esta configuracion al recargar.', 'success');
+            } catch (error) {
+                showToast('Error al guardar la vista publica.', 'error');
+            }
         };
 
         async function initGestorCartografico() {
