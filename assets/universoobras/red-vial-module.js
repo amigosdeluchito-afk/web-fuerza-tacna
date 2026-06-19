@@ -623,25 +623,24 @@ window.rvApplyStyle = function() {
         'id': 'tramos-viales-layer',
         'type': 'line',
         'source': 'tramos-viales',
-        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
         'paint': {
             'line-color': isImpacto ? '#ffffff' : ['get', 'color'],
             'line-width': isImpacto ? 3 : 4,
-            // hide the underlying solid line in normal mode so canvas dashes are fully visible
-            'line-opacity': isImpacto ? 1 : 0
+            'line-opacity': 1
         }
     });
     style.layers.push({
         'id': 'tramos-viales-hover',
         'type': 'line',
         'source': 'tramos-viales',
-        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 12 : 10,
-            'line-opacity': 0.65,
-            'line-blur': isImpacto ? 6 : 4,
-            'line-dasharray': [3, 3]
+            'line-opacity': 1,
+            'line-blur': 0,
+            'line-dasharray': [6, 6]
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -649,13 +648,13 @@ window.rvApplyStyle = function() {
         'id': 'tramos-viales-selected',
         'type': 'line',
         'source': 'tramos-viales',
-        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 12 : 10,
-            'line-opacity': 0.92,
-            'line-blur': isImpacto ? 3 : 2,
-            'line-dasharray': [4, 4]
+            'line-opacity': 1,
+            'line-blur': 0,
+            'line-dasharray': [18, 18]
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -822,6 +821,9 @@ window.rvDrawFlowCanvas = function() {
     const offset = window.rvFlowCanvasOffset || 0;
     // draw each feature line
     features.forEach(f => {
+        // skip features that are hovered or selected - those are rendered by MapLibre dashed layers
+        const fid = f.properties && (f.properties.string_id || f.properties.id || f.properties.nombre || '');
+        if (fid && (fid === window.rvHoveredTramoId || fid === window.rvSelectedTramoId)) return;
         if (!f.geometry || f.geometry.type !== 'LineString') return;
         const coords = f.geometry.coordinates;
         if (!coords || coords.length < 2) return;
@@ -945,9 +947,14 @@ window.rvSetTramoSelection = function(feature) {
     window.rvSafeSetFilter('tramos-viales-selected', window.rvBuildTramoFilter(featureId));
     window.rvSafeSetFilter('tramos-viales-flow', window.rvBuildTramoFilter(featureId));
     
-    // Dim other tramos
-    window.rvSafeSetPaint('tramos-viales-layer', 'line-opacity', 0.35);
-    window.rvSafeSetPaint('tramos-viales-bg', 'line-opacity', 0.18);
+    // Hide the selected tramo in base layers (data-driven paint expressions)
+    try {
+        const map = window.redVialMapInstance;
+        const exprLayer = ['case', ['==', ['get', 'id'], featureId], 0, 1];
+        const exprBg = ['case', ['==', ['get', 'id'], featureId], 0, 0.18];
+        if (map && map.getLayer('tramos-viales-layer')) map.setPaintProperty('tramos-viales-layer', 'line-opacity', exprLayer);
+        if (map && map.getLayer('tramos-viales-bg')) map.setPaintProperty('tramos-viales-bg', 'line-opacity', exprBg);
+    } catch (e) {}
     
     // Start animation and show nodes
     window.rvUpdateFlowAnimationState();
@@ -964,8 +971,12 @@ window.rvClearTramoSelection = function() {
     window.rvSafeSetFilter('tramos-viales-flow', ['==', ['get', 'id'], '__none__']);
     window.rvSafeSetFilter('tramos-viales-hover', ['==', ['get', 'id'], '__none__']);
     window.rvClearTramoNodes();
-    window.rvSafeSetPaint('tramos-viales-layer', 'line-opacity', 1);
-    window.rvSafeSetPaint('tramos-viales-bg', 'line-opacity', 0.65);
+    // restore base layers to normal (clear any data-driven opacity expressions)
+    try {
+        const map = window.redVialMapInstance;
+        if (map && map.getLayer('tramos-viales-layer')) map.setPaintProperty('tramos-viales-layer', 'line-opacity', 1);
+        if (map && map.getLayer('tramos-viales-bg')) map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.65);
+    } catch (e) {}
     window.rvHideTramoTooltip();
     window.rvUpdateFlowAnimationState();
 };
@@ -1295,6 +1306,13 @@ window.initRedVial = async function() {
                     window.rvHoveredTramoId = featureId;
                     window.rvAnimationSpeed = 'hover'; // Speed up animation on hover
                     window.redVialMapInstance.setFilter('tramos-viales-hover', window.rvBuildTramoFilter(featureId));
+                    // Hide the same tramo in base layers (use data-driven paint to keep other features visible)
+                    try {
+                        const exprLayer = ['case', ['==', ['get', 'id'], featureId], 0, 1];
+                        const exprBg = ['case', ['==', ['get', 'id'], featureId], 0, 0.18];
+                        if (window.redVialMapInstance.getLayer('tramos-viales-layer')) window.redVialMapInstance.setPaintProperty('tramos-viales-layer', 'line-opacity', exprLayer);
+                        if (window.redVialMapInstance.getLayer('tramos-viales-bg')) window.redVialMapInstance.setPaintProperty('tramos-viales-bg', 'line-opacity', exprBg);
+                    } catch (e) {}
                     window.rvUpdateFlowAnimationState();
                 }
             }
