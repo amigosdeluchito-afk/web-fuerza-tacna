@@ -1557,9 +1557,13 @@ window.activateRedVial = async function() {
     // 🔥 FIX 1: Ocultar INMEDIATAMENTE el SVG y los pines del mapa base antes de cargar nada
     if (svg) svg.style.setProperty('opacity', '0', 'important');
     if (baseCanvas) baseCanvas.style.setProperty('opacity', '0', 'important');
+    if (container) {
+        container.style.opacity = '1';
+        container.style.pointerEvents = 'auto';
+    }
     if (filters) {
-        filters.style.opacity = '1';
-        filters.style.pointerEvents = 'auto';
+        filters.style.opacity = '0';
+        filters.style.pointerEvents = 'none';
     }
     
     if (!window.redVialMapInstance) {
@@ -1569,6 +1573,11 @@ window.activateRedVial = async function() {
     if (container) {
         container.style.opacity = '1';
         container.style.pointerEvents = 'auto';
+    }
+
+    if (filters) {
+        filters.style.opacity = '1';
+        filters.style.pointerEvents = 'auto';
     }
     
     // 🔥 FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0

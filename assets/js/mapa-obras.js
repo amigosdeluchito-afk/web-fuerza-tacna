@@ -952,6 +952,44 @@ window.initMapEngine = async function(container) {
             if (typeof window.deactivateRedVial === 'function') window.deactivateRedVial();
         }
 
+        if (key === 'alcalde_provincial') {
+            const svgContainer = document.getElementById('synced-svg-container');
+            const dock = getEl('filtersDock');
+
+            if (videoIntro) {
+                videoIntro.style.opacity = '0';
+                videoIntro.style.visibility = 'hidden';
+            }
+
+            if (svgContainer) {
+                svgContainer.style.setProperty('opacity', '0', 'important');
+                svgContainer.className = `active-segment-${key}`;
+            }
+
+            if (mapEl) {
+                mapEl.style.opacity = '0';
+                mapEl.style.visibility = 'hidden';
+                mapEl.style.pointerEvents = 'none';
+            }
+
+            if (dock) {
+                dock.style.opacity = '0';
+                dock.style.visibility = 'hidden';
+            }
+
+            target.querySelectorAll('.chips, .fp').forEach(el => {
+                el.style.visibility = 'visible';
+                el.style.opacity = '1';
+            });
+
+            updateHud(key);
+            updateLegendVisibility(key);
+
+            isSwapping = false;
+            if (pendingKey){ const k = pendingKey; pendingKey = null; swapSegment(k); }
+            return;
+        }
+
 
         // --- NUEVO: Si entramos a un segmento de mapa, ocultamos el video ---
         const isFromBase = (prevKey === 'base' || !prevKey);
@@ -1026,7 +1064,7 @@ window.initMapEngine = async function(container) {
             updateLegendVisibility(key);
             
             // --- NUEVO: Mostrar hint de Onboarding con scroll (Solo una vez por sesión) ---
-            if (key !== 'base' && !window._mapHintShown) {
+            if (key !== 'base' && key !== 'alcalde_provincial' && !window._mapHintShown) {
                 window._mapHintShown = true;
                 setTimeout(() => {
                     let hint = document.getElementById('map-onboarding-hint');
