@@ -88,7 +88,7 @@ const RV_THEMES = {
         road_highway: "#89A5BE", road_highway_case: "#7893AA",
         road_main: "#94AEC4", road_main_case: "#819BB1",
         road_secondary: "#C7D6E1", road_secondary_case: "#B5C7D5",
-        road_minor: "#ACB3B7", road_minor_case: "#C8D2D8",
+        road_minor: "#BAC2C7", road_minor_case: "#D1DADF",
         transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1", 
         text: "#1e293b", poi: "#666666", road_text: "#3f3f46", places_text: "#64748b",
         routeBg: "#ffffff"
@@ -228,8 +228,8 @@ window.rvApplyStyle = function() {
     const isAvenida = ["all", ["has", "name"], ["any", ["in", "Avenida", ["get", "name"]], ["in", "Av.", ["get", "name"]], ["in", "Av ", ["get", "name"]]]];
 
     if (toggles['roads']) {
-        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 3.8, 0], 9.5, ["case", isRegionalRoad, 5.0, isMajorRoad, 2.0, 0], 11, ["case", isRegionalRoad, 6.4, isMajorRoad, 3.0, 0], 13, ["case", isRegionalRoad, 8.4, isMajorRoad, 4.5, isAvenida, 3.0, 1.2], 16, ["case", isRegionalRoad, 20.0, isMajorRoad, 16.0, isAvenida, 10.0, 4.8]] } });
-        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 2.2, 0], 9.5, ["case", isRegionalRoad, 3.0, isMajorRoad, 1.0, 0], 11, ["case", isRegionalRoad, 4.1, isMajorRoad, 1.8, 0], 13, ["case", isRegionalRoad, 5.6, isMajorRoad, 2.5, isAvenida, 1.5, 0.55], 16, ["case", isRegionalRoad, 15.0, isMajorRoad, 12.0, isAvenida, 7.0, 3.0]] } });
+        style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 3.8, 0], 9.5, ["case", isRegionalRoad, 5.0, isMajorRoad, 2.0, 0], 11, ["case", isRegionalRoad, 6.4, isMajorRoad, 3.0, 0], 13, ["case", isRegionalRoad, 8.4, isMajorRoad, 4.5, isAvenida, 3.0, 2.2], 16, ["case", isRegionalRoad, 20.0, isMajorRoad, 16.0, isAvenida, 10.0, 5.8]] } });
+        style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 2.2, 0], 9.5, ["case", isRegionalRoad, 3.0, isMajorRoad, 1.0, 0], 11, ["case", isRegionalRoad, 4.1, isMajorRoad, 1.8, 0], 13, ["case", isRegionalRoad, 5.6, isMajorRoad, 2.5, isAvenida, 1.5, 1.55], 16, ["case", isRegionalRoad, 15.0, isMajorRoad, 12.0, isAvenida, 7.0, 4.0]] } });
     }
     
     if (toggles['buildings'] || toggles['buildings3d']) {
