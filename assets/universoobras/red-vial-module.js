@@ -830,24 +830,25 @@ window.rvDrawFlowCanvas = function() {
         });
         // style
         const color = (f.properties && (f.properties.color || f.properties.color_hex)) || '#ffffff';
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-        // glow
+        // Use square/flat caps and miter joins for straight look
+        ctx.lineJoin = 'miter';
+        ctx.lineCap = 'butt';
+        // glow (subtle, with larger dash gap so dashes don't merge)
         ctx.save();
         ctx.strokeStyle = color;
-        ctx.lineWidth = 12; // glow thickness
-        ctx.globalAlpha = 0.18;
+        ctx.lineWidth = 10; // glow thickness
+        ctx.globalAlpha = 0.14;
         ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
-        ctx.setLineDash([16, 8]);
+        ctx.shadowBlur = 4;
+        ctx.setLineDash([30, 18]);
         ctx.lineDashOffset = -offset;
         ctx.stroke();
         ctx.restore();
-        // main stroke
+        // main stroke (clear, longer gaps so motion is visible)
         ctx.strokeStyle = color;
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 4;
         ctx.globalAlpha = 1;
-        ctx.setLineDash([12, 8]);
+        ctx.setLineDash([18, 18]);
         ctx.lineDashOffset = -offset;
         ctx.stroke();
     });
