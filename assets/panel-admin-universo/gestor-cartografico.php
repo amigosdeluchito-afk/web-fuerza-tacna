@@ -431,6 +431,55 @@ require_admin();
 
         let rvPublicConfig = null;
 
+        const RV_PUBLIC_ADMIN_PREVIEW_LAYERS = {
+            'water': ['water'],
+            'parks': ['parks'],
+            'roads': ['roads-minor', 'roads-major'],
+            'places-text': ['places-text'],
+            'ref-urbanas': ['ref-circles', 'ref-labels']
+        };
+
+        const RV_PUBLIC_SERVICE_KEYS = [
+            'srv-edu',
+            'srv-salud',
+            'srv-seguridad',
+            'srv-gobierno',
+            'srv-mercados',
+            'srv-deporte',
+            'srv-transporte',
+            'srv-negocios'
+        ];
+
+        function setAdminLayerVisibility(layerId, visible) {
+            if (!map || !map.getLayer(layerId)) return;
+            map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+        }
+
+        function getConfigPublicaFromControls() {
+            const layers = {};
+            document.querySelectorAll('#rvPublicLayers input[data-public-layer]').forEach(input => {
+                layers[input.getAttribute('data-public-layer')] = input.checked;
+            });
+
+            return {
+                defaultProfile: document.getElementById('rvPublicProfile')?.value || 'ciudadano',
+                layers
+            };
+        }
+
+        function aplicarPreviewConfigPublica(config) {
+            if (!map || !config || !config.layers) return;
+            const layers = config.layers;
+
+            Object.entries(RV_PUBLIC_ADMIN_PREVIEW_LAYERS).forEach(([key, layerIds]) => {
+                layerIds.forEach(layerId => setAdminLayerVisibility(layerId, !!layers[key]));
+            });
+
+            setAdminLayerVisibility('buildings', !!(layers.buildings || layers.buildings3d));
+            setAdminLayerVisibility('roads-text', !!(layers.roads && layers['places-text']));
+            setAdminLayerVisibility('pois-text', !!(layers['places-text'] && RV_PUBLIC_SERVICE_KEYS.some(key => !!layers[key])));
+        }
+
         function renderConfigPublica(config) {
             rvPublicConfig = config || {};
             const profile = document.getElementById('rvPublicProfile');
@@ -445,6 +494,23 @@ require_admin();
                     <span>${RV_PUBLIC_LAYER_LABELS[key]}</span>
                 </label>
             `).join('');
+
+            layersBox.querySelectorAll('input[data-public-layer]').forEach(input => {
+                input.addEventListener('change', () => {
+                    if (input.getAttribute('data-public-layer') === 'buildings3d' && input.checked) {
+                        const buildings2d = layersBox.querySelector('input[data-public-layer="buildings"]');
+                        if (buildings2d) buildings2d.checked = false;
+                    }
+                    if (input.getAttribute('data-public-layer') === 'buildings' && input.checked) {
+                        const buildings3d = layersBox.querySelector('input[data-public-layer="buildings3d"]');
+                        if (buildings3d) buildings3d.checked = false;
+                    }
+                    aplicarPreviewConfigPublica(getConfigPublicaFromControls());
+                });
+            });
+
+            profile.onchange = () => aplicarPreviewConfigPublica(getConfigPublicaFromControls());
+            aplicarPreviewConfigPublica(rvPublicConfig);
         }
 
         async function cargarConfigPublica() {
@@ -469,11 +535,9 @@ require_admin();
         };
 
         window.guardarConfigPublica = async function() {
-            const profile = document.getElementById('rvPublicProfile').value;
-            const layers = {};
-            document.querySelectorAll('#rvPublicLayers input[data-public-layer]').forEach(input => {
-                layers[input.getAttribute('data-public-layer')] = input.checked;
-            });
+            const draftConfig = getConfigPublicaFromControls();
+            const profile = draftConfig.defaultProfile;
+            const layers = draftConfig.layers;
 
             if (layers.buildings && layers.buildings3d) {
                 layers.buildings3d = false;
@@ -488,6 +552,7 @@ require_admin();
                 const data = await res.json();
                 if (!data.ok) throw new Error(data.error || 'No se pudo guardar');
                 renderConfigPublica(data.config);
+                aplicarPreviewConfigPublica(data.config);
                 showToast('Vista publica guardada. El mapa publico usara esta configuracion al recargar.', 'success');
             } catch (error) {
                 showToast('Error al guardar la vista publica.', 'error');
@@ -549,6 +614,12 @@ require_admin();
             });
             
             // Bloquear el menú nativo del navegador en el canvas para asegurar el clic derecho
+            map.on('load', () => {
+                cargarConfigPublica().catch(() => {
+                    showToast('No se pudo aplicar la vista publica en el mapa admin.', 'warning');
+                });
+            });
+
             map.getCanvas().addEventListener('contextmenu', e => e.preventDefault());
             
             // Evento Click en el Mapa
