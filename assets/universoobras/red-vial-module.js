@@ -15,6 +15,8 @@ const PERF_RV = false;  // Apagado para producción (RV5-PERF-A2)
 
 // Constante única para la ruta de la base de datos vectorial
 const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
+const RED_VIAL_SCRIPT_URL = document.currentScript?.src || document.querySelector('script[src*="red-vial-module.js"]')?.src || window.location.href;
+const PMTILES_LIB_URL = new URL('../vendor/pmtiles/pmtiles-3.0.6.js', RED_VIAL_SCRIPT_URL).href;
 
 // =========================================================
 // GEOJSON DE ETIQUETAS ESTRATÉGICAS (RV6-MAP-B2.2)
@@ -126,14 +128,6 @@ window.rvApplyStyle = function() {
                 type: "geojson",
                 data: "../panel-admin-universo/mapa_referencias_api.php?action=geojson"
             },
-            "tacna-region": {
-                type: "geojson",
-                data: "../data/tacna_region.geojson"
-            },
-            "tacna-provincias": {
-                type: "geojson",
-                data: "../data/tacna_provincias.geojson"
-            },
             "regional-labels": {
                 type: "geojson",
                 data: regionalLabelsGeoJSON
@@ -225,48 +219,6 @@ window.rvApplyStyle = function() {
     if (toggles['parks'] || toggles['srv-salud'] || toggles['srv-edu'] || toggles['srv-deporte']) {
         style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", paint: { "fill-color": landuseColors } });
     }
-
-    style.layers.push({
-        id: "tacna-region-fill",
-        type: "fill",
-        source: "tacna-region",
-        paint: {
-            "fill-color": "#8A1538",
-            "fill-opacity": 0.01
-        }
-    });
-
-    style.layers.push({
-        id: "tacna-provincias-outline",
-        type: "line",
-        source: "tacna-provincias",
-        layout: {
-            "line-join": "miter",
-            "line-cap": "butt"
-        },
-        paint: {
-            "line-color": "#8A1538",
-            "line-width": ["interpolate", ["linear"], ["zoom"], 7, 0.45, 9, 0.7, 11, 1],
-            "line-opacity": 0.35,
-            "line-dasharray": [2, 3]
-        }
-    });
-
-    style.layers.push({
-        id: "tacna-region-outline",
-        type: "line",
-        source: "tacna-region",
-        layout: {
-            "line-join": "miter",
-            "line-cap": "butt"
-        },
-        paint: {
-            "line-color": "#8A1538",
-            "line-width": ["interpolate", ["linear"], ["zoom"], 7, 0.8, 9, 1.1, 11, 1.4],
-            "line-opacity": 0.55,
-            "line-dasharray": [3, 2]
-        }
-    });
 
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
     
@@ -572,24 +524,115 @@ window.rvApplyStyle = function() {
 
     // =========================================================
     // 4. CAPAS FANTASMA DE AUDITORÍA (Forzar carga en memoria RAM)
-    style.layers.push({ id: "debug-pois", type: "circle", source: "protomaps", "source-layer": "pois", paint: { "circle-opacity": 0, "circle-radius": 0 } });
-    style.layers.push({ id: "debug-places", type: "circle", source: "protomaps", "source-layer": "places", paint: { "circle-opacity": 0, "circle-radius": 0 } });
+    if (DEBUG_RV) {
+        style.layers.push({ id: "debug-pois", type: "circle", source: "protomaps", "source-layer": "pois", paint: { "circle-opacity": 0, "circle-radius": 0 } });
+        style.layers.push({ id: "debug-places", type: "circle", source: "protomaps", "source-layer": "places", paint: { "circle-opacity": 0, "circle-radius": 0 } });
+    }
 
     if (window.redVialMapInstance) {
-        window.redVialMapInstance.setStyle(style);
+        const map = window.redVialMapInstance;
+        map.once('style.load', () => window.rvScheduleTerritorialLayers(map));
+        map.setStyle(style);
         // Restaurar filtro espacial si estaba activo al cambiar la estética
         setTimeout(() => {
             const btn = document.querySelector('.rv-filter-btn.is-active');
             if (btn && btn.getAttribute('data-tipo') !== 'Todos') {
                 const tipo = btn.getAttribute('data-tipo');
-                if (window.redVialMapInstance.getLayer('tramos-viales-layer')) {
-                    window.redVialMapInstance.setFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipo]);
-                    window.redVialMapInstance.setFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipo]);
+                if (map.getLayer('tramos-viales-layer')) {
+                    map.setFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipo]);
+                    map.setFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipo]);
                 }
             }
         }, 200);
     }
     return style;
+};
+
+function rv_addLayerBefore(map, layer, beforeIds = []) {
+    const beforeId = beforeIds.find(id => map.getLayer(id));
+    if (beforeId) map.addLayer(layer, beforeId);
+    else map.addLayer(layer);
+}
+
+window.rvAddTerritorialLayers = function(map = window.redVialMapInstance) {
+    if (!map || !map.isStyleLoaded()) return;
+
+    if (!map.getSource('tacna-region')) {
+        map.addSource('tacna-region', {
+            type: 'geojson',
+            data: '../data/tacna_region.geojson'
+        });
+    }
+
+    if (!map.getSource('tacna-provincias')) {
+        map.addSource('tacna-provincias', {
+            type: 'geojson',
+            data: '../data/tacna_provincias.geojson'
+        });
+    }
+
+    const beforeRoads = ['transit', 'roads-casing', 'roads', 'buildings'];
+
+    if (!map.getLayer('tacna-region-fill')) {
+        rv_addLayerBefore(map, {
+            id: 'tacna-region-fill',
+            type: 'fill',
+            source: 'tacna-region',
+            paint: {
+                'fill-color': '#8A1538',
+                'fill-opacity': 0.01
+            }
+        }, beforeRoads);
+    }
+
+    if (!map.getLayer('tacna-provincias-outline')) {
+        rv_addLayerBefore(map, {
+            id: 'tacna-provincias-outline',
+            type: 'line',
+            source: 'tacna-provincias',
+            layout: {
+                'line-join': 'miter',
+                'line-cap': 'butt'
+            },
+            paint: {
+                'line-color': '#8A1538',
+                'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.45, 9, 0.7, 11, 1],
+                'line-opacity': 0.35,
+                'line-dasharray': [2, 3]
+            }
+        }, beforeRoads);
+    }
+
+    if (!map.getLayer('tacna-region-outline')) {
+        rv_addLayerBefore(map, {
+            id: 'tacna-region-outline',
+            type: 'line',
+            source: 'tacna-region',
+            layout: {
+                'line-join': 'miter',
+                'line-cap': 'butt'
+            },
+            paint: {
+                'line-color': '#8A1538',
+                'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.8, 9, 1.1, 11, 1.4],
+                'line-opacity': 0.55,
+                'line-dasharray': [3, 2]
+            }
+        }, beforeRoads);
+    }
+};
+
+window.rvScheduleTerritorialLayers = function(map = window.redVialMapInstance) {
+    if (!map) return;
+
+    const addLayers = () => {
+        if (map && map.isStyleLoaded()) {
+            window.rvAddTerritorialLayers(map);
+        }
+    };
+
+    map.once('idle', addLayers);
+    window.setTimeout(addLayers, 3000);
 };
 
 window.initRedVial = async function() {
@@ -614,11 +657,16 @@ window.initRedVial = async function() {
     if (typeof window.pmtiles === 'undefined') {
         console.log("[Red Vial] Cargando librería PMTiles...");
         try {
-            window.pmtiles = await import('https://unpkg.com/pmtiles@3.0.6/dist/index.js');
+            window.pmtiles = await import(PMTILES_LIB_URL);
         } catch (error) {
-            console.error("[Red Vial] Error al cargar librería PMTiles:", error);
-            window.isRedVialLoading = false;
-            return;
+            console.warn("[Red Vial] No se pudo cargar PMTiles local, intentando CDN:", error);
+            try {
+                window.pmtiles = await import('https://unpkg.com/pmtiles@3.0.6/dist/index.js');
+            } catch (fallbackError) {
+                console.error("[Red Vial] Error al cargar libreria PMTiles:", fallbackError);
+                window.isRedVialLoading = false;
+                return;
+            }
         }
     }
 
@@ -642,6 +690,14 @@ window.initRedVial = async function() {
         attributionControl: false
     });
 
+    const rvBlankRecoveryTimer = window.setTimeout(() => {
+        const map = window.redVialMapInstance;
+        if (!map || map.loaded()) return;
+        console.warn("[Red Vial] Reforzando render inicial del mapa.");
+        map.resize();
+        map.triggerRepaint();
+    }, 3500);
+
     if (PERF_RV) performance.mark('rv_mapa_creado');
 
     if (PERF_RV) {
@@ -652,6 +708,8 @@ window.initRedVial = async function() {
 
     window.redVialMapInstance.on('load', () => {
         window.redVialMapInstance.resize();
+        window.redVialMapInstance.once('idle', () => window.clearTimeout(rvBlankRecoveryTimer));
+        window.rvScheduleTerritorialLayers(window.redVialMapInstance);
         if (PERF_RV) performance.mark('rv_mapa_load');
 
         // Asignar eventos de clic (las capas ya vienen integradas en rvApplyStyle)
