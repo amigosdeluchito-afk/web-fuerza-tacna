@@ -614,8 +614,9 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': isImpacto ? ['get', 'color'] : t.routeBg,
             'line-width': isImpacto ? 14 : 9,
+            // when not in impacto, keep bg subtle so canvas dashes show gaps
             'line-blur': isImpacto ? 6 : 0,
-            'line-opacity': 0.65
+            'line-opacity': isImpacto ? 0.65 : 0.18
         }
     });
     style.layers.push({
@@ -666,8 +667,9 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 10 : 8,
-            'line-opacity': 0.35,
-            'line-blur': isImpacto ? 4 : 2,
+            // hide map-based flow in normal mode (canvas handles animation)
+            'line-opacity': isImpacto ? 0.35 : 0,
+            'line-blur': isImpacto ? 4 : 0,
             'line-dasharray': [8, 4]
         }
     });
