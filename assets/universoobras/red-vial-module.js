@@ -210,6 +210,13 @@ window.rvApplyStyle = function() {
                 type: "geojson", 
                 data: "../panel-admin-universo/mapa_redvial_api.php?action=geojson" 
             },
+            "tramos-viales-nodes": {
+                type: "geojson",
+                data: {
+                    type: "FeatureCollection",
+                    features: []
+                }
+            },
             "referencias-estrategicas": {
                 type: "geojson",
                 data: "../panel-admin-universo/mapa_referencias_api.php?action=geojson"
@@ -646,6 +653,31 @@ window.rvApplyStyle = function() {
             'line-blur': isImpacto ? 3 : 2
         }
     });
+    style.layers.push({
+        'id': 'tramos-viales-flow',
+        'type': 'line',
+        'source': 'tramos-viales',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+            'line-color': ['get', 'color'],
+            'line-width': isImpacto ? 10 : 8,
+            'line-opacity': 0.7,
+            'line-blur': isImpacto ? 4 : 2,
+            'line-dasharray': [0.1, 4]
+        }
+    });
+    style.layers.push({
+        'id': 'tramos-viales-nodes',
+        'type': 'circle',
+        'source': 'tramos-viales-nodes',
+        'paint': {
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4, 14, 6, 16, 8],
+            'circle-color': '#f8fafc',
+            'circle-stroke-color': '#334155',
+            'circle-stroke-width': 2,
+            'circle-opacity': 1
+        }
+    });
 
     // =========================================================
     // 4. CAPAS FANTASMA DE AUDITORÍA (Forzar carga en memoria RAM)
@@ -683,6 +715,136 @@ window.rvBuildTramoFilter = function(featureId) {
         ['==', ['get', 'string_id'], featureId],
         ['==', ['get', 'nombre'], featureId]
     ];
+};
+
+window.rvHoveredTramoId = null;
+window.rvSelectedTramoId = null;
+window.rvFlowAnimationId = null;
+window.rvFlowAnimationStep = 0;
+window.rvSelectedTramoFeature = null;
+
+window.rvStartFlowAnimation = function() {
+    if (window.rvFlowAnimationId) return;
+    const step = () => {
+        if (!window.redVialMapInstance) return;
+        window.rvFlowAnimationStep = (window.rvFlowAnimationStep + 1) % 60;
+        const offset = 0.6 + (window.rvFlowAnimationStep % 10) * 0.18;
+        const dash = [0.1 + (offset * 0.2), 4];
+        if (window.redVialMapInstance.getLayer('tramos-viales-flow')) {
+            window.redVialMapInstance.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
+        }
+        if (window.redVialMapInstance.getLayer('tramos-viales-hover')) {
+            window.redVialMapInstance.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
+        }
+        window.rvFlowAnimationId = window.requestAnimationFrame(step);
+    };
+    window.rvFlowAnimationId = window.requestAnimationFrame(step);
+};
+
+window.rvStopFlowAnimation = function() {
+    if (window.rvFlowAnimationId) {
+        window.cancelAnimationFrame(window.rvFlowAnimationId);
+        window.rvFlowAnimationId = null;
+    }
+};
+
+window.rvUpdateFlowAnimationState = function() {
+    const hasAnyFlow = !!window.rvSelectedTramoId || !!window.rvHoveredTramoId;
+    if (hasAnyFlow) {
+        window.rvStartFlowAnimation();
+    } else {
+        window.rvStopFlowAnimation();
+    }
+};
+
+window.rvUpdateNodeSource = function(coords, props = {}) {
+    const map = window.redVialMapInstance;
+    if (!map || !map.getSource('tramos-viales-nodes')) return;
+    const features = coords.map((coord, index) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: coord },
+        properties: {
+            nodeType: index === 0 ? 'start' : 'end',
+            nodeLabel: props[index === 0 ? 'inicio' : 'fin'] || ''
+        }
+    }));
+    const source = map.getSource('tramos-viales-nodes');
+    source.setData({ type: 'FeatureCollection', features });
+};
+
+window.rvClearTramoNodes = function() {
+    const map = window.redVialMapInstance;
+    if (!map || !map.getSource('tramos-viales-nodes')) return;
+    map.getSource('tramos-viales-nodes').setData({ type: 'FeatureCollection', features: [] });
+};
+
+window.rvSetTramoSelection = function(feature) {
+    const map = window.redVialMapInstance;
+    if (!map || !feature || !feature.properties) return;
+    const featureId = feature.properties.string_id || feature.properties.id || feature.properties.nombre || '';
+    if (!featureId) return;
+
+    window.rvSelectedTramoId = featureId;
+    window.rvSelectedTramoFeature = feature;
+
+    if (map.getLayer('tramos-viales-selected')) {
+        map.setFilter('tramos-viales-selected', window.rvBuildTramoFilter(featureId));
+    }
+    if (map.getLayer('tramos-viales-flow')) {
+        map.setFilter('tramos-viales-flow', window.rvBuildTramoFilter(featureId));
+    }
+    if (map.getLayer('tramos-viales-layer')) {
+        map.setPaintProperty('tramos-viales-layer', 'line-opacity', 0.35);
+        map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.18);
+    }
+    window.rvUpdateFlowAnimationState();
+    window.rvUpdateSelectedTramoNodes(feature);
+};
+
+window.rvClearTramoSelection = function() {
+    const map = window.redVialMapInstance;
+    window.rvSelectedTramoId = null;
+    window.rvSelectedTramoFeature = null;
+    if (!map) return;
+    if (map.getLayer('tramos-viales-selected')) {
+        map.setFilter('tramos-viales-selected', ['==', ['get', 'id'], '__none__']);
+    }
+    if (map.getLayer('tramos-viales-flow')) {
+        map.setFilter('tramos-viales-flow', ['==', ['get', 'id'], '__none__']);
+    }
+    window.rvClearTramoNodes();
+    if (map.getLayer('tramos-viales-layer')) {
+        map.setPaintProperty('tramos-viales-layer', 'line-opacity', 1);
+        map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.65);
+    }
+    window.rvUpdateFlowAnimationState();
+};
+
+window.rvUpdateSelectedTramoNodes = function(feature) {
+    if (!feature || !feature.geometry || feature.geometry.type !== 'LineString') {
+        window.rvClearTramoNodes();
+        return;
+    }
+    const coords = feature.geometry.coordinates;
+    if (!Array.isArray(coords) || coords.length < 2) {
+        window.rvClearTramoNodes();
+        return;
+    }
+
+    const props = {
+        inicio: feature.properties.tramo_desde || feature.properties.inicio || '',
+        fin: feature.properties.tramo_hasta || feature.properties.entrega || ''
+    };
+    window.rvUpdateNodeSource([coords[0], coords[coords.length - 1]], props);
+};
+
+window.rvClearTramoHover = function() {
+    const map = window.redVialMapInstance;
+    window.rvHoveredTramoId = null;
+    if (!map || !map.getLayer('tramos-viales-hover')) return;
+    map.setFilter('tramos-viales-hover', ['==', ['get', 'id'], '__none__']);
+    window.rvHideTramoTooltip();
+    window.rvUpdateFlowAnimationState();
 };
 
 window.rvCreateTramoTooltip = function() {
@@ -740,11 +902,74 @@ window.rvHideTramoTooltip = function() {
     tip.style.opacity = '0';
 };
 
+window.rvHoveredTramoId = null;
+window.rvSelectedTramoId = null;
+window.rvFlowAnimationId = null;
+window.rvFlowAnimationStep = 0;
+window.rvSelectedTramoFeature = null;
+
 window.rvClearTramoHover = function() {
     const map = window.redVialMapInstance;
+    window.rvHoveredTramoId = null;
     if (!map || !map.getLayer('tramos-viales-hover')) return;
     map.setFilter('tramos-viales-hover', ['==', ['get', 'id'], '__none__']);
     window.rvHideTramoTooltip();
+    window.rvUpdateFlowAnimationState();
+};
+
+window.rvStartFlowAnimation = function() {
+    if (window.rvFlowAnimationId) return;
+    const step = () => {
+        if (!window.redVialMapInstance) return;
+        window.rvFlowAnimationStep = (window.rvFlowAnimationStep + 1) % 60;
+        const offset = (window.rvFlowAnimationStep / 60) * 20;
+        if (window.redVialMapInstance.getLayer('tramos-viales-flow')) {
+            window.redVialMapInstance.setPaintProperty('tramos-viales-flow', 'line-dasharray', [2, 6, offset, 6]);
+        }
+        if (window.redVialMapInstance.getLayer('tramos-viales-hover')) {
+            window.redVialMapInstance.setPaintProperty('tramos-viales-hover', 'line-dasharray', [2, 6, offset, 6]);
+        }
+        window.rvFlowAnimationId = window.requestAnimationFrame(step);
+    };
+    window.rvFlowAnimationId = window.requestAnimationFrame(step);
+};
+
+window.rvStopFlowAnimation = function() {
+    if (window.rvFlowAnimationId) {
+        window.cancelAnimationFrame(window.rvFlowAnimationId);
+        window.rvFlowAnimationId = null;
+    }
+};
+
+window.rvUpdateFlowAnimationState = function() {
+    const active = !!window.rvSelectedTramoId || !!window.rvHoveredTramoId;
+    if (active) {
+        window.rvStartFlowAnimation();
+    } else {
+        window.rvStopFlowAnimation();
+    }
+};
+
+window.rvUpdateNodeSource = function(coords, props = {}) {
+    const map = window.redVialMapInstance;
+    if (!map || !map.getSource('tramos-viales-nodes')) return;
+    const features = coords.map((coord, index) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: coord },
+        properties: {
+            nodeType: index === 0 ? 'start' : 'end',
+            nodeLabel: props[index === 0 ? 'inicio' : 'fin'] || '',
+            title: index === 0 ? 'Inicio del tramo' : 'Fin del tramo'
+        }
+    }));
+    const source = map.getSource('tramos-viales-nodes');
+    source.setData({ type: 'FeatureCollection', features });
+};
+
+window.rvClearTramoNodes = function() {
+    const map = window.redVialMapInstance;
+    if (!map || !map.getSource('tramos-viales-nodes')) return;
+    map.getSource('tramos-viales-nodes').setData({ type: 'FeatureCollection', features: [] });
 };
 
 window.rvSetTramoSelection = function(feature) {
@@ -753,25 +978,59 @@ window.rvSetTramoSelection = function(feature) {
     const featureId = feature.properties.string_id || feature.properties.id || feature.properties.nombre || '';
     if (!featureId) return;
 
+    window.rvSelectedTramoId = featureId;
+    window.rvSelectedTramoFeature = feature;
+
     if (map.getLayer('tramos-viales-selected')) {
         map.setFilter('tramos-viales-selected', window.rvBuildTramoFilter(featureId));
+    }
+    if (map.getLayer('tramos-viales-flow')) {
+        map.setFilter('tramos-viales-flow', window.rvBuildTramoFilter(featureId));
     }
     if (map.getLayer('tramos-viales-layer')) {
         map.setPaintProperty('tramos-viales-layer', 'line-opacity', 0.35);
         map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.18);
     }
+    window.rvUpdateFlowAnimationState();
+    window.rvUpdateSelectedTramoNodes(feature);
 };
 
 window.rvClearTramoSelection = function() {
     const map = window.redVialMapInstance;
+    window.rvSelectedTramoId = null;
+    window.rvSelectedTramoFeature = null;
     if (!map) return;
     if (map.getLayer('tramos-viales-selected')) {
         map.setFilter('tramos-viales-selected', ['==', ['get', 'id'], '__none__']);
     }
+    if (map.getLayer('tramos-viales-flow')) {
+        map.setFilter('tramos-viales-flow', ['==', ['get', 'id'], '__none__']);
+    }
+    window.rvClearTramoNodes();
     if (map.getLayer('tramos-viales-layer')) {
         map.setPaintProperty('tramos-viales-layer', 'line-opacity', 1);
         map.setPaintProperty('tramos-viales-bg', 'line-opacity', 0.65);
     }
+    window.rvUpdateFlowAnimationState();
+};
+
+window.rvUpdateSelectedTramoNodes = function(feature) {
+    if (!feature || !feature.geometry || feature.geometry.type !== 'LineString') {
+        window.rvClearTramoNodes();
+        return;
+    }
+
+    const coords = feature.geometry.coordinates;
+    if (!Array.isArray(coords) || coords.length < 2) {
+        window.rvClearTramoNodes();
+        return;
+    }
+
+    const props = {
+        inicio: feature.properties.tramo_desde || feature.properties.inicio || '',
+        fin: feature.properties.tramo_hasta || feature.properties.fin || ''
+    };
+    window.rvUpdateNodeSource([coords[0], coords[coords.length - 1]], props);
 };
 
 window.rvAnimateTramoEntry = function() {
@@ -990,7 +1249,9 @@ window.initRedVial = async function() {
             const feature = e.features[0];
             const featureId = feature.properties.string_id || feature.properties.id || feature.properties.nombre || '';
             if (featureId && window.redVialMapInstance.getLayer('tramos-viales-hover')) {
+                window.rvHoveredTramoId = featureId;
                 window.redVialMapInstance.setFilter('tramos-viales-hover', window.rvBuildTramoFilter(featureId));
+                window.rvUpdateFlowAnimationState();
             }
             window.rvShowTramoTooltip(feature.properties, e.point);
         });
@@ -1001,6 +1262,18 @@ window.initRedVial = async function() {
                 window.rvSetTramoSelection(feature);
                 abrirPanelRedVial(feature.properties);
             }
+        });
+
+        window.redVialMapInstance.on('mousemove', 'tramos-viales-nodes', (e) => {
+            if (!e.features || e.features.length === 0) return;
+            const feature = e.features[0];
+            const title = feature.properties.nodeType === 'end' ? 'Fin del tramo' : 'Inicio del tramo';
+            const label = feature.properties.nodeLabel || title;
+            window.rvShowTramoTooltip({ nombre: label }, e.point);
+        });
+
+        window.redVialMapInstance.on('mouseleave', 'tramos-viales-nodes', () => {
+            window.rvHideTramoTooltip();
         });
 
         window.redVialMapInstance.on('click', (e) => {
