@@ -764,13 +764,15 @@ window.rvSelectedTramoId = null;
 window.rvFlowAnimationId = null;
 window.rvFlowAnimationStep = 0;
 window.rvSelectedTramoFeature = null;
+window.rvAnimationSpeed = 'normal'; // 'normal', 'hover', 'selected'
+window.rvAnimationFrameCounter = 0; // Counter to control speed
 
 window.rvStartFlowAnimation = function() {
     if (window.rvFlowAnimationId !== null) return;
     const map = window.redVialMapInstance;
     if (!map || !map.getContainer) return;
     
-    // Dash patterns with increasing complexity for better visual effect
+    // Dash patterns for smooth flow effect
     const dashPatterns = [
         [3, 3], [2, 4], [4, 2], [2, 3], [3, 2], [1, 4], [4, 1], [2, 2]
     ];
@@ -790,9 +792,19 @@ window.rvStartFlowAnimation = function() {
             return;
         }
         
-        // Update dash pattern every 2 frames for smoother animation
-        if (patternIndex % 2 === 0) {
-            const dash = dashPatterns[Math.floor(patternIndex / 2) % dashPatterns.length];
+        // Determine frame interval based on animation speed
+        let frameInterval = 5; // normal: slowest
+        if (window.rvAnimationSpeed === 'hover') frameInterval = 3; // hover: medium
+        if (window.rvAnimationSpeed === 'selected') frameInterval = 2; // selected: fastest
+        
+        // Increment frame counter
+        window.rvAnimationFrameCounter++;
+        
+        // Update dash pattern based on interval
+        if (window.rvAnimationFrameCounter % frameInterval === 0) {
+            const dash = dashPatterns[patternIndex % dashPatterns.length];
+            patternIndex++;
+            
             try {
                 // Apply animation to main layer always
                 if (map.getLayer('tramos-viales-layer')) {
@@ -810,7 +822,6 @@ window.rvStartFlowAnimation = function() {
             }
         }
         
-        patternIndex++;
         window.rvFlowAnimationId = window.requestAnimationFrame(step);
     };
     
@@ -858,6 +869,7 @@ window.rvSetTramoSelection = function(feature) {
 
     window.rvSelectedTramoId = featureId;
     window.rvSelectedTramoFeature = feature;
+    window.rvAnimationSpeed = 'selected'; // Speed up animation when selected
 
     // Hide hover layer, show selected layer with flow
     window.rvSafeSetFilter('tramos-viales-hover', ['==', ['get', 'id'], '__none__']);
@@ -877,6 +889,7 @@ window.rvClearTramoSelection = function() {
     const map = window.redVialMapInstance;
     window.rvSelectedTramoId = null;
     window.rvSelectedTramoFeature = null;
+    window.rvAnimationSpeed = 'normal'; // Back to normal speed
     if (!map) return;
     window.rvSafeSetFilter('tramos-viales-selected', ['==', ['get', 'id'], '__none__']);
     window.rvSafeSetFilter('tramos-viales-flow', ['==', ['get', 'id'], '__none__']);
@@ -909,6 +922,8 @@ window.rvUpdateSelectedTramoNodes = function(feature) {
 window.rvClearTramoHover = function() {
     const map = window.redVialMapInstance;
     window.rvHoveredTramoId = null;
+    // Back to normal speed (or selected speed if still selected)
+    window.rvAnimationSpeed = window.rvSelectedTramoId ? 'selected' : 'normal';
     if (!map || !map.getLayer('tramos-viales-hover')) return;
     map.setFilter('tramos-viales-hover', ['==', ['get', 'id'], '__none__']);
     window.rvHideTramoTooltip();
@@ -1198,6 +1213,7 @@ window.initRedVial = async function() {
                 // Only show hover if no tramo is selected
                 if (!window.rvSelectedTramoId || window.rvSelectedTramoId !== featureId) {
                     window.rvHoveredTramoId = featureId;
+                    window.rvAnimationSpeed = 'hover'; // Speed up animation on hover
                     window.redVialMapInstance.setFilter('tramos-viales-hover', window.rvBuildTramoFilter(featureId));
                     window.rvUpdateFlowAnimationState();
                 }
