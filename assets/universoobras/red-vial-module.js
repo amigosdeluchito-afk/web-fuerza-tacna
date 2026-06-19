@@ -626,7 +626,8 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': isImpacto ? '#ffffff' : ['get', 'color'],
             'line-width': isImpacto ? 3 : 4,
-            'line-opacity': 1
+            // hide the underlying solid line in normal mode so canvas dashes are fully visible
+            'line-opacity': isImpacto ? 1 : 0
         }
     });
     style.layers.push({
