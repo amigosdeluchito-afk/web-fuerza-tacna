@@ -637,7 +637,7 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
-            'line-width': isImpacto ? 10 : 5,
+            'line-width': isImpacto ? 10 : 3,
             'line-opacity': 1,
             'line-blur': 0,
             'line-dasharray': [1.2, 1.1]
@@ -651,10 +651,10 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
-            'line-width': isImpacto ? 10 : 6,
+            'line-width': isImpacto ? 10 : 4,
             'line-opacity': 1,
             'line-blur': 0,
-            'line-dasharray': [1.8, 1.2]
+            'line-dasharray': [1.5, 1.2]
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -718,7 +718,8 @@ window.rvBuildTramoFilter = function(featureId) {
     return [
         'any',
         ['==', ['get', 'id'], featureId],
-        ['==', ['get', 'string_id'], featureId]
+        ['==', ['get', 'string_id'], featureId],
+        ['==', ['get', 'nombre'], featureId]
     ];
 };
 
@@ -837,22 +838,10 @@ window.rvDrawFlowCanvas = function() {
         // Use square/flat caps and miter joins for straight look
         ctx.lineJoin = 'miter';
         ctx.lineCap = 'butt';
-        // glow (subtle, with larger dash gap so dashes don't merge)
-        ctx.save();
         ctx.strokeStyle = color;
-        ctx.lineWidth = 10; // glow thickness
-        ctx.globalAlpha = 0.14;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 4;
-        ctx.setLineDash([30, 18]);
-        ctx.lineDashOffset = -offset;
-        ctx.stroke();
-        ctx.restore();
-        // main stroke (clear, longer gaps so motion is visible)
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 4;
-        ctx.globalAlpha = 1;
-        ctx.setLineDash([18, 18]);
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.7;
+        ctx.setLineDash([8, 8]);
         ctx.lineDashOffset = -offset;
         ctx.stroke();
     });
@@ -950,7 +939,7 @@ window.rvSetTramoSelection = function(feature) {
     try {
         const map = window.redVialMapInstance;
         const exprLayer = ['case', ['==', ['get', 'id'], featureId], 0, 1];
-        const exprBg = ['case', ['==', ['get', 'id'], featureId], 0, 0.18];
+        const exprBg = ['case', ['==', ['get', 'id'], featureId], 0, 0.65];
         if (map && map.getLayer('tramos-viales-layer')) map.setPaintProperty('tramos-viales-layer', 'line-opacity', exprLayer);
         if (map && map.getLayer('tramos-viales-bg')) map.setPaintProperty('tramos-viales-bg', 'line-opacity', exprBg);
     } catch (e) {}
@@ -1305,10 +1294,10 @@ window.initRedVial = async function() {
                     window.rvHoveredTramoId = featureId;
                     window.rvAnimationSpeed = 'hover'; // Speed up animation on hover
                     window.redVialMapInstance.setFilter('tramos-viales-hover', window.rvBuildTramoFilter(featureId));
-                    // Hide the same tramo in base layers (use data-driven paint to keep other features visible)
+                    // Hide only the hovered tramo in base layers so the dash gaps remain real
                     try {
                         const exprLayer = ['case', ['==', ['get', 'id'], featureId], 0, 1];
-                        const exprBg = ['case', ['==', ['get', 'id'], featureId], 0, 0.18];
+                        const exprBg = ['case', ['==', ['get', 'id'], featureId], 0, 0.65];
                         if (window.redVialMapInstance.getLayer('tramos-viales-layer')) window.redVialMapInstance.setPaintProperty('tramos-viales-layer', 'line-opacity', exprLayer);
                         if (window.redVialMapInstance.getLayer('tramos-viales-bg')) window.redVialMapInstance.setPaintProperty('tramos-viales-bg', 'line-opacity', exprBg);
                     } catch (e) {}
