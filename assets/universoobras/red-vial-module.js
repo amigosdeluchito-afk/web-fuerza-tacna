@@ -859,9 +859,20 @@ window.rvDrawFlowCanvas = function() {
 
 window.rvStartFlowAnimation = function() {
     if (window.rvFlowCanvasRAF) return;
+    const map = window.redVialMapInstance;
     window.rvCreateFlowCanvas();
+    // store original opacities and hide map-based layers so canvas dashes are visible
+    try {
+        window.rvLayerOriginalOpacities = window.rvLayerOriginalOpacities || {};
+        ['tramos-viales-bg', 'tramos-viales-layer', 'tramos-viales-flow'].forEach(id => {
+            if (map && map.getLayer && map.getLayer(id)) {
+                try { window.rvLayerOriginalOpacities[id] = map.getPaintProperty(id, 'line-opacity'); } catch (e) { window.rvLayerOriginalOpacities[id] = null; }
+                try { map.setPaintProperty(id, 'line-opacity', 0); } catch (e) {}
+            }
+        });
+    } catch (e) {}
+
     const step = () => {
-        // speed map
         const speedMap = { normal: 0.6, hover: 1.6, selected: 2.4 };
         const speed = speedMap[window.rvAnimationSpeed] || speedMap.normal;
         window.rvFlowCanvasOffset = (window.rvFlowCanvasOffset + speed) % 10000;
@@ -870,23 +881,27 @@ window.rvStartFlowAnimation = function() {
     };
     window.rvFlowCanvasRAF = window.requestAnimationFrame(step);
 };
-
 window.rvStopFlowAnimation = function() {
     if (window.rvFlowCanvasRAF) {
         window.cancelAnimationFrame(window.rvFlowCanvasRAF);
         window.rvFlowCanvasRAF = null;
     }
-    // do not remove canvas to preserve overlay; it can be cleared instead
+    // clear canvas content
     if (window.rvFlowCanvasCtx && window.rvFlowCanvas) {
         window.rvFlowCanvasCtx.clearRect(0, 0, window.rvFlowCanvas.width, window.rvFlowCanvas.height);
     }
-};
-
-window.rvStopFlowAnimation = function() {
-    if (window.rvFlowAnimationId !== null) {
-        window.cancelAnimationFrame(window.rvFlowAnimationId);
-        window.rvFlowAnimationId = null;
-    }
+    // restore original opacities if we stored them
+    try {
+        const map = window.redVialMapInstance;
+        if (window.rvLayerOriginalOpacities && map && map.getLayer) {
+            Object.keys(window.rvLayerOriginalOpacities).forEach(id => {
+                const val = window.rvLayerOriginalOpacities[id];
+                if (val !== null && map.getLayer(id)) {
+                    try { map.setPaintProperty(id, 'line-opacity', val); } catch (e) {}
+                }
+            });
+        }
+    } catch (e) {}
 };
 
 window.rvUpdateFlowAnimationState = function() {
