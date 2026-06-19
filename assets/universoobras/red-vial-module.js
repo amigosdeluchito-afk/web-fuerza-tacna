@@ -17,6 +17,7 @@ const PERF_RV = false;  // Apagado para producción (RV5-PERF-A2)
 const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
 const RED_VIAL_SCRIPT_URL = document.currentScript?.src || document.querySelector('script[src*="red-vial-module.js"]')?.src || window.location.href;
 const PMTILES_LIB_URL = new URL('../vendor/pmtiles/pmtiles-3.0.6.js', RED_VIAL_SCRIPT_URL).href;
+const PMTILES_SOURCE_URL = new URL(PMTILES_URL, RED_VIAL_SCRIPT_URL).href;
 
 // =========================================================
 // GEOJSON DE ETIQUETAS ESTRATÉGICAS (RV6-MAP-B2.2)
@@ -117,7 +118,7 @@ window.rvApplyStyle = function() {
         sources: {
             "protomaps": {
                 type: "vector",
-                url: `pmtiles://${PMTILES_URL}`, // Ruta centralizada y apuntando al archivo real
+                url: `pmtiles://${PMTILES_SOURCE_URL}`, // Ruta centralizada y apuntando al archivo real
                 attribution: "<a href='https://protomaps.com'>Protomaps</a> © <a href='https://openstreetmap.org'>OpenStreetMap</a>"
             },
             "tramos-viales": { 
@@ -635,6 +636,14 @@ window.rvScheduleTerritorialLayers = function(map = window.redVialMapInstance) {
     window.setTimeout(addLayers, 3000);
 };
 
+function rvIsBaseMapReady(map) {
+    try {
+        return !!(map && map.getSource('protomaps') && map.isSourceLoaded('protomaps'));
+    } catch (error) {
+        return false;
+    }
+}
+
 window.initRedVial = async function() {
     // Guard Clause de seguridad
     if (window.redVialMapInstance || window.isRedVialLoading) return;
@@ -690,13 +699,19 @@ window.initRedVial = async function() {
         attributionControl: false
     });
 
-    const rvBlankRecoveryTimer = window.setTimeout(() => {
+    const rvBaseMapRecoveryTimer = window.setTimeout(() => {
         const map = window.redVialMapInstance;
-        if (!map || map.loaded()) return;
-        console.warn("[Red Vial] Reforzando render inicial del mapa.");
+        if (!map || rvIsBaseMapReady(map)) return;
+        console.warn("[Red Vial] Fuente base lenta; reintentando render del mapa.");
         map.resize();
         map.triggerRepaint();
-    }, 3500);
+        window.setTimeout(() => {
+            if (!map || rvIsBaseMapReady(map) || map._rvBaseMapRetried) return;
+            map._rvBaseMapRetried = true;
+            console.warn("[Red Vial] Reintentando carga del estilo base PMTiles.");
+            window.rvApplyStyle();
+        }, 1200);
+    }, 6500);
 
     if (PERF_RV) performance.mark('rv_mapa_creado');
 
@@ -708,7 +723,7 @@ window.initRedVial = async function() {
 
     window.redVialMapInstance.on('load', () => {
         window.redVialMapInstance.resize();
-        window.redVialMapInstance.once('idle', () => window.clearTimeout(rvBlankRecoveryTimer));
+        window.redVialMapInstance.once('idle', () => window.clearTimeout(rvBaseMapRecoveryTimer));
         window.rvScheduleTerritorialLayers(window.redVialMapInstance);
         if (PERF_RV) performance.mark('rv_mapa_load');
 
