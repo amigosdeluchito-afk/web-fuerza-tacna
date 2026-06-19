@@ -88,7 +88,7 @@ const RV_THEMES = {
         road_highway: "#89A5BE", road_highway_case: "#7893AA",
         road_main: "#94AEC4", road_main_case: "#819BB1",
         road_secondary: "#C7D6E1", road_secondary_case: "#B5C7D5",
-        road_minor: "#667885", road_minor_case: "#A9BBC7",
+        road_minor: "#ACB3B7", road_minor_case: "#C8D2D8",
         transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1", 
         text: "#1e293b", poi: "#666666", road_text: "#3f3f46", places_text: "#64748b",
         routeBg: "#ffffff"
