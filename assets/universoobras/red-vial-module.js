@@ -726,9 +726,12 @@ window.rvFlowAnimationStep = 0;
 window.rvSelectedTramoFeature = null;
 
 window.rvStartFlowAnimation = function() {
-    if (window.rvFlowAnimationId) return;
+    if (window.rvFlowAnimationId !== null) return;
     const step = () => {
-        if (!window.redVialMapInstance) return;
+        if (!window.redVialMapInstance || !window.redVialMapInstance.loaded()) {
+            window.rvFlowAnimationId = null;
+            return;
+        }
         window.rvFlowAnimationStep = (window.rvFlowAnimationStep + 1) % 60;
         const offset = (window.rvFlowAnimationStep / 60) * 16;
         const dash = [2, 6, offset, 6];
@@ -744,7 +747,7 @@ window.rvStartFlowAnimation = function() {
 };
 
 window.rvStopFlowAnimation = function() {
-    if (window.rvFlowAnimationId) {
+    if (window.rvFlowAnimationId !== null) {
         window.cancelAnimationFrame(window.rvFlowAnimationId);
         window.rvFlowAnimationId = null;
     }
@@ -891,7 +894,12 @@ window.rvShowTramoTooltip = function(props, point) {
     lines.push(`<span style="display:block; margin-top:4px; color:#94a3b8;">Click para ver detalles</span>`);
 
     tip.innerHTML = lines.join('');
-    const container = window.redVialMapInstance.getContainer().getBoundingClientRect();
+    const containerEl = window.redVialMapInstance.getContainer && window.redVialMapInstance.getContainer();
+    if (!containerEl || typeof containerEl.getBoundingClientRect !== 'function') {
+        tip.style.opacity = '0';
+        return;
+    }
+    const container = containerEl.getBoundingClientRect();
     tip.style.left = `${container.left + point.x + 14}px`;
     tip.style.top = `${container.top + point.y - 12}px`;
     tip.style.opacity = '1';
