@@ -774,14 +774,21 @@ window.rvStartFlowAnimation = function() {
             window.rvFlowAnimationId = null;
             return;
         }
-        window.rvFlowAnimationStep = (window.rvFlowAnimationStep + 1) % 60;
-        const offset = (window.rvFlowAnimationStep / 60) * 16;
+        // Increment step and rotate among a small set of dash patterns to avoid
+        // creating too many unique textures in MapLibre's LineAtlas.
+        window.rvFlowAnimationStep = (window.rvFlowAnimationStep + 1);
+        const patternCount = window.rvFlowPatternCount || 6; // small set
+        const idx = window.rvFlowAnimationStep % patternCount;
+        const offset = idx * 4; // coarse offsets only
         const dash = [2, 6, offset, 6];
-        if (window.redVialMapInstance.getLayer('tramos-viales-flow')) {
-            window.redVialMapInstance.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
-        }
-        if (window.redVialMapInstance.getLayer('tramos-viales-hover')) {
-            window.redVialMapInstance.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
+        if (window.rvLastDashIndex !== idx) {
+            window.rvLastDashIndex = idx;
+            if (map.getLayer('tramos-viales-flow')) {
+                map.setPaintProperty('tramos-viales-flow', 'line-dasharray', dash);
+            }
+            if (map.getLayer('tramos-viales-hover')) {
+                map.setPaintProperty('tramos-viales-hover', 'line-dasharray', dash);
+            }
         }
         window.rvFlowAnimationId = window.requestAnimationFrame(step);
     };
