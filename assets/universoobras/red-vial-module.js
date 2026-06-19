@@ -637,10 +637,10 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
-            'line-width': isImpacto ? 12 : 10,
+            'line-width': isImpacto ? 10 : 5,
             'line-opacity': 1,
             'line-blur': 0,
-            'line-dasharray': [6, 6]
+            'line-dasharray': [1.2, 1.1]
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -651,10 +651,10 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
-            'line-width': isImpacto ? 12 : 10,
+            'line-width': isImpacto ? 10 : 6,
             'line-opacity': 1,
             'line-blur': 0,
-            'line-dasharray': [18, 18]
+            'line-dasharray': [1.8, 1.2]
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -718,8 +718,7 @@ window.rvBuildTramoFilter = function(featureId) {
     return [
         'any',
         ['==', ['get', 'id'], featureId],
-        ['==', ['get', 'string_id'], featureId],
-        ['==', ['get', 'nombre'], featureId]
+        ['==', ['get', 'string_id'], featureId]
     ];
 };
 
