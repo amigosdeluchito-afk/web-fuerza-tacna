@@ -741,7 +741,6 @@ function injectGlobalAssets() {
             const chatJS = document.createElement('script');
             chatJS.src = 'assets/universoobras/chat-ia.js?v=4'; // Aesthetic UI update
             document.body.appendChild(chatJS);
-        }
     };
 
     if ('requestIdleCallback' in window) {
