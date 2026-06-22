@@ -638,9 +638,8 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 10 : 3,
-            'line-opacity': 1,
-            'line-blur': 0,
-            'line-dasharray': [1.2, 1.1]
+            'line-opacity': 0,
+            'line-blur': 0
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -652,9 +651,8 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 10 : 4,
-            'line-opacity': 1,
-            'line-blur': 0,
-            'line-dasharray': [1.5, 1.2]
+            'line-opacity': 0,
+            'line-blur': 0
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -666,10 +664,60 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#ffffff'],
             'line-width': isImpacto ? 10 : 8,
-            // Flow overlay remains disabled; hover/selected use the dedicated dashed layers.
+            // Flow overlay remains disabled; hover/selected now use chevron symbol layers.
             'line-opacity': 0,
             'line-blur': isImpacto ? 4 : 0,
             'line-dasharray': [8, 4]
+        },
+        'filter': ['==', ['get', 'id'], '__none__']
+    });
+    style.layers.push({
+        'id': 'tramos-viales-chevron-hover',
+        'type': 'symbol',
+        'source': 'tramos-viales',
+        'layout': {
+            'symbol-placement': 'line',
+            'symbol-spacing': 34,
+            'text-field': '›',
+            'text-font': ['Noto Sans Regular'],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 14, 15, 18, 17, 22],
+            'text-rotation-alignment': 'map',
+            'text-pitch-alignment': 'map',
+            'text-keep-upright': false,
+            'text-allow-overlap': true,
+            'text-ignore-placement': true
+        },
+        'paint': {
+            'text-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'text-opacity': 0.95,
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 1.5,
+            'text-halo-blur': 0.2
+        },
+        'filter': ['==', ['get', 'id'], '__none__']
+    });
+    style.layers.push({
+        'id': 'tramos-viales-chevron-selected',
+        'type': 'symbol',
+        'source': 'tramos-viales',
+        'layout': {
+            'symbol-placement': 'line',
+            'symbol-spacing': 32,
+            'text-field': '›',
+            'text-font': ['Noto Sans Regular'],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 15, 15, 19, 17, 23],
+            'text-rotation-alignment': 'map',
+            'text-pitch-alignment': 'map',
+            'text-keep-upright': false,
+            'text-allow-overlap': true,
+            'text-ignore-placement': true
+        },
+        'paint': {
+            'text-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'text-opacity': 1,
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 1.7,
+            'text-halo-blur': 0.2
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -792,17 +840,18 @@ window.rvUpdateTramoActiveStyles = function() {
     const selectedId = window.rvSelectedTramoId;
     const hoveredFilter = hoveredId ? window.rvBuildTramoFilter(hoveredId) : window.rvEmptyTramoFilter;
     const selectedFilter = selectedId ? window.rvBuildTramoFilter(selectedId) : window.rvEmptyTramoFilter;
-    const activeFilter = window.rvBuildActiveTramosFilter();
 
     window.rvSafeSetFilter('tramos-viales-hover', hoveredFilter);
     window.rvSafeSetFilter('tramos-viales-selected', selectedFilter);
+    window.rvSafeSetFilter('tramos-viales-chevron-hover', hoveredFilter);
+    window.rvSafeSetFilter('tramos-viales-chevron-selected', selectedFilter);
     window.rvSafeSetFilter('tramos-viales-flow', window.rvEmptyTramoFilter);
 
     if (map && map.getLayer) {
-        const mainOpacity = ['case', activeFilter, 0, window.rvGetBaseTramoOpacity('tramos-viales-layer')];
-        const bgOpacity = ['case', activeFilter, 0, window.rvGetBaseTramoOpacity('tramos-viales-bg')];
-        window.rvSafeSetPaint('tramos-viales-layer', 'line-opacity', mainOpacity);
-        window.rvSafeSetPaint('tramos-viales-bg', 'line-opacity', bgOpacity);
+        window.rvSafeSetPaint('tramos-viales-layer', 'line-opacity', window.rvGetBaseTramoOpacity('tramos-viales-layer'));
+        window.rvSafeSetPaint('tramos-viales-bg', 'line-opacity', window.rvGetBaseTramoOpacity('tramos-viales-bg'));
+        window.rvSafeSetPaint('tramos-viales-hover', 'line-opacity', 0);
+        window.rvSafeSetPaint('tramos-viales-selected', 'line-opacity', 0);
         window.rvSafeSetPaint('tramos-viales-flow', 'line-opacity', 0);
     }
 
@@ -1289,7 +1338,11 @@ window.initRedVial = async function() {
         const map = window.redVialMapInstance;
         const resizeCanvasHandler = () => {
             window.rvResizeFlowCanvas();
-            window.rvDrawFlowCanvas();
+            if (window.rvFlowCanvasRAF) {
+                window.rvDrawFlowCanvas();
+            } else if (window.rvFlowCanvasCtx && window.rvFlowCanvas) {
+                window.rvFlowCanvasCtx.clearRect(0, 0, window.rvFlowCanvas.width, window.rvFlowCanvas.height);
+            }
         };
         map.on('move', resizeCanvasHandler);
         map.on('moveend', resizeCanvasHandler);
@@ -1990,6 +2043,7 @@ function abrirPanelRedVial(props = {}) {
     
     panel.querySelector('#btnCerrarRV').addEventListener('click', () => {
         panel.classList.remove('is-active');
+        window.rvClearTramoSelection();
     });
 
     panel.querySelector('#btnCompartirRV').addEventListener('click', () => {
