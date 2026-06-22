@@ -613,9 +613,9 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': '#ffffff',
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 12, 12, 15, 14, 18, 16, 21, 18, 24],
+            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 8, 12, 10, 14, 12, 16, 15, 18, 18],
             'line-blur': 0,
-            'line-opacity': 0.95
+            'line-opacity': 1
         }
     });
     style.layers.push({
@@ -625,7 +625,7 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#14532d'],
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 7, 12, 9, 14, 11, 16, 13, 18, 15],
+            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 6, 16, 7, 18, 8],
             'line-opacity': 1
         }
     });
@@ -676,10 +676,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 38, 14, 44, 16, 50, 18, 56],
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 42, 14, 48, 16, 56, 18, 64],
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 14, 16, 16, 18, 18],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 13, 14, 16, 16, 20, 18, 24],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -701,10 +701,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 38, 14, 44, 16, 50, 18, 56],
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 42, 14, 48, 16, 56, 18, 64],
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 14, 16, 16, 18, 18],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 13, 14, 16, 16, 20, 18, 24],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
