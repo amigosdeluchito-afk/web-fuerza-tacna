@@ -625,7 +625,7 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#14532d'],
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 6, 16, 7, 18, 8],
+            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 6, 16, 8, 18, 10],
             'line-opacity': 1
         }
     });
@@ -676,10 +676,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 42, 14, 48, 16, 56, 18, 64],
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 40, 14, 46, 16, 54, 18, 62],
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 13, 14, 16, 16, 20, 18, 24],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 15, 16, 19, 18, 24],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -701,10 +701,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 42, 14, 48, 16, 56, 18, 64],
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 40, 14, 46, 16, 54, 18, 62],
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 13, 14, 16, 16, 20, 18, 24],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 15, 16, 19, 18, 24],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
