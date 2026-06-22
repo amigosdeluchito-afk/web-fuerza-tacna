@@ -1116,30 +1116,35 @@ window.rvClearTramoHover = function() {
 };
 
 window.rvEnsureZoomIndicator = function() {
-    const container = document.getElementById('red-vial-map-container');
-    if (!container) return null;
     let indicator = document.getElementById('rv-zoom-indicator');
-    if (indicator) return indicator;
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'rv-zoom-indicator';
+        indicator.textContent = 'z --';
+    }
 
-    indicator = document.createElement('div');
-    indicator.id = 'rv-zoom-indicator';
     indicator.style.cssText = [
-        'position:absolute',
-        'right:112px',
-        'bottom:18px',
-        'z-index:180',
+        'position:fixed',
+        'left:74px',
+        'top:152px',
+        'z-index:9998',
         'pointer-events:none',
         'padding:4px 8px',
         'border-radius:999px',
-        'background:rgba(15,23,42,0.48)',
-        'color:rgba(255,255,255,0.82)',
+        'background:rgba(15,23,42,0.62)',
+        'color:rgba(255,255,255,0.88)',
         'font:700 10px/1.2 Arial, sans-serif',
         'letter-spacing:0',
-        'box-shadow:0 2px 8px rgba(15,23,42,0.18)',
+        'box-shadow:0 2px 8px rgba(15,23,42,0.22)',
         'backdrop-filter:blur(4px)',
-        'user-select:none'
+        'user-select:none',
+        'opacity:0',
+        'visibility:hidden'
     ].join(';');
-    container.appendChild(indicator);
+
+    if (indicator.parentNode !== document.body) {
+        document.body.appendChild(indicator);
+    }
     return indicator;
 };
 
@@ -1148,6 +1153,8 @@ window.rvUpdateZoomIndicator = function() {
     const indicator = window.rvEnsureZoomIndicator();
     if (!map || !indicator || typeof map.getZoom !== 'function') return;
     indicator.textContent = `z ${map.getZoom().toFixed(2)}`;
+    indicator.style.opacity = '1';
+    indicator.style.visibility = 'visible';
 };
 
 window.rvCreateTramoTooltip = function() {
@@ -2250,11 +2257,17 @@ window.activateRedVial = async function() {
     // 🔥 FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
     if (window.redVialMapInstance) {
         setTimeout(() => {
-            if(window.redVialMapInstance) window.redVialMapInstance.resize();
+            if(window.redVialMapInstance) {
+                window.redVialMapInstance.resize();
+                window.rvUpdateZoomIndicator();
+            }
         }, 100);
         // Doble seguro por si la tarjeta de video tarda en asignar el ancho de la pantalla
         setTimeout(() => {
-            if(window.redVialMapInstance) window.redVialMapInstance.resize();
+            if(window.redVialMapInstance) {
+                window.redVialMapInstance.resize();
+                window.rvUpdateZoomIndicator();
+            }
         }, 600);
     }
 };
@@ -2277,6 +2290,12 @@ window.deactivateRedVial = function() {
     if (filters) {
         filters.style.opacity = '0';
         filters.style.pointerEvents = 'none';
+    }
+
+    const zoomIndicator = document.getElementById('rv-zoom-indicator');
+    if (zoomIndicator) {
+        zoomIndicator.style.opacity = '0';
+        zoomIndicator.style.visibility = 'hidden';
     }
 
     // Cerrar el panel si estuviera abierto
