@@ -805,7 +805,7 @@ window.rvBuildActiveTramosFilter = function() {
 
 window.rvGetBaseTramoOpacity = function(layerId) {
     if (layerId === 'tramos-viales-bg') {
-        return window.rvStyleConfig.theme === 'impacto' ? 0.65 : 0.18;
+        return 1;
     }
     if (layerId === 'tramos-viales-flow') {
         return 0;
