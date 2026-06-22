@@ -613,7 +613,7 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': '#ffffff',
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 9, 12, 11, 14, 13, 16, 15, 18, 17],
+            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 12, 12, 15, 14, 18, 16, 21, 18, 24],
             'line-blur': 0,
             'line-opacity': 0.95
         }
@@ -625,7 +625,7 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#14532d'],
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 5, 12, 6, 14, 7, 16, 8, 18, 9],
+            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 7, 12, 9, 14, 11, 16, 13, 18, 15],
             'line-opacity': 1
         }
     });
@@ -676,10 +676,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 46, 14, 52, 16, 58, 18, 66],
-            'text-field': '❯',
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 38, 14, 44, 16, 50, 18, 56],
+            'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 17, 14, 20, 16, 23, 18, 26],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 14, 16, 16, 18, 18],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -690,8 +690,8 @@ window.rvApplyStyle = function() {
             'text-color': '#ffffff',
             'text-opacity': 0.95,
             'text-halo-color': ['coalesce', ['get', 'color'], '#14532d'],
-            'text-halo-width': 0.9,
-            'text-halo-blur': 0.1
+            'text-halo-width': 0,
+            'text-halo-blur': 0
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -701,10 +701,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 46, 14, 52, 16, 58, 18, 66],
-            'text-field': '❯',
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 38, 14, 44, 16, 50, 18, 56],
+            'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 17, 14, 20, 16, 23, 18, 26],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 14, 16, 16, 18, 18],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -715,8 +715,8 @@ window.rvApplyStyle = function() {
             'text-color': '#ffffff',
             'text-opacity': 1,
             'text-halo-color': ['coalesce', ['get', 'color'], '#14532d'],
-            'text-halo-width': 0.9,
-            'text-halo-blur': 0.1
+            'text-halo-width': 0,
+            'text-halo-blur': 0
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -725,10 +725,10 @@ window.rvApplyStyle = function() {
         'type': 'circle',
         'source': 'tramos-viales-nodes',
         'paint': {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 7, 14, 9, 16, 11, 18, 13],
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 8, 14, 10, 16, 12, 18, 14],
             'circle-color': ['coalesce', ['get', 'color'], '#14532d'],
             'circle-stroke-color': '#ffffff',
-            'circle-stroke-width': 4,
+            'circle-stroke-width': 5,
             'circle-opacity': 1
         }
     });
