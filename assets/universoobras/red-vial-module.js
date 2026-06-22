@@ -612,21 +612,20 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
-            'line-color': isImpacto ? ['get', 'color'] : t.routeBg,
-            'line-width': isImpacto ? 14 : 9,
-            // when not in impacto, keep bg subtle so canvas dashes show gaps
-            'line-blur': isImpacto ? 6 : 0,
-            'line-opacity': isImpacto ? 0.65 : 0.18
+            'line-color': '#ffffff',
+            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 7, 12, 9, 14, 11, 16, 13, 18, 15],
+            'line-blur': 0,
+            'line-opacity': 0.95
         }
     });
     style.layers.push({
         'id': 'tramos-viales-layer',
         'type': 'line',
         'source': 'tramos-viales',
-        'layout': { 'line-join': 'miter', 'line-cap': 'butt' },
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
-            'line-color': isImpacto ? '#ffffff' : ['get', 'color'],
-            'line-width': isImpacto ? 3 : 4,
+            'line-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 6, 16, 7, 18, 8],
             'line-opacity': 1
         }
     });
@@ -677,10 +676,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': 34,
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 42, 14, 48, 16, 56, 18, 64],
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 14, 15, 18, 17, 22],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 15, 14, 17, 16, 20, 18, 23],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -688,11 +687,11 @@ window.rvApplyStyle = function() {
             'text-ignore-placement': true
         },
         'paint': {
-            'text-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'text-color': '#ffffff',
             'text-opacity': 0.95,
-            'text-halo-color': '#ffffff',
-            'text-halo-width': 1.5,
-            'text-halo-blur': 0.2
+            'text-halo-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'text-halo-width': 0.8,
+            'text-halo-blur': 0.1
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -702,10 +701,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': 32,
+            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 42, 14, 48, 16, 56, 18, 64],
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 15, 15, 19, 17, 23],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 15, 14, 17, 16, 20, 18, 23],
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -713,11 +712,11 @@ window.rvApplyStyle = function() {
             'text-ignore-placement': true
         },
         'paint': {
-            'text-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'text-color': '#ffffff',
             'text-opacity': 1,
-            'text-halo-color': '#ffffff',
-            'text-halo-width': 1.7,
-            'text-halo-blur': 0.2
+            'text-halo-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'text-halo-width': 0.8,
+            'text-halo-blur': 0.1
         },
         'filter': ['==', ['get', 'id'], '__none__']
     });
@@ -726,10 +725,10 @@ window.rvApplyStyle = function() {
         'type': 'circle',
         'source': 'tramos-viales-nodes',
         'paint': {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4, 14, 6, 16, 8],
-            'circle-color': '#f8fafc',
-            'circle-stroke-color': '#334155',
-            'circle-stroke-width': 2,
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 6, 14, 8, 16, 10, 18, 12],
+            'circle-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 4,
             'circle-opacity': 1
         }
     });
@@ -993,8 +992,7 @@ window.rvStopFlowAnimation = function() {
 };
 
 window.rvUpdateFlowAnimationState = function() {
-    // The hover/selected effect is handled by MapLibre dashed layers.
-    // Keep the old canvas overlay cleared so it cannot leave residual dashed traces.
+    // Flow animation remains disabled; keep the old canvas overlay cleared.
     window.rvStopFlowAnimation();
 };
 
@@ -1006,7 +1004,8 @@ window.rvUpdateNodeSource = function(coords, props = {}) {
         geometry: { type: 'Point', coordinates: coord },
         properties: {
             nodeType: index === 0 ? 'start' : 'end',
-            nodeLabel: props[index === 0 ? 'inicio' : 'fin'] || ''
+            nodeLabel: props[index === 0 ? 'inicio' : 'fin'] || '',
+            color: props.color || '#14532d'
         }
     }));
     window.rvSafeSetSourceData('tramos-viales-nodes', { type: 'FeatureCollection', features });
@@ -1055,7 +1054,8 @@ window.rvUpdateSelectedTramoNodes = function(feature) {
 
     const props = {
         inicio: feature.properties.tramo_desde || feature.properties.inicio || '',
-        fin: feature.properties.tramo_hasta || feature.properties.entrega || ''
+        fin: feature.properties.tramo_hasta || feature.properties.entrega || '',
+        color: feature.properties.color || '#14532d'
     };
     window.rvUpdateNodeSource([coords[0], coords[coords.length - 1]], props);
 };
