@@ -196,7 +196,8 @@ window.rvApplyStyle = function() {
     const toggles = window.rvStyleConfig.toggles;
     const isImpacto = window.rvStyleConfig.theme === 'impacto';
     const RV_ROUTE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 7, 16, 9, 18, 11];
-    const RV_ROUTE_CASING_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 12, 12, 13, 14, 15, 16, 17, 18, 19];
+    const RV_ROUTE_CASING_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 14, 12, 16, 14, 19, 16, 22, 18, 25];
+    const RV_ROUTE_OUTLINE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 16, 12, 18, 14, 21, 16, 24, 18, 27];
     const RV_CHEVRON_SIZE = ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 14, 14, 18, 16, 23, 18, 28];
     const RV_CHEVRON_SPACING = ['interpolate', ['linear'], ['zoom'], 12, 34, 14, 38, 16, 44, 18, 50];
     const RV_NODE_RADIUS = ['interpolate', ['linear'], ['zoom'], 12, 7, 14, 9, 16, 12, 18, 15];
@@ -612,6 +613,18 @@ window.rvApplyStyle = function() {
 
     // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     style.layers.push({
+        'id': 'tramos-viales-outline',
+        'type': 'line',
+        'source': 'tramos-viales',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+            'line-color': '#64748b',
+            'line-width': RV_ROUTE_OUTLINE_WIDTH,
+            'line-blur': 0.6,
+            'line-opacity': 0.28
+        }
+    });
+    style.layers.push({
         'id': 'tramos-viales-bg',
         'type': 'line',
         'source': 'tramos-viales',
@@ -757,6 +770,7 @@ window.rvApplyStyle = function() {
                 if (map.getLayer('tramos-viales-layer')) {
                     map.setFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipo]);
                     map.setFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipo]);
+                    map.setFilter('tramos-viales-outline', ['==', ['get', 'tipo'], tipo]);
                 }
             }
             window.rvUpdateTramoActiveStyles();
@@ -1629,9 +1643,11 @@ function setupRedVialFilters() {
             
             // Aplicar filtro espacial a las capas nativas
             if (tipoSeleccionado === 'Todos') {
+                window.redVialMapInstance.setFilter('tramos-viales-outline', null);
                 window.redVialMapInstance.setFilter('tramos-viales-layer', null);
                 window.redVialMapInstance.setFilter('tramos-viales-bg', null);
             } else {
+                window.redVialMapInstance.setFilter('tramos-viales-outline', ['==', ['get', 'tipo'], tipoSeleccionado]);
                 window.redVialMapInstance.setFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipoSeleccionado]);
                 window.redVialMapInstance.setFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipoSeleccionado]);
             }
