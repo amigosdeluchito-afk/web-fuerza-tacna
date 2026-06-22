@@ -195,6 +195,11 @@ window.rvApplyStyle = function() {
     const t = RV_THEMES[window.rvStyleConfig.theme];
     const toggles = window.rvStyleConfig.toggles;
     const isImpacto = window.rvStyleConfig.theme === 'impacto';
+    const RV_ROUTE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 7, 16, 9, 18, 11];
+    const RV_ROUTE_CASING_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 12, 12, 13, 14, 15, 16, 17, 18, 19];
+    const RV_CHEVRON_SIZE = ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 14, 14, 18, 16, 23, 18, 28];
+    const RV_CHEVRON_SPACING = ['interpolate', ['linear'], ['zoom'], 12, 34, 14, 38, 16, 44, 18, 50];
+    const RV_NODE_RADIUS = ['interpolate', ['linear'], ['zoom'], 12, 7, 14, 9, 16, 12, 18, 15];
 
     const style = {
         version: 8,
@@ -613,7 +618,7 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': '#ffffff',
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 8, 12, 10, 14, 12, 16, 15, 18, 18],
+            'line-width': RV_ROUTE_CASING_WIDTH,
             'line-blur': 0,
             'line-opacity': 1
         }
@@ -625,7 +630,7 @@ window.rvApplyStyle = function() {
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#14532d'],
-            'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 6, 16, 8, 18, 10],
+            'line-width': RV_ROUTE_WIDTH,
             'line-opacity': 1
         }
     });
@@ -676,10 +681,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 40, 14, 46, 16, 54, 18, 62],
+            'symbol-spacing': RV_CHEVRON_SPACING,
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 15, 16, 19, 18, 24],
+            'text-size': RV_CHEVRON_SIZE,
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -701,10 +706,10 @@ window.rvApplyStyle = function() {
         'source': 'tramos-viales',
         'layout': {
             'symbol-placement': 'line',
-            'symbol-spacing': ['interpolate', ['linear'], ['zoom'], 12, 40, 14, 46, 16, 54, 18, 62],
+            'symbol-spacing': RV_CHEVRON_SPACING,
             'text-field': '›',
             'text-font': ['Noto Sans Regular'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 12, 14, 15, 16, 19, 18, 24],
+            'text-size': RV_CHEVRON_SIZE,
             'text-rotation-alignment': 'map',
             'text-pitch-alignment': 'map',
             'text-keep-upright': false,
@@ -725,7 +730,7 @@ window.rvApplyStyle = function() {
         'type': 'circle',
         'source': 'tramos-viales-nodes',
         'paint': {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 8, 14, 10, 16, 12, 18, 14],
+            'circle-radius': RV_NODE_RADIUS,
             'circle-color': ['coalesce', ['get', 'color'], '#14532d'],
             'circle-stroke-color': '#ffffff',
             'circle-stroke-width': 5,
