@@ -157,6 +157,36 @@ window.rvLoadPublicMapConfig = async function() {
     }
 };
 
+window.rvGetInitialView = function() {
+    const view = window.rvStyleConfig.initialView || {};
+    const center = Array.isArray(view.center) ? view.center : [-70.30, -17.65];
+    const lng = Number(center[0]);
+    const lat = Number(center[1]);
+    const zoom = Number(view.zoom);
+    const pitch = Number(view.pitch);
+    const bearing = Number(view.bearing);
+
+    return {
+        center: [
+            Number.isFinite(lng) ? lng : -70.30,
+            Number.isFinite(lat) ? lat : -17.65
+        ],
+        zoom: Number.isFinite(zoom) ? Math.max(5, Math.min(18, zoom)) : 8.5,
+        pitch: Number.isFinite(pitch) ? Math.max(0, Math.min(75, pitch)) : 0,
+        bearing: Number.isFinite(bearing) ? bearing : 0
+    };
+};
+
+window.rvApplyInitialViewOnce = function(map = window.redVialMapInstance) {
+    if (!map || map._rvInitialViewApplied) return;
+    const initialView = window.rvGetInitialView();
+    map._rvInitialViewApplied = true;
+    map.jumpTo(initialView);
+    if (typeof window.rvUpdateZoomIndicator === 'function') {
+        window.rvUpdateZoomIndicator();
+    }
+};
+
 const RV_THEMES = {
     tecnico: {
         bg: "#e9e5dc", water: "#a0c8f0", parks: "#d5d5d5",
@@ -1346,13 +1376,14 @@ window.initRedVial = async function() {
     console.log("[Red Vial] Inicializando mapa Vectorial PMTiles Offline...");
     
     // 3. Instanciar mapa con la arquitectura de Estilos Dinámicos
+    const initialView = window.rvGetInitialView();
     window.redVialMapInstance = new maplibregl.Map({
         container: 'red-vial-map-container',
         style: window.rvApplyStyle(),
-        center: window.rvStyleConfig.initialView.center,
-        zoom: window.rvStyleConfig.initialView.zoom,
-        pitch: window.rvStyleConfig.initialView.pitch,
-        bearing: window.rvStyleConfig.initialView.bearing,
+        center: initialView.center,
+        zoom: initialView.zoom,
+        pitch: initialView.pitch,
+        bearing: initialView.bearing,
         attributionControl: false
     });
 
@@ -1379,6 +1410,7 @@ window.initRedVial = async function() {
     }
 
     window.redVialMapInstance.on('load', () => {
+        window.rvApplyInitialViewOnce(window.redVialMapInstance);
         window.redVialMapInstance.resize();
         window.redVialMapInstance.once('idle', () => {
             window.clearTimeout(rvBaseMapRecoveryTimer);

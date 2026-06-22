@@ -465,6 +465,43 @@ require_admin();
 
         let rvPublicConfig = null;
 
+        function normalizarVistaPublica(view = {}) {
+            const center = Array.isArray(view.center) ? view.center : RV_PUBLIC_DEFAULT_VIEW.center;
+            const lng = Number(center[0]);
+            const lat = Number(center[1]);
+            const zoom = Number(view.zoom);
+            const pitch = Number(view.pitch);
+            const bearing = Number(view.bearing);
+
+            return {
+                center: [
+                    Number.isFinite(lng) ? lng : RV_PUBLIC_DEFAULT_VIEW.center[0],
+                    Number.isFinite(lat) ? lat : RV_PUBLIC_DEFAULT_VIEW.center[1]
+                ],
+                zoom: Number.isFinite(zoom) ? Math.max(5, Math.min(18, zoom)) : RV_PUBLIC_DEFAULT_VIEW.zoom,
+                pitch: Number.isFinite(pitch) ? Math.max(0, Math.min(75, pitch)) : RV_PUBLIC_DEFAULT_VIEW.pitch,
+                bearing: Number.isFinite(bearing) ? bearing : RV_PUBLIC_DEFAULT_VIEW.bearing
+            };
+        }
+
+        function escribirVistaPublicaEnFormulario(view) {
+            const viewBox = document.getElementById('rvPublicInitialView');
+            if (!viewBox) return;
+            const initialView = normalizarVistaPublica(view);
+            const fields = {
+                lng: initialView.center[0].toFixed(6),
+                lat: initialView.center[1].toFixed(6),
+                zoom: initialView.zoom.toFixed(2),
+                pitch: Math.round(initialView.pitch),
+                bearing: Math.round(initialView.bearing)
+            };
+
+            Object.entries(fields).forEach(([key, value]) => {
+                const input = viewBox.querySelector(`[data-view-key="${key}"]`);
+                if (input) input.value = value;
+            });
+        }
+
         const RV_PUBLIC_ADMIN_PREVIEW_LAYERS = {
             'water': ['water'],
             'parks': ['parks'],
@@ -519,7 +556,7 @@ require_admin();
 
             return {
                 defaultProfile: document.getElementById('rvPublicProfile')?.value || 'ciudadano',
-                initialView,
+                initialView: normalizarVistaPublica(initialView),
                 layers,
                 style
             };
@@ -529,7 +566,7 @@ require_admin();
             if (!map || !config || !config.layers) return;
             const layers = config.layers;
             const style = { ...RV_PUBLIC_DEFAULT_STYLE, ...(config.style || {}) };
-            const initialView = { ...RV_PUBLIC_DEFAULT_VIEW, ...(config.initialView || {}) };
+            const initialView = normalizarVistaPublica({ ...RV_PUBLIC_DEFAULT_VIEW, ...(config.initialView || {}) });
 
             Object.entries(RV_PUBLIC_ADMIN_PREVIEW_LAYERS).forEach(([key, layerIds]) => {
                 layerIds.forEach(layerId => setAdminLayerVisibility(layerId, !!layers[key]));
@@ -588,7 +625,7 @@ require_admin();
 
             profile.value = rvPublicConfig.defaultProfile || 'ciudadano';
             const layers = rvPublicConfig.layers || {};
-            const initialView = { ...RV_PUBLIC_DEFAULT_VIEW, ...(rvPublicConfig.initialView || {}) };
+            const initialView = normalizarVistaPublica({ ...RV_PUBLIC_DEFAULT_VIEW, ...(rvPublicConfig.initialView || {}) });
             layersBox.innerHTML = Object.keys(RV_PUBLIC_LAYER_LABELS).map(key => `
                 <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid #1e293b; border-radius:6px; background:#020617; color:#cbd5e1; font-size:13px;">
                     <input type="checkbox" data-public-layer="${key}" ${layers[key] ? 'checked' : ''} style="width:16px; height:16px;">
@@ -683,11 +720,12 @@ require_admin();
             const viewBox = document.getElementById('rvPublicInitialView');
             if (!viewBox) return;
 
-            viewBox.querySelector('[data-view-key="lng"]').value = center.lng.toFixed(6);
-            viewBox.querySelector('[data-view-key="lat"]').value = center.lat.toFixed(6);
-            viewBox.querySelector('[data-view-key="zoom"]').value = map.getZoom().toFixed(2);
-            viewBox.querySelector('[data-view-key="pitch"]').value = Math.round(map.getPitch());
-            viewBox.querySelector('[data-view-key="bearing"]').value = Math.round(map.getBearing());
+            escribirVistaPublicaEnFormulario({
+                center: [center.lng, center.lat],
+                zoom: map.getZoom(),
+                pitch: map.getPitch(),
+                bearing: map.getBearing()
+            });
 
             showToast('Vista actual capturada. Guarda para aplicarla al mapa publico.', 'info');
             aplicarPreviewConfigPublica(getConfigPublicaFromControls(), true);
@@ -696,7 +734,8 @@ require_admin();
         window.guardarConfigPublica = async function() {
             const draftConfig = getConfigPublicaFromControls();
             const profile = draftConfig.defaultProfile;
-            const initialView = draftConfig.initialView;
+            const initialView = normalizarVistaPublica(draftConfig.initialView);
+            escribirVistaPublicaEnFormulario(initialView);
             const layers = draftConfig.layers;
             const style = draftConfig.style;
 
