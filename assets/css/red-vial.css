@@ -4,11 +4,11 @@
 
 /* Contenedor del mapa aislado */
 .rv-map-container {
-    position: absolute;
-    inset: 0;
+    position: fixed !important;
+    inset: 0 !important;
     width: 100vw;
     height: 100vh;
-    z-index: 2; /* Sobre #map (1), debajo de #video-intro-container (10) */
+    z-index: 50; /* Sobre el mapa/base amarilla, debajo de chips y paneles globales */
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s ease;

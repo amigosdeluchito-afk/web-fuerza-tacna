@@ -1125,17 +1125,17 @@ window.rvEnsureZoomIndicator = function() {
     indicator.id = 'rv-zoom-indicator';
     indicator.style.cssText = [
         'position:absolute',
-        'left:10px',
-        'top:10px',
-        'z-index:120',
+        'right:112px',
+        'bottom:18px',
+        'z-index:180',
         'pointer-events:none',
-        'padding:3px 7px',
+        'padding:4px 8px',
         'border-radius:999px',
-        'background:rgba(15,23,42,0.38)',
-        'color:rgba(255,255,255,0.72)',
+        'background:rgba(15,23,42,0.48)',
+        'color:rgba(255,255,255,0.82)',
         'font:700 10px/1.2 Arial, sans-serif',
         'letter-spacing:0',
-        'box-shadow:0 2px 8px rgba(15,23,42,0.12)',
+        'box-shadow:0 2px 8px rgba(15,23,42,0.18)',
         'backdrop-filter:blur(4px)',
         'user-select:none'
     ].join(';');
