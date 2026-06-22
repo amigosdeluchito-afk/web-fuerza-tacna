@@ -196,10 +196,10 @@ window.rvApplyStyle = function() {
     const toggles = window.rvStyleConfig.toggles;
     const isImpacto = window.rvStyleConfig.theme === 'impacto';
     const RV_ROUTE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5, 14, 7, 16, 9, 18, 11];
-    const RV_ROUTE_CASING_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 14, 12, 16, 14, 19, 16, 22, 18, 25];
-    const RV_ROUTE_OUTLINE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 16, 12, 18, 14, 21, 16, 24, 18, 27];
-    const RV_CHEVRON_SIZE = ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 14, 14, 18, 16, 23, 18, 28];
-    const RV_CHEVRON_SPACING = ['interpolate', ['linear'], ['zoom'], 12, 34, 14, 38, 16, 44, 18, 50];
+    const RV_ROUTE_CASING_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 12, 12, 14, 14, 17, 16, 20, 18, 23];
+    const RV_ROUTE_OUTLINE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 14, 12, 16, 14, 19, 16, 22, 18, 25];
+    const RV_CHEVRON_SIZE = ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 15, 14, 20, 16, 25, 18, 30];
+    const RV_CHEVRON_SPACING = ['interpolate', ['linear'], ['zoom'], 12, 30, 14, 34, 16, 40, 18, 46];
     const RV_NODE_RADIUS = ['interpolate', ['linear'], ['zoom'], 12, 7, 14, 9, 16, 12, 18, 15];
 
     const style = {
@@ -620,8 +620,8 @@ window.rvApplyStyle = function() {
         'paint': {
             'line-color': '#64748b',
             'line-width': RV_ROUTE_OUTLINE_WIDTH,
-            'line-blur': 0.6,
-            'line-opacity': 0.28
+            'line-blur': 1.1,
+            'line-opacity': 0.22
         }
     });
     style.layers.push({
