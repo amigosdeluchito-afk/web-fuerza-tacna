@@ -276,8 +276,8 @@ window.rvApplyStyle = function() {
     const RV_ROUTE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 1, 12, 4.25, 14, 7.5, 16, 10.75, 18, 14];
     const RV_ROUTE_CASING_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 8, 14, 12.5, 16, 17.5, 18, 23];
     const RV_ROUTE_OUTLINE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 6, 12, 10, 14, 14.5, 16, 19.5, 18, 25];
-    const RV_CHEVRON_SIZE = ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 5, 14, 8, 16, 12, 18, 16];
-    const RV_CHEVRON_SPACING = ['interpolate', ['linear'], ['zoom'], 12, 22, 14, 21, 16, 21, 18, 22];
+    const RV_CHEVRON_SIZE = ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 6, 14, 9, 16, 13, 18, 17];
+    const RV_CHEVRON_SPACING = ['interpolate', ['linear'], ['zoom'], 12, 24, 14, 23, 16, 23, 18, 24];
     const RV_NODE_RADIUS = ['interpolate', ['linear'], ['zoom'], 12, 4, 14, 6, 16, 8.5, 18, 12];
 
     const style = {
@@ -773,7 +773,7 @@ window.rvApplyStyle = function() {
         'layout': {
             'symbol-placement': 'line',
             'symbol-spacing': RV_CHEVRON_SPACING,
-            'text-field': '>',
+            'text-field': '>>',
             'text-font': ['Noto Sans Regular'],
             'text-size': RV_CHEVRON_SIZE,
             'text-rotation-alignment': 'map',
@@ -798,7 +798,7 @@ window.rvApplyStyle = function() {
         'layout': {
             'symbol-placement': 'line',
             'symbol-spacing': RV_CHEVRON_SPACING,
-            'text-field': '>',
+            'text-field': '>>',
             'text-font': ['Noto Sans Regular'],
             'text-size': RV_CHEVRON_SIZE,
             'text-rotation-alignment': 'map',
