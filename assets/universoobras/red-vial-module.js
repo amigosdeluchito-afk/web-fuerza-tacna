@@ -1127,6 +1127,61 @@ window.rvSetTramoSelection = function(feature) {
     window.rvUpdateSelectedTramoNodes(feature);
 };
 
+window.rvGetTramoGeometryCenter = function(feature) {
+    if (!feature || !feature.geometry) return null;
+    const geometry = feature.geometry;
+    const rawCoords = geometry.type === 'LineString'
+        ? geometry.coordinates
+        : geometry.type === 'MultiLineString'
+            ? geometry.coordinates.flat()
+            : [];
+
+    const coords = rawCoords.filter(coord => Array.isArray(coord) && coord.length >= 2);
+    if (!coords.length) return null;
+
+    let minLng = Infinity;
+    let minLat = Infinity;
+    let maxLng = -Infinity;
+    let maxLat = -Infinity;
+
+    coords.forEach(coord => {
+        const lng = Number(coord[0]);
+        const lat = Number(coord[1]);
+        if (!Number.isFinite(lng) || !Number.isFinite(lat)) return;
+        minLng = Math.min(minLng, lng);
+        minLat = Math.min(minLat, lat);
+        maxLng = Math.max(maxLng, lng);
+        maxLat = Math.max(maxLat, lat);
+    });
+
+    if (!Number.isFinite(minLng) || !Number.isFinite(minLat) || !Number.isFinite(maxLng) || !Number.isFinite(maxLat)) {
+        return null;
+    }
+
+    return [(minLng + maxLng) / 2, (minLat + maxLat) / 2];
+};
+
+window.rvFocusSelectedTramo = function(feature) {
+    const map = window.redVialMapInstance;
+    const center = window.rvGetTramoGeometryCenter(feature);
+    if (!map || !center) return;
+
+    const panel = document.getElementById('redVialInfoPanel');
+    const panelWidth = panel && panel.classList.contains('is-active') && window.innerWidth > 760
+        ? Math.min(panel.getBoundingClientRect().width || 0, 420)
+        : 0;
+
+    map.easeTo({
+        center,
+        zoom: map.getZoom(),
+        pitch: map.getPitch(),
+        bearing: map.getBearing(),
+        offset: panelWidth ? [-panelWidth / 2, 0] : [0, 0],
+        duration: 650,
+        essential: true
+    });
+};
+
 window.rvClearTramoSelection = function() {
     const map = window.redVialMapInstance;
     window.rvSelectedTramoId = null;
@@ -1523,6 +1578,7 @@ window.initRedVial = async function() {
                 const feature = e.features[0];
                 window.rvSetTramoSelection(feature);
                 abrirPanelRedVial(feature.properties);
+                window.setTimeout(() => window.rvFocusSelectedTramo(feature), 80);
             }
         });
 
