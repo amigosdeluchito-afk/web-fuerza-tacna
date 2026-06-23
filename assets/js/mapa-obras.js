@@ -877,6 +877,13 @@ window.initMapEngine = async function(container) {
             currentKey = 'base';
             isSwapping = false; // Detenemos cualquier swap en curso
             pendingKey = null;
+            document.body.className = document.body.className.replace(/\bsegmento-[^\s]+\b/g, '').trim();
+            if (mapEl) {
+                mapEl.setAttribute('data-segment', 'base');
+            }
+            if (typeof window.deactivateRedVial === 'function') {
+                window.deactivateRedVial();
+            }
             isAutoCenterBlocked = false; // Resetear bandera al volver a inicio
 
             // Cerrar ficha de obra si está abierta para limpiar la pantalla

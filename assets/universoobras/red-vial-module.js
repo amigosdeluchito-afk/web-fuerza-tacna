@@ -679,7 +679,23 @@ window.rvApplyStyle = function() {
             minzoom: 10, 
             filter: ["<=", ["get", "min_zoom"], ["zoom"]],
             layout: {
-                "icon-image": ["concat", "icon-ref-", ["get", "icon_type"]],
+                "icon-image": ["match", ["get", "icon_type"],
+                    "salud", "icon-ref-salud",
+                    "hospital", "icon-ref-hospital",
+                    "HOSPITAL", "icon-ref-hospital",
+                    "edu", "icon-ref-edu",
+                    "educacion", "icon-ref-educacion",
+                    "school", "icon-ref-school",
+                    "SCHOOL", "icon-ref-school",
+                    "gob", "icon-ref-gob",
+                    "gobierno", "icon-ref-gobierno",
+                    "deporte", "icon-ref-deporte",
+                    "transporte", "icon-ref-transporte",
+                    "comercio", "icon-ref-comercio",
+                    "parque", "icon-ref-parque",
+                    "hito", "icon-ref-hito",
+                    "icon-ref-hito"
+                ],
                 "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.45, 14, 0.8],
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
@@ -1357,7 +1373,7 @@ window.rvEnsureZoomIndicator = function() {
     indicator.style.cssText = [
         'position:fixed',
         'left:8px',
-        'top:8px',
+        'bottom:8px',
         'z-index:9998',
         'pointer-events:none',
         'padding:4px 8px',
@@ -1904,11 +1920,24 @@ window.initRedVial = async function() {
             // pixelRatio: 2 empaqueta los 64px en un espacio de 32px (Efecto Retina HD)
             window.redVialMapInstance.addImage(id, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 });
         };
-        createAndAddIcon('icon-ref-salud', 'Ã°Å¸ÂÂ¥'); createAndAddIcon('icon-ref-edu', 'Ã°Å¸Å½â€œ');
-        createAndAddIcon('icon-ref-gob', 'ðŸ›ï¸'); createAndAddIcon('icon-ref-deporte', 'Ã¢Å¡Â½');
-        createAndAddIcon('icon-ref-transporte', 'Ã°Å¸Å¡Å’'); createAndAddIcon('icon-ref-comercio', 'ðŸ›’');
-        createAndAddIcon('icon-ref-parque', 'Ã°Å¸Å’Â³');
-        createAndAddIcon('icon-ref-hito', 'Ã°Å¸â€œÂ');
+        const refIconGlyphs = {
+            salud: String.fromCodePoint(0x1F3E5),
+            hospital: String.fromCodePoint(0x1F3E5),
+            edu: String.fromCodePoint(0x1F393),
+            educacion: String.fromCodePoint(0x1F393),
+            school: String.fromCodePoint(0x1F393),
+            gob: String.fromCodePoint(0x1F3DB, 0xFE0F),
+            gobierno: String.fromCodePoint(0x1F3DB, 0xFE0F),
+            deporte: String.fromCodePoint(0x26BD),
+            transporte: String.fromCodePoint(0x1F68C),
+            comercio: String.fromCodePoint(0x1F6D2),
+            parque: String.fromCodePoint(0x1F333),
+            hito: String.fromCodePoint(0x1F4CD)
+        };
+        Object.entries(refIconGlyphs).forEach(([key, glyph]) => {
+            createAndAddIcon(`icon-ref-${key}`, glyph);
+            createAndAddIcon(`icon-ref-${key.toUpperCase()}`, glyph);
+        });
 
         // =========================================================
         // Ã°Å¸â€Â MÃƒâ€œDULO DE DIAGNÃƒâ€œSTICO ESTRICTO (SOLO LECTURA)
@@ -2288,13 +2317,31 @@ function initRedVialStudio() {
                     ul.innerHTML = '<li style="font-size: 11px; color: #64748b; padding: 4px 0;">No hay referencias guardadas.</li>';
                     return;
                 }
-                const iconMap = { 'salud':'Ã°Å¸ÂÂ¥', 'educacion':'Ã°Å¸Å½â€œ', 'gobierno':'ðŸ›ï¸', 'deporte':'Ã¢Å¡Â½', 'transporte':'Ã°Å¸Å¡Å’', 'comercio':'ðŸ›’', 'hito':'Ã°Å¸â€œÂ' };
+                const iconMap = {
+                    salud: String.fromCodePoint(0x1F3E5),
+                    hospital: String.fromCodePoint(0x1F3E5),
+                    educacion: String.fromCodePoint(0x1F393),
+                    edu: String.fromCodePoint(0x1F393),
+                    school: String.fromCodePoint(0x1F393),
+                    gobierno: String.fromCodePoint(0x1F3DB, 0xFE0F),
+                    gob: String.fromCodePoint(0x1F3DB, 0xFE0F),
+                    deporte: String.fromCodePoint(0x26BD),
+                    transporte: String.fromCodePoint(0x1F68C),
+                    comercio: String.fromCodePoint(0x1F6D2),
+                    parque: String.fromCodePoint(0x1F333),
+                    hito: String.fromCodePoint(0x1F4CD)
+                };
                 data.features.forEach(f => {
                     const li = document.createElement('li');
                     li.style.cssText = 'padding: 6px 0; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); transition: color 0.2s; font-size: 12px; color: #334155; display: flex; align-items: center; gap: 6px;';
                     li.onmouseover = () => li.style.color = '#801039';
                     li.onmouseout = () => li.style.color = '#334155';
-                    li.innerHTML = `<span>${iconMap[f.properties.icon_type] || 'Ã°Å¸â€œÂ'}</span> <span>${f.properties.name}</span>`;
+                    const iconKey = String(f.properties.icon_type || '').toLowerCase();
+                    const iconSpan = document.createElement('span');
+                    iconSpan.textContent = iconMap[iconKey] || String.fromCodePoint(0x1F4CD);
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = f.properties.name || 'Referencia';
+                    li.append(iconSpan, nameSpan);
                     li.addEventListener('click', () => {
                         if (window.redVialMapInstance) {
                             window.redVialMapInstance.flyTo({ center: f.geometry.coordinates, zoom: Math.max(window.redVialMapInstance.getZoom(), 14), speed: 1.2 });
