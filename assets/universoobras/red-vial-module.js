@@ -68,6 +68,7 @@ window.rvStyleConfig = {
         'parks': true,
         'boundaries': false,
         'transit': false,
+        'tramos': true,
         'places-text': true,
         'ref-urbanas': true, // Ahora controlan a tus Titanes de la BD y estÃ¡n visibles por defecto
         'srv-edu': true,
@@ -690,6 +691,7 @@ window.rvApplyStyle = function() {
     }
 
     // 3. Capas Operativas (Efecto Normal vs NeÃ³n para el Modo Impacto)
+    if (toggles['tramos']) {
     style.layers.push({
         'id': 'tramos-viales-outline',
         'type': 'line',
@@ -828,6 +830,7 @@ window.rvApplyStyle = function() {
             'circle-opacity': 1
         }
     });
+    }
 
     // =========================================================
     // 4. CAPAS FANTASMA DE AUDITORÃA (Forzar carga en memoria RAM)
@@ -1309,8 +1312,8 @@ window.rvEnsureZoomIndicator = function() {
 
     indicator.style.cssText = [
         'position:fixed',
-        'left:74px',
-        'top:152px',
+        'left:12px',
+        'top:148px',
         'z-index:9998',
         'pointer-events:none',
         'padding:4px 8px',
@@ -1908,13 +1911,13 @@ function setupRedVialFilters() {
             
             // Aplicar filtro espacial a las capas nativas
             if (tipoSeleccionado === 'Todos') {
-                window.redVialMapInstance.setFilter('tramos-viales-outline', null);
-                window.redVialMapInstance.setFilter('tramos-viales-layer', null);
-                window.redVialMapInstance.setFilter('tramos-viales-bg', null);
+                window.rvSafeSetFilter('tramos-viales-outline', null);
+                window.rvSafeSetFilter('tramos-viales-layer', null);
+                window.rvSafeSetFilter('tramos-viales-bg', null);
             } else {
-                window.redVialMapInstance.setFilter('tramos-viales-outline', ['==', ['get', 'tipo'], tipoSeleccionado]);
-                window.redVialMapInstance.setFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipoSeleccionado]);
-                window.redVialMapInstance.setFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipoSeleccionado]);
+                window.rvSafeSetFilter('tramos-viales-outline', ['==', ['get', 'tipo'], tipoSeleccionado]);
+                window.rvSafeSetFilter('tramos-viales-layer', ['==', ['get', 'tipo'], tipoSeleccionado]);
+                window.rvSafeSetFilter('tramos-viales-bg', ['==', ['get', 'tipo'], tipoSeleccionado]);
             }
         });
     });
@@ -1947,7 +1950,7 @@ function initRedVialStudio() {
                 <span>&#9881;&#65039; Opciones Avanzadas</span>
                 <span>&#9662;</span>
             </div>
-            <div class="rv-advanced-content" id="rv-advanced-content">
+            <div class="rv-advanced-content is-open" id="rv-advanced-content">
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Base</div>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="water"> &#128167; Agua</label>
@@ -1958,6 +1961,7 @@ function initRedVialStudio() {
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Vias</div>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="roads"> &#128739;&#65039; Calles</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="tramos"> &#10148; Tramos destacados</label>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> &#128646; Transporte ferreo</label>
                 </div>
                 <div class="rv-panel-group">
@@ -2013,9 +2017,9 @@ function initRedVialStudio() {
             e.target.classList.add('is-active');
             
             const t = window.rvStyleConfig.toggles;
-            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': true, 'srv-salud': true, 'srv-seguridad': true, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': true, 'srv-transporte': true, 'srv-negocios': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
-            if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
-            if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, 'places-text': false, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
+            if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, tramos: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': true, 'srv-salud': true, 'srv-seguridad': true, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': true, 'srv-transporte': true, 'srv-negocios': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, tramos: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
+            if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, tramos: true, 'places-text': false, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
             
             // Sincronizar checkboxes avanzados
             Object.keys(t).forEach(key => { const chk = panel.querySelector(`input[data-layer="${key}"]`); if (chk) chk.checked = t[key]; });
@@ -2045,6 +2049,15 @@ function initRedVialStudio() {
                 if (list) {
                     list.style.display = e.target.checked ? 'block' : 'none';
                 }
+            }
+
+            if (layerKey === 'tramos' && !e.target.checked) {
+                window.rvSelectedTramoId = null;
+                window.rvSelectedTramoFeature = null;
+                window.rvHoveredTramoId = null;
+                window.rvHoveredTramoFeature = null;
+                window.rvClearTramoNodes?.();
+                window.rvStopFlowAnimation?.();
             }
 
             window.rvApplyStyle();
