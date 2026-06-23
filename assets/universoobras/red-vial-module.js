@@ -1,5 +1,5 @@
 // =========================================================
-// ===== BASE CARTOGRÁFICA ESTABLE (v118) =====
+// ===== BASE CARTOGRÃFICA ESTABLE (v118) =====
 // PMTiles + Proxy PHP + Perfil Ciudadano y Servicios validado
 // =========================================================
 
@@ -8,12 +8,12 @@
    ========================================================= */
 
 window.redVialMapInstance = null;
-window.isRedVialLoading = false; // Bloqueo para evitar doble inicialización
+window.isRedVialLoading = false; // Bloqueo para evitar doble inicializaciÃ³n
 
-const DEBUG_RV = false; // Flag para silenciar bucles y diagnósticos ruidosos
-const PERF_RV = false;  // Apagado para producción (RV5-PERF-A2)
+const DEBUG_RV = false; // Flag para silenciar bucles y diagnÃ³sticos ruidosos
+const PERF_RV = false;  // Apagado para producciÃ³n (RV5-PERF-A2)
 
-// Constante única para la ruta de la base de datos vectorial
+// Constante Ãºnica para la ruta de la base de datos vectorial
 const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
 const RED_VIAL_SCRIPT_URL = document.currentScript?.src || document.querySelector('script[src*="red-vial-module.js"]')?.src || window.location.href;
 const PMTILES_LIB_URL = new URL('../vendor/pmtiles/pmtiles-3.0.6.js', RED_VIAL_SCRIPT_URL).href;
@@ -28,7 +28,7 @@ const RV_DEFAULT_INITIAL_VIEW = {
 };
 
 // =========================================================
-// GEOJSON DE ETIQUETAS ESTRATÉGICAS (RV6-MAP-B2.2)
+// GEOJSON DE ETIQUETAS ESTRATÃ‰GICAS (RV6-MAP-B2.2)
 // =========================================================
 const regionalLabelsGeoJSON = {
     "type": "FeatureCollection",
@@ -40,13 +40,13 @@ const regionalLabelsGeoJSON = {
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5144, -17.4208] }, "properties": { "name": "Ilabaya", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.9631, -17.8361] }, "properties": { "name": "Ite", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5361, -17.8967] }, "properties": { "name": "Sama", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1539, -17.8931] }, "properties": { "name": "Pachía", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1539, -17.8931] }, "properties": { "name": "PachÃ­a", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-69.9575, -17.7817] }, "properties": { "name": "Palca", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.4357, -18.1565] }, "properties": { "name": "La Yarada", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1878, -17.9542] }, "properties": { "name": "Calana", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.0461, -17.4428] }, "properties": { "name": "Ticaco", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.2444, -17.3197] }, "properties": { "name": "Quilahuani", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6756, -18.1636] }, "properties": { "name": "Boca del Río", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6756, -18.1636] }, "properties": { "name": "Boca del RÃ­o", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6133, -17.2475] }, "properties": { "name": "Toquepala", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1067, -17.8744] }, "properties": { "name": "Miculla", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.7850, -17.6711] }, "properties": { "name": "Camiara", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
@@ -69,7 +69,7 @@ window.rvStyleConfig = {
         'boundaries': false,
         'transit': false,
         'places-text': true,
-        'ref-urbanas': true, // Ahora controlan a tus Titanes de la BD y están visibles por defecto
+        'ref-urbanas': true, // Ahora controlan a tus Titanes de la BD y estÃ¡n visibles por defecto
         'srv-edu': true,
         'srv-salud': true,
         'srv-seguridad': true,
@@ -288,7 +288,7 @@ window.rvApplyStyle = function() {
             "protomaps": {
                 type: "vector",
                 url: `pmtiles://${PMTILES_SOURCE_URL}`, // Ruta centralizada y apuntando al archivo real
-                attribution: "<a href='https://protomaps.com'>Protomaps</a> © <a href='https://openstreetmap.org'>OpenStreetMap</a>"
+                attribution: "<a href='https://protomaps.com'>Protomaps</a> Â© <a href='https://openstreetmap.org'>OpenStreetMap</a>"
             },
             "tramos-viales": { 
                 type: "geojson", 
@@ -309,7 +309,7 @@ window.rvApplyStyle = function() {
                 type: "geojson",
                 data: regionalLabelsGeoJSON
             },
-            // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
+            // TEMP RV6-MAP-C1: delimitaciÃ³n regional desactivada hasta crear assets/data/tacna_region.geojson
             /*
             "tacna-region": {
                 type: "geojson",
@@ -323,9 +323,9 @@ window.rvApplyStyle = function() {
     };
 
     // =========================================================
-    // DELIMITACIÓN VISUAL DE LA REGIÓN TACNA (RV6-MAP-C1)
+    // DELIMITACIÃ“N VISUAL DE LA REGIÃ“N TACNA (RV6-MAP-C1)
     // =========================================================
-    // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
+    // TEMP RV6-MAP-C1: delimitaciÃ³n regional desactivada hasta crear assets/data/tacna_region.geojson
     /*
     style.layers.push({
         id: "tacna-region-fill",
@@ -338,7 +338,7 @@ window.rvApplyStyle = function() {
     });
     */
     
-    // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
+    // TEMP RV6-MAP-C1: delimitaciÃ³n regional desactivada hasta crear assets/data/tacna_region.geojson
     /*
     style.layers.push({
         id: "tacna-region-outline",
@@ -348,14 +348,14 @@ window.rvApplyStyle = function() {
             "line-color": "#801039", 
             "line-width": ["interpolate", ["linear"], ["zoom"], 7, 1.5, 10, 2.5, 13, 3.5],
             "line-opacity": 0.8,
-            "line-dasharray": [3, 2] // Efecto de línea institucional punteada
+            "line-dasharray": [3, 2] // Efecto de lÃ­nea institucional punteada
         }
     });
     */
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
     if (toggles['water']) {
-        // Masas de agua: océano, lagos, lagunas
+        // Masas de agua: ocÃ©ano, lagos, lagunas
         style.layers.push({
             id: "water",
             type: "fill",
@@ -365,7 +365,7 @@ window.rvApplyStyle = function() {
             paint: { "fill-color": t.water, "fill-opacity": 0.75 }
         });
     
-        // Ríos, canales y cauces lineales (Brillo / Halo base)
+        // RÃ­os, canales y cauces lineales (Brillo / Halo base)
         style.layers.push({
             id: "water-line-glow",
             type: "line",
@@ -375,7 +375,7 @@ window.rvApplyStyle = function() {
             paint: { "line-color": "#9FD8FF", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1.5, 12, 2.5, 15, 4.5], "line-opacity": 0.28, "line-blur": 0.8 }
         });
 
-        // Ríos, canales y cauces lineales (Línea central)
+        // RÃ­os, canales y cauces lineales (LÃ­nea central)
         style.layers.push({
             id: "water-line",
             type: "line",
@@ -426,11 +426,11 @@ window.rvApplyStyle = function() {
     
     // 2. Capas Vectoriales Textos
     if (toggles['places-text']) {
-        // RV6-MAP-B2: Adaptación basada en 'locality' y 'min_zoom' de Protomaps local
+        // RV6-MAP-B2: AdaptaciÃ³n basada en 'locality' y 'min_zoom' de Protomaps local
         const isLocality = ["==", ["get", "kind"], "locality"];
         
-        // Exclusión para evitar duplicados de nuestras etiquetas estratégicas en el texto base
-        const isCustomLabel = ["match", ["get", "name"], ["Tacna", "Tarata", "Candarave", "Locumba", "Ilabaya", "Ite", "Sama", "Pachía", "Palca", "La Yarada", "Calana", "Ticaco", "Quilahuani", "Boca del Río", "Toquepala", "Miculla", "Camiara", "Mirave"], true, false];
+        // ExclusiÃ³n para evitar duplicados de nuestras etiquetas estratÃ©gicas en el texto base
+        const isCustomLabel = ["match", ["get", "name"], ["Tacna", "Tarata", "Candarave", "Locumba", "Ilabaya", "Ite", "Sama", "PachÃ­a", "Palca", "La Yarada", "Calana", "Ticaco", "Quilahuani", "Boca del RÃ­o", "Toquepala", "Miculla", "Camiara", "Mirave"], true, false];
         
         const isMajorPlace = ["all", isLocality, ["<=", ["coalesce", ["get", "min_zoom"], 99], 8], ["!", isCustomLabel]];
         const isVillagePlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 8], ["<=", ["coalesce", ["get", "min_zoom"], 99], 11], ["!", isCustomLabel]];
@@ -442,7 +442,7 @@ window.rvApplyStyle = function() {
         const sortKeyField = ["coalesce", ["get", "sort_key"], 999999];
         
         // =========================================================
-        // ETIQUETAS REGIONALES ESTRATÉGICAS (Divididas por jerarquía)
+        // ETIQUETAS REGIONALES ESTRATÃ‰GICAS (Divididas por jerarquÃ­a)
         // =========================================================
         
         // 1. Capital Regional (Tacna)
@@ -518,7 +518,7 @@ window.rvApplyStyle = function() {
             }
         });
 
-        // 4. Centros Poblados Secundarios (Boca del Río, Toquepala, Miculla, etc.)
+        // 4. Centros Poblados Secundarios (Boca del RÃ­o, Toquepala, Miculla, etc.)
         style.layers.push({
             id: "regional-labels-minor",
             type: "symbol",
@@ -584,7 +584,7 @@ window.rvApplyStyle = function() {
             paint: { "text-color": t.places_text || t.text, "text-halo-color": "#ffffff", "text-halo-width": 2.5 } 
         });
 
-        // Barrios urbanos, anexos menores y vecindarios (Viñani, Para Chico, etc.)
+        // Barrios urbanos, anexos menores y vecindarios (ViÃ±ani, Para Chico, etc.)
         style.layers.push({ 
             id: "places-minor-text", 
             type: "symbol", 
@@ -619,10 +619,10 @@ window.rvApplyStyle = function() {
     if (toggles['parks']) poiFilters.push(["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "recreation_ground"]);
 
     if (poiFilters.length > 0) {
-        style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ...poiFilters]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "clinic", "🏥 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "kindergarten", "🧸 ", "police", "🚓 ", "fire_station", "🚒 ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "⚽ ", "pitch", "⚽ ", "bus_station", "🚌 ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "park", "🌳 ", "recreation_ground", "🌳 ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
+        style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ...poiFilters]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "ðŸ¥ ", "clinic", "ðŸ¥ ", "school", "ðŸ« ", "university", "ðŸŽ“ ", "college", "ðŸŽ“ ", "kindergarten", "ðŸ§¸ ", "police", "ðŸš“ ", "fire_station", "ðŸš’ ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "âš½ ", "pitch", "âš½ ", "bus_station", "ðŸšŒ ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "park", "ðŸŒ³ ", "recreation_ground", "ðŸŒ³ ", "ðŸ“ "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
     }
 
-    // CAPA DE NEGOCIOS PRIVADOS (Aparece solo con muchísimo zoom)
+    // CAPA DE NEGOCIOS PRIVADOS (Aparece solo con muchÃ­simo zoom)
     if (toggles['srv-negocios']) {
         style.layers.push({ 
             id: "negocios-text", type: "symbol", source: "protomaps", "source-layer": "pois", 
@@ -642,15 +642,15 @@ window.rvApplyStyle = function() {
             ], 
             layout: { 
                 "text-field": ["concat", ["match", ["get", "kind"], 
-                    "restaurant", "🍽️ ", "cafe", "☕ ", "fast_food", "🍔 ", "bar", "🍺 ", "pub", "🍻 ",
-                    "pharmacy", "💊 ", "dentist", "🦷 ", "doctors", "🩺 ", "veterinary", "🐕 ",
-                    "bakery", "🥐 ", "supermarket", "🛒 ", "convenience", "🏪 ", "butcher", "🥩 ",
-                    "bank", "🏦 ", "atm", "🏧 ", 
-                    "hotel", "🏨 ", "motel", "🛏️ ",
-                    "gas_station", "⛽ ", "car_wash", "🚗 ", "parking", "🅿️ ",
-                    "hairdresser", "✂️ ", "clothes", "👕 ", "shoes", "👟 ",
-                    "cinema", "🍿 ", "theatre", "🎭 ", "gym", "🏋️ ", "sports_centre", "🏋️ ",
-                    "🏪 " // Fallback universal
+                    "restaurant", "ðŸ½ï¸ ", "cafe", "â˜• ", "fast_food", "ðŸ” ", "bar", "ðŸº ", "pub", "ðŸ» ",
+                    "pharmacy", "ðŸ’Š ", "dentist", "ðŸ¦· ", "doctors", "ðŸ©º ", "veterinary", "ðŸ• ",
+                    "bakery", "ðŸ¥ ", "supermarket", "🛒 ", "convenience", "ðŸª ", "butcher", "ðŸ¥© ",
+                    "bank", "ðŸ¦ ", "atm", "ðŸ§ ", 
+                    "hotel", "ðŸ¨ ", "motel", "🛏️ ",
+                    "gas_station", "⛽ ", "car_wash", "ðŸš— ", "parking", "ðŸ…¿ï¸ ",
+                    "hairdresser", "âœ‚ï¸ ", "clothes", "ðŸ‘• ", "shoes", "ðŸ‘Ÿ ",
+                    "cinema", "ðŸ¿ ", "theatre", "ðŸŽ­ ", "gym", "ðŸ‹ï¸ ", "sports_centre", "ðŸ‹ï¸ ",
+                    "ðŸª " // Fallback universal
                 ], ["get", "name"]], 
                 "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 16.5, 9, 19, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] 
             }, 
@@ -659,7 +659,7 @@ window.rvApplyStyle = function() {
     }
 
     // =========================================================
-    // CAPA DE REFERENCIAS ESTRATÉGICAS (TITANES DESDE BD)
+    // CAPA DE REFERENCIAS ESTRATÃ‰GICAS (TITANES DESDE BD)
     // =========================================================
     if (toggles['ref-urbanas']) {
         style.layers.push({ 
@@ -689,7 +689,7 @@ window.rvApplyStyle = function() {
         });
     }
 
-    // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
+    // 3. Capas Operativas (Efecto Normal vs NeÃ³n para el Modo Impacto)
     style.layers.push({
         'id': 'tramos-viales-outline',
         'type': 'line',
@@ -773,7 +773,7 @@ window.rvApplyStyle = function() {
         'layout': {
             'symbol-placement': 'line',
             'symbol-spacing': RV_CHEVRON_SPACING,
-            'text-field': '�',
+            'text-field': '>',
             'text-font': ['Noto Sans Regular'],
             'text-size': RV_CHEVRON_SIZE,
             'text-rotation-alignment': 'map',
@@ -798,7 +798,7 @@ window.rvApplyStyle = function() {
         'layout': {
             'symbol-placement': 'line',
             'symbol-spacing': RV_CHEVRON_SPACING,
-            'text-field': '�',
+            'text-field': '>',
             'text-font': ['Noto Sans Regular'],
             'text-size': RV_CHEVRON_SIZE,
             'text-rotation-alignment': 'map',
@@ -830,7 +830,7 @@ window.rvApplyStyle = function() {
     });
 
     // =========================================================
-    // 4. CAPAS FANTASMA DE AUDITORÍA (Forzar carga en memoria RAM)
+    // 4. CAPAS FANTASMA DE AUDITORÃA (Forzar carga en memoria RAM)
     if (DEBUG_RV) {
         style.layers.push({ id: "debug-pois", type: "circle", source: "protomaps", "source-layer": "pois", paint: { "circle-opacity": 0, "circle-radius": 0 } });
         style.layers.push({ id: "debug-places", type: "circle", source: "protomaps", "source-layer": "places", paint: { "circle-opacity": 0, "circle-radius": 0 } });
@@ -840,7 +840,7 @@ window.rvApplyStyle = function() {
         const map = window.redVialMapInstance;
         map.once('style.load', () => window.rvScheduleTerritorialLayers(map));
         map.setStyle(style);
-        // Restaurar filtro espacial si estaba activo al cambiar la estética
+        // Restaurar filtro espacial si estaba activo al cambiar la estÃ©tica
         setTimeout(() => {
             const btn = document.querySelector('.rv-filter-btn.is-active');
             if (btn && btn.getAttribute('data-tipo') !== 'Todos') {
@@ -891,7 +891,7 @@ window.rvGetBaseTramoOpacity = function(layerId) {
     return 1;
 };
 
-// Utilidades seguras: evitan lanzar excepciones si MapLibre no está en estado esperado
+// Utilidades seguras: evitan lanzar excepciones si MapLibre no estÃ¡ en estado esperado
 window.rvSafeSetPaint = function(layerId, prop, value) {
     try {
         const map = window.redVialMapInstance;
@@ -1492,22 +1492,22 @@ window.initRedVial = async function() {
     
     if (PERF_RV) performance.mark('rv_inicio');
     
-    // Asegurar que MapLibre esté disponible (fallback por si no se cargó globalmente).
+    // Asegurar que MapLibre estÃ© disponible (fallback por si no se cargÃ³ globalmente).
     if (typeof window.maplibregl === 'undefined') {
         if (typeof window.loadMapLibre === 'function') {
             await window.loadMapLibre();
         } else {
-            console.error("[Red Vial] Error: MapLibre GL no está disponible.");
+            console.error("[Red Vial] Error: MapLibre GL no estÃ¡ disponible.");
             window.isRedVialLoading = false;
             return;
         }
     }
 
-    // 1. Cargar el lector de PMTiles dinámicamente si no existe
+    // 1. Cargar el lector de PMTiles dinÃ¡micamente si no existe
     await window.rvLoadPublicMapConfig();
 
     if (typeof window.pmtiles === 'undefined') {
-        console.log("[Red Vial] Cargando librería PMTiles...");
+        console.log("[Red Vial] Cargando librerÃ­a PMTiles...");
         try {
             window.pmtiles = await import(PMTILES_LIB_URL);
         } catch (error) {
@@ -1533,7 +1533,7 @@ window.initRedVial = async function() {
 
     console.log("[Red Vial] Inicializando mapa Vectorial PMTiles Offline...");
     
-    // 3. Instanciar mapa con la arquitectura de Estilos Dinámicos
+    // 3. Instanciar mapa con la arquitectura de Estilos DinÃ¡micos
     const initialView = window.rvGetInitialView();
     window.redVialMapInstance = new maplibregl.Map({
         container: 'red-vial-map-container',
@@ -1660,7 +1660,7 @@ window.initRedVial = async function() {
         initRedVialStudio();
 
         // =========================================================
-        // 🚀 REGISTRO DE ICONOS PERSONALIZADOS (FASE D)
+        // ðŸš€ REGISTRO DE ICONOS PERSONALIZADOS (FASE D)
         // =========================================================
         const createAndAddIcon = (id, emoji, size = 64) => {
             if (window.redVialMapInstance.hasImage(id)) return;
@@ -1681,17 +1681,17 @@ window.initRedVial = async function() {
             // pixelRatio: 2 empaqueta los 64px en un espacio de 32px (Efecto Retina HD)
             window.redVialMapInstance.addImage(id, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 });
         };
-        createAndAddIcon('icon-ref-salud', '🏥'); createAndAddIcon('icon-ref-edu', '🎓');
-        createAndAddIcon('icon-ref-gob', '🏛️'); createAndAddIcon('icon-ref-deporte', '⚽');
-        createAndAddIcon('icon-ref-transporte', '🚌'); createAndAddIcon('icon-ref-comercio', '🛒');
-        createAndAddIcon('icon-ref-parque', '🌳');
-        createAndAddIcon('icon-ref-hito', '📍');
+        createAndAddIcon('icon-ref-salud', 'ðŸ¥'); createAndAddIcon('icon-ref-edu', 'ðŸŽ“');
+        createAndAddIcon('icon-ref-gob', '🏛️'); createAndAddIcon('icon-ref-deporte', 'âš½');
+        createAndAddIcon('icon-ref-transporte', 'ðŸšŒ'); createAndAddIcon('icon-ref-comercio', '🛒');
+        createAndAddIcon('icon-ref-parque', 'ðŸŒ³');
+        createAndAddIcon('icon-ref-hito', 'ðŸ“');
 
         // =========================================================
-        // 🔍 MÓDULO DE DIAGNÓSTICO ESTRICTO (SOLO LECTURA)
+        // ðŸ” MÃ“DULO DE DIAGNÃ“STICO ESTRICTO (SOLO LECTURA)
         // =========================================================
         const inspectFeatures = (features, context) => {
-            console.log(`\n=== 🔍 DIAGNÓSTICO: ${context} ===`);
+            console.log(`\n=== ðŸ” DIAGNÃ“STICO: ${context} ===`);
             const protoFeatures = features.filter(f => f.source === 'protomaps');
             if (protoFeatures.length === 0) console.log("No se encontraron features vectoriales de Protomaps en este punto.");
             protoFeatures.forEach((f, i) => {
@@ -1702,14 +1702,14 @@ window.initRedVial = async function() {
         };
 
         // =========================================================
-        // 💧 DEBUG DE AGUA (TEMPORAL)
+        // ðŸ’§ DEBUG DE AGUA (TEMPORAL)
         // =========================================================
         window.redVialMapInstance.on('click', (e) => {
             const waterFeatures = window.redVialMapInstance.queryRenderedFeatures(e.point)
                 .filter(f => f.sourceLayer === 'water' || f.sourceLayer === 'waterway' || f.layer.id === 'water');
             
             if (waterFeatures.length > 0) {
-                console.log(`\n💧 === CLIC EN ZONA DE AGUA ===`);
+                console.log(`\nðŸ’§ === CLIC EN ZONA DE AGUA ===`);
                 waterFeatures.forEach((f, i) => {
                     console.log(`[${i+1}] Layer ID: ${f.layer.id} | Source-Layer: ${f.sourceLayer}`);
                     console.log(`    Kind: ${f.properties.kind || 'N/A'} | Detail: ${f.properties.kind_detail || 'N/A'} | Name: ${f.properties.name || 'N/A'}`);
@@ -1719,20 +1719,20 @@ window.initRedVial = async function() {
         });
 
         if (DEBUG_RV) {
-            // Diagnóstico Inicial (Centro de la pantalla tras 2 segundos de carga)
+            // DiagnÃ³stico Inicial (Centro de la pantalla tras 2 segundos de carga)
             setTimeout(() => {
                 const centerPoint = window.redVialMapInstance.project(window.redVialMapInstance.getCenter());
                 inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(centerPoint), "CENTRO DEL MAPA (INICIO)");
             }, 2000);
 
-            // Diagnóstico por Clic (Global y pasivo, NO rompe los paneles)
+            // DiagnÃ³stico por Clic (Global y pasivo, NO rompe los paneles)
             window.redVialMapInstance.on('click', (e) => {
                 inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(e.point), "CLIC DEL USUARIO");
             });
         }
         
         // =========================================================
-        // 🔍 AUDITORÍA AUTOMÁTICA DE HITOS URBANOS (FASE D)
+        // ðŸ” AUDITORÃA AUTOMÃTICA DE HITOS URBANOS (FASE D)
         // =========================================================
         const targetKeywords = ['aeropuerto', 'terminal', 'unanue', 'basadre', 'mercado', 'grau', 'cenepa', 'plaza', 'paseo', 'arco', 'universidad', 'privada', 'jorge basadre', 'essalud'];
         const auditedFeatures = new Set();
@@ -1750,7 +1750,7 @@ window.initRedVial = async function() {
                         if (!auditedFeatures.has(uniqueKey)) {
                             auditedFeatures.add(uniqueKey);
                             uniqueCount++;
-                            console.log(`\n[${uniqueCount}] 📍 HITO ENCONTRADO`);
+                            console.log(`\n[${uniqueCount}] ðŸ“ HITO ENCONTRADO`);
                             console.log(`   - source-layer: ${f.sourceLayer}`);
                             console.log(`   - kind: ${f.properties.kind || 'N/A'}`);
                             console.log(`   - name: ${f.properties.name}`);
@@ -1764,15 +1764,15 @@ window.initRedVial = async function() {
 
         if (DEBUG_RV) {
             window.redVialMapInstance.on('moveend', scanFeatures);
-            setTimeout(scanFeatures, 3000); // Primer escaneo automático
+            setTimeout(scanFeatures, 3000); // Primer escaneo automÃ¡tico
         }
         
         // =========================================================
-        // 🔍 AUDITORÍA OBJETIVA FASE D: REFERENCIAS URBANAS
+        // ðŸ” AUDITORÃA OBJETIVA FASE D: REFERENCIAS URBANAS
         // =========================================================
         if (DEBUG_RV) {
             setTimeout(() => {
-                console.log("\n=== AUDITORÍA OBJETIVA: REFERENCIAS URBANAS ===");
+                console.log("\n=== AUDITORÃA OBJETIVA: REFERENCIAS URBANAS ===");
                 const layers = window.redVialMapInstance.getStyle().layers;
                 console.log("Captura 1: Stack de capas completo", layers);
     
@@ -1780,18 +1780,18 @@ window.initRedVial = async function() {
                 const refLayer = layers.find(l => l.id === refLayerId);
                 
                 if (!refLayer) {
-                    console.log(`1. ¿La capa existe?: NO SE ENCONTRÓ '${refLayerId}'`);
+                    console.log(`1. Â¿La capa existe?: NO SE ENCONTRÃ“ '${refLayerId}'`);
                     return;
                 }
     
-                console.log("1. ¿La capa existe?: SÍ");
+                console.log("1. Â¿La capa existe?: SÃ");
                 console.log("2. ID exacto:", refLayer.id);
                 console.log("3. source-layer exacto:", refLayer['source-layer']);
             }, 3500);
         }
 
         // =========================================================
-        // ⏱️ LÓGICA DE MEDICIÓN (RV5-PERF-A1)
+        // â±ï¸ LÃ“GICA DE MEDICIÃ“N (RV5-PERF-A1)
         // =========================================================
         
         if (PERF_RV) {
@@ -1815,7 +1815,7 @@ window.initRedVial = async function() {
             window.redVialMapInstance.once('idle', () => {
                 try {
                     performance.mark('rv_mapa_idle');
-                    console.log('\n=== 📊 AUDITORÍA FINA DE CARGA (RV5-PERF-A1.1) ===');
+                    console.log('\n=== ðŸ“Š AUDITORÃA FINA DE CARGA (RV5-PERF-A1.1) ===');
                     
                     // 1. Network Waterfall
                     const resources = performance.getEntriesByType('resource')
@@ -1829,7 +1829,7 @@ window.initRedVial = async function() {
                         .sort((a, b) => b.Duracion_ms - a.Duracion_ms)
                         .slice(0, 15);
                     
-                    console.log('Top 15 Recursos más pesados/lentos:');
+                    console.log('Top 15 Recursos mÃ¡s pesados/lentos:');
                     console.table(resources);
 
                     // 2. Fases Granulares
@@ -1842,10 +1842,10 @@ window.initRedVial = async function() {
                     const measures = performance.getEntriesByType('measure').filter(m => m.name.match(/^[A-E]\./));
                     console.table(measures.map(m => ({
                         'Fase Interna MapLibre': m.name,
-                        'Duración (ms)': parseFloat(m.duration.toFixed(2))
+                        'DuraciÃ³n (ms)': parseFloat(m.duration.toFixed(2))
                     })));
                 } catch(e) { 
-                    console.log('Esperando métricas...', e); 
+                    console.log('Esperando mÃ©tricas...', e); 
                 }
             });
         }
@@ -1853,7 +1853,7 @@ window.initRedVial = async function() {
         window.isRedVialLoading = false;
     });
     
-    // Prevención de cuelgues si el usuario cambia de página antes de cargar los tiles
+    // PrevenciÃ³n de cuelgues si el usuario cambia de pÃ¡gina antes de cargar los tiles
     window.redVialMapInstance.on('error', (e) => { 
         console.error("[MapLibre Error Detalle]:", e.error || e);
         window.isRedVialLoading = false; 
@@ -1897,59 +1897,59 @@ function initRedVialStudio() {
 
     panel.innerHTML = `
         <div class="rv-panel-header" id="rv-panel-header-btn" title="Mostrar/Ocultar capas">
-            <h3 class="rv-panel-title">🗺️ Vista del Mapa</h3>
-            <button class="rv-panel-toggle">▼</button>
+            <h3 class="rv-panel-title">ðŸ—ºï¸ Vista del Mapa</h3>
+            <button class="rv-panel-toggle">â–¼</button>
         </div>
         <div class="rv-panel-body">
-            <!-- Pestañas Principales (UX Ciudadano) -->
+            <!-- PestaÃ±as Principales (UX Ciudadano) -->
             <div class="rv-profiles">
                 <button class="rv-profile-btn is-active" data-profile="ciudadano">Ciudadano</button>
-                <button class="rv-profile-btn" data-profile="tecnico">Técnico</button>
+                <button class="rv-profile-btn" data-profile="tecnico">TÃ©cnico</button>
                 <button class="rv-profile-btn" data-profile="impacto">Impacto</button>
             </div>
             
-            <!-- Acordeón Opciones Avanzadas -->
+            <!-- AcordeÃ³n Opciones Avanzadas -->
             <div class="rv-advanced-header" id="rv-advanced-toggle">
-                <span>⚙️ Opciones Avanzadas</span>
-                <span>▼</span>
+                <span>âš™ï¸ Opciones Avanzadas</span>
+                <span>â–¼</span>
             </div>
             <div class="rv-advanced-content" id="rv-advanced-content">
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Base</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="water"> 💧 Agua</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="parks"> 🌳 Parques</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings"> 🏢 Edificios 2D</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings3d"> 🏙️ Edificios 3D</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="water"> ðŸ’§ Agua</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="parks"> ðŸŒ³ Parques</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings"> ðŸ¢ Edificios 2D</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings3d"> ðŸ™ï¸ Edificios 3D</label>
                 </div>
                 <div class="rv-panel-group">
-                    <div class="rv-panel-group-title">Vías</div>
+                    <div class="rv-panel-group-title">VÃ­as</div>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="roads"> 🛣️ Calles</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> 🚆 Transp. Férreo</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> ðŸš† Transp. FÃ©rreo</label>
                 </div>
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Territorio</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="boundaries"> 🗺️ Límites Distr.</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="places-text"> 🏷️ Nombres</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="boundaries"> ðŸ—ºï¸ LÃ­mites Distr.</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="places-text"> ðŸ·ï¸ Nombres</label>
                 </div>
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Referencias</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="ref-urbanas"> 📍 Referencias Clave</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="ref-urbanas"> ðŸ“ Referencias Clave</label>
                     <div id="ref-urbanas-list" class="rv-ref-list" style="display: none;">
                         <ul style="list-style: none; padding: 0; margin: 0;">
-                            <li style="font-size: 11px; color: #64748b; padding: 4px 0;">⏳ Cargando referencias...</li>
+                            <li style="font-size: 11px; color: #64748b; padding: 4px 0;">â³ Cargando referencias...</li>
                         </ul>
                     </div>
                 </div>
                 <div class="rv-panel-group">
-                    <div class="rv-panel-group-title">🏢 Servicios</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-edu"> 📚 Educación</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-salud"> 🏥 Salud</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-seguridad"> 🚓 Seguridad</label>
+                    <div class="rv-panel-group-title">ðŸ¢ Servicios</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-edu"> ðŸ“š EducaciÃ³n</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-salud"> ðŸ¥ Salud</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-seguridad"> ðŸš“ Seguridad</label>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="srv-gobierno"> 🏛️ Gobierno</label>
                     <label class="rv-panel-item"><input type="checkbox" data-layer="srv-mercados"> 🛒 Mercados</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-deporte"> ⚽ Deporte</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-transporte"> 🚍 Transporte</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-negocios"> 🏪 Negocios Locales</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-deporte"> âš½ Deporte</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-transporte"> ðŸš Transporte</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-negocios"> ðŸª Negocios Locales</label>
                 </div>
             </div>
         </div>
@@ -1965,12 +1965,12 @@ function initRedVialStudio() {
         panel.classList.toggle('is-collapsed');
     });
     
-    // Evento Acordeón Avanzado
+    // Evento AcordeÃ³n Avanzado
     panel.querySelector('#rv-advanced-toggle').addEventListener('click', () => {
         panel.querySelector('#rv-advanced-content').classList.toggle('is-open');
     });
 
-    // Lógica de Perfiles Públicos
+    // LÃ³gica de Perfiles PÃºblicos
     panel.querySelectorAll('.rv-profile-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const profile = e.target.getAttribute('data-profile');
@@ -1997,7 +1997,7 @@ function initRedVialStudio() {
         });
     });
 
-    // Lógica Controles Avanzados Manuales
+    // LÃ³gica Controles Avanzados Manuales
     panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
         const layerKey = chk.getAttribute('data-layer');
         chk.checked = window.rvStyleConfig.toggles[layerKey];
@@ -2006,7 +2006,7 @@ function initRedVialStudio() {
             if (layerKey === 'buildings' && e.target.checked) { window.rvStyleConfig.toggles['buildings3d'] = false; panel.querySelector('[data-layer="buildings3d"]').checked = false; }
             window.rvStyleConfig.toggles[layerKey] = e.target.checked;
 
-            // Lógica para mostrar/ocultar lista de Referencias Urbanas
+            // LÃ³gica para mostrar/ocultar lista de Referencias Urbanas
             if (layerKey === 'ref-urbanas') {
                 const list = document.getElementById('ref-urbanas-list');
                 if (list) {
@@ -2018,12 +2018,12 @@ function initRedVialStudio() {
         });
     });
 
-    // Sincronización inicial de la lista de referencias
+    // SincronizaciÃ³n inicial de la lista de referencias
     const refList = document.getElementById('ref-urbanas-list');
     if (refList) {
         refList.style.display = window.rvStyleConfig.toggles['ref-urbanas'] ? 'block' : 'none';
         
-        // Cargar desde la BD y dibujar la lista dinámica con vuelos de cámara
+        // Cargar desde la BD y dibujar la lista dinÃ¡mica con vuelos de cÃ¡mara
         fetch('../panel-admin-universo/mapa_referencias_api.php?action=geojson')
             .then(res => res.json())
             .then(data => {
@@ -2034,13 +2034,13 @@ function initRedVialStudio() {
                     ul.innerHTML = '<li style="font-size: 11px; color: #64748b; padding: 4px 0;">No hay referencias guardadas.</li>';
                     return;
                 }
-                const iconMap = { 'salud':'🏥', 'educacion':'🎓', 'gobierno':'🏛️', 'deporte':'⚽', 'transporte':'🚌', 'comercio':'🛒', 'hito':'📍' };
+                const iconMap = { 'salud':'ðŸ¥', 'educacion':'ðŸŽ“', 'gobierno':'🏛️', 'deporte':'âš½', 'transporte':'ðŸšŒ', 'comercio':'🛒', 'hito':'ðŸ“' };
                 data.features.forEach(f => {
                     const li = document.createElement('li');
                     li.style.cssText = 'padding: 6px 0; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); transition: color 0.2s; font-size: 12px; color: #334155; display: flex; align-items: center; gap: 6px;';
                     li.onmouseover = () => li.style.color = '#801039';
                     li.onmouseout = () => li.style.color = '#334155';
-                    li.innerHTML = `<span>${iconMap[f.properties.icon_type] || '📍'}</span> <span>${f.properties.name}</span>`;
+                    li.innerHTML = `<span>${iconMap[f.properties.icon_type] || 'ðŸ“'}</span> <span>${f.properties.name}</span>`;
                     li.addEventListener('click', () => {
                         if (window.redVialMapInstance) {
                             window.redVialMapInstance.flyTo({ center: f.geometry.coordinates, zoom: Math.max(window.redVialMapInstance.getZoom(), 14), speed: 1.2 });
@@ -2079,7 +2079,7 @@ window.rv_compartirViaSeguro = function(idEncoded, nombreRaw) {
     if (navigator.share) {
         navigator.share({
             title: nombreRaw + ' - Fuerza Tacna',
-            text: 'Conoce los detalles de esta vía en el mapa interactivo:',
+            text: 'Conoce los detalles de esta vÃ­a en el mapa interactivo:',
             url: url
         }).catch(() => {});
     } else {
@@ -2087,7 +2087,7 @@ window.rv_compartirViaSeguro = function(idEncoded, nombreRaw) {
             const btn = document.getElementById('btnCompartirRV');
             if (btn) {
                 const originalText = btn.innerHTML;
-                btn.innerHTML = '✅ ¡Enlace copiado!';
+                btn.innerHTML = 'âœ… Â¡Enlace copiado!';
                 setTimeout(() => { if(btn) btn.innerHTML = originalText; }, 2500);
             }
         });
@@ -2145,7 +2145,7 @@ function abrirPanelRedVial(props = {}) {
     const idEncoded = rawId ? encodeURIComponent(rawId) : '';
     const descSafe = rv_escapeHTML(props.descripcion || '').replace(/\n/g, '<br>');
 
-    // RV3-C3: Extracción Segura de Nuevos Campos Estratégicos
+    // RV3-C3: ExtracciÃ³n Segura de Nuevos Campos EstratÃ©gicos
     const mensajeSafe = rv_escapeHTML(props.mensaje_principal);
     const distritoSafe = rv_escapeHTML(props.distrito);
     const sectorSafe = rv_escapeHTML(props.sector);
@@ -2165,44 +2165,44 @@ function abrirPanelRedVial(props = {}) {
     let estadoClass = 'pill--estudios';
     const estLow = estadoSafe.toLowerCase();
     if (estLow.includes('entregado')) estadoClass = 'pill--entregado';
-    else if (estLow.includes('ejecución') || estLow.includes('construccion')) estadoClass = 'pill--construccion';
+    else if (estLow.includes('ejecuciÃ³n') || estLow.includes('construccion')) estadoClass = 'pill--construccion';
     else if (estLow.includes('paralizado')) estadoClass = 'pill--paralizado';
     else if (estLow.includes('buena pro')) estadoClass = 'pill--buenapro';
     else if (estLow.includes('transferencia')) estadoClass = 'pill--transferencia';
 
     // ==========================================
-    // CONSTRUCCIÓN CONDICIONAL DE BLOQUES
+    // CONSTRUCCIÃ“N CONDICIONAL DE BLOQUES
     // ==========================================
     let htmlMensaje = '';
     if (rv_hasValue(mensajeSafe)) htmlMensaje = `<div class="rd-rv-hook" style="color: ${colorSafe};">${mensajeSafe}</div>`;
 
-    // Ubicación (Debajo del título)
+    // UbicaciÃ³n (Debajo del tÃ­tulo)
     let locParts = [];
     if (rv_hasValue(distritoSafe)) locParts.push(`<strong>${distritoSafe}</strong>`);
     if (rv_hasValue(sectorSafe)) locParts.push(`Sector ${sectorSafe}`);
     let htmlUbicacion = locParts.length > 0 ? `<div class="rd-rv-location"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg> ${locParts.join(' &middot; ')}</div>` : '';
 
     // ==========================================
-    // JERARQUÍA DE MÉTRICAS (RV3-C3.2)
+    // JERARQUÃA DE MÃ‰TRICAS (RV3-C3.2)
     // ==========================================
     
-    // NIVEL 1: PROTAGONISTAS (Inversión y Longitud)
+    // NIVEL 1: PROTAGONISTAS (InversiÃ³n y Longitud)
     let htmlNivel1 = '';
     if (rv_hasValue(montoSafe) || rv_hasValue(longitudSafe)) {
         htmlNivel1 += `<div class="rd-rv-metrics-primary">`;
         if (rv_hasValue(montoSafe)) {
-            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">💰 Inversión</span></div>`;
+            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">ðŸ’° InversiÃ³n</span></div>`;
         }
         if (rv_hasValue(longitudSafe)) {
             let cuadrasHtml = '';
             const cVal = props.longitud_cuadras;
             if (rv_hasValue(cVal) && parseFloat(cVal) > 0) cuadrasHtml = `<span class="rd-rv-metric-sub">Equivale aprox. a ${cVal} cuadras</span>`;
-            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">📏 Longitud</span>${cuadrasHtml}</div>`;
+            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">ðŸ“ Longitud</span>${cuadrasHtml}</div>`;
         }
         htmlNivel1 += `</div>`;
     }
 
-    // NIVEL 2: AVANCE FÍSICO (Secundario pero altamente visible)
+    // NIVEL 2: AVANCE FÃSICO (Secundario pero altamente visible)
     let htmlNivel2 = '';
     if (hasAvance) {
         let avanceTxt = `${avance}%`;
@@ -2210,7 +2210,7 @@ function abrirPanelRedVial(props = {}) {
         htmlNivel2 = `
         <div class="rd-rv-metrics-secondary">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span class="rd-rv-metric-lbl">📊 Avance</span>
+                <span class="rd-rv-metric-lbl">ðŸ“Š Avance</span>
                 <span style="color:${colorSafe}; font-size:14px; font-weight:900; line-height:1;">${avanceTxt}</span>
             </div>
             <div style="height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
@@ -2221,9 +2221,9 @@ function abrirPanelRedVial(props = {}) {
 
     // NIVEL 3: DATOS SECUNDARIOS Y CONTEXTO
     let secItems = '';
-    if (rv_hasValue(benefSafe)) secItems += `<div class="rd-rv-sec-item"><span>👥</span> <div><strong>Beneficiarios:</strong> ${benefSafe}</div></div>`;
-    if (rv_hasValue(inicioSafe)) secItems += `<div class="rd-rv-sec-item"><span>📅</span> <div><strong>Inicio:</strong> ${inicioSafe}</div></div>`;
-    if (rv_hasValue(entregaSafe)) secItems += `<div class="rd-rv-sec-item"><span>🏁</span> <div><strong>Entrega:</strong> ${entregaSafe}</div></div>`;
+    if (rv_hasValue(benefSafe)) secItems += `<div class="rd-rv-sec-item"><span>ðŸ‘¥</span> <div><strong>Beneficiarios:</strong> ${benefSafe}</div></div>`;
+    if (rv_hasValue(inicioSafe)) secItems += `<div class="rd-rv-sec-item"><span>ðŸ“…</span> <div><strong>Inicio:</strong> ${inicioSafe}</div></div>`;
+    if (rv_hasValue(entregaSafe)) secItems += `<div class="rd-rv-sec-item"><span>ðŸ</span> <div><strong>Entrega:</strong> ${entregaSafe}</div></div>`;
     let htmlSecondary = secItems ? `<div class="rd-rv-sec-list">${secItems}</div>` : '';
 
     let htmlTramo = '';
@@ -2233,9 +2233,9 @@ function abrirPanelRedVial(props = {}) {
         if (tramoTxt) tramoTxt += ` &middot; Sector <strong>${sectorSafe}</strong>`;
         else tramoTxt = `Sector: <strong>${sectorSafe}</strong>`;
     }
-    if (tramoTxt) htmlTramo = `<div class="rd-rv-tramo-compact"><span>📍</span> <div>${tramoTxt}</div></div>`;
+    if (tramoTxt) htmlTramo = `<div class="rd-rv-tramo-compact"><span>ðŸ“</span> <div>${tramoTxt}</div></div>`;
 
-    // NIVEL 3: NARRATIVA (Descripción y Antes/Ahora)
+    // NIVEL 3: NARRATIVA (DescripciÃ³n y Antes/Ahora)
     let htmlAntesAhora = '';
     if (rv_hasValue(antesSafe) || rv_hasValue(ahoraSafe)) {
         htmlAntesAhora = `<div class="rd-rv-antes-ahora">`;
@@ -2249,13 +2249,13 @@ function abrirPanelRedVial(props = {}) {
         htmlDesc = `
         <div class="rd-rv-desc-block">
             <div id="rvDescText" class="rd-rv-desc-clamp"><p>${descSafe}</p></div>
-            <button id="rvBtnMoreDesc" class="rd-rv-btn-more" style="display: none;">Ver más</button>
+            <button id="rvBtnMoreDesc" class="rd-rv-btn-more" style="display: none;">Ver mÃ¡s</button>
         </div>`;
     }
 
     let htmlNoData = '';
     if (!htmlNivel1 && !htmlNivel2 && !htmlSecondary && !htmlTramo && !htmlDesc && !htmlAntesAhora) {
-        htmlNoData = `<p style="color:#94a3b8; font-style:italic; font-size:13px; margin-top:5px;">No hay información adicional disponible para este tramo.</p>`;
+        htmlNoData = `<p style="color:#94a3b8; font-style:italic; font-size:13px; margin-top:5px;">No hay informaciÃ³n adicional disponible para este tramo.</p>`;
     }
 
     panel.innerHTML = `
@@ -2286,7 +2286,7 @@ function abrirPanelRedVial(props = {}) {
             </div>
             <div id="rv-gallery-container" style="display: none; padding: 0 15px 12px 15px;"></div>
             <div class="rd-rv-footer">
-                <button id="btnCompartirRV" class="btn-share">🔗 Compartir Vía</button>
+                <button id="btnCompartirRV" class="btn-share">ðŸ”— Compartir VÃ­a</button>
             </div>
         </div>
     `;
@@ -2300,7 +2300,7 @@ function abrirPanelRedVial(props = {}) {
         window.rv_compartirViaSeguro(idEncoded, props.nombre || 'Tramo Vial'); 
     });
     
-    // Lógica "Ver más" de la descripción
+    // LÃ³gica "Ver mÃ¡s" de la descripciÃ³n
     const btnMore = panel.querySelector('#rvBtnMoreDesc');
     const descText = panel.querySelector('#rvDescText');
     if (btnMore && descText) {
@@ -2308,15 +2308,15 @@ function abrirPanelRedVial(props = {}) {
             if (descText.scrollHeight > descText.clientHeight) {
                 btnMore.style.display = 'block';
             }
-        }, 20); // Retraso mínimo para asegurar render del DOM
+        }, 20); // Retraso mÃ­nimo para asegurar render del DOM
         
         btnMore.addEventListener('click', () => {
             descText.classList.toggle('rd-rv-desc-clamp');
-            btnMore.textContent = descText.classList.contains('rd-rv-desc-clamp') ? 'Ver más' : 'Ver menos';
+            btnMore.textContent = descText.classList.contains('rd-rv-desc-clamp') ? 'Ver mÃ¡s' : 'Ver menos';
         });
     }
     
-    // Petición Asíncrona (Lazy Load) de la Galería Pública
+    // PeticiÃ³n AsÃ­ncrona (Lazy Load) de la GalerÃ­a PÃºblica
     if (rawId) {
         fetch(`../panel-admin-universo/fotos_redvial_api.php?action=listar_publico&tramo_id=${idEncoded}`)
             .then(res => res.json())
@@ -2333,7 +2333,7 @@ function abrirPanelRedVial(props = {}) {
                             heroEl.style.display = 'block';
                         }
 
-                        // Mostrar mini galería si hay más de 1 foto
+                        // Mostrar mini galerÃ­a si hay mÃ¡s de 1 foto
                         if (data.fotos.length > 1) {
                             const galContainer = document.getElementById('rv-gallery-container');
                             if (galContainer) {
@@ -2365,7 +2365,7 @@ function abrirPanelRedVial(props = {}) {
                 }
             })
             .catch(err => {
-                console.warn("[Red Vial] Ocurrió un error al consultar la galería pública:", err);
+                console.warn("[Red Vial] OcurriÃ³ un error al consultar la galerÃ­a pÃºblica:", err);
             });
     }
 
@@ -2373,14 +2373,14 @@ function abrirPanelRedVial(props = {}) {
 }
 
 window.activateRedVial = async function() {
-    console.log("[Red Vial] Activando módulo...");
+    console.log("[Red Vial] Activando mÃ³dulo...");
     
     const container = document.getElementById('red-vial-map-container');
     const svg = document.getElementById('synced-svg-container');
     const filters = document.getElementById('red-vial-filters');
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
     
-    // 🔥 FIX 1: Ocultar INMEDIATAMENTE el SVG y los pines del mapa base antes de cargar nada
+    // ðŸ”¥ FIX 1: Ocultar INMEDIATAMENTE el SVG y los pines del mapa base antes de cargar nada
     if (svg) svg.style.setProperty('opacity', '0', 'important');
     if (baseCanvas) baseCanvas.style.setProperty('opacity', '0', 'important');
     if (container) {
@@ -2406,7 +2406,7 @@ window.activateRedVial = async function() {
         filters.style.pointerEvents = 'auto';
     }
     
-    // 🔥 FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
+    // ðŸ”¥ FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
     if (window.redVialMapInstance) {
         setTimeout(() => {
             if(window.redVialMapInstance) {
@@ -2435,7 +2435,7 @@ window.deactivateRedVial = function() {
         container.style.pointerEvents = 'none';
     }
     
-    // 🔥 FIX 2: Restaurar INMEDIATAMENTE el SVG y los pines del mapa base
+    // ðŸ”¥ FIX 2: Restaurar INMEDIATAMENTE el SVG y los pines del mapa base
     if (svg) svg.style.setProperty('opacity', '1', 'important');
     if (baseCanvas) baseCanvas.style.setProperty('opacity', '1', 'important');
     
