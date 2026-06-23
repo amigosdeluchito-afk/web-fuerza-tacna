@@ -1933,64 +1933,61 @@ function initRedVialStudio() {
 
     panel.innerHTML = `
         <div class="rv-panel-header" id="rv-panel-header-btn" title="Mostrar/Ocultar capas">
-            <h3 class="rv-panel-title">ðŸ—ºï¸ Vista del Mapa</h3>
-            <button class="rv-panel-toggle">â–¼</button>
+            <h3 class="rv-panel-title">Vista del Mapa</h3>
+            <button class="rv-panel-toggle">v</button>
         </div>
         <div class="rv-panel-body">
-            <!-- PestaÃ±as Principales (UX Ciudadano) -->
             <div class="rv-profiles">
                 <button class="rv-profile-btn is-active" data-profile="ciudadano">Ciudadano</button>
-                <button class="rv-profile-btn" data-profile="tecnico">TÃ©cnico</button>
+                <button class="rv-profile-btn" data-profile="tecnico">Tecnico</button>
                 <button class="rv-profile-btn" data-profile="impacto">Impacto</button>
             </div>
             
-            <!-- AcordeÃ³n Opciones Avanzadas -->
             <div class="rv-advanced-header" id="rv-advanced-toggle">
-                <span>âš™ï¸ Opciones Avanzadas</span>
-                <span>â–¼</span>
+                <span>Opciones Avanzadas</span>
+                <span>v</span>
             </div>
             <div class="rv-advanced-content" id="rv-advanced-content">
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Base</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="water"> ðŸ’§ Agua</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="parks"> ðŸŒ³ Parques</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings"> ðŸ¢ Edificios 2D</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings3d"> ðŸ™ï¸ Edificios 3D</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="water"> Agua</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="parks"> Parques</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings"> Edificios 2D</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="buildings3d"> Edificios 3D</label>
                 </div>
                 <div class="rv-panel-group">
-                    <div class="rv-panel-group-title">VÃ­as</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="roads"> 🛣️ Calles</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> ðŸš† Transp. FÃ©rreo</label>
+                    <div class="rv-panel-group-title">Vias</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="roads"> Calles</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="transit"> Transporte ferreo</label>
                 </div>
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Territorio</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="boundaries"> ðŸ—ºï¸ LÃ­mites Distr.</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="places-text"> ðŸ·ï¸ Nombres</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="boundaries"> Limites distr.</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="places-text"> Nombres</label>
                 </div>
                 <div class="rv-panel-group">
                     <div class="rv-panel-group-title">Referencias</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="ref-urbanas"> ðŸ“ Referencias Clave</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="ref-urbanas"> Referencias clave</label>
                     <div id="ref-urbanas-list" class="rv-ref-list" style="display: none;">
                         <ul style="list-style: none; padding: 0; margin: 0;">
-                            <li style="font-size: 11px; color: #64748b; padding: 4px 0;">â³ Cargando referencias...</li>
+                            <li style="font-size: 11px; color: #64748b; padding: 4px 0;">Cargando referencias...</li>
                         </ul>
                     </div>
                 </div>
                 <div class="rv-panel-group">
-                    <div class="rv-panel-group-title">ðŸ¢ Servicios</div>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-edu"> ðŸ“š EducaciÃ³n</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-salud"> ðŸ¥ Salud</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-seguridad"> ðŸš“ Seguridad</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-gobierno"> 🏛️ Gobierno</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-mercados"> 🛒 Mercados</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-deporte"> âš½ Deporte</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-transporte"> ðŸš Transporte</label>
-                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-negocios"> ðŸª Negocios Locales</label>
+                    <div class="rv-panel-group-title">Servicios</div>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-edu"> Educacion</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-salud"> Salud</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-seguridad"> Seguridad</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-gobierno"> Gobierno</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-mercados"> Mercados</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-deporte"> Deporte</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-transporte"> Transporte</label>
+                    <label class="rv-panel-item"><input type="checkbox" data-layer="srv-negocios"> Negocios locales</label>
                 </div>
             </div>
         </div>
-    `;
-    container.appendChild(panel);
+    `;    container.appendChild(panel);
 
     panel.querySelectorAll('.rv-profile-btn').forEach(btn => {
         btn.classList.toggle('is-active', btn.getAttribute('data-profile') === window.rvStyleConfig.theme);
