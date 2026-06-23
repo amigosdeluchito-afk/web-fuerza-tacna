@@ -579,7 +579,8 @@ body.segmento-alcalde_provincial #legend {
 .rv-panel {
   position: absolute;
   top: 20px;
-  right: 20px;
+  left: 20px;
+  right: auto;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

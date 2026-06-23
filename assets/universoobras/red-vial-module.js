@@ -1356,8 +1356,8 @@ window.rvEnsureZoomIndicator = function() {
 
     indicator.style.cssText = [
         'position:fixed',
-        'left:12px',
-        'top:148px',
+        'left:8px',
+        'top:8px',
         'z-index:9998',
         'pointer-events:none',
         'padding:4px 8px',
