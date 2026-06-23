@@ -1559,7 +1559,10 @@ window.rvAnimateTramoEntry = function() {
     const sourceData = window.rvTramoEntryGeoJSON;
     if (!sourceData) return;
 
-    const duration = 1600;
+    window.rvSetBaseTramosOpacity(0);
+    window.rvSafeSetSourceData('tramos-viales-entry', { type: 'FeatureCollection', features: [] });
+
+    const duration = 2200;
     const startedAt = performance.now();
     const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
@@ -1591,9 +1594,6 @@ window.rvScheduleTramoEntryAnimation = async function(delay = 2000) {
         window.rvSetBaseTramosOpacity(1);
         return;
     }
-
-    window.rvSetBaseTramosOpacity(0);
-    window.rvSafeSetSourceData('tramos-viales-entry', { type: 'FeatureCollection', features: [] });
     window.rvTramoEntryTimeout = window.setTimeout(() => {
         window.rvTramoEntryTimeout = null;
         window.rvAnimateTramoEntry();
@@ -1783,7 +1783,6 @@ window.initRedVial = async function() {
         window.redVialMapInstance.resize();
         window.redVialMapInstance.once('idle', () => {
             window.clearTimeout(rvBaseMapRecoveryTimer);
-            window.rvScheduleTramoEntryAnimation?.(2000);
             window.rvUpdateTramoActiveStyles();
         });
         window.rvScheduleTerritorialLayers(window.redVialMapInstance);
@@ -2641,8 +2640,6 @@ window.activateRedVial = async function() {
         filters.style.pointerEvents = 'auto';
     }
 
-    window.rvScheduleTramoEntryAnimation?.(2000);
-    
     // ðŸ”¥ FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
     if (window.redVialMapInstance) {
         setTimeout(() => {
@@ -2656,6 +2653,7 @@ window.activateRedVial = async function() {
             if(window.redVialMapInstance) {
                 window.redVialMapInstance.resize();
                 window.rvUpdateZoomIndicator();
+                window.rvScheduleTramoEntryAnimation?.(1600);
             }
         }, 600);
     }
