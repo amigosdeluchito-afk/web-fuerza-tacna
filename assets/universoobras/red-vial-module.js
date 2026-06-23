@@ -293,6 +293,7 @@ window.rvApplyStyle = function() {
             },
             "tramos-viales": { 
                 type: "geojson", 
+                lineMetrics: true,
                 data: "../panel-admin-universo/mapa_redvial_api.php?action=geojson" 
             },
             "tramos-viales-nodes": {
@@ -1406,24 +1407,88 @@ window.rvHideTramoTooltip = function() {
 
 
 
-window.rvAnimateTramoEntry = function() {
+window.rvClearTramoEntryAnimation = function() {
+    if (window.rvTramoEntryTimeout) {
+        window.clearTimeout(window.rvTramoEntryTimeout);
+        window.rvTramoEntryTimeout = null;
+    }
+    if (window.rvTramoEntryRAF) {
+        window.cancelAnimationFrame(window.rvTramoEntryRAF);
+        window.rvTramoEntryRAF = null;
+    }
+};
+
+window.rvSetTramoEntryProgress = function(progress) {
     const map = window.redVialMapInstance;
     if (!map) return;
-    const frames = 8;
-    let step = 0;
-    const targetMainOpacity = window.rvGetBaseTramoOpacity('tramos-viales-layer');
-    const targetBgOpacity = window.rvGetBaseTramoOpacity('tramos-viales-bg');
-    const interval = window.setInterval(() => {
-        step += 1;
-        const alpha = Math.min(1, step / frames);
-        if (map.getLayer('tramos-viales-layer')) map.setPaintProperty('tramos-viales-layer', 'line-opacity', alpha * targetMainOpacity);
-        if (map.getLayer('tramos-viales-bg')) map.setPaintProperty('tramos-viales-bg', 'line-opacity', alpha * targetBgOpacity);
-        if (step >= frames) {
-            window.clearInterval(interval);
-            window.rvUpdateTramoActiveStyles();
+
+    const p = Math.max(0, Math.min(1, progress));
+    const transparent = 'rgba(255,255,255,0)';
+    window.rvSafeSetPaint('tramos-viales-outline', 'line-gradient', [
+        'step', ['line-progress'],
+        '#64748b',
+        p, transparent
+    ]);
+    window.rvSafeSetPaint('tramos-viales-bg', 'line-gradient', [
+        'step', ['line-progress'],
+        '#ffffff',
+        p, transparent
+    ]);
+    window.rvSafeSetPaint('tramos-viales-layer', 'line-gradient', [
+        'step', ['line-progress'],
+        ['coalesce', ['get', 'color'], '#14532d'],
+        p, 'rgba(20,83,45,0)'
+    ]);
+};
+
+window.rvResetTramoEntryGradient = function() {
+    window.rvSafeSetPaint('tramos-viales-outline', 'line-gradient', '#64748b');
+    window.rvSafeSetPaint('tramos-viales-bg', 'line-gradient', '#ffffff');
+    window.rvSafeSetPaint('tramos-viales-layer', 'line-gradient', ['coalesce', ['get', 'color'], '#14532d']);
+};
+
+window.rvAnimateTramoEntry = function() {
+    const map = window.redVialMapInstance;
+    if (!map || !window.rvStyleConfig.toggles.tramos || !map.getLayer('tramos-viales-layer')) return;
+
+    window.rvClearTramoEntryAnimation();
+    window.rvSelectedTramoId = null;
+    window.rvSelectedTramoFeature = null;
+    window.rvHoveredTramoId = null;
+    window.rvHoveredTramoFeature = null;
+    window.rvClearTramoNodes?.();
+    window.rvStopFlowAnimation?.();
+
+    const duration = 1600;
+    const startedAt = performance.now();
+    const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+    const frame = now => {
+        const raw = Math.min(1, (now - startedAt) / duration);
+        window.rvSetTramoEntryProgress(easeOutCubic(raw));
+        if (raw < 1) {
+            window.rvTramoEntryRAF = window.requestAnimationFrame(frame);
+            return;
         }
-    }, 90);
-}
+        window.rvTramoEntryRAF = null;
+        window.rvResetTramoEntryGradient();
+        window.rvUpdateTramoActiveStyles();
+    };
+
+    window.rvTramoEntryRAF = window.requestAnimationFrame(frame);
+};
+
+window.rvScheduleTramoEntryAnimation = function(delay = 2000) {
+    const map = window.redVialMapInstance;
+    if (!map || !window.rvStyleConfig.toggles.tramos || !map.getLayer('tramos-viales-layer')) return;
+
+    window.rvClearTramoEntryAnimation();
+    window.rvSetTramoEntryProgress(0);
+    window.rvTramoEntryTimeout = window.setTimeout(() => {
+        window.rvTramoEntryTimeout = null;
+        window.rvAnimateTramoEntry();
+    }, delay);
+};
 
 function rv_addLayerBefore(map, layer, beforeIds = []) {
     const beforeId = beforeIds.find(id => map.getLayer(id));
@@ -2465,6 +2530,8 @@ window.activateRedVial = async function() {
         filters.style.opacity = '1';
         filters.style.pointerEvents = 'auto';
     }
+
+    window.rvScheduleTramoEntryAnimation?.(2000);
     
     // ðŸ”¥ FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
     if (window.redVialMapInstance) {
@@ -2489,6 +2556,7 @@ window.deactivateRedVial = function() {
     const svg = document.getElementById('synced-svg-container');
     const filters = document.getElementById('red-vial-filters');
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
+    window.rvClearTramoEntryAnimation?.();
     
     if (container) {
         container.style.opacity = '0';
