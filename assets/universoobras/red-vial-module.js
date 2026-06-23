@@ -2086,6 +2086,18 @@ function initRedVialStudio() {
     }
 }
 
+function rvOpenStudioPanel() {
+    const panel = document.getElementById('rv-studio-panel');
+    if (!panel) return;
+
+    panel.classList.remove('is-collapsed');
+
+    const advancedContent = panel.querySelector('#rv-advanced-content');
+    if (advancedContent) {
+        advancedContent.classList.add('is-open');
+    }
+}
+
 function rv_escapeHTML(str) {
     if (!str) return '';
     return String(str)
@@ -2428,6 +2440,8 @@ window.activateRedVial = async function() {
     if (!window.redVialMapInstance) {
         await window.initRedVial();
     }
+
+    rvOpenStudioPanel();
     
     if (container) {
         container.style.opacity = '1';

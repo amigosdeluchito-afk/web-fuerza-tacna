@@ -270,6 +270,14 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 #legend .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #fff; }
 #legend .label { opacity: .9; }
 
+body.segmento-alcalde_provincial #filtersDock,
+body.segmento-alcalde_provincial #legend {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 @media (prefers-reduced-motion: reduce){
   *{ animation:none!important; transition:none!important }
 }

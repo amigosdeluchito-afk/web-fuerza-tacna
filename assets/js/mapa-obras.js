@@ -120,7 +120,7 @@ window.initMapEngine = async function(container) {
 
     function updateLegendVisibility(key){
         const el = getEl('legend');
-        if (el) el.style.display = (key === 'base') ? 'none' : 'block';
+        if (el) el.style.display = (key === 'base' || key === 'alcalde_provincial') ? 'none' : 'block';
     }
 
     function padBounds(b, pct){
