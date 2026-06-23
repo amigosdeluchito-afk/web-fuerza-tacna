@@ -2345,7 +2345,7 @@ window.rv_compartirViaSeguro = function(idEncoded, nombreRaw) {
     if (navigator.share) {
         navigator.share({
             title: nombreRaw + ' - Fuerza Tacna',
-            text: 'Conoce los detalles de esta vÃƒÂ­a en el mapa interactivo:',
+            text: 'Conoce los detalles de esta via en el mapa interactivo:',
             url: url
         }).catch(() => {});
     } else {
@@ -2353,7 +2353,7 @@ window.rv_compartirViaSeguro = function(idEncoded, nombreRaw) {
             const btn = document.getElementById('btnCompartirRV');
             if (btn) {
                 const originalText = btn.innerHTML;
-                btn.innerHTML = 'Ã¢Å“â€¦ Ã‚Â¡Enlace copiado!';
+                btn.innerHTML = '&#10003; Enlace copiado';
                 setTimeout(() => { if(btn) btn.innerHTML = originalText; }, 2500);
             }
         });
@@ -2457,13 +2457,13 @@ function abrirPanelRedVial(props = {}) {
     if (rv_hasValue(montoSafe) || rv_hasValue(longitudSafe)) {
         htmlNivel1 += `<div class="rd-rv-metrics-primary">`;
         if (rv_hasValue(montoSafe)) {
-            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">Ã°Å¸â€™Â° InversiÃƒÂ³n</span></div>`;
+            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${montoSafe}</span><span class="rd-rv-metric-lbl">&#128176; Inversion</span></div>`;
         }
         if (rv_hasValue(longitudSafe)) {
             let cuadrasHtml = '';
             const cVal = props.longitud_cuadras;
             if (rv_hasValue(cVal) && parseFloat(cVal) > 0) cuadrasHtml = `<span class="rd-rv-metric-sub">Equivale aprox. a ${cVal} cuadras</span>`;
-            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">Ã°Å¸â€œÂ Longitud</span>${cuadrasHtml}</div>`;
+            htmlNivel1 += `<div class="rd-rv-metric-card"><span class="rd-rv-metric-val">${longitudSafe}</span><span class="rd-rv-metric-lbl">&#128207; Longitud</span>${cuadrasHtml}</div>`;
         }
         htmlNivel1 += `</div>`;
     }
@@ -2476,7 +2476,7 @@ function abrirPanelRedVial(props = {}) {
         htmlNivel2 = `
         <div class="rd-rv-metrics-secondary">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span class="rd-rv-metric-lbl">Ã°Å¸â€œÅ  Avance</span>
+                <span class="rd-rv-metric-lbl">&#128202; Avance</span>
                 <span style="color:${colorSafe}; font-size:14px; font-weight:900; line-height:1;">${avanceTxt}</span>
             </div>
             <div style="height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden;">
@@ -2487,9 +2487,9 @@ function abrirPanelRedVial(props = {}) {
 
     // NIVEL 3: DATOS SECUNDARIOS Y CONTEXTO
     let secItems = '';
-    if (rv_hasValue(benefSafe)) secItems += `<div class="rd-rv-sec-item"><span>Ã°Å¸â€˜Â¥</span> <div><strong>Beneficiarios:</strong> ${benefSafe}</div></div>`;
-    if (rv_hasValue(inicioSafe)) secItems += `<div class="rd-rv-sec-item"><span>Ã°Å¸â€œâ€¦</span> <div><strong>Inicio:</strong> ${inicioSafe}</div></div>`;
-    if (rv_hasValue(entregaSafe)) secItems += `<div class="rd-rv-sec-item"><span>Ã°Å¸ÂÂ</span> <div><strong>Entrega:</strong> ${entregaSafe}</div></div>`;
+    if (rv_hasValue(benefSafe)) secItems += `<div class="rd-rv-sec-item"><span>&#128101;</span> <div><strong>Beneficiarios:</strong> ${benefSafe}</div></div>`;
+    if (rv_hasValue(inicioSafe)) secItems += `<div class="rd-rv-sec-item"><span>&#128197;</span> <div><strong>Inicio:</strong> ${inicioSafe}</div></div>`;
+    if (rv_hasValue(entregaSafe)) secItems += `<div class="rd-rv-sec-item"><span>&#127937;</span> <div><strong>Entrega:</strong> ${entregaSafe}</div></div>`;
     let htmlSecondary = secItems ? `<div class="rd-rv-sec-list">${secItems}</div>` : '';
 
     let htmlTramo = '';
@@ -2499,7 +2499,7 @@ function abrirPanelRedVial(props = {}) {
         if (tramoTxt) tramoTxt += ` &middot; Sector <strong>${sectorSafe}</strong>`;
         else tramoTxt = `Sector: <strong>${sectorSafe}</strong>`;
     }
-    if (tramoTxt) htmlTramo = `<div class="rd-rv-tramo-compact"><span>Ã°Å¸â€œÂ</span> <div>${tramoTxt}</div></div>`;
+    if (tramoTxt) htmlTramo = `<div class="rd-rv-tramo-compact"><span>&#128205;</span> <div>${tramoTxt}</div></div>`;
 
     // NIVEL 3: NARRATIVA (DescripciÃƒÂ³n y Antes/Ahora)
     let htmlAntesAhora = '';
@@ -2515,13 +2515,13 @@ function abrirPanelRedVial(props = {}) {
         htmlDesc = `
         <div class="rd-rv-desc-block">
             <div id="rvDescText" class="rd-rv-desc-clamp"><p>${descSafe}</p></div>
-            <button id="rvBtnMoreDesc" class="rd-rv-btn-more" style="display: none;">Ver mÃƒÂ¡s</button>
+            <button id="rvBtnMoreDesc" class="rd-rv-btn-more" style="display: none;">Ver mas</button>
         </div>`;
     }
 
     let htmlNoData = '';
     if (!htmlNivel1 && !htmlNivel2 && !htmlSecondary && !htmlTramo && !htmlDesc && !htmlAntesAhora) {
-        htmlNoData = `<p style="color:#94a3b8; font-style:italic; font-size:13px; margin-top:5px;">No hay informaciÃƒÂ³n adicional disponible para este tramo.</p>`;
+        htmlNoData = `<p style="color:#94a3b8; font-style:italic; font-size:13px; margin-top:5px;">No hay informacion adicional disponible para este tramo.</p>`;
     }
 
     panel.innerHTML = `
@@ -2552,7 +2552,7 @@ function abrirPanelRedVial(props = {}) {
             </div>
             <div id="rv-gallery-container" style="display: none; padding: 0 15px 12px 15px;"></div>
             <div class="rd-rv-footer">
-                <button id="btnCompartirRV" class="btn-share">Ã°Å¸â€â€” Compartir VÃƒÂ­a</button>
+                <button id="btnCompartirRV" class="btn-share">&#128279; Compartir via</button>
             </div>
         </div>
     `;
@@ -2578,7 +2578,7 @@ function abrirPanelRedVial(props = {}) {
         
         btnMore.addEventListener('click', () => {
             descText.classList.toggle('rd-rv-desc-clamp');
-            btnMore.textContent = descText.classList.contains('rd-rv-desc-clamp') ? 'Ver mÃƒÂ¡s' : 'Ver menos';
+            btnMore.textContent = descText.classList.contains('rd-rv-desc-clamp') ? 'Ver mas' : 'Ver menos';
         });
     }
     
