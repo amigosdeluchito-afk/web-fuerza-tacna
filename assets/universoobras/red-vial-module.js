@@ -1161,22 +1161,70 @@ window.rvGetTramoGeometryCenter = function(feature) {
     return [(minLng + maxLng) / 2, (minLat + maxLat) / 2];
 };
 
+window.rvGetTramoGeometryBounds = function(feature) {
+    if (!feature || !feature.geometry) return null;
+    const geometry = feature.geometry;
+    const rawCoords = geometry.type === 'LineString'
+        ? geometry.coordinates
+        : geometry.type === 'MultiLineString'
+            ? geometry.coordinates.flat()
+            : [];
+
+    const coords = rawCoords.filter(coord => Array.isArray(coord) && coord.length >= 2);
+    if (!coords.length) return null;
+
+    let minLng = Infinity;
+    let minLat = Infinity;
+    let maxLng = -Infinity;
+    let maxLat = -Infinity;
+
+    coords.forEach(coord => {
+        const lng = Number(coord[0]);
+        const lat = Number(coord[1]);
+        if (!Number.isFinite(lng) || !Number.isFinite(lat)) return;
+        minLng = Math.min(minLng, lng);
+        minLat = Math.min(minLat, lat);
+        maxLng = Math.max(maxLng, lng);
+        maxLat = Math.max(maxLat, lat);
+    });
+
+    if (!Number.isFinite(minLng) || !Number.isFinite(minLat) || !Number.isFinite(maxLng) || !Number.isFinite(maxLat)) {
+        return null;
+    }
+
+    const minSpan = 0.0025;
+    if (Math.abs(maxLng - minLng) < minSpan) {
+        const midLng = (minLng + maxLng) / 2;
+        minLng = midLng - minSpan / 2;
+        maxLng = midLng + minSpan / 2;
+    }
+    if (Math.abs(maxLat - minLat) < minSpan) {
+        const midLat = (minLat + maxLat) / 2;
+        minLat = midLat - minSpan / 2;
+        maxLat = midLat + minSpan / 2;
+    }
+
+    return [[minLng, minLat], [maxLng, maxLat]];
+};
+
 window.rvFocusSelectedTramo = function(feature) {
     const map = window.redVialMapInstance;
-    const center = window.rvGetTramoGeometryCenter(feature);
-    if (!map || !center) return;
+    const bounds = window.rvGetTramoGeometryBounds(feature);
+    if (!map || !bounds) return;
 
     const panel = document.getElementById('redVialInfoPanel');
     const panelWidth = panel && panel.classList.contains('is-active') && window.innerWidth > 760
         ? Math.min(panel.getBoundingClientRect().width || 0, 420)
         : 0;
 
-    map.easeTo({
-        center,
-        zoom: map.getZoom(),
-        pitch: map.getPitch(),
-        bearing: map.getBearing(),
-        offset: panelWidth ? [-panelWidth / 2, 0] : [0, 0],
+    map.fitBounds(bounds, {
+        padding: {
+            top: 130,
+            bottom: 120,
+            left: 120,
+            right: panelWidth ? panelWidth + 150 : 120
+        },
+        maxZoom: 16.5,
         duration: 650,
         essential: true
     });
