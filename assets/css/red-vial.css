@@ -69,3 +69,13 @@
     background: #801039;
     color: #ffc300;
 }
+
+.rv-filter-btn.rv-filter-toggle {
+    border-left: 1px solid rgba(128, 16, 57, 0.18);
+    color: #5b6678;
+}
+
+.rv-filter-btn.rv-filter-toggle.is-muted {
+    background: rgba(15, 23, 42, 0.08);
+    color: #64748b;
+}

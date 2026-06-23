@@ -1568,7 +1568,7 @@ window.rvAnimateTramoEntry = function() {
     window.rvSetBaseTramosOpacity(0);
     window.rvSafeSetSourceData('tramos-viales-entry', { type: 'FeatureCollection', features: [] });
 
-    const duration = 2200;
+    const duration = 4200;
     const startedAt = performance.now();
     const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
@@ -2091,8 +2091,28 @@ function setupRedVialFilters() {
     const filterButtons = document.querySelectorAll('.rv-filter-btn');
     filterButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
+            if (btn.getAttribute('data-action') === 'toggle-tramos') {
+                const enabled = !window.rvStyleConfig.toggles.tramos;
+                window.rvStyleConfig.toggles.tramos = enabled;
+                btn.textContent = enabled ? 'Ocultar tramos' : 'Mostrar tramos';
+                btn.classList.toggle('is-muted', !enabled);
+                if (!enabled) {
+                    window.rvSelectedTramoId = null;
+                    window.rvSelectedTramoFeature = null;
+                    window.rvHoveredTramoId = null;
+                    window.rvHoveredTramoFeature = null;
+                    window.rvClearTramoNodes?.();
+                    window.rvStopFlowAnimation?.();
+                    window.rvSafeSetSourceData('tramos-viales-entry', { type: 'FeatureCollection', features: [] });
+                }
+                window.rvApplyStyle();
+                return;
+            }
+
             // Actualizar apariencia del UI
-            filterButtons.forEach(b => b.classList.remove('is-active'));
+            filterButtons.forEach(b => {
+                if (b.getAttribute('data-action') !== 'toggle-tramos') b.classList.remove('is-active');
+            });
             btn.classList.add('is-active');
 
             const tipoSeleccionado = btn.getAttribute('data-tipo');
