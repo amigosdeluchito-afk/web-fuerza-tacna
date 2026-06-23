@@ -296,6 +296,13 @@ window.rvApplyStyle = function() {
                 lineMetrics: true,
                 data: "../panel-admin-universo/mapa_redvial_api.php?action=geojson" 
             },
+            "tramos-viales-entry": {
+                type: "geojson",
+                data: {
+                    type: "FeatureCollection",
+                    features: []
+                }
+            },
             "tramos-viales-nodes": {
                 type: "geojson",
                 data: {
@@ -721,6 +728,41 @@ window.rvApplyStyle = function() {
         'id': 'tramos-viales-layer',
         'type': 'line',
         'source': 'tramos-viales',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+            'line-color': ['coalesce', ['get', 'color'], '#14532d'],
+            'line-width': RV_ROUTE_WIDTH,
+            'line-opacity': 1
+        }
+    });
+    style.layers.push({
+        'id': 'tramos-viales-entry-outline',
+        'type': 'line',
+        'source': 'tramos-viales-entry',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+            'line-color': '#64748b',
+            'line-width': RV_ROUTE_OUTLINE_WIDTH,
+            'line-blur': 1.1,
+            'line-opacity': 0.18
+        }
+    });
+    style.layers.push({
+        'id': 'tramos-viales-entry-bg',
+        'type': 'line',
+        'source': 'tramos-viales-entry',
+        'layout': { 'line-join': 'round', 'line-cap': 'round' },
+        'paint': {
+            'line-color': '#ffffff',
+            'line-width': RV_ROUTE_CASING_WIDTH,
+            'line-blur': 0,
+            'line-opacity': 1
+        }
+    });
+    style.layers.push({
+        'id': 'tramos-viales-entry-layer',
+        'type': 'line',
+        'source': 'tramos-viales-entry',
         'layout': { 'line-join': 'round', 'line-cap': 'round' },
         'paint': {
             'line-color': ['coalesce', ['get', 'color'], '#14532d'],
@@ -1418,33 +1460,88 @@ window.rvClearTramoEntryAnimation = function() {
     }
 };
 
-window.rvSetTramoEntryProgress = function(progress) {
-    const map = window.redVialMapInstance;
-    if (!map) return;
-
-    const p = Math.max(0, Math.min(1, progress));
-    const transparent = 'rgba(255,255,255,0)';
-    window.rvSafeSetPaint('tramos-viales-outline', 'line-gradient', [
-        'step', ['line-progress'],
-        '#64748b',
-        p, transparent
-    ]);
-    window.rvSafeSetPaint('tramos-viales-bg', 'line-gradient', [
-        'step', ['line-progress'],
-        '#ffffff',
-        p, transparent
-    ]);
-    window.rvSafeSetPaint('tramos-viales-layer', 'line-gradient', [
-        'step', ['line-progress'],
-        ['coalesce', ['get', 'color'], '#14532d'],
-        p, 'rgba(20,83,45,0)'
-    ]);
+window.rvSetBaseTramosOpacity = function(opacity) {
+    window.rvSafeSetPaint('tramos-viales-outline', 'line-opacity', opacity * 0.18);
+    window.rvSafeSetPaint('tramos-viales-bg', 'line-opacity', opacity);
+    window.rvSafeSetPaint('tramos-viales-layer', 'line-opacity', opacity);
 };
 
-window.rvResetTramoEntryGradient = function() {
-    window.rvSafeSetPaint('tramos-viales-outline', 'line-gradient', '#64748b');
-    window.rvSafeSetPaint('tramos-viales-bg', 'line-gradient', '#ffffff');
-    window.rvSafeSetPaint('tramos-viales-layer', 'line-gradient', ['coalesce', ['get', 'color'], '#14532d']);
+window.rvLoadTramoEntryGeoJSON = async function() {
+    if (window.rvTramoEntryGeoJSON) return window.rvTramoEntryGeoJSON;
+    const res = await fetch('../panel-admin-universo/mapa_redvial_api.php?action=geojson', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    window.rvTramoEntryGeoJSON = data && data.type === 'FeatureCollection'
+        ? data
+        : { type: 'FeatureCollection', features: [] };
+    return window.rvTramoEntryGeoJSON;
+};
+
+window.rvClipLineCoordinates = function(coords, progress) {
+    if (!Array.isArray(coords) || coords.length < 2) return null;
+    const p = Math.max(0, Math.min(1, progress));
+    if (p <= 0) return null;
+    if (p >= 1) return coords;
+
+    let total = 0;
+    const lengths = [];
+    for (let i = 1; i < coords.length; i += 1) {
+        const a = coords[i - 1];
+        const b = coords[i];
+        const dx = b[0] - a[0];
+        const dy = b[1] - a[1];
+        const len = Math.sqrt(dx * dx + dy * dy);
+        lengths.push(len);
+        total += len;
+    }
+    if (total <= 0) return null;
+
+    const target = total * p;
+    let walked = 0;
+    const out = [coords[0]];
+    for (let i = 1; i < coords.length; i += 1) {
+        const segLen = lengths[i - 1];
+        if (walked + segLen < target) {
+            out.push(coords[i]);
+            walked += segLen;
+            continue;
+        }
+        const ratio = segLen > 0 ? (target - walked) / segLen : 0;
+        const a = coords[i - 1];
+        const b = coords[i];
+        out.push([
+            a[0] + (b[0] - a[0]) * ratio,
+            a[1] + (b[1] - a[1]) * ratio
+        ]);
+        break;
+    }
+    return out.length >= 2 ? out : null;
+};
+
+window.rvBuildEntryGeoJSON = function(sourceData, progress) {
+    const features = [];
+    (sourceData.features || []).forEach(feature => {
+        if (!feature || !feature.geometry) return;
+        if (feature.geometry.type === 'LineString') {
+            const clipped = window.rvClipLineCoordinates(feature.geometry.coordinates, progress);
+            if (clipped) {
+                features.push({ ...feature, geometry: { type: 'LineString', coordinates: clipped } });
+            }
+        }
+        if (feature.geometry.type === 'MultiLineString') {
+            const lines = feature.geometry.coordinates
+                .map(coords => window.rvClipLineCoordinates(coords, progress))
+                .filter(Boolean);
+            if (lines.length) {
+                features.push({ ...feature, geometry: { type: 'MultiLineString', coordinates: lines } });
+            }
+        }
+    });
+    return { type: 'FeatureCollection', features };
+};
+
+window.rvSetTramoEntryProgress = function(sourceData, progress) {
+    window.rvSafeSetSourceData('tramos-viales-entry', window.rvBuildEntryGeoJSON(sourceData, progress));
 };
 
 window.rvAnimateTramoEntry = function() {
@@ -1459,31 +1556,44 @@ window.rvAnimateTramoEntry = function() {
     window.rvClearTramoNodes?.();
     window.rvStopFlowAnimation?.();
 
+    const sourceData = window.rvTramoEntryGeoJSON;
+    if (!sourceData) return;
+
     const duration = 1600;
     const startedAt = performance.now();
     const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
     const frame = now => {
         const raw = Math.min(1, (now - startedAt) / duration);
-        window.rvSetTramoEntryProgress(easeOutCubic(raw));
+        window.rvSetTramoEntryProgress(sourceData, easeOutCubic(raw));
         if (raw < 1) {
             window.rvTramoEntryRAF = window.requestAnimationFrame(frame);
             return;
         }
         window.rvTramoEntryRAF = null;
-        window.rvResetTramoEntryGradient();
+        window.rvSafeSetSourceData('tramos-viales-entry', { type: 'FeatureCollection', features: [] });
+        window.rvSetBaseTramosOpacity(1);
         window.rvUpdateTramoActiveStyles();
     };
 
     window.rvTramoEntryRAF = window.requestAnimationFrame(frame);
 };
 
-window.rvScheduleTramoEntryAnimation = function(delay = 2000) {
+window.rvScheduleTramoEntryAnimation = async function(delay = 2000) {
     const map = window.redVialMapInstance;
     if (!map || !window.rvStyleConfig.toggles.tramos || !map.getLayer('tramos-viales-layer')) return;
 
     window.rvClearTramoEntryAnimation();
-    window.rvSetTramoEntryProgress(0);
+    try {
+        await window.rvLoadTramoEntryGeoJSON();
+    } catch (error) {
+        console.warn('[Red Vial] No se pudo preparar animacion de entrada de tramos.', error);
+        window.rvSetBaseTramosOpacity(1);
+        return;
+    }
+
+    window.rvSetBaseTramosOpacity(0);
+    window.rvSafeSetSourceData('tramos-viales-entry', { type: 'FeatureCollection', features: [] });
     window.rvTramoEntryTimeout = window.setTimeout(() => {
         window.rvTramoEntryTimeout = null;
         window.rvAnimateTramoEntry();
@@ -1673,7 +1783,7 @@ window.initRedVial = async function() {
         window.redVialMapInstance.resize();
         window.redVialMapInstance.once('idle', () => {
             window.clearTimeout(rvBaseMapRecoveryTimer);
-            window.rvAnimateTramoEntry();
+            window.rvScheduleTramoEntryAnimation?.(2000);
             window.rvUpdateTramoActiveStyles();
         });
         window.rvScheduleTerritorialLayers(window.redVialMapInstance);
