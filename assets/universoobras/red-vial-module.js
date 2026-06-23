@@ -930,7 +930,6 @@ window.rvSafeSetSourceData = function(sourceId, data) {
 
 window.rvUpdateTramoActiveStyles = function() {
     const map = window.redVialMapInstance;
-    window.rvUpdateFlowAnimationState();
 
     const hoveredId = window.rvHoveredTramoId;
     const selectedId = window.rvSelectedTramoId;
@@ -939,8 +938,8 @@ window.rvUpdateTramoActiveStyles = function() {
 
     window.rvSafeSetFilter('tramos-viales-hover', hoveredFilter);
     window.rvSafeSetFilter('tramos-viales-selected', selectedFilter);
-    window.rvSafeSetFilter('tramos-viales-chevron-hover', hoveredFilter);
-    window.rvSafeSetFilter('tramos-viales-chevron-selected', selectedFilter);
+    window.rvSafeSetFilter('tramos-viales-chevron-hover', window.rvEmptyTramoFilter);
+    window.rvSafeSetFilter('tramos-viales-chevron-selected', window.rvEmptyTramoFilter);
     window.rvSafeSetFilter('tramos-viales-flow', window.rvEmptyTramoFilter);
 
     if (map && map.getLayer) {
@@ -952,9 +951,11 @@ window.rvUpdateTramoActiveStyles = function() {
     }
 
     window.rvAnimationSpeed = selectedId ? 'selected' : (hoveredId ? 'hover' : 'normal');
+    window.rvUpdateFlowAnimationState();
 };
 
 window.rvHoveredTramoId = null;
+window.rvHoveredTramoFeature = null;
 window.rvSelectedTramoId = null;
 window.rvFlowAnimationId = null;
 window.rvFlowAnimationStep = 0;
@@ -966,7 +967,7 @@ window.rvFlowCanvasCtx = null;
 window.rvFlowCanvasRAF = null;
 window.rvFlowCanvasOffset = 0;
 
-// Canvas-based flow animation (draws animated dashed lines on a canvas overlay)
+// Canvas-based direction animation (draws moving chevrons on active tramos).
 window.rvCreateFlowCanvas = function() {
     const map = window.redVialMapInstance;
     if (!map || !map.getContainer) return;
@@ -998,68 +999,105 @@ window.rvResizeFlowCanvas = function() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 };
 
+window.rvGetChevronAnimationSize = function(zoom) {
+    if (zoom <= 12) return Math.max(0, (zoom - 10) * 3);
+    if (zoom <= 14) return 6 + ((zoom - 12) / 2) * 3;
+    if (zoom <= 16) return 9 + ((zoom - 14) / 2) * 4;
+    return Math.min(17, 13 + ((zoom - 16) / 2) * 4);
+};
+
+window.rvGetAnimatedTramoFeature = function() {
+    return window.rvSelectedTramoFeature || window.rvHoveredTramoFeature || null;
+};
+
+window.rvGetFeatureLineCoordinates = function(feature) {
+    if (!feature || !feature.geometry) return [];
+    if (feature.geometry.type === 'LineString') return feature.geometry.coordinates || [];
+    if (feature.geometry.type === 'MultiLineString') return (feature.geometry.coordinates || []).flat();
+    return [];
+};
+
+window.rvPointAtDistance = function(points, distance) {
+    if (!Array.isArray(points) || points.length < 2) return null;
+    let travelled = 0;
+    for (let i = 0; i < points.length - 1; i += 1) {
+        const a = points[i];
+        const b = points[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const len = Math.hypot(dx, dy);
+        if (!len) continue;
+        if (travelled + len >= distance) {
+            const t = (distance - travelled) / len;
+            return {
+                x: a.x + dx * t,
+                y: a.y + dy * t,
+                angle: Math.atan2(dy, dx)
+            };
+        }
+        travelled += len;
+    }
+    return null;
+};
+
 window.rvDrawFlowCanvas = function() {
     const map = window.redVialMapInstance;
     const canvas = window.rvFlowCanvas;
     const ctx = window.rvFlowCanvasCtx;
     if (!map || !canvas || !ctx) return;
-    // clear
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // query visible tramo features (limit to layer to reduce noise)
-    let features = [];
-    try {
-        features = map.queryRenderedFeatures({ layers: ['tramos-viales-layer'] });
-    } catch (e) { features = []; }
-    if (!features || features.length === 0) return;
-    // animation offset
-    const offset = window.rvFlowCanvasOffset || 0;
-    // draw each feature line
-    features.forEach(f => {
-        // skip features that are hovered or selected - those are rendered by MapLibre dashed layers
-        const fid = f.properties && (f.properties.string_id || f.properties.id || f.properties.nombre || '');
-        if (fid && (fid === window.rvHoveredTramoId || fid === window.rvSelectedTramoId)) return;
-        if (!f.geometry || f.geometry.type !== 'LineString') return;
-        const coords = f.geometry.coordinates;
-        if (!coords || coords.length < 2) return;
-        ctx.beginPath();
-        coords.forEach((c, i) => {
-            const p = map.project({ lng: c[0], lat: c[1] });
-            if (i === 0) ctx.moveTo(p.x, p.y);
-            else ctx.lineTo(p.x, p.y);
-        });
-        // style
-        const color = (f.properties && (f.properties.color || f.properties.color_hex)) || '#ffffff';
-        // Use square/flat caps and miter joins for straight look
-        ctx.lineJoin = 'miter';
-        ctx.lineCap = 'butt';
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = 0.7;
-        ctx.setLineDash([8, 8]);
-        ctx.lineDashOffset = -offset;
-        ctx.stroke();
-    });
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const feature = window.rvGetAnimatedTramoFeature();
+    const coords = window.rvGetFeatureLineCoordinates(feature)
+        .filter(coord => Array.isArray(coord) && coord.length >= 2);
+    if (!feature || coords.length < 2) return;
+
+    const points = coords.map(coord => map.project({ lng: Number(coord[0]), lat: Number(coord[1]) }));
+    let totalLength = 0;
+    for (let i = 0; i < points.length - 1; i += 1) {
+        totalLength += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+    }
+    if (totalLength <= 0) return;
+
+    const zoom = map.getZoom();
+    const size = window.rvGetChevronAnimationSize(zoom);
+    if (size <= 0) return;
+
+    const spacing = Math.max(24, size * 1.6);
+    const offset = (window.rvFlowCanvasOffset || 0) % spacing;
+
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = window.rvSelectedTramoFeature ? 1 : 0.92;
+    ctx.font = `900 ${size}px Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.16)';
+    ctx.shadowBlur = 1.5;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    for (let distance = offset; distance <= totalLength; distance += spacing) {
+        const point = window.rvPointAtDistance(points, distance);
+        if (!point) continue;
+        ctx.save();
+        ctx.translate(point.x, point.y);
+        ctx.rotate(point.angle);
+        ctx.fillText('>>', 0, 0);
+        ctx.restore();
+    }
+    ctx.restore();
 };
 
 window.rvStartFlowAnimation = function() {
     if (window.rvFlowCanvasRAF) return;
-    const map = window.redVialMapInstance;
     window.rvCreateFlowCanvas();
-    // store original opacities and hide map-based layers so canvas dashes are visible
-    try {
-        window.rvLayerOriginalOpacities = window.rvLayerOriginalOpacities || {};
-        ['tramos-viales-bg', 'tramos-viales-layer', 'tramos-viales-flow'].forEach(id => {
-            if (map && map.getLayer && map.getLayer(id)) {
-                try { window.rvLayerOriginalOpacities[id] = map.getPaintProperty(id, 'line-opacity'); } catch (e) { window.rvLayerOriginalOpacities[id] = null; }
-                try { map.setPaintProperty(id, 'line-opacity', 0); } catch (e) {}
-            }
-        });
-    } catch (e) {}
 
     const step = () => {
-        const speedMap = { normal: 0.6, hover: 1.6, selected: 2.4 };
+        const speedMap = { normal: 0, hover: 0.9, selected: 1.25 };
         const speed = speedMap[window.rvAnimationSpeed] || speedMap.normal;
-        window.rvFlowCanvasOffset = (window.rvFlowCanvasOffset + speed) % 10000;
+        window.rvFlowCanvasOffset = (window.rvFlowCanvasOffset + speed) % 1000;
         window.rvDrawFlowCanvas();
         window.rvFlowCanvasRAF = window.requestAnimationFrame(step);
     };
@@ -1074,22 +1112,13 @@ window.rvStopFlowAnimation = function() {
     if (window.rvFlowCanvasCtx && window.rvFlowCanvas) {
         window.rvFlowCanvasCtx.clearRect(0, 0, window.rvFlowCanvas.width, window.rvFlowCanvas.height);
     }
-    // restore original opacities if we stored them
-    try {
-        const map = window.redVialMapInstance;
-        if (window.rvLayerOriginalOpacities && map && map.getLayer) {
-            Object.keys(window.rvLayerOriginalOpacities).forEach(id => {
-                const val = window.rvLayerOriginalOpacities[id];
-                if (val !== null && map.getLayer(id)) {
-                    try { map.setPaintProperty(id, 'line-opacity', val); } catch (e) {}
-                }
-            });
-        }
-    } catch (e) {}
 };
 
 window.rvUpdateFlowAnimationState = function() {
-    // Flow animation remains disabled; keep the old canvas overlay cleared.
+    if (window.rvSelectedTramoFeature || window.rvHoveredTramoFeature) {
+        window.rvStartFlowAnimation();
+        return;
+    }
     window.rvStopFlowAnimation();
 };
 
@@ -1122,7 +1151,10 @@ window.rvSetTramoSelection = function(feature) {
 
     window.rvSelectedTramoId = featureId;
     window.rvSelectedTramoFeature = feature;
-    if (window.rvHoveredTramoId === featureId) window.rvHoveredTramoId = null;
+    if (window.rvHoveredTramoId === featureId) {
+        window.rvHoveredTramoId = null;
+        window.rvHoveredTramoFeature = null;
+    }
     window.rvUpdateTramoActiveStyles();
     window.rvUpdateSelectedTramoNodes(feature);
 };
@@ -1262,6 +1294,7 @@ window.rvUpdateSelectedTramoNodes = function(feature) {
 
 window.rvClearTramoHover = function() {
     window.rvHoveredTramoId = null;
+    window.rvHoveredTramoFeature = null;
     window.rvHideTramoTooltip();
     window.rvUpdateTramoActiveStyles();
 };
@@ -1615,7 +1648,10 @@ window.initRedVial = async function() {
                 const nextHoverId = window.rvSelectedTramoId === featureId ? null : featureId;
                 if (window.rvHoveredTramoId !== nextHoverId) {
                     window.rvHoveredTramoId = nextHoverId;
+                    window.rvHoveredTramoFeature = nextHoverId ? feature : null;
                     window.rvUpdateTramoActiveStyles();
+                } else if (nextHoverId) {
+                    window.rvHoveredTramoFeature = feature;
                 }
             }
             window.rvShowTramoTooltip(feature.properties, e.point);
