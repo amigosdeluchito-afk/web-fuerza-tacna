@@ -19,6 +19,13 @@ const RED_VIAL_SCRIPT_URL = document.currentScript?.src || document.querySelecto
 const PMTILES_LIB_URL = new URL('../vendor/pmtiles/pmtiles-3.0.6.js', RED_VIAL_SCRIPT_URL).href;
 const PMTILES_SOURCE_URL = new URL(PMTILES_URL, RED_VIAL_SCRIPT_URL).href;
 const RV_PUBLIC_CONFIG_URL = new URL('../panel-admin-universo/red_vial_public_config_api.php?action=get', RED_VIAL_SCRIPT_URL).href;
+const RV_PUBLIC_CONFIG_STORAGE_KEY = 'fuerzaTacna.redVial.publicConfig';
+const RV_DEFAULT_INITIAL_VIEW = {
+    center: [-70.30, -17.65],
+    zoom: 8.5,
+    pitch: 0,
+    bearing: 0
+};
 
 // =========================================================
 // GEOJSON DE ETIQUETAS ESTRATÉGICAS (RV6-MAP-B2.2)
@@ -52,12 +59,7 @@ const regionalLabelsGeoJSON = {
 // =========================================================
 window.rvStyleConfig = {
     theme: 'ciudadano',
-    initialView: {
-        center: [-70.30, -17.65],
-        zoom: 8.5,
-        pitch: 0,
-        bearing: 0
-    },
+    initialView: { ...RV_DEFAULT_INITIAL_VIEW },
     toggles: {
         'roads': true,
         'buildings': true,
@@ -150,10 +152,56 @@ window.rvLoadPublicMapConfig = async function() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data && data.ok && data.config) {
-            window.rvApplyPublicMapConfig(data.config);
+            const storedConfig = window.rvReadStoredPublicConfig();
+            const remoteIsDefault = window.rvIsDefaultInitialView(data.config.initialView);
+            const storedIsCustom = storedConfig && !window.rvIsDefaultInitialView(storedConfig.initialView);
+            const finalConfig = remoteIsDefault && storedIsCustom ? storedConfig : data.config;
+            window.rvApplyPublicMapConfig(finalConfig);
+            if (!window.rvIsDefaultInitialView(finalConfig.initialView)) {
+                window.rvStorePublicConfig(finalConfig);
+            }
         }
     } catch (error) {
+        const storedConfig = window.rvReadStoredPublicConfig();
+        if (storedConfig) {
+            window.rvApplyPublicMapConfig(storedConfig);
+            console.warn('[Red Vial] No se pudo cargar configuracion publica; usando copia local.', error);
+            return;
+        }
         console.warn('[Red Vial] No se pudo cargar configuracion publica; usando valores por defecto.', error);
+    }
+};
+
+window.rvIsDefaultInitialView = function(view) {
+    if (!view || !Array.isArray(view.center)) return true;
+    const same = (a, b, epsilon = 0.000001) => Math.abs(Number(a) - Number(b)) <= epsilon;
+    return same(view.center[0], RV_DEFAULT_INITIAL_VIEW.center[0])
+        && same(view.center[1], RV_DEFAULT_INITIAL_VIEW.center[1])
+        && same(view.zoom, RV_DEFAULT_INITIAL_VIEW.zoom, 0.001)
+        && same(view.pitch || 0, RV_DEFAULT_INITIAL_VIEW.pitch, 0.001)
+        && same(view.bearing || 0, RV_DEFAULT_INITIAL_VIEW.bearing, 0.001);
+};
+
+window.rvReadStoredPublicConfig = function() {
+    try {
+        const raw = window.localStorage?.getItem(RV_PUBLIC_CONFIG_STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        return data && typeof data === 'object' ? data : null;
+    } catch (error) {
+        return null;
+    }
+};
+
+window.rvStorePublicConfig = function(config) {
+    if (!config || typeof config !== 'object') return;
+    try {
+        window.localStorage?.setItem(RV_PUBLIC_CONFIG_STORAGE_KEY, JSON.stringify({
+            ...config,
+            storedAt: new Date().toISOString()
+        }));
+    } catch (error) {
+        // Si el navegador bloquea localStorage, el JSON del servidor sigue siendo la fuente principal.
     }
 };
 

@@ -462,6 +462,7 @@ require_admin();
             pitch: 0,
             bearing: 0
         };
+        const RV_PUBLIC_CONFIG_STORAGE_KEY = 'fuerzaTacna.redVial.publicConfig';
 
         let rvPublicConfig = null;
 
@@ -500,6 +501,17 @@ require_admin();
                 const input = viewBox.querySelector(`[data-view-key="${key}"]`);
                 if (input) input.value = value;
             });
+        }
+
+        function guardarConfigPublicaLocal(config) {
+            try {
+                window.localStorage?.setItem(RV_PUBLIC_CONFIG_STORAGE_KEY, JSON.stringify({
+                    ...config,
+                    storedAt: new Date().toISOString()
+                }));
+            } catch (error) {
+                // El guardado principal es el JSON del servidor; localStorage solo es respaldo de desarrollo.
+            }
         }
 
         const RV_PUBLIC_ADMIN_PREVIEW_LAYERS = {
@@ -751,6 +763,7 @@ require_admin();
                 });
                 const data = await res.json();
                 if (!data.ok) throw new Error(data.error || 'No se pudo guardar');
+                guardarConfigPublicaLocal(data.config);
                 renderConfigPublica(data.config);
                 aplicarPreviewConfigPublica(data.config, true);
                 showToast('Vista publica guardada. El mapa publico usara esta configuracion al recargar.', 'success');
