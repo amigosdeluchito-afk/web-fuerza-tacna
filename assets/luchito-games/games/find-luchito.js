@@ -21,9 +21,11 @@ window.LuchitoGames.registerGame('find-luchito', {
                 .lg-find-target { position: absolute; border: 3px dashed #ffc300; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; background: rgba(255,195,0,0.1); box-shadow: 0 0 18px rgba(128,16,57,0.35); }
                 .lg-find-target.show { opacity: 1; animation: lgFindPulse 0.7s ease; }
                 .lg-find-progress { width: 100%; text-align: center; color: #801039; font-weight: bold; flex: 0 0 auto; }
-                .lg-find-hint { width: 100%; max-width: 1500px; color: #444; text-align: center; font-size: 0.95rem; line-height: 1.25; min-height: 20px; flex: 0 0 auto; }
-                .lg-find-hint.pending { opacity: 0; transform: translateY(-4px); pointer-events: none; }
-                .lg-find-hint.revealed { opacity: 1; transform: translateY(0); transition: opacity 0.25s ease, transform 0.25s ease; }
+                .lg-find-hint { position: absolute; top: 16px; right: 16px; z-index: 4; max-width: min(360px, 48%); color: #801039; text-align: left; font-size: 0.95rem; font-weight: 800; line-height: 1.25; background: #ffffff; border: 3px solid #ffc300; border-radius: 28px; padding: 0.85rem 1.1rem; box-shadow: 0 12px 28px rgba(0,0,0,0.22); pointer-events: none; }
+                .lg-find-hint::before { content: ""; position: absolute; right: 36px; bottom: -13px; width: 24px; height: 24px; background: #ffffff; border-right: 3px solid #ffc300; border-bottom: 3px solid #ffc300; border-bottom-right-radius: 20px; transform: rotate(45deg); }
+                .lg-find-hint::after { content: ""; position: absolute; right: 18px; bottom: -28px; width: 13px; height: 13px; background: #ffffff; border: 3px solid #ffc300; border-radius: 50%; }
+                .lg-find-hint.pending { opacity: 0; transform: translateY(-8px) scale(0.96); }
+                .lg-find-hint.revealed { opacity: 1; transform: translateY(0) scale(1); transition: opacity 0.25s ease, transform 0.25s ease; }
                 .lg-find-description { width: 100%; max-width: 1500px; color: #5f3345; text-align: center; font-size: 0.85rem; line-height: 1.25; background: rgba(128,16,57,0.06); border: 1px solid rgba(128,16,57,0.12); border-radius: 12px; padding: 0.45rem 0.7rem; box-sizing: border-box; flex: 0 0 auto; }
                 .lg-find-msg { min-height: 20px; font-weight: 800; color: #801039; text-align: center; flex: 0 0 auto; }
                 .lg-find-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 0.4rem; width: 100%; margin-top: 0.5rem; padding: 1rem; background: #fff; border: 2px solid #801039; border-radius: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -40,6 +42,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                     .lg-find-title { font-size: 0.78rem; }
                     .lg-find-stat { font-size: 0.9rem; }
                     .lg-find-scene img { max-height: calc(100vh - 260px); }
+                    .lg-find-hint { top: 10px; right: 10px; max-width: 68%; font-size: 0.82rem; padding: 0.65rem 0.8rem; }
                 }
             `;
             document.head.appendChild(style);
@@ -101,10 +104,10 @@ window.LuchitoGames.registerGame('find-luchito', {
                             <div class="lg-find-title">Nivel ${currentLevel}: Encuentra a Luchito</div>
                             <div class="lg-find-stat">Intentos <span id="lg-find-attempts">${attempts}</span></div>
                         </div>
-                        <div class="lg-find-hint ${hintDelay > 0 ? 'pending' : 'revealed'}" id="lg-find-hint">${escapeHTML(levelConfig.hint || 'Mira con calma y toca donde creas que esta escondido.')}</div>
                         ${levelConfig.description ? `<div class="lg-find-description">${escapeHTML(levelConfig.description)}</div>` : ''}
                         <div class="lg-find-scene" id="lg-find-scene" role="button" tabindex="0" aria-label="Imagen del nivel. Haz clic donde esta Luchito.">
                             <img src="${escapeHTML(levelConfig.image)}" alt="Nivel ${currentLevel} de Encuentra a Luchito">
+                            <div class="lg-find-hint ${hintDelay > 0 ? 'pending' : 'revealed'}" id="lg-find-hint">${escapeHTML(levelConfig.hint || 'Mira con calma y toca donde creas que esta escondido.')}</div>
                             <span class="lg-find-marker" id="lg-find-marker"></span>
                             <span class="lg-find-target" id="lg-find-target"></span>
                         </div>
