@@ -105,6 +105,10 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .icon-option { height: 42px; border: 1px solid #1e293b; border-radius: 8px; background: #0f172a; cursor: pointer; font-size: 22px; transition: 0.15s; }
         .icon-option:hover { border-color: #ffc300; transform: translateY(-2px); background: rgba(255,195,0,0.12); }
         .proposal-description-input { min-height: 160px; line-height: 1.55; resize: vertical; }
+        .trajectory-item .form-group { margin-bottom: 12px; }
+        .trajectory-description-input { min-height: 150px; line-height: 1.55; resize: vertical; }
+        .tag-item { padding-right: 42px; }
+        .tag-item .form-group { margin-bottom: 0; }
         @media (max-width: 900px) { .proposal-top-row { grid-template-columns: 1fr; } .icon-palette { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); position: static; } }
         
         .btn-add { background: transparent; border: 1px dashed #3b82f6; color: #3b82f6; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; font-size: 13px; transition: 0.2s; }
@@ -375,6 +379,51 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         setTimeout(updateLivePreview, 10);
     }
 
+    function etiquetaFormHtml(index, texto = '') {
+        return `<div class="dynamic-item tag-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><input type="hidden" name="etiquetas[${index}][icono]" value=""><div class="form-group"><label>Texto</label><input type="text" name="etiquetas[${index}][texto]" class="form-control" value="${texto}" placeholder="Ej: Enfermera"></div></div>`;
+    }
+
+    function addEtiqueta() {
+        const container = document.getElementById('etiquetas-list');
+        const index = Date.now();
+        container.insertAdjacentHTML('beforeend', etiquetaFormHtml(index));
+        setTimeout(updateLivePreview, 10);
+    }
+
+    function trayectoriaFormHtml(index, periodo = '', descripcion = '') {
+        return `<div class="dynamic-item trajectory-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div class="form-group"><label>Periodo o Año</label><input type="text" name="trayectoria[${index}][periodo]" class="form-control" value="${periodo}" placeholder="Ej: 2018 - 2022"></div><div class="form-group"><label>Descripción de Logros</label><textarea name="trayectoria[${index}][descripcion]" class="form-control trajectory-description-input" rows="6" placeholder="Describe la experiencia, logros o responsabilidades...">${descripcion}</textarea></div></div>`;
+    }
+
+    function addTrayectoria() {
+        const container = document.getElementById('trayectoria-list');
+        const index = Date.now();
+        container.insertAdjacentHTML('beforeend', trayectoriaFormHtml(index));
+        setTimeout(updateLivePreview, 10);
+    }
+
+    function upgradeEtiquetaEditors() {
+        document.querySelectorAll('#etiquetas-list .dynamic-item').forEach(item => {
+            if (item.classList.contains('tag-item')) return;
+            const textInput = item.querySelector('input[name$="[texto]"]');
+            if (!textInput) return;
+            const match = textInput.name.match(/etiquetas\[([^\]]+)\]/);
+            const index = match ? match[1] : Date.now();
+            item.outerHTML = etiquetaFormHtml(index, textInput.value);
+        });
+    }
+
+    function upgradeTrayectoriaEditors() {
+        document.querySelectorAll('#trayectoria-list .dynamic-item').forEach(item => {
+            if (item.classList.contains('trajectory-item')) return;
+            const periodoInput = item.querySelector('input[name$="[periodo]"]');
+            const descInput = item.querySelector('textarea[name$="[descripcion]"]');
+            if (!periodoInput || !descInput) return;
+            const match = periodoInput.name.match(/trayectoria\[([^\]]+)\]/);
+            const index = match ? match[1] : Date.now();
+            item.outerHTML = trayectoriaFormHtml(index, periodoInput.value, descInput.value);
+        });
+    }
+
     document.getElementById('input_foto').addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
             const reader = new FileReader();
@@ -401,10 +450,9 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         // Etiquetas
         const tagsCont = document.getElementById('preview-etiquetas');
         tagsCont.innerHTML = '';
-        const iIco = form.querySelectorAll('input[name^="etiquetas"][name$="[icono]"]');
         const iTex = form.querySelectorAll('input[name^="etiquetas"][name$="[texto]"]');
-        iIco.forEach((input, i) => {
-            if(input.value || iTex[i].value) tagsCont.innerHTML += `<span class="badge-tag">${input.value} ${iTex[i].value}</span>`;
+        iTex.forEach((input) => {
+            if(input.value) tagsCont.innerHTML += `<span class="badge-tag">${input.value}</span>`;
         });
 
         // Trayectoria
@@ -517,6 +565,8 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
             // Si es nuevo, añadir campos vacíos por defecto
             addEtiqueta(); addTrayectoria(); addPropuesta();
         }
+        upgradeEtiquetaEditors();
+        upgradeTrayectoriaEditors();
         upgradeProposalEditors();
         updateLivePreview(); // Primer render
     };

@@ -1208,7 +1208,7 @@ window.showCandidateDetail = async function(candidatoId) {
 
     let badgesHTML = '';
     (fullCandidato.etiquetas || []).forEach(e => {
-        badgesHTML += `<span class="badge">${e.icono} ${e.texto}</span>`;
+        if (e.texto) badgesHTML += `<span class="badge">${e.texto}</span>`;
     });
 
     // --- Lógica de Trayectoria con "Ver más" ---
