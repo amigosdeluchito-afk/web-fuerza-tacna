@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyFindLevel = (number) => ({
         image: '',
         hint: '',
+        description: '',
         shape: 'circle',
         targetX: 50,
         targetY: 50,
@@ -96,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="rect" ${level.shape === 'rect' ? 'selected' : ''}>Cuadrado</option>
                         </select>
                     </div>
+                </div>
+                <div>
+                    <label>Descripcion de la imagen</label>
+                    <textarea data-level-field="description" rows="3" placeholder="Ej: Imagen panoramica del mercado, con varias personas y puestos alrededor.">${escapeHTML(level.description || '')}</textarea>
                 </div>
                 <input type="hidden" data-level-field="targetX" value="${escapeHTML(level.targetX ?? 50)}">
                 <input type="hidden" data-level-field="targetY" value="${escapeHTML(level.targetY ?? 50)}">
@@ -238,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: `Nivel ${index + 1}`,
             image: getLevelValue(levelCard, 'image').trim(),
             hint: getLevelValue(levelCard, 'hint').trim(),
+            description: getLevelValue(levelCard, 'description').trim(),
             shape: getLevelValue(levelCard, 'shape', 'circle'),
             targetX: Number(getLevelValue(levelCard, 'targetX', 50)),
             targetY: Number(getLevelValue(levelCard, 'targetY', 50)),

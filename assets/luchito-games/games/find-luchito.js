@@ -20,6 +20,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                 .lg-find-target { position: absolute; border: 3px dashed #ffc300; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; background: rgba(255,195,0,0.1); box-shadow: 0 0 18px rgba(128,16,57,0.35); }
                 .lg-find-target.show { opacity: 1; animation: lgFindPulse 0.7s ease; }
                 .lg-find-hint { width: 100%; max-width: 680px; color: #444; text-align: center; font-size: 0.95rem; line-height: 1.35; min-height: 22px; }
+                .lg-find-description { width: 100%; max-width: 680px; color: #5f3345; text-align: center; font-size: 0.9rem; line-height: 1.35; background: rgba(128,16,57,0.06); border: 1px solid rgba(128,16,57,0.12); border-radius: 12px; padding: 0.65rem 0.8rem; box-sizing: border-box; }
                 .lg-find-msg { min-height: 24px; font-weight: 800; color: #801039; text-align: center; }
                 .lg-find-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 0.4rem; width: 100%; margin-top: 0.5rem; padding: 1rem; background: #fff; border: 2px solid #801039; border-radius: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
                 .lg-find-cell { font-size: 1.8rem; display: flex; align-items: center; justify-content: center; height: 45px; background: transparent; cursor: pointer; user-select: none; transition: transform 0.1s ease; border-radius: 8px; }
@@ -95,6 +96,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                             <div class="lg-find-stat">Intentos <span id="lg-find-attempts">${attempts}</span></div>
                         </div>
                         <div class="lg-find-hint">${escapeHTML(levelConfig.hint || 'Mira con calma y toca donde creas que esta escondido.')}</div>
+                        ${levelConfig.description ? `<div class="lg-find-description">${escapeHTML(levelConfig.description)}</div>` : ''}
                         <div class="lg-find-scene" id="lg-find-scene" role="button" tabindex="0" aria-label="Imagen del nivel. Haz clic donde esta Luchito.">
                             <img src="${escapeHTML(levelConfig.image)}" alt="Nivel ${currentLevel} de Encuentra a Luchito">
                             <span class="lg-find-marker" id="lg-find-marker"></span>
