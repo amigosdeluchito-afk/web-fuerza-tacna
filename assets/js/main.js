@@ -440,7 +440,7 @@ function injectGlobalAssets() {
             .facebook-text { display: flex; flex-direction: column; gap: 1.2rem; align-items: flex-start; padding: 0; }
             .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.8rem; margin: 0; text-transform: uppercase; line-height: 1.1; }
             .facebook-text p { color: #bbb; font-size: 1.05rem; line-height: 1.6; margin: 0 0 1rem 0; max-width: 40ch; font-weight: 300; }
-            .fb-widget-container { display: flex; justify-content: center; background: transparent; padding: 0; border: none; overflow: hidden; width: 500px; max-width: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+            .fb-widget-container { display: flex; justify-content: center; background: transparent; padding: 0; border: none; overflow: hidden; width: min(500px, 100%); max-width: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
             .fb-widget-container iframe { width: 100% !important; max-width: 100%; background: #fff; border-radius: 8px; display: block; }
 
             /* --- Estilos del Popup / Lightbox --- */
@@ -1260,7 +1260,7 @@ window.showCandidateDetail = async function(candidatoId) {
                         <a href="${fullCandidato.fb_url_perfil}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Perfil Completo</a>
                     </div>
                     <div class="fb-widget-container">
-                        <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="100%" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                        <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
                     </div>
                 </div>
             </div>`;
