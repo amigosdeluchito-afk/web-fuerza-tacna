@@ -78,9 +78,12 @@ window.LuchitoGames.registerGame('find-luchito', {
                 isGameOver = false;
                 time = clamp(asNumber(levelConfig.time, 20), 5, 120);
                 attempts = clamp(asNumber(levelConfig.attempts, 3), 1, 10);
+                const shape = levelConfig.shape === 'rect' ? 'rect' : 'circle';
                 const targetX = clamp(asNumber(levelConfig.targetX, 50), 0, 100);
                 const targetY = clamp(asNumber(levelConfig.targetY, 50), 0, 100);
                 const radius = clamp(asNumber(levelConfig.radius, 6), 2, 30);
+                const targetW = clamp(asNumber(levelConfig.targetW, radius * 2), 2, 60);
+                const targetH = clamp(asNumber(levelConfig.targetH, radius * 2), 2, 60);
                 clearInterval(timerId);
 
                 container.innerHTML = `
@@ -88,12 +91,12 @@ window.LuchitoGames.registerGame('find-luchito', {
                         <div style="width: 100%; text-align: center; color: #801039; font-weight: bold;">Nivel ${currentLevel}/${levels.length} | Puntos: ${totalScore}</div>
                         <div class="lg-find-header">
                             <div class="lg-find-stat">Tiempo <span id="lg-find-time">${time}s</span></div>
-                            <div class="lg-find-title">${escapeHTML(levelConfig.title || 'Donde esta Luchito?')}</div>
+                            <div class="lg-find-title">Nivel ${currentLevel}: Encuentra a Luchito</div>
                             <div class="lg-find-stat">Intentos <span id="lg-find-attempts">${attempts}</span></div>
                         </div>
                         <div class="lg-find-hint">${escapeHTML(levelConfig.hint || 'Mira con calma y toca donde creas que esta escondido.')}</div>
                         <div class="lg-find-scene" id="lg-find-scene" role="button" tabindex="0" aria-label="Imagen del nivel. Haz clic donde esta Luchito.">
-                            <img src="${escapeHTML(levelConfig.image)}" alt="${escapeHTML(levelConfig.alt || levelConfig.title || 'Nivel de Encuentra a Luchito')}">
+                            <img src="${escapeHTML(levelConfig.image)}" alt="Nivel ${currentLevel} de Encuentra a Luchito">
                             <span class="lg-find-marker" id="lg-find-marker"></span>
                             <span class="lg-find-target" id="lg-find-target"></span>
                         </div>
@@ -108,11 +111,29 @@ window.LuchitoGames.registerGame('find-luchito', {
                 const targetEl = container.querySelector('#lg-find-target');
                 const msgEl = container.querySelector('#lg-find-msg');
 
-                const targetSize = radius * 2;
-                targetEl.style.left = `${targetX}%`;
-                targetEl.style.top = `${targetY}%`;
-                targetEl.style.width = `${targetSize}%`;
-                targetEl.style.height = `${targetSize}%`;
+                if (shape === 'rect') {
+                    targetEl.style.left = `${targetX}%`;
+                    targetEl.style.top = `${targetY}%`;
+                    targetEl.style.width = `${targetW}%`;
+                    targetEl.style.height = `${targetH}%`;
+                    targetEl.style.transform = 'none';
+                    targetEl.style.borderRadius = '8px';
+                } else {
+                    const targetSize = radius * 2;
+                    targetEl.style.left = `${targetX}%`;
+                    targetEl.style.top = `${targetY}%`;
+                    targetEl.style.width = `${targetSize}%`;
+                    targetEl.style.height = `${targetSize}%`;
+                    targetEl.style.transform = 'translate(-50%, -50%)';
+                    targetEl.style.borderRadius = '50%';
+                }
+
+                function isHit(x, y) {
+                    if (shape === 'rect') {
+                        return x >= targetX && x <= targetX + targetW && y >= targetY && y <= targetY + targetH;
+                    }
+                    return Math.hypot(x - targetX, y - targetY) <= radius;
+                }
 
                 function stopGame() {
                     isGameOver = true;
@@ -157,8 +178,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                     const rect = scene.getBoundingClientRect();
                     const x = ((clientX - rect.left) / rect.width) * 100;
                     const y = ((clientY - rect.top) / rect.height) * 100;
-                    const distance = Math.hypot(x - targetX, y - targetY);
-                    const hit = distance <= radius;
+                    const hit = isHit(x, y);
 
                     markerEl.style.left = `${x}%`;
                     markerEl.style.top = `${y}%`;

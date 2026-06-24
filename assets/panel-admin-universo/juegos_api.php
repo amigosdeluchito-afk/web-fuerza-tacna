@@ -54,6 +54,67 @@ if ($method === 'POST') {
     require_login();
     require_admin();
 
+    if (($_POST['action'] ?? '') === 'upload_find_image') {
+        if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'No llego la imagen.']);
+            exit;
+        }
+
+        if ($_FILES['image']['size'] > (8 * 1024 * 1024)) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'La imagen supera los 8 MB.']);
+            exit;
+        }
+
+        $info = @getimagesize($_FILES['image']['tmp_name']);
+        if (!$info || empty($info['mime'])) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'El archivo no es una imagen valida.']);
+            exit;
+        }
+
+        $allowed = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+        ];
+
+        if (!isset($allowed[$info['mime']])) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'Formato no soportado. Usa JPG, PNG, WEBP o GIF.']);
+            exit;
+        }
+
+        $level = max(1, min(10, (int)($_POST['level'] ?? 1)));
+        $ext = $allowed[$info['mime']];
+        $destDir = realpath(__DIR__ . '/../universoobras');
+        if ($destDir === false) {
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'error' => 'No se encontro la carpeta publica.']);
+            exit;
+        }
+
+        $uploadDir = $destDir . '/IMG/juegos/find-luchito';
+        ensure_dir($uploadDir);
+
+        $filename = 'nivel-' . $level . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $ext;
+        $destPath = $uploadDir . '/' . $filename;
+
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $destPath)) {
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'error' => 'No se pudo guardar la imagen.']);
+            exit;
+        }
+
+        echo json_encode([
+            'ok' => true,
+            'url' => '/assets/universoobras/IMG/juegos/find-luchito/' . rawurlencode($filename),
+        ]);
+        exit;
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
 
     if (!isset($input['games']) || !is_array($input['games'])) {

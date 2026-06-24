@@ -35,13 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const emptyFindLevel = (number) => ({
-        title: `Nivel ${number}`,
         image: '',
-        alt: '',
         hint: '',
+        shape: 'circle',
         targetX: 50,
         targetY: 50,
         radius: 6,
+        targetW: 12,
+        targetH: 12,
         time: 25,
         attempts: 3
     });
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderFindLevelEditor = (game) => {
         const config = parseConfig(game);
         const levels = Array.isArray(config.levels) && config.levels.length
-            ? config.levels
+            ? config.levels.slice(0, 10)
             : [emptyFindLevel(1)];
 
         const levelsHTML = levels.map((level, index) => `
@@ -60,10 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="form-row">
                     <div>
-                        <label>Titulo del nivel</label>
-                        <input type="text" data-level-field="title" value="${escapeHTML(level.title || `Nivel ${index + 1}`)}">
-                    </div>
-                    <div>
                         <label>Tiempo (seg.)</label>
                         <input type="number" data-level-field="time" min="5" max="120" value="${escapeHTML(level.time || 25)}">
                     </div>
@@ -73,8 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div>
-                    <label>Imagen del nivel (URL o ruta)</label>
-                    <input type="text" data-level-field="image" placeholder="/assets/universoobras/IMG/mi-imagen.webp" value="${escapeHTML(level.image || '')}">
+                    <label>Imagen del nivel</label>
+                    <div class="upload-row">
+                        <input type="file" data-level-file accept="image/*">
+                        <button type="button" class="btn btn-secondary btn-small" data-action="upload-find-image">Subir</button>
+                    </div>
+                    <input type="hidden" data-level-field="image" value="${escapeHTML(level.image || '')}">
+                    <div class="upload-status" data-upload-status>${level.image ? 'Imagen cargada' : 'Sin imagen cargada'}</div>
                 </div>
                 <div class="form-row">
                     <div>
@@ -82,28 +84,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="text" data-level-field="hint" placeholder="Ej: Mira cerca del mural..." value="${escapeHTML(level.hint || '')}">
                     </div>
                     <div>
-                        <label>Texto alternativo</label>
-                        <input type="text" data-level-field="alt" placeholder="Descripcion de la imagen" value="${escapeHTML(level.alt || '')}">
+                        <label>Forma del area</label>
+                        <select data-level-field="shape">
+                            <option value="circle" ${(level.shape || 'circle') === 'circle' ? 'selected' : ''}>Circulo</option>
+                            <option value="rect" ${level.shape === 'rect' ? 'selected' : ''}>Cuadrado</option>
+                        </select>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div>
-                        <label>X objetivo (%)</label>
-                        <input type="number" data-level-field="targetX" min="0" max="100" step="0.1" value="${escapeHTML(level.targetX ?? 50)}">
-                    </div>
-                    <div>
-                        <label>Y objetivo (%)</label>
-                        <input type="number" data-level-field="targetY" min="0" max="100" step="0.1" value="${escapeHTML(level.targetY ?? 50)}">
-                    </div>
-                    <div>
-                        <label>Radio (%)</label>
-                        <input type="number" data-level-field="radius" min="2" max="30" step="0.1" value="${escapeHTML(level.radius || 6)}">
-                    </div>
-                </div>
+                <input type="hidden" data-level-field="targetX" value="${escapeHTML(level.targetX ?? 50)}">
+                <input type="hidden" data-level-field="targetY" value="${escapeHTML(level.targetY ?? 50)}">
+                <input type="hidden" data-level-field="radius" value="${escapeHTML(level.radius || 6)}">
+                <input type="hidden" data-level-field="targetW" value="${escapeHTML(level.targetW || (Number(level.radius || 6) * 2))}">
+                <input type="hidden" data-level-field="targetH" value="${escapeHTML(level.targetH || (Number(level.radius || 6) * 2))}">
                 <div class="level-preview" data-preview>
                     <img alt="Preview nivel ${index + 1}">
-                    <span class="level-preview-dot"></span>
+                    <span class="level-target-area"></span>
                 </div>
+                <div class="level-draw-hint">Arrastra sobre la imagen para dibujar el circulo o cuadrado donde esta Luchito.</div>
             </div>
         `).join('');
 
@@ -111,12 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="special-editor" data-find-editor>
                 <h3>Encuentra a Luchito por imagenes</h3>
                 <p class="editor-help">
-                    Cada nivel usa una imagen y un punto correcto. Puedes pegar la ruta de la imagen y luego hacer clic en la previsualizacion para calcular X/Y automaticamente.
+                    Sube hasta 10 imagenes. En cada nivel dibuja el area correcta sobre la imagen; cuando el usuario acierta, pasa automaticamente a la siguiente.
                 </p>
                 <div class="level-list" data-find-levels>
                     ${levelsHTML}
                 </div>
-                <button type="button" class="btn btn-secondary" data-action="add-find-level" style="margin-top:12px;">Agregar nivel</button>
+                <button type="button" class="btn btn-secondary" data-action="add-find-level" style="margin-top:12px;" ${levels.length >= 10 ? 'disabled' : ''}>Agregar nivel</button>
             </div>
         `;
     };
@@ -156,14 +153,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             <label>Orden</label>
                             <input type="number" data-field="sort_order" value="${escapeHTML(game.sort_order)}">
                         </div>
-                        <div>
-                            <label>Dificultad base</label>
-                            <select data-field="default_difficulty">
-                                <option value="easy" ${game.default_difficulty === 'easy' ? 'selected' : ''}>Facil</option>
-                                <option value="medium" ${game.default_difficulty === 'medium' || !game.default_difficulty ? 'selected' : ''}>Medio</option>
-                                <option value="hard" ${game.default_difficulty === 'hard' ? 'selected' : ''}>Dificil</option>
-                            </select>
-                        </div>
+                        ${game.game_id === 'find-luchito' ? `
+                            <input type="hidden" data-field="default_difficulty" value="medium">
+                        ` : `
+                            <div>
+                                <label>Dificultad base</label>
+                                <select data-field="default_difficulty">
+                                    <option value="easy" ${game.default_difficulty === 'easy' ? 'selected' : ''}>Facil</option>
+                                    <option value="medium" ${game.default_difficulty === 'medium' || !game.default_difficulty ? 'selected' : ''}>Medio</option>
+                                    <option value="hard" ${game.default_difficulty === 'hard' ? 'selected' : ''}>Dificil</option>
+                                </select>
+                            </div>
+                        `}
                     </div>
                     <div>
                         <label>Descripcion / mensaje corto</label>
@@ -175,10 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
 
         gamesGrid.querySelectorAll('input, select, textarea').forEach(el => {
-            el.addEventListener('input', () => {
+            const onFieldChange = () => {
                 updatePreviewForElement(el);
                 markDirty();
-            });
+            };
+            el.addEventListener('input', onFieldChange);
+            el.addEventListener('change', onFieldChange);
         });
 
         gamesGrid.querySelectorAll('[data-find-editor]').forEach(editor => {
@@ -193,13 +196,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const serializeFindConfig = (card) => {
         const levels = Array.from(card.querySelectorAll('[data-level-index]')).map((levelCard, index) => ({
-            title: getLevelValue(levelCard, 'title', `Nivel ${index + 1}`).trim() || `Nivel ${index + 1}`,
+            title: `Nivel ${index + 1}`,
             image: getLevelValue(levelCard, 'image').trim(),
-            alt: getLevelValue(levelCard, 'alt').trim(),
             hint: getLevelValue(levelCard, 'hint').trim(),
+            shape: getLevelValue(levelCard, 'shape', 'circle'),
             targetX: Number(getLevelValue(levelCard, 'targetX', 50)),
             targetY: Number(getLevelValue(levelCard, 'targetY', 50)),
             radius: Number(getLevelValue(levelCard, 'radius', 6)),
+            targetW: Number(getLevelValue(levelCard, 'targetW', 12)),
+            targetH: Number(getLevelValue(levelCard, 'targetH', 12)),
             time: Number(getLevelValue(levelCard, 'time', 25)),
             attempts: Number(getLevelValue(levelCard, 'attempts', 3))
         })).filter(level => level.image);
@@ -221,10 +226,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!preview) return;
 
         const img = preview.querySelector('img');
-        const dot = preview.querySelector('.level-preview-dot');
+        const area = preview.querySelector('.level-target-area');
         const image = getLevelValue(levelCard, 'image').trim();
+        const shape = getLevelValue(levelCard, 'shape', 'circle');
         const x = Number(getLevelValue(levelCard, 'targetX', 50));
         const y = Number(getLevelValue(levelCard, 'targetY', 50));
+        const radius = Number(getLevelValue(levelCard, 'radius', 6));
+        const targetW = Number(getLevelValue(levelCard, 'targetW', 12));
+        const targetH = Number(getLevelValue(levelCard, 'targetH', 12));
 
         if (!image) {
             preview.style.display = 'none';
@@ -234,8 +243,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         preview.style.display = 'block';
         if (img.getAttribute('src') !== image) img.src = image;
-        dot.style.left = `${Number.isFinite(x) ? x : 50}%`;
-        dot.style.top = `${Number.isFinite(y) ? y : 50}%`;
+        area.className = `level-target-area ${shape === 'rect' ? 'rect' : 'circle'}`;
+
+        if (shape === 'rect') {
+            area.style.left = `${Number.isFinite(x) ? x : 50}%`;
+            area.style.top = `${Number.isFinite(y) ? y : 50}%`;
+            area.style.width = `${Number.isFinite(targetW) ? targetW : 12}%`;
+            area.style.height = `${Number.isFinite(targetH) ? targetH : 12}%`;
+            area.style.transform = 'none';
+        } else {
+            const size = (Number.isFinite(radius) ? radius : 6) * 2;
+            area.style.left = `${Number.isFinite(x) ? x : 50}%`;
+            area.style.top = `${Number.isFinite(y) ? y : 50}%`;
+            area.style.width = `${size}%`;
+            area.style.height = `${size}%`;
+            area.style.transform = 'translate(-50%, -50%)';
+        }
     };
 
     const refreshFindPreviews = (editor) => {
@@ -255,6 +278,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const addFindLevel = (editor) => {
         const list = editor.querySelector('[data-find-levels]');
         const existingCount = list.querySelectorAll('[data-level-index]').length;
+        if (existingCount >= 10) {
+            showToast('Este juego permite maximo 10 niveles.', true);
+            return;
+        }
         const html = renderFindLevelEditor({
             game_id: 'find-luchito',
             config: { levels: [emptyFindLevel(existingCount + 1)] }
@@ -265,14 +292,89 @@ document.addEventListener('DOMContentLoaded', () => {
         newLevel.dataset.levelIndex = existingCount;
         list.appendChild(newLevel);
 
-        newLevel.querySelectorAll('input, textarea').forEach(el => {
-            el.addEventListener('input', () => {
+        newLevel.querySelectorAll('input, select, textarea').forEach(el => {
+            const onFieldChange = () => {
                 updatePreviewForElement(el);
                 markDirty();
-            });
+            };
+            el.addEventListener('input', onFieldChange);
+            el.addEventListener('change', onFieldChange);
         });
 
         refreshPreview(newLevel);
+        updateAddLevelButtons();
+        markDirty();
+    };
+
+    const updateAddLevelButtons = () => {
+        gamesGrid.querySelectorAll('[data-find-editor]').forEach(editor => {
+            const count = editor.querySelectorAll('[data-level-index]').length;
+            const addBtn = editor.querySelector('[data-action="add-find-level"]');
+            if (addBtn) addBtn.disabled = count >= 10;
+        });
+    };
+
+    const uploadFindImage = async (levelCard) => {
+        const fileInput = levelCard.querySelector('[data-level-file]');
+        const status = levelCard.querySelector('[data-upload-status]');
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+            showToast('Selecciona una imagen para subir.', true);
+            return;
+        }
+
+        const levelIndex = Number(levelCard.dataset.levelIndex || 0) + 1;
+        const formData = new FormData();
+        formData.append('action', 'upload_find_image');
+        formData.append('level', String(levelIndex));
+        formData.append('image', fileInput.files[0]);
+
+        status.textContent = 'Subiendo imagen...';
+
+        try {
+            const response = await fetch('juegos_api.php', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (!result.ok) throw new Error(result.error || 'No se pudo subir la imagen.');
+
+            const imageInput = levelCard.querySelector('[data-level-field="image"]');
+            imageInput.value = result.url;
+            status.textContent = 'Imagen cargada';
+            refreshPreview(levelCard);
+            markDirty();
+            showToast('Imagen subida. Ahora dibuja el area correcta.');
+        } catch (error) {
+            status.textContent = 'Error al subir';
+            showToast(error.message || 'Error al subir la imagen.', true);
+        }
+    };
+
+    let drawState = null;
+
+    const setLevelValue = (card, field, value) => {
+        const input = card.querySelector(`[data-level-field="${field}"]`);
+        if (input) input.value = value;
+    };
+
+    const updateAreaFromDrag = (levelCard, startX, startY, endX, endY) => {
+        const shape = getLevelValue(levelCard, 'shape', 'circle');
+        const left = Math.max(0, Math.min(startX, endX));
+        const top = Math.max(0, Math.min(startY, endY));
+        const right = Math.min(100, Math.max(startX, endX));
+        const bottom = Math.min(100, Math.max(startY, endY));
+        const width = Math.max(2, right - left);
+        const height = Math.max(2, bottom - top);
+
+        if (shape === 'rect') {
+            setLevelValue(levelCard, 'targetX', left.toFixed(1));
+            setLevelValue(levelCard, 'targetY', top.toFixed(1));
+            setLevelValue(levelCard, 'targetW', width.toFixed(1));
+            setLevelValue(levelCard, 'targetH', height.toFixed(1));
+        } else {
+            setLevelValue(levelCard, 'targetX', ((left + right) / 2).toFixed(1));
+            setLevelValue(levelCard, 'targetY', ((top + bottom) / 2).toFixed(1));
+            setLevelValue(levelCard, 'radius', (Math.max(width, height) / 2).toFixed(1));
+        }
+
+        refreshPreview(levelCard);
         markDirty();
     };
 
@@ -286,6 +388,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 addFindLevel(editor);
             }
 
+            if (action === 'upload-find-image') {
+                const levelCard = actionBtn.closest('[data-level-index]');
+                if (levelCard) uploadFindImage(levelCard);
+            }
+
             if (action === 'remove-find-level') {
                 const levelCard = actionBtn.closest('[data-level-index]');
                 const parentEditor = actionBtn.closest('[data-find-editor]');
@@ -293,27 +400,48 @@ document.addEventListener('DOMContentLoaded', () => {
                     levelCard.remove();
                     if (!parentEditor.querySelector('[data-level-index]')) addFindLevel(parentEditor);
                     renumberLevels(parentEditor);
+                    updateAddLevelButtons();
                     markDirty();
                 }
             }
 
             return;
         }
+    });
 
+    gamesGrid.addEventListener('pointerdown', event => {
         const preview = event.target.closest('[data-preview]');
-        if (!preview) return;
-
-        const levelCard = preview.closest('[data-level-index]');
+        if (!preview || !preview.querySelector('img')?.getAttribute('src')) return;
         const rect = preview.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
-        const xInput = levelCard.querySelector('[data-level-field="targetX"]');
-        const yInput = levelCard.querySelector('[data-level-field="targetY"]');
 
-        xInput.value = Math.max(0, Math.min(100, x)).toFixed(1);
-        yInput.value = Math.max(0, Math.min(100, y)).toFixed(1);
-        refreshPreview(levelCard);
-        markDirty();
+        drawState = {
+            preview,
+            levelCard: preview.closest('[data-level-index]'),
+            startX: Math.max(0, Math.min(100, x)),
+            startY: Math.max(0, Math.min(100, y))
+        };
+        preview.setPointerCapture?.(event.pointerId);
+        event.preventDefault();
+    });
+
+    gamesGrid.addEventListener('pointermove', event => {
+        if (!drawState) return;
+        const rect = drawState.preview.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        updateAreaFromDrag(
+            drawState.levelCard,
+            drawState.startX,
+            drawState.startY,
+            Math.max(0, Math.min(100, x)),
+            Math.max(0, Math.min(100, y))
+        );
+    });
+
+    window.addEventListener('pointerup', () => {
+        drawState = null;
     });
 
     const loadGames = async () => {
