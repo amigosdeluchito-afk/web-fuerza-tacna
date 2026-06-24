@@ -96,11 +96,11 @@
 
 .lg-global-modal.lg-find-mode .lg-global-view {
     overflow: hidden;
-    padding: 18px 34px 22px;
+    padding: 14px 22px 18px;
 }
 
 .lg-global-modal.lg-find-mode .lg-global-header {
-    padding: 14px 24px;
+    padding: 10px 22px;
 }
 
 .lg-global-modal.lg-find-mode .lg-global-title {
@@ -113,8 +113,7 @@
 }
 
 .lg-global-modal.lg-find-mode .lg-game-nav {
-    margin-bottom: 12px;
-    padding-bottom: 8px;
+    display: none;
 }
 
 .lg-global-modal.lg-find-mode .lg-game-container {

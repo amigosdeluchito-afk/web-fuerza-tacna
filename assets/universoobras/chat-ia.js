@@ -72,13 +72,13 @@ function initChatIA() {
         const gamesCSS = document.createElement('link');
         gamesCSS.id = 'luchito-games-css';
         gamesCSS.rel = 'stylesheet';
-        gamesCSS.href = projectRoot + 'assets/universoobras/luchito-games.css?v=4';
+        gamesCSS.href = projectRoot + 'assets/universoobras/luchito-games.css?v=5';
         document.head.appendChild(gamesCSS);
     }
     if (!document.getElementById('luchito-games-js')) {
         const gamesJS = document.createElement('script');
         gamesJS.id = 'luchito-games-js';
-        gamesJS.src = projectRoot + 'assets/universoobras/luchito-games.js?v=5';
+        gamesJS.src = projectRoot + 'assets/universoobras/luchito-games.js?v=6';
         document.body.appendChild(gamesJS);
     }
 
