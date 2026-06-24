@@ -87,6 +87,41 @@
     padding: 28px 40px;
 }
 
+.lg-global-modal.lg-find-mode {
+    width: calc(100vw - 24px);
+    max-width: none;
+    height: calc(100vh - 24px);
+    max-height: none;
+}
+
+.lg-global-modal.lg-find-mode .lg-global-view {
+    overflow: hidden;
+    padding: 18px 34px 22px;
+}
+
+.lg-global-modal.lg-find-mode .lg-global-header {
+    padding: 14px 24px;
+}
+
+.lg-global-modal.lg-find-mode .lg-global-title {
+    font-size: 16px;
+}
+
+.lg-global-modal.lg-find-mode .lg-game-screen {
+    height: 100%;
+    min-height: 0;
+}
+
+.lg-global-modal.lg-find-mode .lg-game-nav {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+}
+
+.lg-global-modal.lg-find-mode .lg-game-container {
+    min-height: 0;
+    overflow: hidden;
+}
+
 /* --- PANTALLA PRINCIPAL (HOME) --- */
 .lg-home-header {
     text-align: center;
@@ -393,6 +428,9 @@
     }
     .lg-global-view {
         padding: 20px 15px;
+    }
+    .lg-global-modal.lg-find-mode .lg-global-view {
+        padding: 14px 12px 16px;
     }
     .lg-ttt-cell {
         width: 75px;

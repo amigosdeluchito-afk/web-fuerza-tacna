@@ -87,6 +87,9 @@ window.LuchitoGames = {
     },
 
     renderHome: async function() {
+        const modal = document.getElementById('luchito-games-modal');
+        if (modal) modal.classList.remove('lg-find-mode');
+
         const view = document.getElementById('luchito-games-view');
         
         // Indicador de carga súper rápido
@@ -163,6 +166,9 @@ window.LuchitoGames = {
     },
 
     openGame: async function(gameId, level = 'medium') {
+        const modal = document.getElementById('luchito-games-modal');
+        if (modal) modal.classList.toggle('lg-find-mode', gameId === 'find-luchito');
+
         const view = document.getElementById('luchito-games-view');
         
         view.innerHTML = `
@@ -182,7 +188,7 @@ window.LuchitoGames = {
 
         if (!this.games[gameId]) {
             const GAMES_BASE_PATH = '/assets/luchito-games/games/';
-            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=6`;
+            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=8`;
             
             try {
                 await new Promise((resolve, reject) => {
