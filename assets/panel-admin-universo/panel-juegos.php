@@ -61,7 +61,7 @@ require_admin();
     .btn-danger { background: #7f1d1d; color: #fecaca; }
     .btn-danger:hover { background: #991b1b; }
     .btn-small { padding: 6px 10px; font-size: 12px; }
-    .level-preview { margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; background: #0f172a; position: relative; display: none; }
+    .level-preview { margin-top: 10px; border-radius: 8px; overflow: hidden; border: 0; outline: 1px solid #1e293b; background: #0f172a; position: relative; display: none; }
     .level-preview img { display: block; width: 100%; height: auto; }
     .level-target-area { position: absolute; border: 3px solid #facc15; background: rgba(250,204,21,0.18); box-shadow: 0 0 14px rgba(250,204,21,0.75); pointer-events: none; }
     .level-target-area.circle { border-radius: 999px; transform: translate(-50%, -50%); }
@@ -77,7 +77,7 @@ require_admin();
     .area-editor-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1e293b; }
     .area-editor-title { margin:0; font-size:16px; color:#f8fafc; }
     .area-editor-body { padding:16px; overflow:auto; }
-    .area-editor-canvas { position:relative; width:100%; max-width:1000px; margin:0 auto; background:#020617; border:1px solid #334155; border-radius:10px; overflow:hidden; cursor:crosshair; touch-action:none; }
+    .area-editor-canvas { position:relative; width:100%; max-width:1000px; margin:0 auto; background:#020617; border:0; outline:1px solid #334155; border-radius:10px; overflow:hidden; cursor:crosshair; touch-action:none; }
     .area-editor-canvas img { display:block; width:100%; height:auto; user-select:none; -webkit-user-drag:none; }
     .area-editor-foot { padding:12px 16px; border-top:1px solid #1e293b; color:#94a3b8; font-size:12px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
   </style>
@@ -133,7 +133,7 @@ require_admin();
 
 <div id="toast-msg" class="toast-msg">Mensaje</div>
 
-<script src="panel-juegos.js?v=6"></script>
+<script src="panel-juegos.js?v=7"></script>
 
 <script>
     // Ajuste de scroll horizontal de nav activo

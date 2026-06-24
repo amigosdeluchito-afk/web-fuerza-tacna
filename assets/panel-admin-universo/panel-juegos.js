@@ -560,13 +560,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('pointerdown', event => {
         const canvas = event.target.closest('[data-area-editor-canvas]');
-        if (!canvas || !activeAreaLevelCard || !canvas.querySelector('img')?.getAttribute('src')) return;
-        const rect = canvas.getBoundingClientRect();
+        const img = canvas?.querySelector('img');
+        if (!canvas || !activeAreaLevelCard || !img?.getAttribute('src')) return;
+        const rect = img.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
 
         drawState = {
             canvas,
+            img,
             levelCard: activeAreaLevelCard,
             startX: Math.max(0, Math.min(100, x)),
             startY: Math.max(0, Math.min(100, y))
@@ -577,7 +580,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('pointermove', event => {
         if (!drawState) return;
-        const rect = drawState.canvas.getBoundingClientRect();
+        const rect = drawState.img.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
         updateAreaFromDrag(
