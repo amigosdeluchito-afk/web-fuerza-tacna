@@ -353,12 +353,12 @@ function injectGlobalAssets() {
             .mini-card { width: 100%; height: 120px; border-radius: 1rem; cursor: pointer; overflow: hidden; opacity: 0.5; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); border: 2px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
             .mini-card.active, .mini-card:hover { opacity: 1; border-color: #ffc300; transform: scale(1.05) translateX(10px); }
             .mini-card img { width: 100%; height: 100%; object-fit: cover; }
-            .candidato-content { flex-grow: 1; display: flex; flex-direction: column; background: #801039; border-radius: 2rem; padding: 3.5rem; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
-            .candidato-content p.stagger-el { margin-bottom: 2.5rem !important; font-size: 1.1rem !important; line-height: 1.8 !important; }
+            .candidato-content { flex-grow: 1; display: flex; flex-direction: column; background: #801039; border-radius: 2rem; padding: clamp(2rem, 3vw, 3rem); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+            .candidato-content p.stagger-el { margin-bottom: 1.4rem !important; font-size: 1.05rem !important; line-height: 1.65 !important; }
             
             /* --- Diseño de Ficha Profesional (Bloques Visuales) --- */
-            .candidate-top-row { display: flex; gap: 3.5rem; width: 100%; align-items: flex-start; }
-            .candidate-bottom-row { width: 100%; margin-top: 3.5rem; padding-top: 3.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+            .candidate-top-row { display: flex; gap: clamp(2rem, 3.2vw, 3rem); width: 100%; align-items: flex-start; }
+            .candidate-bottom-row { width: 100%; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 
             /* --- Animación de Borde Giratorio (React Port) --- */
             @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
@@ -380,18 +380,18 @@ function injectGlobalAssets() {
             .photo-badge { position: absolute; top: 1.5rem; left: -1rem; background: #ffc300; color: #801039; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 8px; z-index: 3; box-shadow: 0 6px 20px rgba(0,0,0,0.4); text-transform: uppercase; transform: rotate(-4deg); border: 2px solid #fff; }
             
             .candidate-top-info { flex: 1; color: #fff; display: flex; flex-direction: column; justify-content: flex-start; }
-            .candidate-top-info h2 { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: clamp(2.5rem, 4vw, 4rem); color: #ffc300; text-transform: uppercase; margin: 0 0 1rem 0; line-height: 1.1; }
+            .candidate-top-info h2 { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: clamp(2.5rem, 4vw, 4rem); color: #ffc300; text-transform: uppercase; margin: 0 0 0.75rem 0; line-height: 1.05; }
             
-            .candidate-badges { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+            .candidate-badges { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 1rem; }
             .badge { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,195,0,0.4); color: #ffc300; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; text-transform: uppercase; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; letter-spacing: 1px; backdrop-filter: blur(5px); }
             
-            .candidate-quote { position: relative; border-left: 2px solid #ffc300; padding: 2rem 2.5rem 2rem 4rem; color: #fff; margin: 2.5rem 0 3.5rem 0; font-size: 1.4rem; line-height: 1.6; background: linear-gradient(90deg, rgba(255,195,0,0.15), transparent); border-radius: 0 1.5rem 1.5rem 0; }
-            .candidate-quote::before { content: '"'; position: absolute; left: 1rem; top: -0.5rem; font-family: Georgia, serif; font-size: 6rem; color: rgba(255, 195, 0, 0.4); line-height: 1; }
-            .candidate-quote p { font-style: italic; margin: 0 0 1rem 0; font-weight: 300; }
+            .candidate-quote { position: relative; border-left: 2px solid #ffc300; padding: 1.25rem 2rem 1.25rem 3.25rem; color: #fff; margin: 1.5rem 0 1.6rem 0; font-size: 1.25rem; line-height: 1.45; background: linear-gradient(90deg, rgba(255,195,0,0.15), transparent); border-radius: 0 1.2rem 1.2rem 0; }
+            .candidate-quote::before { content: '"'; position: absolute; left: 0.85rem; top: -0.35rem; font-family: Georgia, serif; font-size: 4.75rem; color: rgba(255, 195, 0, 0.4); line-height: 1; }
+            .candidate-quote p { font-style: italic; margin: 0 0 0.6rem 0; font-weight: 300; }
             .quote-author { display: block; font-size: 0.9rem; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; color: #ffc300; text-transform: uppercase; letter-spacing: 1px; opacity: 0.95; }
             
-            .info-block { margin-bottom: 4rem; }
-            .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.2rem; color: #ffc300; margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
+            .info-block { margin-bottom: 2.5rem; }
+            .block-title { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif !important; font-size: 1.15rem; color: #ffc300; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
             
             .proposals-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
             .proposal-card { background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); padding: 2.2rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; gap: 1.2rem; }
@@ -454,7 +454,7 @@ function injectGlobalAssets() {
             .fuerza-lightbox-thumbs img:hover, .fuerza-lightbox-thumbs img.active { opacity: 1; border-color: #ffc300; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
             @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
             
-            .candidate-actions { display: flex; gap: 1rem; margin-top: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; width: 100%; justify-content: center; }
+            .candidate-actions { display: flex; gap: 1rem; margin-top: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; width: 100%; justify-content: center; }
             .action-btn { padding: 0.8rem 1.8rem; border-radius: 50px; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.85rem; text-transform: uppercase; text-decoration: none !important; transition: all 0.3s ease; cursor: pointer; text-align: center; letter-spacing: 1px; }
             .action-btn.primary { background: #ffc300; color: #801039 !important; border: 2px solid #ffc300; box-shadow: 0 6px 20px rgba(255,195,0,0.4); }
             .action-btn.primary:hover { background: #fff; border-color: #fff; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(255,255,255,0.5); }
@@ -575,13 +575,14 @@ function injectGlobalAssets() {
             .timeline-modal-content::-webkit-scrollbar-thumb:hover { background: rgba(255,195,0,0.8); }
 
             /* --- Mejoras de Lectura y Contenido Expandible --- */
-            .bio-container { font-size: 1.05rem; line-height: 1.7; color: #ddd; max-width: 85ch; }
+            .bio-container { font-size: 1.02rem; line-height: 1.62; color: #ddd; max-width: 85ch; margin-top: 0.2rem; }
+            .bio-content p { margin: 0 0 0.8rem 0; }
             .bio-content.is-clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; text-overflow: ellipsis; }
             .bio-content ul, .proposal-description ul, .timeline-text ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
             .bio-content ul li, .proposal-description ul li, .timeline-text ul li { margin-bottom: 0.5rem; }
             
             .proposal-description {
-                font-size: 1.05rem !important; margin: 0; line-height: 1.7 !important; color: #ccc !important;
+                font-size: 1rem !important; margin: 0; line-height: 1.6 !important; color: #ccc !important;
                 font-weight: 300; flex-grow: 1; transition: max-height 0.4s ease-in-out;
             }
             .proposal-description.is-clamped {
@@ -613,7 +614,7 @@ function injectGlobalAssets() {
             .timeline-text { color: #bbb; line-height: 1.7; font-size: 1rem; margin: 0; font-weight: 300; max-width: 60ch; }
 
             @media (max-width: 991px) {
-                .bio-container { font-size: 0.9rem; line-height: 1.6; }
+                .bio-container { font-size: 0.9rem; line-height: 1.5; }
                 .proposal-description { font-size: 0.95rem !important; line-height: 1.6 !important; }
                 .proposal-description.is-clamped { max-height: 105px; }
                 .timeline-text { font-size: 0.9rem; line-height: 1.6; }
@@ -1321,7 +1322,7 @@ window.showCandidateDetail = async function(candidatoId) {
                 
                 ${fbHTML}
 
-                <div class="candidate-actions stagger-el" style="justify-content: center; margin-bottom: 3.5rem;">
+                <div class="candidate-actions stagger-el" style="justify-content: center; margin-bottom: 1.5rem;">
                     <a href="contacto.html" class="action-btn outline" style="padding: 1.2rem 3rem;">Contactar Candidato</a>
                 </div>
 
