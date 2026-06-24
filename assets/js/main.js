@@ -436,12 +436,14 @@ function injectGlobalAssets() {
             .timeline-carousel-nav.next { right: 12px; }
 
             /* --- Contenedor de Facebook (Widget 2 Columnas) --- */
-            .facebook-layout-grid { display: grid; grid-template-columns: 1fr auto; gap: 3rem; align-items: center; background: rgba(255,255,255,0.02); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); margin-top: 1rem; overflow: hidden; }
-            .facebook-text { display: flex; flex-direction: column; gap: 1.2rem; align-items: flex-start; padding: 0; }
-            .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.8rem; margin: 0; text-transform: uppercase; line-height: 1.1; }
-            .facebook-text p { color: #bbb; font-size: 1.05rem; line-height: 1.6; margin: 0 0 1rem 0; max-width: 40ch; font-weight: 300; }
-            .fb-widget-container { display: flex; justify-content: center; background: transparent; padding: 0; border: none; overflow: hidden; width: min(500px, 100%); max-width: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-            .fb-widget-container iframe { width: 100% !important; max-width: 100%; background: #fff; border-radius: 8px; display: block; }
+            .facebook-layout-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(340px, 500px); gap: 2rem; align-items: stretch; background: linear-gradient(135deg, rgba(255,195,0,0.08), rgba(255,255,255,0.025)); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(255,195,0,0.16); margin-top: 0.8rem; overflow: hidden; }
+            .facebook-text { display: flex; flex-direction: column; justify-content: center; gap: 1rem; align-items: flex-start; padding: 2rem; min-height: 500px; border-radius: 1.2rem; background: rgba(0,0,0,0.16); border: 1px solid rgba(255,255,255,0.06); }
+            .facebook-text::before { content: 'FACEBOOK OFICIAL'; color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.78rem; letter-spacing: 2px; opacity: 0.8; }
+            .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: clamp(1.8rem, 3vw, 2.7rem); margin: 0; text-transform: uppercase; line-height: 1.02; max-width: 11ch; }
+            .facebook-text p { color: rgba(255,255,255,0.78); font-size: 1rem; line-height: 1.55; margin: 0 0 0.4rem 0; max-width: 34ch; font-weight: 300; }
+            .facebook-text .action-btn { margin-top: 0.5rem; }
+            .fb-widget-container { display: flex; justify-content: center; align-items: flex-start; background: transparent; padding: 0; border: none; overflow: hidden; width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); justify-self: end; }
+            .fb-widget-container iframe { width: 500px !important; max-width: 100%; background: #fff; border-radius: 12px; display: block; }
 
             /* --- Estilos del Popup / Lightbox --- */
             .fuerza-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
@@ -496,11 +498,12 @@ function injectGlobalAssets() {
                 .next-candidate-module { flex-direction: column; text-align: center; gap: 0.8rem; padding: 0.8rem; margin-top: 1rem; }
                 .next-candidate-arrow { transform: rotate(90deg); }
                 .next-candidate-module:hover .next-candidate-arrow { transform: rotate(90deg) translateY(6px); }
-                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1.5rem 0 0 0; text-align: center; margin-top: 0.5rem; overflow: hidden; border-radius: 1rem; }
-                .facebook-text { align-items: center; gap: 0.6rem; }
+                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; text-align: center; margin-top: 0.5rem; overflow: hidden; border-radius: 1rem; }
+                .facebook-text { align-items: center; gap: 0.6rem; min-height: auto; padding: 1.5rem; }
+                .facebook-text h3 { max-width: 100%; }
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
-                .fb-widget-container { width: 100%; max-width: 100%; margin: 0 auto; border-radius: 0; overflow: hidden; }
-                .fb-widget-container iframe { width: 100% !important; max-width: 100%; border-radius: 0; }
+                .fb-widget-container { width: 100%; max-width: 500px; margin: 0 auto; border-radius: 10px; overflow: hidden; justify-self: center; }
+                .fb-widget-container iframe { width: 500px !important; max-width: 100%; border-radius: 10px; }
                 .proposals-grid { grid-template-columns: 1fr; gap: 1rem; }
                 .proposal-card { padding: 1.5rem; border-radius: 0.8rem; gap: 1rem; }
                 .proposal-header { gap: 1rem; }
