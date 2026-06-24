@@ -53,8 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ? config.levels.slice(0, 10)
             : [emptyFindLevel(1)];
 
+        const tabsHTML = levels.map((level, index) => `
+            <button type="button" class="level-tab ${index === 0 ? 'active' : ''} ${level.image ? '' : 'empty'}" data-action="select-find-level" data-tab-index="${index}">
+                Nivel ${index + 1}
+            </button>
+        `).join('');
+
         const levelsHTML = levels.map((level, index) => `
-            <div class="level-card" data-level-index="${index}">
+            <div class="level-card ${index === 0 ? 'active' : ''}" data-level-index="${index}">
                 <div class="level-card-header">
                     <span>Nivel ${index + 1}</span>
                     <button type="button" class="btn btn-danger btn-small" data-action="remove-find-level">Eliminar</button>
@@ -100,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img alt="Preview nivel ${index + 1}">
                     <span class="level-target-area"></span>
                 </div>
-                <div class="level-draw-hint">Arrastra sobre la imagen para dibujar el circulo o cuadrado donde esta Luchito.</div>
+                <div class="level-draw-hint">Abre la imagen en grande para dibujar el area exacta donde esta Luchito.</div>
+                <button type="button" class="btn btn-secondary btn-small" data-action="open-area-editor" style="margin-top:8px;">Editar area en grande</button>
             </div>
         `).join('');
 
@@ -110,12 +117,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="editor-help">
                     Sube hasta 10 imagenes. En cada nivel dibuja el area correcta sobre la imagen; cuando el usuario acierta, pasa automaticamente a la siguiente.
                 </p>
+                <div class="level-tabs" data-find-tabs>
+                    ${tabsHTML}
+                </div>
                 <div class="level-list" data-find-levels>
                     ${levelsHTML}
                 </div>
                 <button type="button" class="btn btn-secondary" data-action="add-find-level" style="margin-top:12px;" ${levels.length >= 10 ? 'disabled' : ''}>Agregar nivel</button>
             </div>
         `;
+    };
+
+    const ensureAreaEditorModal = () => {
+        let modal = document.getElementById('find-area-editor-modal');
+        if (modal) return modal;
+
+        modal = document.createElement('div');
+        modal.id = 'find-area-editor-modal';
+        modal.className = 'area-editor-modal';
+        modal.innerHTML = `
+            <div class="area-editor-panel">
+                <div class="area-editor-head">
+                    <h2 class="area-editor-title" id="area-editor-title">Editar area</h2>
+                    <button type="button" class="btn btn-secondary btn-small" data-action="close-area-editor">Cerrar</button>
+                </div>
+                <div class="area-editor-body">
+                    <div class="area-editor-canvas" data-area-editor-canvas>
+                        <img alt="Imagen del nivel">
+                        <span class="level-target-area"></span>
+                    </div>
+                </div>
+                <div class="area-editor-foot">
+                    <span>Arrastra sobre la imagen para marcar el area correcta. Puedes cambiar entre circulo y cuadrado en el nivel.</span>
+                    <button type="button" class="btn btn-success btn-small" data-action="close-area-editor">Listo</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        return modal;
     };
 
     const renderGames = (games) => {
@@ -219,6 +258,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const levelCard = el.closest('[data-level-index]');
         if (!levelCard) return;
         refreshPreview(levelCard);
+        if (activeAreaLevelCard === levelCard) refreshLargeEditor();
+    };
+
+    const paintTargetArea = (levelCard, area) => {
+        const shape = getLevelValue(levelCard, 'shape', 'circle');
+        const x = Number(getLevelValue(levelCard, 'targetX', 50));
+        const y = Number(getLevelValue(levelCard, 'targetY', 50));
+        const radius = Number(getLevelValue(levelCard, 'radius', 6));
+        const targetW = Number(getLevelValue(levelCard, 'targetW', 12));
+        const targetH = Number(getLevelValue(levelCard, 'targetH', 12));
+
+        area.className = `level-target-area ${shape === 'rect' ? 'rect' : 'circle'}`;
+
+        if (shape === 'rect') {
+            area.style.left = `${Number.isFinite(x) ? x : 50}%`;
+            area.style.top = `${Number.isFinite(y) ? y : 50}%`;
+            area.style.width = `${Number.isFinite(targetW) ? targetW : 12}%`;
+            area.style.height = `${Number.isFinite(targetH) ? targetH : 12}%`;
+            area.style.transform = 'none';
+            return;
+        }
+
+        const size = (Number.isFinite(radius) ? radius : 6) * 2;
+        area.style.left = `${Number.isFinite(x) ? x : 50}%`;
+        area.style.top = `${Number.isFinite(y) ? y : 50}%`;
+        area.style.width = `${size}%`;
+        area.style.height = `${size}%`;
+        area.style.transform = 'translate(-50%, -50%)';
     };
 
     const refreshPreview = (levelCard) => {
@@ -228,12 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const img = preview.querySelector('img');
         const area = preview.querySelector('.level-target-area');
         const image = getLevelValue(levelCard, 'image').trim();
-        const shape = getLevelValue(levelCard, 'shape', 'circle');
-        const x = Number(getLevelValue(levelCard, 'targetX', 50));
-        const y = Number(getLevelValue(levelCard, 'targetY', 50));
-        const radius = Number(getLevelValue(levelCard, 'radius', 6));
-        const targetW = Number(getLevelValue(levelCard, 'targetW', 12));
-        const targetH = Number(getLevelValue(levelCard, 'targetH', 12));
 
         if (!image) {
             preview.style.display = 'none';
@@ -243,26 +304,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         preview.style.display = 'block';
         if (img.getAttribute('src') !== image) img.src = image;
-        area.className = `level-target-area ${shape === 'rect' ? 'rect' : 'circle'}`;
-
-        if (shape === 'rect') {
-            area.style.left = `${Number.isFinite(x) ? x : 50}%`;
-            area.style.top = `${Number.isFinite(y) ? y : 50}%`;
-            area.style.width = `${Number.isFinite(targetW) ? targetW : 12}%`;
-            area.style.height = `${Number.isFinite(targetH) ? targetH : 12}%`;
-            area.style.transform = 'none';
-        } else {
-            const size = (Number.isFinite(radius) ? radius : 6) * 2;
-            area.style.left = `${Number.isFinite(x) ? x : 50}%`;
-            area.style.top = `${Number.isFinite(y) ? y : 50}%`;
-            area.style.width = `${size}%`;
-            area.style.height = `${size}%`;
-            area.style.transform = 'translate(-50%, -50%)';
-        }
+        paintTargetArea(levelCard, area);
     };
 
     const refreshFindPreviews = (editor) => {
         editor.querySelectorAll('[data-level-index]').forEach(refreshPreview);
+        updateTabs(editor);
+    };
+
+    const updateTabs = (editor) => {
+        const tabs = editor.querySelector('[data-find-tabs]');
+        if (!tabs) return;
+
+        const activeIndex = Number(editor.dataset.activeLevel || 0);
+        tabs.innerHTML = Array.from(editor.querySelectorAll('[data-level-index]')).map((card, index) => {
+            const hasImage = Boolean(getLevelValue(card, 'image').trim());
+            return `
+                <button type="button" class="level-tab ${index === activeIndex ? 'active' : ''} ${hasImage ? '' : 'empty'}" data-action="select-find-level" data-tab-index="${index}">
+                    Nivel ${index + 1}
+                </button>
+            `;
+        }).join('');
+    };
+
+    const selectLevel = (editor, index) => {
+        const cards = Array.from(editor.querySelectorAll('[data-level-index]'));
+        const safeIndex = Math.max(0, Math.min(index, cards.length - 1));
+        editor.dataset.activeLevel = String(safeIndex);
+        cards.forEach((card, cardIndex) => {
+            card.classList.toggle('active', cardIndex === safeIndex);
+        });
+        updateTabs(editor);
     };
 
     const renumberLevels = (editor) => {
@@ -273,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = card.querySelector('[data-preview] img');
             if (img) img.alt = `Preview nivel ${index + 1}`;
         });
+        selectLevel(editor, Number(editor.dataset.activeLevel || 0));
     };
 
     const addFindLevel = (editor) => {
@@ -303,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         refreshPreview(newLevel);
         updateAddLevelButtons();
+        selectLevel(editor, existingCount);
         markDirty();
     };
 
@@ -339,6 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
             imageInput.value = result.url;
             status.textContent = 'Imagen cargada';
             refreshPreview(levelCard);
+            const editor = levelCard.closest('[data-find-editor]');
+            if (editor) updateTabs(editor);
             markDirty();
             showToast('Imagen subida. Ahora dibuja el area correcta.');
         } catch (error) {
@@ -348,6 +424,43 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let drawState = null;
+    let activeAreaLevelCard = null;
+
+    const refreshLargeEditor = () => {
+        if (!activeAreaLevelCard) return;
+        const modal = ensureAreaEditorModal();
+        const canvas = modal.querySelector('[data-area-editor-canvas]');
+        const img = canvas.querySelector('img');
+        const area = canvas.querySelector('.level-target-area');
+        const image = getLevelValue(activeAreaLevelCard, 'image').trim();
+        const levelNumber = Number(activeAreaLevelCard.dataset.levelIndex || 0) + 1;
+
+        modal.querySelector('#area-editor-title').textContent = `Nivel ${levelNumber} - dibujar area`;
+        img.src = image;
+        paintTargetArea(activeAreaLevelCard, area);
+    };
+
+    const openLargeEditor = (levelCard) => {
+        const image = getLevelValue(levelCard, 'image').trim();
+        if (!image) {
+            showToast('Primero sube una imagen para este nivel.', true);
+            return;
+        }
+
+        activeAreaLevelCard = levelCard;
+        const modal = ensureAreaEditorModal();
+        refreshLargeEditor();
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeLargeEditor = () => {
+        const modal = document.getElementById('find-area-editor-modal');
+        if (modal) modal.classList.remove('open');
+        activeAreaLevelCard = null;
+        drawState = null;
+        document.body.style.overflow = '';
+    };
 
     const setLevelValue = (card, field, value) => {
         const input = card.querySelector(`[data-level-field="${field}"]`);
@@ -375,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         refreshPreview(levelCard);
+        if (activeAreaLevelCard === levelCard) refreshLargeEditor();
         markDirty();
     };
 
@@ -384,6 +498,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const action = actionBtn.dataset.action;
             const editor = actionBtn.closest('[data-find-editor]');
 
+            if (action === 'select-find-level' && editor) {
+                selectLevel(editor, Number(actionBtn.dataset.tabIndex || 0));
+            }
+
             if (action === 'add-find-level' && editor) {
                 addFindLevel(editor);
             }
@@ -391,6 +509,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (action === 'upload-find-image') {
                 const levelCard = actionBtn.closest('[data-level-index]');
                 if (levelCard) uploadFindImage(levelCard);
+            }
+
+            if (action === 'open-area-editor') {
+                const levelCard = actionBtn.closest('[data-level-index]');
+                if (levelCard) openLargeEditor(levelCard);
             }
 
             if (action === 'remove-find-level') {
@@ -409,26 +532,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    gamesGrid.addEventListener('pointerdown', event => {
-        const preview = event.target.closest('[data-preview]');
-        if (!preview || !preview.querySelector('img')?.getAttribute('src')) return;
-        const rect = preview.getBoundingClientRect();
+    document.addEventListener('click', event => {
+        const actionBtn = event.target.closest('[data-action="close-area-editor"]');
+        if (actionBtn) closeLargeEditor();
+
+        const modal = event.target.closest('#find-area-editor-modal');
+        if (event.target.id === 'find-area-editor-modal' && modal) closeLargeEditor();
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && document.getElementById('find-area-editor-modal')?.classList.contains('open')) {
+            closeLargeEditor();
+        }
+    });
+
+    document.addEventListener('pointerdown', event => {
+        const canvas = event.target.closest('[data-area-editor-canvas]');
+        if (!canvas || !activeAreaLevelCard || !canvas.querySelector('img')?.getAttribute('src')) return;
+        const rect = canvas.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
 
         drawState = {
-            preview,
-            levelCard: preview.closest('[data-level-index]'),
+            canvas,
+            levelCard: activeAreaLevelCard,
             startX: Math.max(0, Math.min(100, x)),
             startY: Math.max(0, Math.min(100, y))
         };
-        preview.setPointerCapture?.(event.pointerId);
+        canvas.setPointerCapture?.(event.pointerId);
         event.preventDefault();
     });
 
-    gamesGrid.addEventListener('pointermove', event => {
+    document.addEventListener('pointermove', event => {
         if (!drawState) return;
-        const rect = drawState.preview.getBoundingClientRect();
+        const rect = drawState.canvas.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
         updateAreaFromDrag(

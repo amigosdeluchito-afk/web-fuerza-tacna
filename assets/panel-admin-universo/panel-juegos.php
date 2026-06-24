@@ -50,8 +50,13 @@ require_admin();
     .special-editor { margin-top: 6px; border-top: 1px solid #1e293b; padding-top: 14px; }
     .special-editor h3 { margin: 0 0 6px; font-size: 14px; color: #f8fafc; }
     .editor-help { margin: 0 0 12px; color: #94a3b8; font-size: 12px; line-height: 1.45; }
+    .level-tabs { display:flex; gap:8px; overflow-x:auto; padding:4px 0 12px; margin-bottom: 10px; }
+    .level-tab { min-width:74px; padding:8px 10px; border-radius:8px; border:1px solid #334155; background:#020617; color:#cbd5e1; cursor:pointer; font-weight:700; font-size:12px; }
+    .level-tab.active { background:#2563eb; border-color:#60a5fa; color:#fff; }
+    .level-tab.empty { opacity:.72; }
     .level-list { display: flex; flex-direction: column; gap: 12px; }
     .level-card { border: 1px solid #334155; background: #020617; border-radius: 10px; padding: 12px; }
+    .level-card:not(.active) { display:none; }
     .level-card-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; color: #e2e8f0; font-weight: 700; font-size: 13px; }
     .btn-danger { background: #7f1d1d; color: #fecaca; }
     .btn-danger:hover { background: #991b1b; }
@@ -66,6 +71,15 @@ require_admin();
     .upload-row input[type="file"] { padding: 7px; }
     .upload-status { color:#94a3b8; font-size:12px; min-height:18px; }
     .game-card[data-game-id="find-luchito"] [data-difficulty-row] { display:none; }
+    .area-editor-modal { position:fixed; inset:0; background:rgba(2,6,23,.86); z-index:2000; display:none; align-items:center; justify-content:center; padding:22px; }
+    .area-editor-modal.open { display:flex; }
+    .area-editor-panel { width:min(1100px, 96vw); max-height:92vh; background:#0b1020; border:1px solid #334155; border-radius:14px; box-shadow:0 25px 70px rgba(0,0,0,.55); display:flex; flex-direction:column; overflow:hidden; }
+    .area-editor-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1e293b; }
+    .area-editor-title { margin:0; font-size:16px; color:#f8fafc; }
+    .area-editor-body { padding:16px; overflow:auto; }
+    .area-editor-canvas { position:relative; width:100%; max-width:1000px; margin:0 auto; background:#020617; border:1px solid #334155; border-radius:10px; overflow:hidden; cursor:crosshair; touch-action:none; }
+    .area-editor-canvas img { display:block; width:100%; height:auto; user-select:none; -webkit-user-drag:none; }
+    .area-editor-foot { padding:12px 16px; border-top:1px solid #1e293b; color:#94a3b8; font-size:12px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
   </style>
 </head>
 <body>
@@ -119,7 +133,7 @@ require_admin();
 
 <div id="toast-msg" class="toast-msg">Mensaje</div>
 
-<script src="panel-juegos.js?v=3"></script>
+<script src="panel-juegos.js?v=4"></script>
 
 <script>
     // Ajuste de scroll horizontal de nav activo
