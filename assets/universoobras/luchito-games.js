@@ -28,7 +28,7 @@ window.LuchitoGames = {
                     background: transparent !important;
                 }
                 /* --- ESTILOS DE ESTABILIZACIÓN (JUEGO 12) --- */
-                .lg-game-wrapper { max-width: 600px; margin: 0 auto; padding: 0 1rem; box-sizing: border-box; width: 100%; }
+                .lg-game-wrapper { max-width: 1220px; margin: 0 auto; padding: 0 1rem; box-sizing: border-box; width: 100%; }
                 .lg-game-card.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(80%); }
                 .lg-game-nav .lg-game-title { font-family: 'Arial Black Web', sans-serif; font-size: 1.4rem; color: #801039; text-transform: uppercase; letter-spacing: 1px; }
                 .lg-btn-primary {
@@ -182,7 +182,7 @@ window.LuchitoGames = {
 
         if (!this.games[gameId]) {
             const GAMES_BASE_PATH = '/assets/luchito-games/games/';
-            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=4`;
+            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=5`;
             
             try {
                 await new Promise((resolve, reject) => {
