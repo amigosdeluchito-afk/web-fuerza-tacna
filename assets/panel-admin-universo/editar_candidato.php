@@ -95,6 +95,17 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .dynamic-item { background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-remove { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border: none; border-radius: 50%; cursor: pointer; width: 24px; height: 24px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .btn-remove:hover { background: #dc2626; transform: scale(1.1); }
+        .proposal-top-row { display: grid; grid-template-columns: minmax(210px, 300px) 1fr; gap: 12px; margin-bottom: 12px; }
+        .icon-field { display: flex; gap: 8px; align-items: stretch; }
+        .icon-field .form-control { width: 74px; text-align: center; font-size: 22px; flex-shrink: 0; }
+        .icon-picker-btn { flex: 1; border: 1px solid #3b82f6; background: rgba(59,130,246,0.12); color: #93c5fd; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 12px; }
+        .icon-picker-btn:hover { background: rgba(59,130,246,0.22); color: #dbeafe; }
+        .icon-palette { display: none; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 8px; margin-top: 10px; padding: 10px; border: 1px solid #334155; border-radius: 8px; background: #020617; }
+        .icon-palette.open { display: grid; }
+        .icon-option { height: 42px; border: 1px solid #1e293b; border-radius: 8px; background: #0f172a; cursor: pointer; font-size: 22px; transition: 0.15s; }
+        .icon-option:hover { border-color: #ffc300; transform: translateY(-2px); background: rgba(255,195,0,0.12); }
+        .proposal-description-input { min-height: 160px; line-height: 1.55; resize: vertical; }
+        @media (max-width: 900px) { .proposal-top-row { grid-template-columns: 1fr; } }
         
         .btn-add { background: transparent; border: 1px dashed #3b82f6; color: #3b82f6; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; font-size: 13px; transition: 0.2s; }
         .btn-add:hover { background: rgba(59,130,246,0.1); }
@@ -321,6 +332,49 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // --- 2.5 LÓGICA DE SUBIDA DE FOTO EN VIVO ---
+    const propuestaIconos = ['🛡️','👮','📹','🏥','🩺','💊','🏫','🎓','📚','💡','💼','🏗️','🚧','🚰','🌱','🌳','⚽','🏠','🚍','🛣️','👵','👶','🤝','📈','🧹','♻️','🔥','⭐'];
+
+    function iconPaletteHtml() {
+        return `<div class="icon-palette">${propuestaIconos.map(icon => `<button type="button" class="icon-option" onclick="chooseProposalIcon(this, '${icon}')" title="${icon}">${icon}</button>`).join('')}</div>`;
+    }
+
+    function toggleProposalIconPicker(btn) {
+        const palette = btn.closest('.form-group').querySelector('.icon-palette');
+        if (palette) palette.classList.toggle('open');
+    }
+
+    function chooseProposalIcon(btn, icon) {
+        const group = btn.closest('.form-group');
+        const input = group.querySelector('input[type="text"]');
+        input.value = icon;
+        group.querySelector('.icon-palette').classList.remove('open');
+        updateLivePreview();
+    }
+
+    function propuestaFormHtml(index, icono = '', titulo = '', descripcion = '') {
+        return `<div class="dynamic-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove(); updateLivePreview();" title="Eliminar">X</button><div class="proposal-top-row"><div class="form-group" style="margin-bottom:0;"><label>Icono</label><div class="icon-field"><input type="text" name="propuestas[${index}][icono]" class="form-control" value="${icono}" placeholder="🛡️"><button type="button" class="icon-picker-btn" onclick="toggleProposalIconPicker(this)">Elegir icono</button></div>${iconPaletteHtml()}</div><div class="form-group" style="margin-bottom:0;"><label>Título de la Propuesta</label><input type="text" name="propuestas[${index}][titulo]" class="form-control" value="${titulo}" placeholder="Ej: Seguridad Ciudadana"></div></div><div class="form-group" style="margin-bottom:0;"><label>Descripción o Desarrollo</label><textarea name="propuestas[${index}][descripcion]" class="form-control proposal-description-input" rows="6" placeholder="Implementaremos un sistema de vigilancia...">${descripcion}</textarea></div></div>`;
+    }
+
+    function upgradeProposalEditors() {
+        document.querySelectorAll('#propuestas-list .dynamic-item').forEach(item => {
+            if (item.querySelector('.proposal-top-row')) return;
+            const iconInput = item.querySelector('input[name$="[icono]"]');
+            const titleInput = item.querySelector('input[name$="[titulo]"]');
+            const descInput = item.querySelector('textarea[name$="[descripcion]"]');
+            if (!iconInput || !titleInput || !descInput) return;
+            const match = iconInput.name.match(/propuestas\[([^\]]+)\]/);
+            const index = match ? match[1] : Date.now();
+            item.outerHTML = propuestaFormHtml(index, iconInput.value, titleInput.value, descInput.value);
+        });
+    }
+
+    function addPropuesta() {
+        const container = document.getElementById('propuestas-list');
+        const index = Date.now();
+        container.insertAdjacentHTML('beforeend', propuestaFormHtml(index));
+        setTimeout(updateLivePreview, 10);
+    }
+
     document.getElementById('input_foto').addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
             const reader = new FileReader();
@@ -463,6 +517,7 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
             // Si es nuevo, añadir campos vacíos por defecto
             addEtiqueta(); addTrayectoria(); addPropuesta();
         }
+        upgradeProposalEditors();
         updateLivePreview(); // Primer render
     };
 </script>
