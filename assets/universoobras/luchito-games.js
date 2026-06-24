@@ -99,7 +99,16 @@ window.LuchitoGames = {
             
             const data = await response.json();
             if (data && data.ok && Array.isArray(data.games)) {
-                gamesConfig = data.games;
+                gamesConfig = data.games.map(game => {
+                    if (typeof game.config_json === 'string' && game.config_json.trim()) {
+                        try {
+                            game.config = JSON.parse(game.config_json);
+                        } catch (e) {
+                            game.config = {};
+                        }
+                    }
+                    return game;
+                });
                 console.log("Juega con Luchito: Configuración cargada desde panel.");
             } else {
                 throw new Error('Estructura JSON inválida.');
@@ -168,7 +177,7 @@ window.LuchitoGames = {
 
         if (!this.games[gameId]) {
             const GAMES_BASE_PATH = '/assets/luchito-games/games/';
-            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=1`;
+            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=2`;
             
             try {
                 await new Promise((resolve, reject) => {
@@ -190,7 +199,7 @@ window.LuchitoGames = {
             document.getElementById('lg-dynamic-title').textContent = game.title || 'Minijuego';
             const container = document.getElementById('lg-game-container');
             container.innerHTML = '';
-            if (typeof game.render === 'function') game.render(container, level);
+            if (typeof game.render === 'function') game.render(container, level, game);
         }
     },
 

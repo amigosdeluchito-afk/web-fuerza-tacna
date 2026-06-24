@@ -19,6 +19,12 @@ $db->exec("CREATE TABLE IF NOT EXISTS `panel_juegos_config` (
   PRIMARY KEY (`game_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+try {
+    $db->exec("ALTER TABLE `panel_juegos_config` ADD COLUMN `config_json` longtext NULL");
+} catch (PDOException $e) {
+    // La columna ya existe en instalaciones actualizadas.
+}
+
 $stmtCheck = $db->query("SELECT COUNT(*) FROM panel_juegos_config");
 if ($stmtCheck->fetchColumn() == 0) {
     $db->exec("INSERT INTO `panel_juegos_config` (`game_id`, `title`, `description`, `status`, `sort_order`, `default_difficulty`, `icon`, `config_json`) VALUES
@@ -58,10 +64,25 @@ if ($method === 'POST') {
 
     $db->beginTransaction();
     try {
-        $stmt = $db->prepare("UPDATE panel_juegos_config SET title = :title, description = :description, status = :status, sort_order = :sort_order, default_difficulty = :default_difficulty, icon = :icon WHERE game_id = :game_id");
+        $stmt = $db->prepare("UPDATE panel_juegos_config SET title = :title, description = :description, status = :status, sort_order = :sort_order, default_difficulty = :default_difficulty, icon = :icon, config_json = COALESCE(:config_json, config_json) WHERE game_id = :game_id");
         foreach ($input['games'] as $game) {
+            $configJson = $game['config_json'] ?? null;
+            if ($configJson !== null) {
+                $decodedConfig = json_decode($configJson, true);
+                $configJson = json_last_error() === JSON_ERROR_NONE
+                    ? json_encode($decodedConfig, JSON_UNESCAPED_UNICODE)
+                    : null;
+            }
+
             $stmt->execute([
-                ':game_id' => $game['game_id'], ':title' => $game['title'], ':description' => $game['description'], ':status' => $game['status'], ':sort_order' => (int)$game['sort_order'], ':default_difficulty' => $game['default_difficulty'], ':icon' => $game['icon']
+                ':game_id' => $game['game_id'],
+                ':title' => $game['title'],
+                ':description' => $game['description'],
+                ':status' => $game['status'],
+                ':sort_order' => (int)$game['sort_order'],
+                ':default_difficulty' => $game['default_difficulty'],
+                ':icon' => $game['icon'],
+                ':config_json' => $configJson
             ]);
         }
         $db->commit();

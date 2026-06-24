@@ -47,6 +47,18 @@ require_admin();
     .toast-msg { position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
     .toast-msg.show { transform: translateX(0); }
     .toast-msg.error { background: #ef4444; }
+    .special-editor { margin-top: 6px; border-top: 1px solid #1e293b; padding-top: 14px; }
+    .special-editor h3 { margin: 0 0 6px; font-size: 14px; color: #f8fafc; }
+    .editor-help { margin: 0 0 12px; color: #94a3b8; font-size: 12px; line-height: 1.45; }
+    .level-list { display: flex; flex-direction: column; gap: 12px; }
+    .level-card { border: 1px solid #334155; background: #020617; border-radius: 10px; padding: 12px; }
+    .level-card-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; color: #e2e8f0; font-weight: 700; font-size: 13px; }
+    .btn-danger { background: #7f1d1d; color: #fecaca; }
+    .btn-danger:hover { background: #991b1b; }
+    .btn-small { padding: 6px 10px; font-size: 12px; }
+    .level-preview { margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; background: #0f172a; position: relative; display: none; }
+    .level-preview img { display: block; width: 100%; height: auto; }
+    .level-preview-dot { position: absolute; width: 18px; height: 18px; border: 3px solid #facc15; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px rgba(250,204,21,0.75); pointer-events: none; }
   </style>
 </head>
 <body>
@@ -100,7 +112,7 @@ require_admin();
 
 <div id="toast-msg" class="toast-msg">Mensaje</div>
 
-<script src="panel-juegos.js?v=1"></script>
+<script src="panel-juegos.js?v=2"></script>
 
 <script>
     // Ajuste de scroll horizontal de nav activo
