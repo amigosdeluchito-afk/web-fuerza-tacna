@@ -182,7 +182,7 @@ window.LuchitoGames = {
 
         if (!this.games[gameId]) {
             const GAMES_BASE_PATH = '/assets/luchito-games/games/';
-            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=5`;
+            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=6`;
             
             try {
                 await new Promise((resolve, reject) => {

@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyFindLevel = (number) => ({
         image: '',
         hint: '',
+        hintDelay: 5,
         description: '',
         shape: 'circle',
         targetX: 50,
@@ -89,6 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>
                         <label>Pista corta</label>
                         <input type="text" data-level-field="hint" placeholder="Ej: Mira cerca del mural..." value="${escapeHTML(level.hint || '')}">
+                    </div>
+                    <div>
+                        <label>Mostrar pista despues de (seg.)</label>
+                        <input type="number" data-level-field="hintDelay" min="0" max="120" value="${escapeHTML(level.hintDelay ?? 5)}">
                     </div>
                     <div>
                         <label>Forma del area</label>
@@ -243,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: `Nivel ${index + 1}`,
             image: getLevelValue(levelCard, 'image').trim(),
             hint: getLevelValue(levelCard, 'hint').trim(),
+            hintDelay: Number(getLevelValue(levelCard, 'hintDelay', 5)),
             description: getLevelValue(levelCard, 'description').trim(),
             shape: getLevelValue(levelCard, 'shape', 'circle'),
             targetX: Number(getLevelValue(levelCard, 'targetX', 50)),

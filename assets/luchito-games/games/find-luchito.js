@@ -20,6 +20,8 @@ window.LuchitoGames.registerGame('find-luchito', {
                 .lg-find-target { position: absolute; border: 3px dashed #ffc300; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; background: rgba(255,195,0,0.1); box-shadow: 0 0 18px rgba(128,16,57,0.35); }
                 .lg-find-target.show { opacity: 1; animation: lgFindPulse 0.7s ease; }
                 .lg-find-hint { width: 100%; max-width: 1160px; color: #444; text-align: center; font-size: 0.95rem; line-height: 1.35; min-height: 22px; }
+                .lg-find-hint.pending { opacity: 0; transform: translateY(-4px); pointer-events: none; }
+                .lg-find-hint.revealed { opacity: 1; transform: translateY(0); transition: opacity 0.25s ease, transform 0.25s ease; }
                 .lg-find-description { width: 100%; max-width: 1160px; color: #5f3345; text-align: center; font-size: 0.9rem; line-height: 1.35; background: rgba(128,16,57,0.06); border: 1px solid rgba(128,16,57,0.12); border-radius: 12px; padding: 0.65rem 0.8rem; box-sizing: border-box; }
                 .lg-find-msg { min-height: 24px; font-weight: 800; color: #801039; text-align: center; }
                 .lg-find-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 0.4rem; width: 100%; margin-top: 0.5rem; padding: 1rem; background: #fff; border: 2px solid #801039; border-radius: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -85,6 +87,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                 const radius = clamp(asNumber(levelConfig.radius, 6), 2, 30);
                 const targetW = clamp(asNumber(levelConfig.targetW, radius * 2), 2, 60);
                 const targetH = clamp(asNumber(levelConfig.targetH, radius * 2), 2, 60);
+                const hintDelay = clamp(asNumber(levelConfig.hintDelay, 5), 0, 120);
                 clearInterval(timerId);
 
                 container.innerHTML = `
@@ -95,7 +98,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                             <div class="lg-find-title">Nivel ${currentLevel}: Encuentra a Luchito</div>
                             <div class="lg-find-stat">Intentos <span id="lg-find-attempts">${attempts}</span></div>
                         </div>
-                        <div class="lg-find-hint">${escapeHTML(levelConfig.hint || 'Mira con calma y toca donde creas que esta escondido.')}</div>
+                        <div class="lg-find-hint ${hintDelay > 0 ? 'pending' : 'revealed'}" id="lg-find-hint">${escapeHTML(levelConfig.hint || 'Mira con calma y toca donde creas que esta escondido.')}</div>
                         ${levelConfig.description ? `<div class="lg-find-description">${escapeHTML(levelConfig.description)}</div>` : ''}
                         <div class="lg-find-scene" id="lg-find-scene" role="button" tabindex="0" aria-label="Imagen del nivel. Haz clic donde esta Luchito.">
                             <img src="${escapeHTML(levelConfig.image)}" alt="Nivel ${currentLevel} de Encuentra a Luchito">
@@ -112,6 +115,15 @@ window.LuchitoGames.registerGame('find-luchito', {
                 const markerEl = container.querySelector('#lg-find-marker');
                 const targetEl = container.querySelector('#lg-find-target');
                 const msgEl = container.querySelector('#lg-find-msg');
+                const hintEl = container.querySelector('#lg-find-hint');
+
+                function revealHint() {
+                    if (!hintEl || hintEl.classList.contains('revealed')) return;
+                    hintEl.classList.remove('pending');
+                    hintEl.classList.add('revealed');
+                }
+
+                if (hintDelay === 0) revealHint();
 
                 if (shape === 'rect') {
                     targetEl.style.left = `${targetX}%`;
@@ -215,6 +227,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                     if (isGameOver) return;
                     time--;
                     timeEl.textContent = time + 's';
+                    if ((asNumber(levelConfig.time, 20) - time) >= hintDelay) revealHint();
                     if (time <= 0) endGame(false);
                 }, 1000);
             }
