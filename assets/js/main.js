@@ -915,7 +915,7 @@ async function initCandidatos(container) {
                 window.CANDIDATOS_CACHE = window.CANDIDATOS_CACHE || {};
                 
                 window.CANDIDATOS_LIST.forEach(c => {
-                    const fotoUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://placehold.co/400x400/801039/ffc300?text=Fuerza+Tacna';
+                    const fotoUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'assets/img/logo.svg';
                     const fotoHover = c.foto_portada ? `assets/universoobras/IMG/candidatos/${c.foto_portada}` : fotoUrl;
                     marqueeContent.innerHTML += `
                         <div class="candidate-card" data-id="${c.id}">
@@ -1192,7 +1192,7 @@ window.showCandidateDetail = async function(candidatoId) {
     let sidebarHTML = `<div class="candidato-sidebar animate-detail-element">`;
     candidates.forEach(c => {
         const isActive = c.id == candidatoId ? 'active' : '';
-        const thumbUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'https://placehold.co/400x400/801039/ffc300?text=Fuerza+Tacna';
+        const thumbUrl = c.foto_perfil ? `assets/universoobras/IMG/candidatos/${c.foto_perfil}` : 'assets/img/logo.svg';
         sidebarHTML += `
             <div class="mini-card ${isActive}" onclick="window.showCandidateDetail('${c.id}')">
                 <img src="${thumbUrl}" alt="${c.nombres}" loading="lazy" decoding="async">
@@ -1200,7 +1200,7 @@ window.showCandidateDetail = async function(candidatoId) {
     });
     sidebarHTML += `</div>`;
     
-    const fotoPrincipal = fullCandidato.foto_perfil ? `assets/universoobras/IMG/candidatos/${fullCandidato.foto_perfil}` : 'https://placehold.co/400x400/801039/ffc300?text=Fuerza+Tacna';
+    const fotoPrincipal = fullCandidato.foto_perfil ? `assets/universoobras/IMG/candidatos/${fullCandidato.foto_perfil}` : 'assets/img/logo.svg';
 
     let badgesHTML = '';
     (fullCandidato.etiquetas || []).forEach(e => {
@@ -1329,7 +1329,7 @@ window.showCandidateDetail = async function(candidatoId) {
                 <div class="stagger-el">
                     <div class="next-candidate-module" onclick="window.showCandidateDetail('${nextCandidate.id}')">
                         <div class="next-candidate-info">
-                            <img src="${nextCandidate.foto_perfil ? `assets/universoobras/IMG/candidatos/${nextCandidate.foto_perfil}` : 'https://placehold.co/100x100/801039/ffc300?text=FT'}" alt="${nextCandidate.nombres}" class="next-candidate-avatar" loading="lazy" decoding="async">
+                            <img src="${nextCandidate.foto_perfil ? `assets/universoobras/IMG/candidatos/${nextCandidate.foto_perfil}` : 'assets/img/logo.svg'}" alt="${nextCandidate.nombres}" class="next-candidate-avatar" loading="lazy" decoding="async">
                             <div class="next-candidate-text">
                                 <h5>Siguiente Perfil</h5>
                                 <h3>${nextCandidate.nombres}</h3>

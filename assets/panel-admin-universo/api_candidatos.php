@@ -11,7 +11,7 @@ $action = $_REQUEST['action'] ?? '';
 try {
     // 1. Obtener lista rápida (Para el menú principal del panel admin)
     if ($action === 'listar') {
-        $stmt = $db->query("SELECT id, nombres, cargo_flotante, foto_perfil, foto_portada, estado FROM panel_candidatos ORDER BY orden ASC, id DESC");
+        $stmt = $db->query("SELECT id, nombres, cargo_flotante, foto_perfil, foto_portada, COALESCE(estado, 1) AS estado FROM panel_candidatos ORDER BY orden ASC, id DESC");
         $candidatos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode(['ok' => true, 'candidatos' => $candidatos]);
         exit;
@@ -63,6 +63,7 @@ try {
         $fb_titulo = trim($_POST['fb_titulo'] ?? '');
         $fb_descripcion = trim($_POST['fb_descripcion'] ?? '');
         $fb_url_perfil = trim($_POST['fb_url_perfil'] ?? '');
+        $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 1;
 
         if ($nombres === '') {
             echo json_encode(['ok' => false, 'error' => 'El nombre es obligatorio']);
@@ -103,8 +104,8 @@ try {
 
             if ($id > 0) {
                 // Actualizar candidato existente
-                $sql = "UPDATE panel_candidatos SET nombres=?, cargo_flotante=?, frase_cita=?, biografia=?, fb_titulo=?, fb_descripcion=?, fb_url_perfil=?";
-                $params = [$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil];
+                $sql = "UPDATE panel_candidatos SET nombres=?, cargo_flotante=?, frase_cita=?, biografia=?, fb_titulo=?, fb_descripcion=?, fb_url_perfil=?, estado=?";
+                $params = [$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $estado];
                 
                 if ($foto_perfil) {
                     $sql .= ", foto_perfil=?";
@@ -121,9 +122,12 @@ try {
                 $stmt->execute($params);
             } else {
                 // Insertar nuevo candidato
-                $sql = "INSERT INTO panel_candidatos (nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, foto_perfil, foto_portada) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmtOrden = $db->query("SELECT COALESCE(MAX(orden), 0) + 1 FROM panel_candidatos");
+                $orden = (int)$stmtOrden->fetchColumn();
+
+                $sql = "INSERT INTO panel_candidatos (nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, foto_perfil, foto_portada, estado, orden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($sql);
-                $stmt->execute([$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $foto_perfil, $foto_portada]);
+                $stmt->execute([$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $foto_perfil, $foto_portada, $estado, $orden]);
                 $id = $db->lastInsertId();
             }
 

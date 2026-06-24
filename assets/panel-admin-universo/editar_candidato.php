@@ -169,6 +169,7 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         
         <form id="candidato-form" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+            <input type="hidden" name="estado" value="1">
             <!-- PESTAÑA 1: PERFIL PRINCIPAL -->
             <div id="tab-perfil" class="tab-content active">
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -250,7 +251,7 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="photo-glow"></div>
                         <div class="photo-badge" id="preview-cargo">Candidato a Alcalde</div>
                         <div class="candidato-photo">
-                            <img src="https://via.placeholder.com/400" id="preview-foto" alt="Foto">
+                            <img src="../img/logo.svg" id="preview-foto" alt="Foto">
                         </div>
                     </div>
                     <div class="candidate-top-info">
