@@ -133,7 +133,7 @@ require_admin();
 
 <div id="toast-msg" class="toast-msg">Mensaje</div>
 
-<script src="panel-juegos.js?v=7"></script>
+<script src="panel-juegos.js?v=8"></script>
 
 <script>
     // Ajuste de scroll horizontal de nav activo

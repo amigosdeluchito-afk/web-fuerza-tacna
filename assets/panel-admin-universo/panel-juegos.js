@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hint: '',
         hintDelay: 5,
         description: '',
+        foundImage: '',
+        foundDescription: '',
         shape: 'circle',
         targetX: 50,
         targetY: 50,
@@ -106,6 +108,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>
                     <label>Descripcion de la imagen</label>
                     <textarea data-level-field="description" rows="3" placeholder="Ej: Imagen panoramica del mercado, con varias personas y puestos alrededor.">${escapeHTML(level.description || '')}</textarea>
+                </div>
+                <div>
+                    <label>Imagen del personaje encontrado</label>
+                    <div class="upload-row">
+                        <input type="file" data-level-found-file accept="image/*">
+                        <button type="button" class="btn btn-secondary btn-small" data-action="upload-find-found-image">Subir personaje</button>
+                    </div>
+                    <input type="hidden" data-level-field="foundImage" value="${escapeHTML(level.foundImage || '')}">
+                    <div class="upload-status" data-found-upload-status>${level.foundImage ? 'Personaje cargado' : 'Sin personaje cargado'}</div>
+                    <div class="level-draw-hint">Recomendado: PNG o WEBP sin fondo para que aparezca como pop up.</div>
+                </div>
+                <div>
+                    <label>Texto del pop up al encontrarlo</label>
+                    <textarea data-level-field="foundDescription" rows="2" placeholder="Ej: Luchito estaba supervisando esta importante obra para los vecinos.">${escapeHTML(level.foundDescription || '')}</textarea>
                 </div>
                 <input type="hidden" data-level-field="targetX" value="${escapeHTML(level.targetX ?? 50)}">
                 <input type="hidden" data-level-field="targetY" value="${escapeHTML(level.targetY ?? 50)}">
@@ -250,6 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
             hint: getLevelValue(levelCard, 'hint').trim(),
             hintDelay: Number(getLevelValue(levelCard, 'hintDelay', 5)),
             description: getLevelValue(levelCard, 'description').trim(),
+            foundImage: getLevelValue(levelCard, 'foundImage').trim(),
+            foundDescription: getLevelValue(levelCard, 'foundDescription').trim(),
             shape: getLevelValue(levelCard, 'shape', 'circle'),
             targetX: Number(getLevelValue(levelCard, 'targetX', 50)),
             targetY: Number(getLevelValue(levelCard, 'targetY', 50)),
@@ -400,9 +418,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const uploadFindImage = async (levelCard) => {
-        const fileInput = levelCard.querySelector('[data-level-file]');
-        const status = levelCard.querySelector('[data-upload-status]');
+    const uploadFindImage = async (levelCard, kind = 'level') => {
+        const isFoundImage = kind === 'found';
+        const fileInput = levelCard.querySelector(isFoundImage ? '[data-level-found-file]' : '[data-level-file]');
+        const status = levelCard.querySelector(isFoundImage ? '[data-found-upload-status]' : '[data-upload-status]');
         if (!fileInput || !fileInput.files || !fileInput.files[0]) {
             showToast('Selecciona una imagen para subir.', true);
             return;
@@ -412,23 +431,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('action', 'upload_find_image');
         formData.append('level', String(levelIndex));
+        formData.append('asset', isFoundImage ? 'found' : 'level');
         formData.append('image', fileInput.files[0]);
 
-        status.textContent = 'Subiendo imagen...';
+        status.textContent = isFoundImage ? 'Subiendo personaje...' : 'Subiendo imagen...';
 
         try {
             const response = await fetch('juegos_api.php', { method: 'POST', body: formData });
             const result = await response.json();
             if (!result.ok) throw new Error(result.error || 'No se pudo subir la imagen.');
 
-            const imageInput = levelCard.querySelector('[data-level-field="image"]');
+            const imageInput = levelCard.querySelector(isFoundImage ? '[data-level-field="foundImage"]' : '[data-level-field="image"]');
             imageInput.value = result.url;
-            status.textContent = 'Imagen cargada';
+            status.textContent = isFoundImage ? 'Personaje cargado' : 'Imagen cargada';
             refreshPreview(levelCard);
             const editor = levelCard.closest('[data-find-editor]');
             if (editor) updateTabs(editor);
             markDirty();
-            showToast('Imagen subida. Ahora dibuja el area correcta.');
+            showToast(isFoundImage ? 'Personaje subido para el pop up.' : 'Imagen subida. Ahora dibuja el area correcta.');
         } catch (error) {
             status.textContent = 'Error al subir';
             showToast(error.message || 'Error al subir la imagen.', true);
@@ -521,6 +541,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (action === 'upload-find-image') {
                 const levelCard = actionBtn.closest('[data-level-index]');
                 if (levelCard) uploadFindImage(levelCard);
+            }
+
+            if (action === 'upload-find-found-image') {
+                const levelCard = actionBtn.closest('[data-level-index]');
+                if (levelCard) uploadFindImage(levelCard, 'found');
             }
 
             if (action === 'open-area-editor') {

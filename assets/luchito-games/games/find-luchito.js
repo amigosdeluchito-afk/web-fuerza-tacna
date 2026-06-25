@@ -6,7 +6,7 @@ window.LuchitoGames.registerGame('find-luchito', {
             const style = document.createElement('style');
             style.id = styleId;
             style.innerHTML = `
-                .lg-find-game { display: flex; flex-direction: column; font-family: system-ui, sans-serif; width: 100%; height: 100%; min-height: 0; }
+                .lg-find-game { display: flex; flex-direction: column; font-family: system-ui, sans-serif; width: 100%; height: 100%; min-height: 0; position: relative; }
                 .lg-game-wrapper.lg-find-game { max-width: none; padding: 0; }
                 .lg-find-stage { display: grid; grid-template-columns: 176px minmax(0, 1fr); gap: 12px; width: 100%; height: 100%; min-height: 0; align-items: stretch; }
                 .lg-find-panel { display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; color: #801039; }
@@ -35,6 +35,16 @@ window.LuchitoGames.registerGame('find-luchito', {
                 .lg-find-hint.revealed { opacity: 1; transform: translateY(0) scale(1); transition: opacity 0.25s ease, transform 0.25s ease; }
                 .lg-find-description { color: #5f3345; font-size: 0.74rem; line-height: 1.22; background: rgba(128,16,57,0.06); border: 1px solid rgba(128,16,57,0.12); border-radius: 10px; padding: 0.5rem 0.55rem; box-sizing: border-box; max-height: 92px; overflow: auto; }
                 .lg-find-msg { min-height: 18px; font-weight: 800; color: #801039; font-size: 0.78rem; line-height: 1.22; }
+                .lg-find-found-pop { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none; opacity: 0; transform: scale(0.88); transition: opacity 0.25s ease, transform 0.25s ease; }
+                .lg-find-found-pop.show { opacity: 1; transform: scale(1); }
+                .lg-find-found-content { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; max-width: min(560px, 72vw); animation: lgTreasureRise 0.75s cubic-bezier(0.18, 0.9, 0.28, 1.25) both; }
+                .lg-find-found-content::before { content: ""; position: absolute; inset: 18% 8% 22%; z-index: -1; background: radial-gradient(circle, rgba(255,195,0,0.75), rgba(255,195,0,0.18) 38%, transparent 68%); filter: blur(10px); animation: lgTreasureGlow 1.1s ease-in-out infinite alternate; }
+                .lg-find-found-title { margin: 0; color: #801039; font-family: 'Arial Black Web', sans-serif; font-size: clamp(1.35rem, 3.2vw, 2.35rem); text-transform: uppercase; text-shadow: 0 3px 0 #ffc300, 0 10px 28px rgba(0,0,0,0.2); }
+                .lg-find-found-img-wrap { position: relative; display: grid; place-items: center; }
+                .lg-find-found-img-wrap::before, .lg-find-found-img-wrap::after { content: ""; position: absolute; inset: -18%; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(255,195,0,0.95), transparent, rgba(255,255,255,0.95), transparent); opacity: 0.8; animation: lgTreasureSpin 1.7s linear infinite; }
+                .lg-find-found-img-wrap::after { inset: -28%; animation-duration: 2.4s; animation-direction: reverse; opacity: 0.45; }
+                .lg-find-found-img { position: relative; z-index: 1; display: block; max-width: min(300px, 34vw); max-height: min(360px, 58vh); object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,195,0,0.95)) drop-shadow(0 14px 18px rgba(128,16,57,0.35)); animation: lgTreasureFloat 1.15s ease-in-out infinite alternate; }
+                .lg-find-found-desc { margin: 0; color: #801039; font-weight: 900; font-size: clamp(0.95rem, 1.6vw, 1.25rem); line-height: 1.25; max-width: 520px; text-shadow: 0 2px 0 #ffffff, 0 8px 18px rgba(255,195,0,0.35); }
                 .lg-find-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 0.4rem; width: 100%; margin-top: 0.5rem; padding: 1rem; background: #fff; border: 2px solid #801039; border-radius: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
                 .lg-find-cell { font-size: 1.8rem; display: flex; align-items: center; justify-content: center; height: 45px; background: transparent; cursor: pointer; user-select: none; transition: transform 0.1s ease; border-radius: 8px; }
                 .lg-find-cell:hover:not(.locked) { transform: scale(1.15) translateY(-2px); background: #fdf5f7; }
@@ -44,6 +54,10 @@ window.LuchitoGames.registerGame('find-luchito', {
                 @keyframes lgShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
                 @keyframes lgBounceFound { 0% { transform: scale(1); } 50% { transform: scale(1.6); } 100% { transform: scale(1.4); } }
                 @keyframes lgFindPulse { 0% { transform: translate(-50%, -50%) scale(0.65); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+                @keyframes lgTreasureRise { 0% { transform: translateY(28px) scale(0.72); opacity: 0; } 65% { transform: translateY(-8px) scale(1.06); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+                @keyframes lgTreasureGlow { from { opacity: 0.6; transform: scale(0.92); } to { opacity: 1; transform: scale(1.12); } }
+                @keyframes lgTreasureSpin { to { transform: rotate(360deg); } }
+                @keyframes lgTreasureFloat { from { transform: translateY(0) scale(1); } to { transform: translateY(-8px) scale(1.04); } }
                 @media (max-width: 640px) {
                     .lg-find-stage { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
                     .lg-find-panel { gap: 0.45rem; }
@@ -56,6 +70,8 @@ window.LuchitoGames.registerGame('find-luchito', {
                     .lg-find-msg { min-height: 0; font-size: 0.72rem; }
                     .lg-find-scene img { max-width: 100%; max-height: calc(100vh - 112px); }
                     .lg-find-hint { top: 10px; right: 10px; max-width: 68%; font-size: 0.82rem; padding: 0.65rem 0.8rem; }
+                    .lg-find-found-content { max-width: 86vw; }
+                    .lg-find-found-img { max-width: 52vw; max-height: 42vh; }
                 }
             `;
             document.head.appendChild(style);
@@ -136,6 +152,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                                 </div>
                             </div>
                         </div>
+                        <div class="lg-find-found-pop" id="lg-find-found-pop" aria-hidden="true"></div>
                     </div>
                 `;
 
@@ -147,6 +164,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                 const targetEl = container.querySelector('#lg-find-target');
                 const msgEl = container.querySelector('#lg-find-msg');
                 const hintEl = container.querySelector('#lg-find-hint');
+                const foundPopEl = container.querySelector('#lg-find-found-pop');
 
                 function revealHint() {
                     if (!hintEl || hintEl.classList.contains('revealed')) return;
@@ -190,6 +208,26 @@ window.LuchitoGames.registerGame('find-luchito', {
                     targetEl.classList.add('show');
                 }
 
+                function showFoundCelebration(callback) {
+                    const foundImage = String(levelConfig.foundImage || '').trim();
+                    const foundDescription = String(levelConfig.foundDescription || '').trim();
+                    if (!foundImage && !foundDescription) {
+                        setTimeout(callback, 900);
+                        return;
+                    }
+
+                    foundPopEl.innerHTML = `
+                        <div class="lg-find-found-content">
+                            <h3 class="lg-find-found-title">Encontraste a Luchito</h3>
+                            ${foundImage ? `<div class="lg-find-found-img-wrap"><img class="lg-find-found-img" src="${escapeHTML(foundImage)}" alt="Luchito encontrado"></div>` : ''}
+                            ${foundDescription ? `<p class="lg-find-found-desc">${escapeHTML(foundDescription)}</p>` : ''}
+                        </div>
+                    `;
+                    foundPopEl.setAttribute('aria-hidden', 'false');
+                    foundPopEl.classList.add('show');
+                    setTimeout(callback, 2600);
+                }
+
                 function endGame(win) {
                     stopGame();
                     revealTarget();
@@ -199,14 +237,14 @@ window.LuchitoGames.registerGame('find-luchito', {
                         msgEl.style.color = '#155724';
                         totalScore += (time * 10) + (attempts * 60) + (currentLevel * 100);
 
-                        setTimeout(() => {
+                        showFoundCelebration(() => {
                             if (currentLevel < levels.length) {
                                 msgEl.textContent = `Nivel ${currentLevel} superado. Preparando el siguiente...`;
                                 setTimeout(() => startLevel(currentLevel + 1), 1200);
                             } else {
                                 window.LuchitoGames.showRankingPrompt(totalScore, 'find-luchito', container);
                             }
-                        }, 900);
+                        });
                     } else {
                         msgEl.textContent = 'Se acabaron los intentos o el tiempo. Mira donde estaba.';
                         msgEl.style.color = '#721c24';

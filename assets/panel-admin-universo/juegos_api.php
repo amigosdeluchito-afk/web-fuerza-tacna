@@ -88,6 +88,7 @@ if ($method === 'POST') {
         }
 
         $level = max(1, min(10, (int)($_POST['level'] ?? 1)));
+        $asset = ($_POST['asset'] ?? 'level') === 'found' ? 'found' : 'level';
         $ext = $allowed[$info['mime']];
         $destDir = realpath(__DIR__ . '/../universoobras');
         if ($destDir === false) {
@@ -99,7 +100,7 @@ if ($method === 'POST') {
         $uploadDir = $destDir . '/IMG/juegos/find-luchito';
         ensure_dir($uploadDir);
 
-        $filename = 'nivel-' . $level . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $ext;
+        $filename = ($asset === 'found' ? 'personaje-' : 'nivel-') . $level . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . $ext;
         $destPath = $uploadDir . '/' . $filename;
 
         if (!move_uploaded_file($_FILES['image']['tmp_name'], $destPath)) {
