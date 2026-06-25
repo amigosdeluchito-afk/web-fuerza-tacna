@@ -35,27 +35,26 @@ window.LuchitoGames.registerGame('find-luchito', {
                 .lg-find-hint.revealed { opacity: 1; transform: translateY(0) scale(1); transition: opacity 0.25s ease, transform 0.25s ease; }
                 .lg-find-description { color: #5f3345; font-size: 0.74rem; line-height: 1.22; background: rgba(128,16,57,0.06); border: 1px solid rgba(128,16,57,0.12); border-radius: 10px; padding: 0.5rem 0.55rem; box-sizing: border-box; max-height: 92px; overflow: auto; }
                 .lg-find-msg { min-height: 18px; font-weight: 800; color: #801039; font-size: 0.78rem; line-height: 1.22; }
-                .lg-find-found-pop { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none; opacity: 0; transform: scale(0.82); transition: opacity 0.2s ease, transform 0.2s ease; overflow: hidden; }
-                .lg-find-found-pop.show { opacity: 1; transform: scale(1); }
-                .lg-find-found-content { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.55rem; max-width: min(620px, 74vw); animation: lgTreasurePop 1.05s cubic-bezier(0.15, 1.35, 0.22, 1) both; }
-                .lg-find-found-content::before { content: ""; position: absolute; inset: 13% -6% 15%; z-index: -2; background: radial-gradient(circle, rgba(255,233,111,0.92), rgba(255,195,0,0.36) 36%, rgba(255,255,255,0.14) 50%, transparent 72%); filter: blur(8px); animation: lgTreasureGlow 0.72s ease-in-out infinite alternate; }
-                .lg-find-found-content::after { content: ""; position: absolute; inset: -18%; z-index: -3; background: repeating-conic-gradient(from 10deg, rgba(255,195,0,0.58) 0 8deg, transparent 8deg 18deg); border-radius: 50%; opacity: 0.7; mix-blend-mode: screen; animation: lgTreasureSpin 7s linear infinite, lgTreasureFlash 0.9s ease-in-out infinite alternate; }
-                .lg-find-found-title { margin: 0; color: #801039; font-family: 'Arial Black Web', sans-serif; font-size: clamp(1.35rem, 3.2vw, 2.35rem); text-transform: uppercase; text-shadow: 0 3px 0 #ffc300, 0 10px 28px rgba(0,0,0,0.2); }
-                .lg-find-found-img-wrap { position: relative; display: grid; place-items: center; }
-                .lg-find-found-img-wrap::before, .lg-find-found-img-wrap::after { content: ""; position: absolute; inset: -22%; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(255,195,0,1), transparent, rgba(255,255,255,1), transparent, rgba(255,76,76,0.75), transparent); opacity: 0.95; animation: lgTreasureSpin 1.15s linear infinite; filter: blur(0.5px); }
-                .lg-find-found-img-wrap::after { inset: -34%; animation-duration: 1.8s; animation-direction: reverse; opacity: 0.55; filter: blur(2px); }
-                .lg-find-found-img { position: relative; z-index: 2; display: block; max-width: min(330px, 35vw); max-height: min(390px, 60vh); object-fit: contain; filter: drop-shadow(0 0 8px #fff4a8) drop-shadow(0 0 24px rgba(255,195,0,1)) drop-shadow(0 18px 22px rgba(128,16,57,0.42)); animation: lgTreasureBounce 1.35s cubic-bezier(0.18, 0.9, 0.24, 1.35) infinite; }
-                .lg-find-found-desc { margin: 0; color: #801039; font-weight: 900; font-size: clamp(0.95rem, 1.6vw, 1.25rem); line-height: 1.25; max-width: 520px; text-shadow: 0 2px 0 #ffffff, 0 8px 18px rgba(255,195,0,0.35); }
-                .lg-find-particles { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
-                .lg-find-spark { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; border-radius: 50%; background: #ffc300; box-shadow: 0 0 10px #fff, 0 0 18px #ffc300; opacity: 0; animation: lgTreasureSpark 1.45s ease-out infinite; }
-                .lg-find-spark:nth-child(1) { --x:-230px; --y:-150px; animation-delay:0s; }
-                .lg-find-spark:nth-child(2) { --x:210px; --y:-170px; animation-delay:.08s; width:9px; height:9px; }
-                .lg-find-spark:nth-child(3) { --x:-270px; --y:40px; animation-delay:.16s; background:#fff; }
-                .lg-find-spark:nth-child(4) { --x:260px; --y:55px; animation-delay:.24s; width:14px; height:14px; }
-                .lg-find-spark:nth-child(5) { --x:-160px; --y:190px; animation-delay:.32s; }
-                .lg-find-spark:nth-child(6) { --x:170px; --y:205px; animation-delay:.4s; background:#fff3a3; }
-                .lg-find-spark:nth-child(7) { --x:0px; --y:-230px; animation-delay:.48s; width:10px; height:10px; }
-                .lg-find-spark:nth-child(8) { --x:0px; --y:235px; animation-delay:.56s; background:#ffef88; }
+                /* Celebracion contenida: no cubre la imagen con filtros fuertes. */
+                .luchito-found-overlay { --luchito-gold: #ffc300; --luchito-orange: #f59e0b; --luchito-glow: rgba(255,195,0,0.42); position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 18px; text-align: center; pointer-events: none; opacity: 0; transition: opacity 0.18s ease; overflow: hidden; }
+                .luchito-found-overlay.show { opacity: 1; }
+                .luchito-found-card { position: relative; display: grid; justify-items: center; gap: 0.55rem; max-width: min(520px, 78vw); }
+                .luchito-pop { position: relative; display: grid; place-items: center; animation: luchitoFoundPop 620ms cubic-bezier(0.18, 0.9, 0.24, 1.15) both; }
+                .luchito-found-glow { position: absolute; width: min(360px, 50vw); aspect-ratio: 1; border-radius: 999px; background: radial-gradient(circle, rgba(255,239,166,0.72) 0%, var(--luchito-glow) 34%, rgba(245,158,11,0.16) 52%, transparent 72%); filter: blur(10px); opacity: 0.78; animation: luchitoGlowPulse 1.4s ease-in-out infinite alternate; }
+                .luchito-found-ripple { position: absolute; width: min(260px, 42vw); aspect-ratio: 1; border: 2px solid rgba(255,195,0,0.65); border-radius: 999px; opacity: 0; animation: luchitoRipple 760ms ease-out forwards; }
+                .luchito-found-img { position: relative; z-index: 2; display: block; max-width: min(300px, 34vw); max-height: min(350px, 54vh); object-fit: contain; filter: drop-shadow(0 0 8px rgba(255,255,255,0.85)) drop-shadow(0 0 18px rgba(255,195,0,0.72)) drop-shadow(0 16px 20px rgba(47,24,7,0.35)); }
+                .luchito-found-message { position: relative; z-index: 4; width: min(440px, 82vw); padding: 0.72rem 1rem; border: 1px solid rgba(255,195,0,0.32); border-radius: 16px; background: rgba(18, 12, 20, 0.72); backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0,0,0,0.2); }
+                .luchito-found-title { margin: 0; color: #fff8d6; font-family: 'Arial Black Web', sans-serif; font-size: clamp(1.05rem, 2.2vw, 1.55rem); line-height: 1.05; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.36); }
+                .luchito-found-subtitle { margin: 0.25rem 0 0; color: #f8fafc; font-weight: 800; font-size: clamp(0.78rem, 1.4vw, 0.98rem); line-height: 1.2; }
+                .luchito-found-desc { margin: 0.3rem 0 0; color: #ffe7a0; font-weight: 800; font-size: clamp(0.82rem, 1.45vw, 1.02rem); line-height: 1.25; }
+                /* Particulas temporales creadas por JS y removidas al terminar. */
+                .luchito-effects { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+                .luchito-particle { position: absolute; left: 50%; top: 45%; width: var(--size); height: var(--size); border-radius: 999px; background: var(--color); box-shadow: 0 0 10px var(--color); opacity: 0; transform: translate(-50%, -50%) scale(0.4); animation: luchitoParticleBurst var(--duration) ease-out var(--delay) forwards; }
+                .luchito-particle.star { border-radius: 2px; transform: translate(-50%, -50%) scale(0.35) rotate(45deg); }
+                .luchito-sparkle { position: absolute; left: 50%; top: 45%; width: var(--size); height: var(--size); opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.35) rotate(0deg); animation: luchitoSparklePop var(--duration) ease-out var(--delay) forwards; }
+                .luchito-sparkle::before, .luchito-sparkle::after { content: ""; position: absolute; inset: 0; margin: auto; background: var(--color); border-radius: 999px; box-shadow: 0 0 10px var(--color); }
+                .luchito-sparkle::before { width: 24%; height: 100%; }
+                .luchito-sparkle::after { width: 100%; height: 24%; }
                 .lg-find-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 0.4rem; width: 100%; margin-top: 0.5rem; padding: 1rem; background: #fff; border: 2px solid #801039; border-radius: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
                 .lg-find-cell { font-size: 1.8rem; display: flex; align-items: center; justify-content: center; height: 45px; background: transparent; cursor: pointer; user-select: none; transition: transform 0.1s ease; border-radius: 8px; }
                 .lg-find-cell:hover:not(.locked) { transform: scale(1.15) translateY(-2px); background: #fdf5f7; }
@@ -65,12 +64,11 @@ window.LuchitoGames.registerGame('find-luchito', {
                 @keyframes lgShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
                 @keyframes lgBounceFound { 0% { transform: scale(1); } 50% { transform: scale(1.6); } 100% { transform: scale(1.4); } }
                 @keyframes lgFindPulse { 0% { transform: translate(-50%, -50%) scale(0.65); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-                @keyframes lgTreasurePop { 0% { transform: translateY(54px) scale(0.25) rotate(-7deg); opacity: 0; } 48% { transform: translateY(-20px) scale(1.22) rotate(3deg); opacity: 1; } 68% { transform: translateY(8px) scale(0.94) rotate(-1deg); } 84% { transform: translateY(-4px) scale(1.06); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-                @keyframes lgTreasureGlow { from { opacity: 0.65; transform: scale(0.88); } to { opacity: 1; transform: scale(1.22); } }
-                @keyframes lgTreasureFlash { from { opacity: 0.35; transform: scale(0.96); } to { opacity: 0.82; transform: scale(1.08); } }
-                @keyframes lgTreasureSpin { to { transform: rotate(360deg); } }
-                @keyframes lgTreasureBounce { 0%, 100% { transform: translateY(0) scale(1) rotate(-1deg); } 36% { transform: translateY(-18px) scale(1.1) rotate(1deg); } 58% { transform: translateY(5px) scale(0.98); } 76% { transform: translateY(-7px) scale(1.04); } }
-                @keyframes lgTreasureSpark { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; } 16% { opacity: 1; } 78% { opacity: 0.95; } 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0); opacity: 0; } }
+                @keyframes luchitoFoundPop { 0% { opacity: 0; transform: translateY(18px) scale(0.75); } 62% { opacity: 1; transform: translateY(-5px) scale(1.12); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+                @keyframes luchitoGlowPulse { from { opacity: 0.52; transform: scale(0.95); } to { opacity: 0.82; transform: scale(1.06); } }
+                @keyframes luchitoRipple { 0% { opacity: 0.55; transform: scale(0.55); } 100% { opacity: 0; transform: scale(1.45); } }
+                @keyframes luchitoParticleBurst { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.35); } 16% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.9); } }
+                @keyframes luchitoSparklePop { 0% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.25) rotate(0deg); } 35% { opacity: 1; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1) rotate(45deg); } 100% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.25) rotate(90deg); } }
                 @media (max-width: 640px) {
                     .lg-find-stage { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
                     .lg-find-panel { gap: 0.45rem; }
@@ -83,8 +81,9 @@ window.LuchitoGames.registerGame('find-luchito', {
                     .lg-find-msg { min-height: 0; font-size: 0.72rem; }
                     .lg-find-scene img { max-width: 100%; max-height: calc(100vh - 112px); }
                     .lg-find-hint { top: 10px; right: 10px; max-width: 68%; font-size: 0.82rem; padding: 0.65rem 0.8rem; }
-                    .lg-find-found-content { max-width: 86vw; }
-                    .lg-find-found-img { max-width: 56vw; max-height: 44vh; }
+                    .luchito-found-card { max-width: 88vw; }
+                    .luchito-found-img { max-width: 54vw; max-height: 42vh; }
+                    .luchito-found-message { width: min(360px, 86vw); padding: 0.65rem 0.8rem; }
                 }
             `;
             document.head.appendChild(style);
@@ -165,7 +164,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                                 </div>
                             </div>
                         </div>
-                        <div class="lg-find-found-pop" id="lg-find-found-pop" aria-hidden="true"></div>
+                        <div class="luchito-found-overlay" id="lg-find-found-pop" aria-hidden="true"></div>
                     </div>
                 `;
 
@@ -221,24 +220,56 @@ window.LuchitoGames.registerGame('find-luchito', {
                     targetEl.classList.add('show');
                 }
 
+                function playLuchitoFoundAnimation(overlay, foundImage, foundDescription) {
+                    const particleColors = ['#ffc300', '#ffe08a', '#fff7d6', '#f59e0b'];
+                    const particleCount = 30;
+                    const sparkleCount = 8;
+
+                    const particles = Array.from({ length: particleCount }, (_, index) => {
+                        const angle = (Math.PI * 2 * index) / particleCount + (Math.random() * 0.35);
+                        const distance = 92 + Math.random() * 132;
+                        const size = 4 + Math.random() * 7;
+                        const color = particleColors[index % particleColors.length];
+                        return `<span class="luchito-particle ${index % 5 === 0 ? 'star' : ''}" style="--x:${Math.cos(angle) * distance}px; --y:${Math.sin(angle) * distance}px; --size:${size}px; --color:${color}; --duration:${820 + Math.random() * 360}ms; --delay:${Math.random() * 110}ms;"></span>`;
+                    }).join('');
+
+                    const sparkles = Array.from({ length: sparkleCount }, (_, index) => {
+                        const angle = (Math.PI * 2 * index) / sparkleCount + 0.2;
+                        const distance = 118 + Math.random() * 82;
+                        const size = 14 + Math.random() * 10;
+                        const color = particleColors[(index + 2) % particleColors.length];
+                        return `<span class="luchito-sparkle" style="--x:${Math.cos(angle) * distance}px; --y:${Math.sin(angle) * distance}px; --size:${size}px; --color:${color}; --duration:${680 + Math.random() * 260}ms; --delay:${index * 45}ms;"></span>`;
+                    }).join('');
+
+                    overlay.innerHTML = `
+                        <div class="luchito-found-card">
+                            <div class="luchito-effects" aria-hidden="true">${particles}${sparkles}</div>
+                            <div class="luchito-pop">
+                                <span class="luchito-found-glow" aria-hidden="true"></span>
+                                <span class="luchito-found-ripple" aria-hidden="true"></span>
+                                ${foundImage ? `<img class="luchito-found-img" src="${escapeHTML(foundImage)}" alt="Luchito encontrado">` : ''}
+                            </div>
+                            <div class="luchito-found-message">
+                                <h3 class="luchito-found-title">&iexcl;Encontraste a Luchito!</h3>
+                                <p class="luchito-found-subtitle">Buen ojo, vecino &#128064;</p>
+                                ${foundDescription ? `<p class="luchito-found-desc">${escapeHTML(foundDescription)}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    overlay.setAttribute('aria-hidden', 'false');
+                    overlay.classList.add('show');
+
+                    // Limpia efectos temporales para no acumular particulas entre niveles.
+                    setTimeout(() => overlay.querySelector('.luchito-effects')?.remove(), 1400);
+                }
+
                 function showFoundCelebration(callback) {
                     const foundImage = String(levelConfig.foundImage || '').trim();
                     const foundDescription = String(levelConfig.foundDescription || '').trim();
 
-                    foundPopEl.innerHTML = `
-                        <div class="lg-find-found-content">
-                            <div class="lg-find-particles" aria-hidden="true">
-                                <span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span>
-                                <span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span>
-                            </div>
-                            <h3 class="lg-find-found-title">Encontraste a Luchito</h3>
-                            ${foundImage ? `<div class="lg-find-found-img-wrap"><img class="lg-find-found-img" src="${escapeHTML(foundImage)}" alt="Luchito encontrado"></div>` : ''}
-                            ${foundDescription ? `<p class="lg-find-found-desc">${escapeHTML(foundDescription)}</p>` : ''}
-                        </div>
-                    `;
-                    foundPopEl.setAttribute('aria-hidden', 'false');
-                    foundPopEl.classList.add('show');
-                    setTimeout(callback, 3600);
+                    playLuchitoFoundAnimation(foundPopEl, foundImage, foundDescription);
+                    setTimeout(callback, 2800);
                 }
 
                 function endGame(win) {
