@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array
                     if (empty($nombre)) continue; // Regla 3: Ignorar si columna A está vacía
 
                     $estado = trim($r[1] ?? '');
+                    if (stripos($estado, 'Oculto') !== false) continue;
                     $monto = trim($r[2] ?? '');
                     $provincia = trim($r[5] ?? '');
                     $distrito = trim($r[6] ?? '');

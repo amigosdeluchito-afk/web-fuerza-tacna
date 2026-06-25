@@ -53,7 +53,9 @@ try {
                 $nombre = trim($r[0] ?? '');
                 if (empty($nombre)) continue;
 
-                $estado = trim($r[1] ?? ''); $monto = trim($r[2] ?? '');
+                $estado = trim($r[1] ?? '');
+                if (stripos($estado, 'Oculto') !== false) continue;
+                $monto = trim($r[2] ?? '');
                 $provincia = trim($r[5] ?? ''); $distrito = trim($r[6] ?? '');
                 $carpeta = trim($r[7] ?? ''); $descripcion = trim($r[8] ?? '');
 

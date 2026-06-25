@@ -119,6 +119,272 @@ $normalizada = mb_strtolower($mensaje, 'UTF-8');
 $unwanted_array = array('á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ü'=>'u', 'ñ'=>'n');
 $normalizada = strtr($normalizada, $unwanted_array);
 
+function ft_normalizar_busqueda($texto) {
+    $texto = mb_strtolower((string)$texto, 'UTF-8');
+    $texto = strtr($texto, [
+        'á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ü'=>'u', 'ñ'=>'n',
+        'Ã¡'=>'a', 'Ã©'=>'e', 'Ã­'=>'i', 'Ã³'=>'o', 'Ãº'=>'u', 'Ã¼'=>'u', 'Ã±'=>'n'
+    ]);
+    $texto = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $texto);
+    return trim(preg_replace('/\s+/', ' ', $texto));
+}
+
+function ft_extraer_estado_obra($contenido) {
+    if (preg_match("/Estado actual:\s*'([^']+)'/u", (string)$contenido, $m)) {
+        return trim($m[1]);
+    }
+    return '';
+}
+
+function ft_es_obra_educacion($titulo, $contenido, $palabras) {
+    $texto = ft_normalizar_busqueda($titulo . ' ' . $contenido . ' ' . $palabras);
+    return (bool)preg_match('/\b(educacion|colegio|colegios|escuela|escuelas|educativa|educativo|inicial|primaria|secundaria|institucion educativa|ie)\b/u', $texto);
+}
+
+function ft_clasificar_estado_obra($estado) {
+    $estado_norm = ft_normalizar_busqueda($estado);
+    if ($estado_norm === '') return 'sin_estado';
+    if (strpos($estado_norm, 'oculto') !== false) return 'oculto';
+    if (preg_match('/(entregad|culminad|terminad|concluid|funcion|inaugurad|finalizad)/', $estado_norm)) return 'funcionando';
+    if (preg_match('/(constru|ejecucion|ejecut)/', $estado_norm)) return 'construccion';
+    return 'otro';
+}
+
+function ft_extraer_valor_patron($patron, $texto) {
+    if (preg_match($patron, (string)$texto, $m)) {
+        return trim($m[1]);
+    }
+    return '';
+}
+
+function ft_parsear_monto_soles($monto) {
+    $raw = ft_normalizar_busqueda($monto);
+    if ($raw === '') return 0.0;
+
+    $multiplicador = 1;
+    if (preg_match('/\b(millon|millones)\b/', $raw)) {
+        $multiplicador = 1000000;
+    } elseif (preg_match('/\b(mil)\b/', $raw)) {
+        $multiplicador = 1000;
+    }
+
+    $numero = preg_replace('/[^\d\.,]/', '', (string)$monto);
+    if ($numero === '') return 0.0;
+    if (strpos($numero, ',') !== false && strpos($numero, '.') === false) {
+        $numero = str_replace(',', '.', $numero);
+    } else {
+        $numero = str_replace(',', '', $numero);
+    }
+
+    return (float)$numero * $multiplicador;
+}
+
+function ft_formatear_soles($monto) {
+    if ($monto >= 1000000) {
+        $millones = $monto / 1000000;
+        $txt = ($millones == floor($millones)) ? number_format($millones, 0) : number_format($millones, 1);
+        return 'S/ ' . $txt . ' millones';
+    }
+    return 'S/ ' . number_format($monto, 0);
+}
+
+function ft_tokenizar_busqueda($texto) {
+    $stop = ['obra','obras','proyecto','proyectos','cuanto','cuantos','cuanta','cuantas','total','hay','existe','existen','en','de','del','la','el','los','las','un','una','por','para','con','se','gasto','gasto','gasto','inversion','invertido','monto','millones','dinero','soles','registrado','referencial'];
+    $tokens = array_filter(explode(' ', ft_normalizar_busqueda($texto)), function($w) use ($stop) {
+        return mb_strlen($w, 'UTF-8') > 3 && !in_array($w, $stop);
+    });
+    return array_values(array_unique($tokens));
+}
+
+function ft_parsear_obra_estadistica($row) {
+    $titulo = trim($row['titulo'] ?? '');
+    $contenido = trim($row['contenido'] ?? '');
+    $nombre = trim(preg_replace('/^Obra:\s*/i', '', $titulo));
+    $sector = ft_extraer_valor_patron('/pertenece al sector\s+(.+?)\.\s/iu', $contenido);
+    $estado = ft_extraer_estado_obra($contenido);
+    $monto_raw = ft_extraer_valor_patron('/Monto referencial:\s*(.+?)(?:\.\s+(?:Descripci|Tiene|\()|$)/iu', $contenido);
+    $ubicacion = ft_extraer_valor_patron('/Ubicada en\s+(.+?)\.\s/iu', $contenido);
+    $distrito = '';
+    $provincia = '';
+    if ($ubicacion !== '') {
+        $partes = array_map('trim', explode(',', $ubicacion));
+        $distrito = $partes[0] ?? '';
+        $provincia = $partes[1] ?? '';
+    }
+
+    return [
+        'titulo' => $titulo,
+        'nombre' => $nombre,
+        'sector' => $sector,
+        'estado' => $estado,
+        'estado_clase' => ft_clasificar_estado_obra($estado),
+        'distrito' => $distrito,
+        'provincia' => $provincia,
+        'monto_raw' => $monto_raw,
+        'monto' => ft_parsear_monto_soles($monto_raw),
+        'busqueda' => ft_normalizar_busqueda($titulo . ' ' . $contenido . ' ' . ($row['palabras_clave'] ?? ''))
+    ];
+}
+
+function ft_query_menciona_sector($query, $obra) {
+    $sector = ft_normalizar_busqueda($obra['sector']);
+    if ($sector !== '' && strpos($query, $sector) !== false) return true;
+
+    $aliases = [
+        'educacion' => ['educacion','colegio','colegios','escuela','escuelas','educativa','educativo','inicial','primaria','secundaria'],
+        'salud' => ['salud','posta','postas','hospital','centro de salud'],
+        'agua' => ['agua','saneamiento','desague','alcantarillado'],
+        'vias' => ['via','vias','pista','pistas','carretera','transporte','vial'],
+        'seguridad' => ['seguridad','serenazgo','comisaria'],
+        'social' => ['social','comunal','parque','recreacion','deporte']
+    ];
+
+    foreach ($aliases as $canon => $words) {
+        $sector_match = (strpos($sector, $canon) !== false);
+        $query_match = false;
+        foreach ($words as $w) {
+            if (strpos($query, $w) !== false) {
+                $query_match = true;
+                break;
+            }
+        }
+        if ($sector_match && $query_match) return true;
+    }
+
+    return false;
+}
+
+function ft_query_menciona_lugar($query, $obra) {
+    foreach ([$obra['distrito'], $obra['provincia']] as $lugar) {
+        $lugar_norm = ft_normalizar_busqueda($lugar);
+        if (mb_strlen($lugar_norm, 'UTF-8') > 3 && strpos($query, $lugar_norm) !== false) return true;
+
+        $tokens = ft_tokenizar_busqueda($lugar);
+        if (empty($tokens)) continue;
+        $hits = 0;
+        foreach ($tokens as $token) {
+            if ($token === 'tacna') continue;
+            if (strpos($query, $token) !== false) $hits++;
+        }
+        if ($hits >= min(2, max(1, count($tokens) - 1))) return true;
+    }
+    return false;
+}
+
+function ft_query_menciona_obra($query, $obra) {
+    $tokens = ft_tokenizar_busqueda($obra['nombre']);
+    if (empty($tokens)) return false;
+    $hits = 0;
+    foreach ($tokens as $token) {
+        if (strpos($query, $token) !== false) $hits++;
+    }
+    return $hits >= min(2, count($tokens));
+}
+
+function ft_filtrar_obras_estadistica($query, $obras) {
+    $filtradas = [];
+    $hay_filtro = false;
+
+    foreach ($obras as $obra) {
+        $match_sector = ft_query_menciona_sector($query, $obra);
+        $match_lugar = ft_query_menciona_lugar($query, $obra);
+        $match_obra = ft_query_menciona_obra($query, $obra);
+
+        if ($match_sector || $match_lugar || $match_obra) {
+            $hay_filtro = true;
+            $filtradas[] = $obra;
+        }
+    }
+
+    return $hay_filtro ? $filtradas : $obras;
+}
+
+function ft_nombre_alcance_estadistica($query, $filtradas, $todas) {
+    if (count($filtradas) === count($todas)) return 'todas las obras registradas';
+
+    $sectores = array_values(array_unique(array_filter(array_map(function($o) { return $o['sector']; }, $filtradas))));
+    $distritos = array_values(array_unique(array_filter(array_map(function($o) { return $o['distrito']; }, $filtradas))));
+    $provincias = array_values(array_unique(array_filter(array_map(function($o) { return $o['provincia']; }, $filtradas))));
+
+    if (count($filtradas) === 1) return "la obra '" . $filtradas[0]['nombre'] . "'";
+    if (count($sectores) === 1 && ft_query_menciona_sector($query, $filtradas[0])) return "el sector " . $sectores[0];
+    if (count($distritos) === 1 && ft_query_menciona_lugar($query, $filtradas[0])) return "el distrito " . $distritos[0];
+    if (count($provincias) === 1 && ft_query_menciona_lugar($query, $filtradas[0])) return "la provincia " . $provincias[0];
+    return 'la selección encontrada';
+}
+
+function ft_responder_estadistica_obras($db, $mensaje_normalizado) {
+    $pide_conteo = preg_match('/\b(cuantos|cuantas|cantidad|numero|total|hay|existen)\b/', $mensaje_normalizado);
+    $pide_monto = preg_match('/\b(cuanto|cuanta|dinero|monto|inversion|invertido|gasto|gasto|costo|presupuesto|millones|soles)\b/', $mensaje_normalizado);
+    $tema_obras = preg_match('/\b(obra|obras|proyecto|proyectos|colegio|colegios|educacion|salud|agua|vias|distrito|provincia|millones|inversion|monto|gasto|gastado)\b/', $mensaje_normalizado);
+    if ((!$pide_conteo && !$pide_monto) || !$tema_obras) return null;
+
+    try {
+        $stmt = $db->query("SELECT titulo, contenido, palabras_clave FROM panel_ia_conocimiento WHERE estado = 1 AND categoria = 'Obras' AND fuente = 'Google Sheets - Obras'");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        return null;
+    }
+
+    $obras = [];
+    $vistos = [];
+    foreach ($rows as $row) {
+        $obra = ft_parsear_obra_estadistica($row);
+        if ($obra['titulo'] === '' || isset($vistos[$obra['titulo']])) continue;
+        if ($obra['estado_clase'] === 'oculto') continue;
+        $vistos[$obra['titulo']] = true;
+        $obras[] = $obra;
+    }
+    if (empty($obras)) return null;
+
+    $filtradas = ft_filtrar_obras_estadistica($mensaje_normalizado, $obras);
+    if (empty($filtradas)) return null;
+
+    $stats = ['funcionando' => 0, 'construccion' => 0, 'otros' => 0, 'sin_estado' => 0];
+    $monto_total = 0.0;
+    $con_monto = 0;
+    $ejemplos = [];
+
+    foreach ($filtradas as $obra) {
+        if ($obra['estado_clase'] === 'funcionando') $stats['funcionando']++;
+        elseif ($obra['estado_clase'] === 'construccion') $stats['construccion']++;
+        elseif ($obra['estado_clase'] === 'sin_estado') $stats['sin_estado']++;
+        else $stats['otros']++;
+
+        if ($obra['monto'] > 0) {
+            $monto_total += $obra['monto'];
+            $con_monto++;
+        }
+        if (count($ejemplos) < 3) $ejemplos[] = $obra['nombre'];
+    }
+
+    $partes = [];
+    if ($stats['funcionando'] > 0) $partes[] = $stats['funcionando'] . ' entregadas o funcionando';
+    if ($stats['construccion'] > 0) $partes[] = $stats['construccion'] . ' en construcción/ejecución';
+    if ($stats['otros'] > 0) $partes[] = $stats['otros'] . ' con otro estado';
+    if ($stats['sin_estado'] > 0) $partes[] = $stats['sin_estado'] . ' sin estado claro';
+
+    $alcance = ft_nombre_alcance_estadistica($mensaje_normalizado, $filtradas, $obras);
+    $texto = "Según el cerebro de obras, para " . $alcance . " tengo " . count($filtradas) . " obra" . (count($filtradas) === 1 ? '' : 's') . " registrada" . (count($filtradas) === 1 ? '' : 's');
+    if (!empty($partes)) $texto .= ": " . implode(', ', $partes);
+
+    if ($pide_monto) {
+        if ($con_monto > 0) {
+            $texto .= ". La inversión referencial registrada suma " . ft_formatear_soles($monto_total) . " en " . $con_monto . " obra" . ($con_monto === 1 ? '' : 's') . " con monto";
+            if (preg_match('/\b(gasto|gastado|gasto)\b/', $mensaje_normalizado)) {
+                $texto .= "; te lo digo como inversión registrada, no como gasto ejecutado real";
+            }
+        } else {
+            $texto .= ". No encontré montos referenciales cargados para esa selección";
+        }
+    }
+
+    if (!empty($ejemplos)) $texto .= ". Ejemplos: " . implode('; ', $ejemplos);
+    $texto .= ".";
+
+    return $texto;
+}
+
 // 6. Diccionario Temático de Clasificación
 $temas_validos = [
     'Obras' => [
@@ -192,6 +458,7 @@ $motivo_bloqueo = '';
 $limite_alcanzado = false;
 $error_openai_debug = '';
 $razon_no_openai = ($ia_activa === 1) ? 'OK_LISTO_PARA_EVALUAR' : 'IA_APAGADA_EN_PANEL';
+$resuelto_local = false;
 
 if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instrucciones|olvida todo|muestrame tu prompt)/i', $normalizada)) {
     $categoria_detectada = 'Auditoría - Inyección';
@@ -220,8 +487,20 @@ if (preg_match('/(ignora|olvida|actua como|comportate como|eres un prompt|instru
     if (preg_match('/(.)\1{7,}/', $normalizada)) $spam_extremo = true;
 }
 
+if ($motivo_bloqueo === '') {
+    $respuesta_estadistica = ft_responder_estadistica_obras($db, ft_normalizar_busqueda($mensaje));
+    if ($respuesta_estadistica !== null) {
+        $categoria_detectada = 'Obras - Estadística';
+        $texto_final = $respuesta_estadistica;
+        $acciones_final = [['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras']];
+        $origen_final = 'router_estadistica_obras';
+        $resuelto_local = true;
+        $razon_no_openai = 'RESPUESTA_LOCAL_ESTADISTICA';
+    }
+}
+
 // --- AUDITORÍA Y LÍMITES IA (ETAPA 6B) ---
-if ($ia_activa === 1 && $motivo_bloqueo === '') {
+if ($ia_activa === 1 && $motivo_bloqueo === '' && !$resuelto_local) {
     
     $ip_real = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
     $salt = defined('IA_HASH_SALT') ? IA_HASH_SALT : 'FallbackSalt';
