@@ -95,7 +95,32 @@ function injectGlobalAssets() {
     // Esto evita errores 404 al navegar a páginas en subcarpetas (como el mapa de obras),
     // ya que la ruta relativa se ajusta automáticamente.
     const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
-    const gamesHref = `${basePath}index.html#juega-luchito`;
+    const gamesHref = '#juega-luchito';
+
+    const openGamesOverlay = () => {
+        const tryOpen = () => {
+            if (window.LuchitoGames && typeof window.LuchitoGames.open === 'function') {
+                window.LuchitoGames.open();
+                return;
+            }
+            setTimeout(tryOpen, 120);
+        };
+        tryOpen();
+    };
+
+    const bindGamesMenuLinks = () => {
+        document.querySelectorAll('a[data-menu-juegos="true"]').forEach((link) => {
+            if (link.dataset.gamesClickBound) return;
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (window.location.hash !== '#juega-luchito') {
+                    history.pushState(null, '', '#juega-luchito');
+                }
+                openGamesOverlay();
+            });
+            link.dataset.gamesClickBound = 'true';
+        });
+    };
 
     const ensureGamesMenuItem = () => {
         const menus = [
@@ -104,13 +129,21 @@ function injectGlobalAssets() {
         ].filter(Boolean);
 
         menus.forEach((menu) => {
-            if (menu.querySelector('a[href$="#juega-luchito"], a[data-menu-juegos="true"]')) return;
-            const li = document.createElement('li');
-            li.setAttribute('data-x-aos', 'fade-down');
-            li.setAttribute('data-x-aos-duration', '1600');
-            li.innerHTML = `<a href="${gamesHref}" data-menu-juegos="true">JUEGOS</a>`;
-            menu.appendChild(li);
+            let link = menu.querySelector('a[href$="#juega-luchito"], a[data-menu-juegos="true"]');
+            if (!link) {
+                const li = document.createElement('li');
+                li.setAttribute('data-x-aos', 'fade-down');
+                li.setAttribute('data-x-aos-duration', '1600');
+                li.innerHTML = `<a href="${gamesHref}" data-menu-juegos="true">JUEGA<br>CON LUCHITO</a>`;
+                menu.appendChild(li);
+                link = li.querySelector('a');
+            } else {
+                link.href = gamesHref;
+                link.dataset.menuJuegos = 'true';
+                link.innerHTML = 'JUEGA<br>CON LUCHITO';
+            }
         });
+        bindGamesMenuLinks();
     };
 
     const injectLuchitoGamesAssets = () => {
@@ -133,14 +166,7 @@ function injectGlobalAssets() {
 
     const openGamesFromHash = () => {
         if (window.location.hash !== '#juega-luchito') return;
-        const tryOpen = () => {
-            if (window.LuchitoGames && typeof window.LuchitoGames.open === 'function') {
-                window.LuchitoGames.open();
-                return;
-            }
-            setTimeout(tryOpen, 120);
-        };
-        tryOpen();
+        openGamesOverlay();
     };
 
     ensureGamesMenuItem();
@@ -166,6 +192,7 @@ function injectGlobalAssets() {
             @media (min-width: 992px) { #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; } #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; } #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; } #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; } }
             #hero-header ul { background-color: rgba(255, 195, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 50px; padding: 18px 24px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.4); width: max-content !important; margin: 0 auto; will-change: transform, backdrop-filter; transform: translateZ(0); backface-visibility: hidden; }
             #hero-header ul li { margin: 0 15px !important; }
+            #hero-header ul li a[data-menu-juegos="true"], .menu-links a[data-menu-juegos="true"] { line-height: 1.05 !important; font-size: 13px !important; text-align: center !important; white-space: normal !important; }
             #hero-section, #hero-drone-section, #hero-video-section, #hero-contact, #hero-design-section, #sumate-hyperspace-section, #contacto-escenario { min-height: 100vh !important; width: 100%; box-sizing: border-box; }
             body.hide-header #hero-header, body.hide-header .mobile-arrows {
                 opacity: 0 !important;
@@ -796,7 +823,7 @@ function injectGlobalAssets() {
     
             // 3. Inyectar JS
             const chatJS = document.createElement('script');
-            chatJS.src = 'assets/universoobras/chat-ia.js?v=5'; // Juegos en menu/chat
+            chatJS.src = 'assets/universoobras/chat-ia.js?v=6'; // Juegos en menu/chat
             document.body.appendChild(chatJS);
     };
 

@@ -146,18 +146,23 @@ function initChatIA() {
 
     const navigateTo = (actionType) => {
         if (actionType === 'jugar_luchito') {
-            const gamesDest = projectRoot + 'index.html#juega-luchito';
             chatContainer.classList.remove('ft-chat-open');
             chatContainer.classList.add('ft-chat-closed');
 
-            if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
+            if (window.location.hash !== '#juega-luchito') {
                 window.location.hash = 'juega-luchito';
+            }
+
+            let attempts = 0;
+            const openGames = () => {
                 if (window.LuchitoGames && typeof window.LuchitoGames.open === 'function') {
                     window.LuchitoGames.open();
+                    return;
                 }
-            } else {
-                window.location.href = gamesDest;
-            }
+                attempts++;
+                if (attempts < 25) setTimeout(openGames, 120);
+            };
+            openGames();
             return;
         }
 
