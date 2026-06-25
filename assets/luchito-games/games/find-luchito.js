@@ -211,10 +211,6 @@ window.LuchitoGames.registerGame('find-luchito', {
                 function showFoundCelebration(callback) {
                     const foundImage = String(levelConfig.foundImage || '').trim();
                     const foundDescription = String(levelConfig.foundDescription || '').trim();
-                    if (!foundImage && !foundDescription) {
-                        setTimeout(callback, 900);
-                        return;
-                    }
 
                     foundPopEl.innerHTML = `
                         <div class="lg-find-found-content">
@@ -225,7 +221,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                     `;
                     foundPopEl.setAttribute('aria-hidden', 'false');
                     foundPopEl.classList.add('show');
-                    setTimeout(callback, 2600);
+                    setTimeout(callback, 3600);
                 }
 
                 function endGame(win) {

@@ -69,71 +69,82 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>Nivel ${index + 1}</span>
                     <button type="button" class="btn btn-danger btn-small" data-action="remove-find-level">Eliminar</button>
                 </div>
-                <div class="form-row">
-                    <div>
-                        <label>Tiempo (seg.)</label>
-                        <input type="number" data-level-field="time" min="5" max="120" value="${escapeHTML(level.time || 25)}">
-                    </div>
-                    <div>
-                        <label>Intentos</label>
-                        <input type="number" data-level-field="attempts" min="1" max="10" value="${escapeHTML(level.attempts || 3)}">
-                    </div>
+                <div class="level-admin-grid">
+                    <section class="level-section">
+                        <p class="level-section-title">Juego</p>
+                        <div class="form-row">
+                            <div>
+                                <label>Tiempo (seg.)</label>
+                                <input type="number" data-level-field="time" min="5" max="120" value="${escapeHTML(level.time || 25)}">
+                            </div>
+                            <div>
+                                <label>Intentos</label>
+                                <input type="number" data-level-field="attempts" min="1" max="10" value="${escapeHTML(level.attempts || 3)}">
+                            </div>
+                        </div>
+                        <div>
+                            <label>Imagen del nivel</label>
+                            <div class="upload-row">
+                                <input type="file" data-level-file accept="image/*">
+                                <button type="button" class="btn btn-secondary btn-small" data-action="upload-find-image">Subir</button>
+                            </div>
+                            <input type="hidden" data-level-field="image" value="${escapeHTML(level.image || '')}">
+                            <div class="upload-status" data-upload-status>${level.image ? 'Imagen cargada' : 'Sin imagen cargada'}</div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Pista corta</label>
+                                <input type="text" data-level-field="hint" placeholder="Ej: Mira cerca del mural..." value="${escapeHTML(level.hint || '')}">
+                            </div>
+                            <div>
+                                <label>Pista despues de (seg.)</label>
+                                <input type="number" data-level-field="hintDelay" min="0" max="120" value="${escapeHTML(level.hintDelay ?? 5)}">
+                            </div>
+                        </div>
+                    </section>
+                    <section class="level-section">
+                        <p class="level-section-title">Textos y personaje</p>
+                        <div>
+                            <label>Descripcion de la imagen</label>
+                            <textarea data-level-field="description" rows="3" placeholder="Ej: Imagen panoramica del mercado, con varias personas y puestos alrededor.">${escapeHTML(level.description || '')}</textarea>
+                        </div>
+                        <div>
+                            <label>Imagen del personaje encontrado</label>
+                            <div class="upload-row">
+                                <input type="file" data-level-found-file accept="image/*">
+                                <button type="button" class="btn btn-secondary btn-small" data-action="upload-find-found-image">Subir personaje</button>
+                            </div>
+                            <input type="hidden" data-level-field="foundImage" value="${escapeHTML(level.foundImage || '')}">
+                            <div class="upload-status" data-found-upload-status>${level.foundImage ? 'Personaje cargado' : 'Sin personaje cargado'}</div>
+                            <div class="level-draw-hint">Recomendado: PNG o WEBP sin fondo para que aparezca como pop up.</div>
+                        </div>
+                        <div>
+                            <label>Texto del pop up al encontrarlo</label>
+                            <textarea data-level-field="foundDescription" rows="2" placeholder="Ej: Luchito estaba supervisando esta importante obra para los vecinos.">${escapeHTML(level.foundDescription || '')}</textarea>
+                        </div>
+                    </section>
+                    <section class="level-section level-section-preview">
+                        <p class="level-section-title">Area correcta</p>
+                        <div>
+                            <label>Forma del area</label>
+                            <select data-level-field="shape">
+                                <option value="circle" ${(level.shape || 'circle') === 'circle' ? 'selected' : ''}>Circulo</option>
+                                <option value="rect" ${level.shape === 'rect' ? 'selected' : ''}>Cuadrado</option>
+                            </select>
+                        </div>
+                        <input type="hidden" data-level-field="targetX" value="${escapeHTML(level.targetX ?? 50)}">
+                        <input type="hidden" data-level-field="targetY" value="${escapeHTML(level.targetY ?? 50)}">
+                        <input type="hidden" data-level-field="radius" value="${escapeHTML(level.radius || 6)}">
+                        <input type="hidden" data-level-field="targetW" value="${escapeHTML(level.targetW || (Number(level.radius || 6) * 2))}">
+                        <input type="hidden" data-level-field="targetH" value="${escapeHTML(level.targetH || (Number(level.radius || 6) * 2))}">
+                        <div class="level-preview" data-preview>
+                            <img alt="Preview nivel ${index + 1}">
+                            <span class="level-target-area"></span>
+                        </div>
+                        <div class="level-draw-hint">Abre la imagen en grande para dibujar el area exacta donde esta Luchito.</div>
+                        <button type="button" class="btn btn-secondary btn-small" data-action="open-area-editor" style="margin-top:8px;">Editar area en grande</button>
+                    </section>
                 </div>
-                <div>
-                    <label>Imagen del nivel</label>
-                    <div class="upload-row">
-                        <input type="file" data-level-file accept="image/*">
-                        <button type="button" class="btn btn-secondary btn-small" data-action="upload-find-image">Subir</button>
-                    </div>
-                    <input type="hidden" data-level-field="image" value="${escapeHTML(level.image || '')}">
-                    <div class="upload-status" data-upload-status>${level.image ? 'Imagen cargada' : 'Sin imagen cargada'}</div>
-                </div>
-                <div class="form-row">
-                    <div>
-                        <label>Pista corta</label>
-                        <input type="text" data-level-field="hint" placeholder="Ej: Mira cerca del mural..." value="${escapeHTML(level.hint || '')}">
-                    </div>
-                    <div>
-                        <label>Mostrar pista despues de (seg.)</label>
-                        <input type="number" data-level-field="hintDelay" min="0" max="120" value="${escapeHTML(level.hintDelay ?? 5)}">
-                    </div>
-                    <div>
-                        <label>Forma del area</label>
-                        <select data-level-field="shape">
-                            <option value="circle" ${(level.shape || 'circle') === 'circle' ? 'selected' : ''}>Circulo</option>
-                            <option value="rect" ${level.shape === 'rect' ? 'selected' : ''}>Cuadrado</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label>Descripcion de la imagen</label>
-                    <textarea data-level-field="description" rows="3" placeholder="Ej: Imagen panoramica del mercado, con varias personas y puestos alrededor.">${escapeHTML(level.description || '')}</textarea>
-                </div>
-                <div>
-                    <label>Imagen del personaje encontrado</label>
-                    <div class="upload-row">
-                        <input type="file" data-level-found-file accept="image/*">
-                        <button type="button" class="btn btn-secondary btn-small" data-action="upload-find-found-image">Subir personaje</button>
-                    </div>
-                    <input type="hidden" data-level-field="foundImage" value="${escapeHTML(level.foundImage || '')}">
-                    <div class="upload-status" data-found-upload-status>${level.foundImage ? 'Personaje cargado' : 'Sin personaje cargado'}</div>
-                    <div class="level-draw-hint">Recomendado: PNG o WEBP sin fondo para que aparezca como pop up.</div>
-                </div>
-                <div>
-                    <label>Texto del pop up al encontrarlo</label>
-                    <textarea data-level-field="foundDescription" rows="2" placeholder="Ej: Luchito estaba supervisando esta importante obra para los vecinos.">${escapeHTML(level.foundDescription || '')}</textarea>
-                </div>
-                <input type="hidden" data-level-field="targetX" value="${escapeHTML(level.targetX ?? 50)}">
-                <input type="hidden" data-level-field="targetY" value="${escapeHTML(level.targetY ?? 50)}">
-                <input type="hidden" data-level-field="radius" value="${escapeHTML(level.radius || 6)}">
-                <input type="hidden" data-level-field="targetW" value="${escapeHTML(level.targetW || (Number(level.radius || 6) * 2))}">
-                <input type="hidden" data-level-field="targetH" value="${escapeHTML(level.targetH || (Number(level.radius || 6) * 2))}">
-                <div class="level-preview" data-preview>
-                    <img alt="Preview nivel ${index + 1}">
-                    <span class="level-target-area"></span>
-                </div>
-                <div class="level-draw-hint">Abre la imagen en grande para dibujar el area exacta donde esta Luchito.</div>
-                <button type="button" class="btn btn-secondary btn-small" data-action="open-area-editor" style="margin-top:8px;">Editar area en grande</button>
             </div>
         `).join('');
 
