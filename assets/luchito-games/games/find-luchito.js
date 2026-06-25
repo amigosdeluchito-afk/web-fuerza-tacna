@@ -28,9 +28,16 @@ window.LuchitoGames.registerGame('find-luchito', {
                 .lg-find-stage.wide-image .lg-find-timer-label { font-size: clamp(0.9rem, 1.2vw, 1.05rem); }
                 .lg-find-stage.wide-image .lg-find-timer-value { font-size: clamp(4.2rem, 7vw, 6.3rem); }
                 .lg-find-stage.wide-image .lg-find-board { padding-left: min(245px, 18vw); }
-                .lg-find-scene { position: relative; width: fit-content; max-width: 100%; border: 0; outline: 3px solid #801039; outline-offset: 0; border-radius: 18px; overflow: hidden; background: #ffffff; box-shadow: 0 10px 24px rgba(0,0,0,0.12); cursor: crosshair; touch-action: manipulation; flex: 0 1 auto; }
+                .lg-find-scene { position: relative; width: fit-content; max-width: 100%; border: 0; outline: 3px solid #801039; outline-offset: 0; border-radius: 18px; overflow: hidden; background: #ffffff; box-shadow: 0 10px 24px rgba(0,0,0,0.12); cursor: crosshair; touch-action: none; flex: 0 1 auto; }
+                .lg-find-scene.zoomed { cursor: grab; }
+                .lg-find-scene.panning { cursor: grabbing; }
                 .lg-find-scene.locked { cursor: default; }
+                .lg-find-zoom-layer { position: relative; width: fit-content; max-width: 100%; transform-origin: 0 0; will-change: transform; }
                 .lg-find-scene img { display: block; width: auto; height: auto; max-width: calc(100vw - 28px); max-height: calc(100vh - 36px); user-select: none; -webkit-user-drag: none; }
+                .lg-find-zoom-controls { position: absolute; right: 14px; bottom: 14px; z-index: 9; display: flex; gap: 6px; align-items: center; padding: 6px; border-radius: 999px; background: rgba(253,245,247,0.86); border: 1px solid rgba(128,16,57,0.18); backdrop-filter: blur(7px); box-shadow: 0 8px 18px rgba(0,0,0,0.12); }
+                .lg-find-zoom-btn { width: 34px; height: 34px; border: 0; border-radius: 999px; background: #801039; color: #ffc300; font-weight: 900; cursor: pointer; line-height: 1; font-size: 18px; }
+                .lg-find-zoom-btn:hover { background: #5f0c2b; }
+                .lg-find-zoom-level { min-width: 44px; text-align: center; color: #801039; font-weight: 900; font-size: 12px; }
                 .lg-find-marker { position: absolute; width: 44px; height: 44px; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; }
                 .lg-find-marker.show { opacity: 1; animation: lgFindPulse 0.7s ease; }
                 .lg-find-marker.hit { border: 4px solid #16a34a; box-shadow: 0 0 0 999px rgba(22,163,74,0.08), 0 0 18px rgba(22,163,74,0.75); }
@@ -181,10 +188,18 @@ window.LuchitoGames.registerGame('find-luchito', {
                             </aside>
                             <div class="lg-find-board">
                                 <div class="lg-find-scene" id="lg-find-scene" role="button" tabindex="0" aria-label="Imagen del nivel. Haz clic donde esta Luchito.">
-                                    <img src="${escapeHTML(levelConfig.image)}" alt="Nivel ${currentLevel} de Encuentra a Luchito">
+                                    <div class="lg-find-zoom-layer" id="lg-find-zoom-layer">
+                                        <img src="${escapeHTML(levelConfig.image)}" alt="Nivel ${currentLevel} de Encuentra a Luchito">
+                                        <span class="lg-find-marker" id="lg-find-marker"></span>
+                                        <span class="lg-find-target" id="lg-find-target"></span>
+                                    </div>
                                     <div class="lg-find-hint ${hintDelay > 0 ? 'pending' : 'revealed'}" id="lg-find-hint">${escapeHTML(levelConfig.hint || 'Mira con calma y toca donde creas que esta escondido.')}</div>
-                                    <span class="lg-find-marker" id="lg-find-marker"></span>
-                                    <span class="lg-find-target" id="lg-find-target"></span>
+                                    <div class="lg-find-zoom-controls" aria-label="Controles de zoom">
+                                        <button type="button" class="lg-find-zoom-btn" id="lg-find-zoom-out" aria-label="Alejar">-</button>
+                                        <span class="lg-find-zoom-level" id="lg-find-zoom-level">100%</span>
+                                        <button type="button" class="lg-find-zoom-btn" id="lg-find-zoom-in" aria-label="Acercar">+</button>
+                                        <button type="button" class="lg-find-zoom-btn" id="lg-find-zoom-reset" aria-label="Restablecer">↺</button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="lg-find-intro" id="lg-find-intro">
@@ -200,6 +215,7 @@ window.LuchitoGames.registerGame('find-luchito', {
 
                 const scene = container.querySelector('#lg-find-scene');
                 const stage = container.querySelector('.lg-find-stage');
+                const zoomLayer = container.querySelector('#lg-find-zoom-layer');
                 const sceneImg = scene.querySelector('img');
                 const timeEl = container.querySelector('#lg-find-time');
                 const timerCardEl = container.querySelector('#lg-find-timer-card');
@@ -210,6 +226,57 @@ window.LuchitoGames.registerGame('find-luchito', {
                 const hintEl = container.querySelector('#lg-find-hint');
                 const foundPopEl = container.querySelector('#lg-find-found-pop');
                 const introEl = container.querySelector('#lg-find-intro');
+                const zoomLevelEl = container.querySelector('#lg-find-zoom-level');
+                const zoomInBtn = container.querySelector('#lg-find-zoom-in');
+                const zoomOutBtn = container.querySelector('#lg-find-zoom-out');
+                const zoomResetBtn = container.querySelector('#lg-find-zoom-reset');
+                const zoomState = { scale: 1, x: 0, y: 0, dragging: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 };
+                const MIN_ZOOM = 1;
+                const MAX_ZOOM = 4;
+
+                function clampPan() {
+                    const viewportW = scene.clientWidth;
+                    const viewportH = scene.clientHeight;
+                    const contentW = zoomLayer.offsetWidth * zoomState.scale;
+                    const contentH = zoomLayer.offsetHeight * zoomState.scale;
+                    const minX = Math.min(0, viewportW - contentW);
+                    const minY = Math.min(0, viewportH - contentH);
+                    zoomState.x = clamp(zoomState.x, minX, 0);
+                    zoomState.y = clamp(zoomState.y, minY, 0);
+                    if (contentW <= viewportW) zoomState.x = (viewportW - contentW) / 2;
+                    if (contentH <= viewportH) zoomState.y = (viewportH - contentH) / 2;
+                }
+
+                function applyZoom() {
+                    clampPan();
+                    zoomLayer.style.transform = `translate(${zoomState.x}px, ${zoomState.y}px) scale(${zoomState.scale})`;
+                    scene.classList.toggle('zoomed', zoomState.scale > 1.01);
+                    if (zoomLevelEl) zoomLevelEl.textContent = `${Math.round(zoomState.scale * 100)}%`;
+                }
+
+                function setZoom(nextScale, clientX, clientY) {
+                    const oldScale = zoomState.scale;
+                    const newScale = clamp(nextScale, MIN_ZOOM, MAX_ZOOM);
+                    if (Math.abs(newScale - oldScale) < 0.001) return;
+
+                    const rect = scene.getBoundingClientRect();
+                    const focusX = Number.isFinite(clientX) ? clientX - rect.left : rect.width / 2;
+                    const focusY = Number.isFinite(clientY) ? clientY - rect.top : rect.height / 2;
+                    const imageX = (focusX - zoomState.x) / oldScale;
+                    const imageY = (focusY - zoomState.y) / oldScale;
+
+                    zoomState.scale = newScale;
+                    zoomState.x = focusX - imageX * newScale;
+                    zoomState.y = focusY - imageY * newScale;
+                    applyZoom();
+                }
+
+                function resetZoom() {
+                    zoomState.scale = 1;
+                    zoomState.x = 0;
+                    zoomState.y = 0;
+                    applyZoom();
+                }
 
                 function updateImageLayout() {
                     const isWide = sceneImg.naturalWidth > sceneImg.naturalHeight;
@@ -217,8 +284,66 @@ window.LuchitoGames.registerGame('find-luchito', {
                     stage?.classList.toggle('tall-image', !isWide);
                 }
 
-                if (sceneImg.complete) updateImageLayout();
+                if (sceneImg.complete) {
+                    updateImageLayout();
+                    resetZoom();
+                }
                 sceneImg.addEventListener('load', updateImageLayout, { once: true });
+                sceneImg.addEventListener('load', resetZoom, { once: true });
+
+                scene.addEventListener('wheel', event => {
+                    if (isGameOver) return;
+                    event.preventDefault();
+                    const factor = event.deltaY < 0 ? 1.14 : 0.88;
+                    setZoom(zoomState.scale * factor, event.clientX, event.clientY);
+                }, { passive: false });
+
+                zoomInBtn?.addEventListener('click', event => {
+                    event.stopPropagation();
+                    setZoom(zoomState.scale * 1.2);
+                });
+                zoomOutBtn?.addEventListener('click', event => {
+                    event.stopPropagation();
+                    setZoom(zoomState.scale / 1.2);
+                });
+                zoomResetBtn?.addEventListener('click', event => {
+                    event.stopPropagation();
+                    resetZoom();
+                });
+
+                scene.addEventListener('pointerdown', event => {
+                    if (isGameOver || event.button !== 0 || event.target.closest('.lg-find-zoom-controls')) return;
+                    zoomState.dragging = true;
+                    zoomState.moved = false;
+                    zoomState.startX = event.clientX;
+                    zoomState.startY = event.clientY;
+                    zoomState.originX = zoomState.x;
+                    zoomState.originY = zoomState.y;
+                    scene.classList.add('panning');
+                    scene.setPointerCapture?.(event.pointerId);
+                });
+
+                scene.addEventListener('pointermove', event => {
+                    if (!zoomState.dragging) return;
+                    const dx = event.clientX - zoomState.startX;
+                    const dy = event.clientY - zoomState.startY;
+                    if (Math.abs(dx) + Math.abs(dy) > 4) zoomState.moved = true;
+                    if (!zoomState.moved) return;
+                    event.preventDefault();
+                    zoomState.x = zoomState.originX + dx;
+                    zoomState.y = zoomState.originY + dy;
+                    applyZoom();
+                });
+
+                const endPan = event => {
+                    if (!zoomState.dragging) return;
+                    zoomState.dragging = false;
+                    scene.classList.remove('panning');
+                    scene.releasePointerCapture?.(event.pointerId);
+                    applyZoom();
+                };
+                scene.addEventListener('pointerup', endPan);
+                scene.addEventListener('pointercancel', endPan);
 
                 function revealHint() {
                     if (!hintEl || hintEl.classList.contains('revealed')) return;
@@ -263,13 +388,13 @@ window.LuchitoGames.registerGame('find-luchito', {
                 }
 
                 function showMissBubble(x, y) {
-                    scene.querySelectorAll('.lg-find-miss-bubble').forEach(item => item.remove());
+                    zoomLayer.querySelectorAll('.lg-find-miss-bubble').forEach(item => item.remove());
                     const bubble = document.createElement('span');
                     bubble.className = 'lg-find-miss-bubble';
                     bubble.textContent = 'CASI PERO NO';
                     bubble.style.setProperty('--x', `${x}%`);
                     bubble.style.setProperty('--y', `${y}%`);
-                    scene.appendChild(bubble);
+                    zoomLayer.appendChild(bubble);
                     bubble.addEventListener('animationend', () => bubble.remove(), { once: true });
                 }
 
@@ -379,7 +504,14 @@ window.LuchitoGames.registerGame('find-luchito', {
                     if (attempts <= 0) endGame(false);
                 }
 
-                scene.addEventListener('click', event => handleGuess(event.clientX, event.clientY));
+                scene.addEventListener('click', event => {
+                    if (event.target.closest('.lg-find-zoom-controls')) return;
+                    if (zoomState.moved) {
+                        zoomState.moved = false;
+                        return;
+                    }
+                    handleGuess(event.clientX, event.clientY);
+                });
                 scene.addEventListener('keydown', event => {
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();

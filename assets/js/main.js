@@ -158,7 +158,7 @@ function injectGlobalAssets() {
         if (!document.getElementById('luchito-games-script')) {
             const gamesJS = document.createElement('script');
             gamesJS.id = 'luchito-games-script';
-            gamesJS.src = `${basePath}assets/universoobras/luchito-games.js?v=19`;
+            gamesJS.src = `${basePath}assets/universoobras/luchito-games.js?v=20`;
             gamesJS.defer = true;
             document.body.appendChild(gamesJS);
         }
@@ -823,7 +823,7 @@ function injectGlobalAssets() {
     
             // 3. Inyectar JS
             const chatJS = document.createElement('script');
-            chatJS.src = 'assets/universoobras/chat-ia.js?v=6'; // Juegos en menu/chat
+            chatJS.src = 'assets/universoobras/chat-ia.js?v=7'; // Juegos en menu/chat
             document.body.appendChild(chatJS);
     };
 
