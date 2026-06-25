@@ -23,7 +23,8 @@
     ],
     "actions": [
       { "label": "🏗️ Ver Obras", "type": "ir_a_obras" },
-      { "label": "👥 Candidatos", "type": "ir_a_candidatos" }
+      { "label": "👥 Candidatos", "type": "ir_a_candidatos" },
+      { "label": "🎮 Juegos", "type": "jugar_luchito" }
     ],
     "estado": 1,
     "orden": 10

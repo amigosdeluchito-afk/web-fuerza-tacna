@@ -75,9 +75,9 @@ function initChatIA() {
         gamesCSS.href = projectRoot + 'assets/universoobras/luchito-games.css?v=6';
         document.head.appendChild(gamesCSS);
     }
-    if (!document.getElementById('luchito-games-js')) {
+    if (!document.getElementById('luchito-games-script') && !document.getElementById('luchito-games-js')) {
         const gamesJS = document.createElement('script');
-        gamesJS.id = 'luchito-games-js';
+        gamesJS.id = 'luchito-games-script';
         gamesJS.src = projectRoot + 'assets/universoobras/luchito-games.js?v=19';
         document.body.appendChild(gamesJS);
     }
@@ -112,7 +112,8 @@ function initChatIA() {
                 { label: '🏗️ Ver Obras', type: 'ir_a_obras' },
                 { label: '👥 Candidatos', type: 'ir_a_candidatos' },
                 { label: '🚀 Propuestas', type: 'ir_a_propuestas' },
-                { label: '📞 Contacto', type: 'ir_a_contacto' }
+                { label: '📞 Contacto', type: 'ir_a_contacto' },
+                { label: '🎮 Juegos', type: 'jugar_luchito' }
             ]
         }
     ];
@@ -145,10 +146,17 @@ function initChatIA() {
 
     const navigateTo = (actionType) => {
         if (actionType === 'jugar_luchito') {
-            if (typeof window.LuchitoGames !== 'undefined') {
-                window.LuchitoGames.open();
+            const gamesDest = projectRoot + 'index.html#juega-luchito';
+            chatContainer.classList.remove('ft-chat-open');
+            chatContainer.classList.add('ft-chat-closed');
+
+            if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
+                window.location.hash = 'juega-luchito';
+                if (window.LuchitoGames && typeof window.LuchitoGames.open === 'function') {
+                    window.LuchitoGames.open();
+                }
             } else {
-                console.warn('El módulo Juega con Luchito no ha cargado aún.');
+                window.location.href = gamesDest;
             }
             return;
         }

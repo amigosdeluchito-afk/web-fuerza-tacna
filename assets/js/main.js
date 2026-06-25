@@ -95,6 +95,59 @@ function injectGlobalAssets() {
     // Esto evita errores 404 al navegar a páginas en subcarpetas (como el mapa de obras),
     // ya que la ruta relativa se ajusta automáticamente.
     const basePath = window.location.pathname.includes('/assets/') ? '../../' : '';
+    const gamesHref = `${basePath}index.html#juega-luchito`;
+
+    const ensureGamesMenuItem = () => {
+        const menus = [
+            document.querySelector('.menu-pane .menu-links'),
+            document.querySelector('#hero-header ul')
+        ].filter(Boolean);
+
+        menus.forEach((menu) => {
+            if (menu.querySelector('a[href$="#juega-luchito"], a[data-menu-juegos="true"]')) return;
+            const li = document.createElement('li');
+            li.setAttribute('data-x-aos', 'fade-down');
+            li.setAttribute('data-x-aos-duration', '1600');
+            li.innerHTML = `<a href="${gamesHref}" data-menu-juegos="true">JUEGOS</a>`;
+            menu.appendChild(li);
+        });
+    };
+
+    const injectLuchitoGamesAssets = () => {
+        if (!document.getElementById('luchito-games-css')) {
+            const gamesCSS = document.createElement('link');
+            gamesCSS.id = 'luchito-games-css';
+            gamesCSS.rel = 'stylesheet';
+            gamesCSS.href = `${basePath}assets/universoobras/luchito-games.css?v=6`;
+            document.head.appendChild(gamesCSS);
+        }
+
+        if (!document.getElementById('luchito-games-script')) {
+            const gamesJS = document.createElement('script');
+            gamesJS.id = 'luchito-games-script';
+            gamesJS.src = `${basePath}assets/universoobras/luchito-games.js?v=19`;
+            gamesJS.defer = true;
+            document.body.appendChild(gamesJS);
+        }
+    };
+
+    const openGamesFromHash = () => {
+        if (window.location.hash !== '#juega-luchito') return;
+        const tryOpen = () => {
+            if (window.LuchitoGames && typeof window.LuchitoGames.open === 'function') {
+                window.LuchitoGames.open();
+                return;
+            }
+            setTimeout(tryOpen, 120);
+        };
+        tryOpen();
+    };
+
+    ensureGamesMenuItem();
+    setInterval(ensureGamesMenuItem, 1000);
+    injectLuchitoGamesAssets();
+    openGamesFromHash();
+    window.addEventListener('hashchange', openGamesFromHash);
 
     // Inyectar estilos globales si no existen en la página actual
     if (!document.getElementById('le-lab-dynamic-styles')) {
@@ -743,7 +796,7 @@ function injectGlobalAssets() {
     
             // 3. Inyectar JS
             const chatJS = document.createElement('script');
-            chatJS.src = 'assets/universoobras/chat-ia.js?v=4'; // Aesthetic UI update
+            chatJS.src = 'assets/universoobras/chat-ia.js?v=5'; // Juegos en menu/chat
             document.body.appendChild(chatJS);
     };
 
