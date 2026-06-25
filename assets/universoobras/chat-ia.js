@@ -78,7 +78,7 @@ function initChatIA() {
     if (!document.getElementById('luchito-games-js')) {
         const gamesJS = document.createElement('script');
         gamesJS.id = 'luchito-games-js';
-        gamesJS.src = projectRoot + 'assets/universoobras/luchito-games.js?v=18';
+        gamesJS.src = projectRoot + 'assets/universoobras/luchito-games.js?v=19';
         document.body.appendChild(gamesJS);
     }
 
