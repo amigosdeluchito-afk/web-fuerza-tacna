@@ -188,7 +188,7 @@ window.LuchitoGames = {
 
         if (!this.games[gameId]) {
             const GAMES_BASE_PATH = '/assets/luchito-games/games/';
-            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=14`;
+            const scriptUrl = `${GAMES_BASE_PATH}${gameId}.js?v=15`;
             
             try {
                 await new Promise((resolve, reject) => {
@@ -286,6 +286,30 @@ window.LuchitoGames = {
     },
 
     showRankingPrompt: function(score, gameId, container) {
+        if (gameId === 'find-luchito') {
+            container.style.position = 'relative';
+            const existingPrompt = container.querySelector('.lg-find-score-overlay');
+            if (existingPrompt) existingPrompt.remove();
+            container.insertAdjacentHTML('beforeend', `
+                <div class="lg-find-score-overlay" style="position:absolute; inset:0; z-index:40; display:flex; align-items:center; justify-content:center; padding:18px; background:rgba(2,6,23,0.18); backdrop-filter:blur(2px);">
+                    <div class="lg-animated-view" style="width:min(430px, 92vw); text-align:center; background:rgba(253,245,247,0.92); border:2px solid #ffc300; border-radius:18px; padding:1.1rem 1.2rem; box-shadow:0 18px 42px rgba(0,0,0,0.28);">
+                        <h2 style="color:#801039; font-family:'Arial Black Web', sans-serif; font-size:1.35rem; margin:0 0 .35rem; text-transform:uppercase;">Â¡Juego terminado!</h2>
+                        <p style="font-size:1rem; font-weight:800; color:#333; margin:.2rem 0 .9rem;">Puntaje: <span style="color:#ffc300; font-size:1.25rem; background:#801039; padding:2px 10px; border-radius:8px;">${score}</span></p>
+                        <div style="background:rgba(255,255,255,0.78); padding:.85rem; border-radius:14px; border:1px solid rgba(128,16,57,0.15);">
+                            <p style="margin:0 0 .65rem; font-weight:700; color:#555; font-size:.9rem;">Escribe tu nombre para aparecer en el ranking:</p>
+                            <input type="text" id="lg-ranking-name" placeholder="Tu nombre o apodo" maxlength="15" style="width:100%; box-sizing:border-box; padding:.7rem; border:2px solid #801039; border-radius:50px; font-size:.95rem; text-align:center; outline:none; margin-bottom:.75rem;">
+                            <button class="lg-btn-primary" style="width:100%; display:block; padding:.72rem 1rem;" onclick="window.LuchitoGames.saveAndShowRanking('${gameId}', ${score})">Guardar Puntaje</button>
+                        </div>
+                        <div style="display:flex; justify-content:center; gap:.65rem; margin-top:.9rem; flex-wrap:wrap;">
+                            <button class="lg-btn" style="padding:.55rem 1rem;" onclick="window.LuchitoGames.openGame('${gameId}')">Jugar sin guardar</button>
+                            <button class="lg-back-btn" style="padding:.55rem 1rem; margin-right:0;" onclick="window.LuchitoGames.renderHome()">Volver al menÃº</button>
+                        </div>
+                    </div>
+                </div>
+            `);
+            return;
+        }
+
         container.innerHTML = `
             <div class="lg-animated-view" style="text-align: center; padding: 2rem 1rem;">
                 <h2 style="color: #801039; font-family: 'Arial Black Web', sans-serif; font-size: 1.8rem; margin-bottom: 0.5rem; text-transform: uppercase;">¡Juego Terminado!</h2>

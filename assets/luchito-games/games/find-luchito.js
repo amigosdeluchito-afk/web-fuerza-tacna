@@ -35,16 +35,27 @@ window.LuchitoGames.registerGame('find-luchito', {
                 .lg-find-hint.revealed { opacity: 1; transform: translateY(0) scale(1); transition: opacity 0.25s ease, transform 0.25s ease; }
                 .lg-find-description { color: #5f3345; font-size: 0.74rem; line-height: 1.22; background: rgba(128,16,57,0.06); border: 1px solid rgba(128,16,57,0.12); border-radius: 10px; padding: 0.5rem 0.55rem; box-sizing: border-box; max-height: 92px; overflow: auto; }
                 .lg-find-msg { min-height: 18px; font-weight: 800; color: #801039; font-size: 0.78rem; line-height: 1.22; }
-                .lg-find-found-pop { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none; opacity: 0; transform: scale(0.88); transition: opacity 0.25s ease, transform 0.25s ease; }
+                .lg-find-found-pop { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none; opacity: 0; transform: scale(0.82); transition: opacity 0.2s ease, transform 0.2s ease; overflow: hidden; }
                 .lg-find-found-pop.show { opacity: 1; transform: scale(1); }
-                .lg-find-found-content { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; max-width: min(560px, 72vw); animation: lgTreasureRise 0.75s cubic-bezier(0.18, 0.9, 0.28, 1.25) both; }
-                .lg-find-found-content::before { content: ""; position: absolute; inset: 18% 8% 22%; z-index: -1; background: radial-gradient(circle, rgba(255,195,0,0.75), rgba(255,195,0,0.18) 38%, transparent 68%); filter: blur(10px); animation: lgTreasureGlow 1.1s ease-in-out infinite alternate; }
+                .lg-find-found-content { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.55rem; max-width: min(620px, 74vw); animation: lgTreasurePop 1.05s cubic-bezier(0.15, 1.35, 0.22, 1) both; }
+                .lg-find-found-content::before { content: ""; position: absolute; inset: 13% -6% 15%; z-index: -2; background: radial-gradient(circle, rgba(255,233,111,0.92), rgba(255,195,0,0.36) 36%, rgba(255,255,255,0.14) 50%, transparent 72%); filter: blur(8px); animation: lgTreasureGlow 0.72s ease-in-out infinite alternate; }
+                .lg-find-found-content::after { content: ""; position: absolute; inset: -18%; z-index: -3; background: repeating-conic-gradient(from 10deg, rgba(255,195,0,0.58) 0 8deg, transparent 8deg 18deg); border-radius: 50%; opacity: 0.7; mix-blend-mode: screen; animation: lgTreasureSpin 7s linear infinite, lgTreasureFlash 0.9s ease-in-out infinite alternate; }
                 .lg-find-found-title { margin: 0; color: #801039; font-family: 'Arial Black Web', sans-serif; font-size: clamp(1.35rem, 3.2vw, 2.35rem); text-transform: uppercase; text-shadow: 0 3px 0 #ffc300, 0 10px 28px rgba(0,0,0,0.2); }
                 .lg-find-found-img-wrap { position: relative; display: grid; place-items: center; }
-                .lg-find-found-img-wrap::before, .lg-find-found-img-wrap::after { content: ""; position: absolute; inset: -18%; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(255,195,0,0.95), transparent, rgba(255,255,255,0.95), transparent); opacity: 0.8; animation: lgTreasureSpin 1.7s linear infinite; }
-                .lg-find-found-img-wrap::after { inset: -28%; animation-duration: 2.4s; animation-direction: reverse; opacity: 0.45; }
-                .lg-find-found-img { position: relative; z-index: 1; display: block; max-width: min(300px, 34vw); max-height: min(360px, 58vh); object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,195,0,0.95)) drop-shadow(0 14px 18px rgba(128,16,57,0.35)); animation: lgTreasureFloat 1.15s ease-in-out infinite alternate; }
+                .lg-find-found-img-wrap::before, .lg-find-found-img-wrap::after { content: ""; position: absolute; inset: -22%; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(255,195,0,1), transparent, rgba(255,255,255,1), transparent, rgba(255,76,76,0.75), transparent); opacity: 0.95; animation: lgTreasureSpin 1.15s linear infinite; filter: blur(0.5px); }
+                .lg-find-found-img-wrap::after { inset: -34%; animation-duration: 1.8s; animation-direction: reverse; opacity: 0.55; filter: blur(2px); }
+                .lg-find-found-img { position: relative; z-index: 2; display: block; max-width: min(330px, 35vw); max-height: min(390px, 60vh); object-fit: contain; filter: drop-shadow(0 0 8px #fff4a8) drop-shadow(0 0 24px rgba(255,195,0,1)) drop-shadow(0 18px 22px rgba(128,16,57,0.42)); animation: lgTreasureBounce 1.35s cubic-bezier(0.18, 0.9, 0.24, 1.35) infinite; }
                 .lg-find-found-desc { margin: 0; color: #801039; font-weight: 900; font-size: clamp(0.95rem, 1.6vw, 1.25rem); line-height: 1.25; max-width: 520px; text-shadow: 0 2px 0 #ffffff, 0 8px 18px rgba(255,195,0,0.35); }
+                .lg-find-particles { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+                .lg-find-spark { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; border-radius: 50%; background: #ffc300; box-shadow: 0 0 10px #fff, 0 0 18px #ffc300; opacity: 0; animation: lgTreasureSpark 1.45s ease-out infinite; }
+                .lg-find-spark:nth-child(1) { --x:-230px; --y:-150px; animation-delay:0s; }
+                .lg-find-spark:nth-child(2) { --x:210px; --y:-170px; animation-delay:.08s; width:9px; height:9px; }
+                .lg-find-spark:nth-child(3) { --x:-270px; --y:40px; animation-delay:.16s; background:#fff; }
+                .lg-find-spark:nth-child(4) { --x:260px; --y:55px; animation-delay:.24s; width:14px; height:14px; }
+                .lg-find-spark:nth-child(5) { --x:-160px; --y:190px; animation-delay:.32s; }
+                .lg-find-spark:nth-child(6) { --x:170px; --y:205px; animation-delay:.4s; background:#fff3a3; }
+                .lg-find-spark:nth-child(7) { --x:0px; --y:-230px; animation-delay:.48s; width:10px; height:10px; }
+                .lg-find-spark:nth-child(8) { --x:0px; --y:235px; animation-delay:.56s; background:#ffef88; }
                 .lg-find-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 0.4rem; width: 100%; margin-top: 0.5rem; padding: 1rem; background: #fff; border: 2px solid #801039; border-radius: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
                 .lg-find-cell { font-size: 1.8rem; display: flex; align-items: center; justify-content: center; height: 45px; background: transparent; cursor: pointer; user-select: none; transition: transform 0.1s ease; border-radius: 8px; }
                 .lg-find-cell:hover:not(.locked) { transform: scale(1.15) translateY(-2px); background: #fdf5f7; }
@@ -54,10 +65,12 @@ window.LuchitoGames.registerGame('find-luchito', {
                 @keyframes lgShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
                 @keyframes lgBounceFound { 0% { transform: scale(1); } 50% { transform: scale(1.6); } 100% { transform: scale(1.4); } }
                 @keyframes lgFindPulse { 0% { transform: translate(-50%, -50%) scale(0.65); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-                @keyframes lgTreasureRise { 0% { transform: translateY(28px) scale(0.72); opacity: 0; } 65% { transform: translateY(-8px) scale(1.06); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-                @keyframes lgTreasureGlow { from { opacity: 0.6; transform: scale(0.92); } to { opacity: 1; transform: scale(1.12); } }
+                @keyframes lgTreasurePop { 0% { transform: translateY(54px) scale(0.25) rotate(-7deg); opacity: 0; } 48% { transform: translateY(-20px) scale(1.22) rotate(3deg); opacity: 1; } 68% { transform: translateY(8px) scale(0.94) rotate(-1deg); } 84% { transform: translateY(-4px) scale(1.06); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+                @keyframes lgTreasureGlow { from { opacity: 0.65; transform: scale(0.88); } to { opacity: 1; transform: scale(1.22); } }
+                @keyframes lgTreasureFlash { from { opacity: 0.35; transform: scale(0.96); } to { opacity: 0.82; transform: scale(1.08); } }
                 @keyframes lgTreasureSpin { to { transform: rotate(360deg); } }
-                @keyframes lgTreasureFloat { from { transform: translateY(0) scale(1); } to { transform: translateY(-8px) scale(1.04); } }
+                @keyframes lgTreasureBounce { 0%, 100% { transform: translateY(0) scale(1) rotate(-1deg); } 36% { transform: translateY(-18px) scale(1.1) rotate(1deg); } 58% { transform: translateY(5px) scale(0.98); } 76% { transform: translateY(-7px) scale(1.04); } }
+                @keyframes lgTreasureSpark { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; } 16% { opacity: 1; } 78% { opacity: 0.95; } 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0); opacity: 0; } }
                 @media (max-width: 640px) {
                     .lg-find-stage { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
                     .lg-find-panel { gap: 0.45rem; }
@@ -71,7 +84,7 @@ window.LuchitoGames.registerGame('find-luchito', {
                     .lg-find-scene img { max-width: 100%; max-height: calc(100vh - 112px); }
                     .lg-find-hint { top: 10px; right: 10px; max-width: 68%; font-size: 0.82rem; padding: 0.65rem 0.8rem; }
                     .lg-find-found-content { max-width: 86vw; }
-                    .lg-find-found-img { max-width: 52vw; max-height: 42vh; }
+                    .lg-find-found-img { max-width: 56vw; max-height: 44vh; }
                 }
             `;
             document.head.appendChild(style);
@@ -214,6 +227,10 @@ window.LuchitoGames.registerGame('find-luchito', {
 
                     foundPopEl.innerHTML = `
                         <div class="lg-find-found-content">
+                            <div class="lg-find-particles" aria-hidden="true">
+                                <span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span>
+                                <span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span><span class="lg-find-spark"></span>
+                            </div>
                             <h3 class="lg-find-found-title">Encontraste a Luchito</h3>
                             ${foundImage ? `<div class="lg-find-found-img-wrap"><img class="lg-find-found-img" src="${escapeHTML(foundImage)}" alt="Luchito encontrado"></div>` : ''}
                             ${foundDescription ? `<p class="lg-find-found-desc">${escapeHTML(foundDescription)}</p>` : ''}
