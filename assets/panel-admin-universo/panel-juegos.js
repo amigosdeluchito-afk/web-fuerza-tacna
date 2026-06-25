@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="special-editor" data-find-editor>
                 <h3>Encuentra a Luchito por imagenes</h3>
                 <p class="editor-help">
-                    Sube hasta 10 imagenes. En cada nivel dibuja el area correcta sobre la imagen; cuando el usuario acierta, pasa automaticamente a la siguiente.
+                    Hasta 10 imagenes. Dibuja el area correcta; al acertar pasa al siguiente nivel.
                 </p>
                 <div class="level-tabs" data-find-tabs>
                     ${tabsHTML}
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="level-list" data-find-levels>
                     ${levelsHTML}
                 </div>
-                <button type="button" class="btn btn-secondary" data-action="add-find-level" style="margin-top:12px;" ${levels.length >= 10 ? 'disabled' : ''}>Agregar nivel</button>
+                <button type="button" class="btn btn-secondary btn-small" data-action="add-find-level" style="margin-top:10px;" ${levels.length >= 10 ? 'disabled' : ''}>Agregar nivel</button>
             </div>
         `;
     };
