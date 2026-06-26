@@ -12,8 +12,8 @@
 
 /* --- Botón Flotante --- */
 #ft-chat-fab {
-    width: 150px;
-    height: 150px;
+    width: 168px;
+    height: 168px;
     border-radius: 50%;
     flex-shrink: 0;
     aspect-ratio: 1 / 1;
@@ -115,7 +115,7 @@
 /* --- Ventana Principal del Chat --- */
 #ft-chat-window {
     position: absolute;
-    bottom: 164px;
+    bottom: 182px;
     right: 0;
     width: 360px;
     height: 550px;
@@ -265,7 +265,7 @@
 /* --- Móviles --- */
 @media (max-width: 480px) {
     #ft-chat-container { bottom: 4px; right: 4px; }
-    #ft-chat-fab { width: 130px; height: 130px; }
-    #ft-chat-window { width: calc(100vw - 18px); height: calc(100vh - 100px); max-height: 600px; bottom: 138px; right: 5px; }
+    #ft-chat-fab { width: 144px; height: 144px; }
+    #ft-chat-window { width: calc(100vw - 18px); height: calc(100vh - 100px); max-height: 600px; bottom: 152px; right: 5px; }
     .ft-chat-body { padding: 15px 12px; }
 }
