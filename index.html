@@ -2080,7 +2080,8 @@
                         errorSkips = 0;
                         setStatus('');
                         setPlayingState(true);
-                    }).catch(() => {
+                    }).catch((error) => {
+                        if (error && error.name === 'AbortError') return;
                         setStatus('No se pudo reproducir. Toca play otra vez.');
                         setPlayingState(false);
                     });
