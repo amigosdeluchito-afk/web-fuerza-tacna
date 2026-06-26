@@ -193,11 +193,11 @@ function injectGlobalAssets() {
             @media (min-width: 992px) { #hero-header { display: flex !important; justify-content: space-between !important; align-items: center !important; } #hero-header .logo-container { flex: 1 !important; display: flex !important; justify-content: flex-start !important; } #hero-header .button-container { flex: 1 !important; display: flex !important; justify-content: flex-end !important; } #hero-header ul { flex: 0 1 auto !important; margin: 0 auto !important; } }
             #hero-header ul { background-color: rgba(255, 195, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 50px; padding: 18px 24px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.4); width: max-content !important; margin: 0 auto; will-change: transform, backdrop-filter; transform: translateZ(0); backface-visibility: hidden; }
             #hero-header ul li { margin: 0 15px !important; }
-            #hero-header ul.has-games-menu { padding: 14px 18px !important; }
-            #hero-header ul.has-games-menu li { margin: 0 9px !important; }
+            #hero-header ul.has-games-menu { padding: 14px 20px !important; }
+            #hero-header ul.has-games-menu li { margin: 0 11px !important; }
             #hero-header ul.has-games-menu li a { font-size: 13px !important; }
-            #hero-header ul li a[data-menu-juegos="true"], .menu-links a[data-menu-juegos="true"] { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; min-width: 92px !important; line-height: 0.86 !important; font-size: 11.8px !important; text-align: center !important; white-space: normal !important; }
-            #hero-header ul li a[data-menu-juegos="true"] span, .menu-links a[data-menu-juegos="true"] span { display: block !important; line-height: 0.9 !important; margin: 0 !important; padding: 0 !important; }
+            #hero-header ul li a[data-menu-juegos="true"], .menu-links a[data-menu-juegos="true"] { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; min-width: 104px !important; line-height: 1.05 !important; font-size: 13px !important; text-align: center !important; white-space: normal !important; }
+            #hero-header ul li a[data-menu-juegos="true"] span, .menu-links a[data-menu-juegos="true"] span { display: block !important; line-height: 1.08 !important; margin: 0 !important; padding: 0 !important; }
             #hero-section, #hero-drone-section, #hero-video-section, #hero-contact, #hero-design-section, #sumate-hyperspace-section, #contacto-escenario { min-height: 100vh !important; width: 100%; box-sizing: border-box; }
             body.hide-header #hero-header, body.hide-header .mobile-arrows {
                 opacity: 0 !important;
