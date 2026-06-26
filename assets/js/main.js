@@ -834,7 +834,7 @@ function injectGlobalAssets() {
     
             // 3. Inyectar JS
             const chatJS = document.createElement('script');
-            chatJS.src = 'assets/universoobras/chat-ia.js?v=13'; // Avatar animado Luchito IA
+            chatJS.src = 'assets/universoobras/chat-ia.js?v=14'; // Avatar animado Luchito IA
             document.body.appendChild(chatJS);
     };
 

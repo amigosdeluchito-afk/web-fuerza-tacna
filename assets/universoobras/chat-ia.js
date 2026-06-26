@@ -16,6 +16,19 @@ function initChatIA() {
 
     chatContainer.dataset.initialized = 'true';
 
+    const projectAssetRoot = window.location.href.includes('/assets/universoobras/')
+        ? '../img/'
+        : 'assets/img/';
+    const buttonSound = new Audio(projectAssetRoot + 'BOTON%20LUCHITO%20IA.mp3');
+    buttonSound.preload = 'auto';
+    buttonSound.volume = 0.9;
+    const playButtonSound = () => {
+        try {
+            buttonSound.currentTime = 0;
+            buttonSound.play().catch(() => {});
+        } catch (error) {}
+    };
+
     const setupFabAvatarLoop = () => {
         const avatar = fabBtn.querySelector('.ft-fab-avatar');
         const video = avatar?.querySelector('video');
@@ -398,6 +411,7 @@ function initChatIA() {
     };
 
     fabBtn.addEventListener('click', () => {
+        playButtonSound();
         chatContainer.classList.remove('ft-chat-closed');
         chatContainer.classList.add('ft-chat-open');
         sessionStorage.setItem('ft_chat_state', 'open');
@@ -405,6 +419,7 @@ function initChatIA() {
     });
 
     closeBtn.addEventListener('click', () => {
+        playButtonSound();
         chatContainer.classList.remove('ft-chat-open');
         chatContainer.classList.add('ft-chat-closed');
         sessionStorage.setItem('ft_chat_state', 'closed');
