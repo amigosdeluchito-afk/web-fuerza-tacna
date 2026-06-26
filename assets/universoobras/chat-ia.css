@@ -12,8 +12,8 @@
 
 /* --- Botón Flotante --- */
 #ft-chat-fab {
-    width: 86px;
-    height: 86px;
+    width: 108px;
+    height: 108px;
     border-radius: 50%;
     flex-shrink: 0;
     aspect-ratio: 1 / 1;
@@ -32,14 +32,33 @@
     animation: fab-levitate 4s ease-in-out infinite;
 }
 
-/* --- Anillo pulsante (Efecto WOW) --- */
 #ft-chat-fab::before {
     content: '';
     position: absolute;
-    inset: 8px;
+    inset: 13px;
     border-radius: 50%;
-    border: 2px solid rgba(128, 16, 57, 0.35);
-    animation: fab-ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    background: radial-gradient(circle, rgba(166, 38, 83, 0.34) 0 38%, rgba(166, 38, 83, 0.16) 52%, rgba(166, 38, 83, 0) 72%);
+    filter: blur(2px);
+    animation: fab-aura 2.4s ease-in-out infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+#ft-chat-fab::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 18% 28%, rgba(174, 45, 92, 0.9) 0 3px, transparent 4px),
+        radial-gradient(circle at 78% 22%, rgba(199, 70, 115, 0.85) 0 2px, transparent 3px),
+        radial-gradient(circle at 88% 62%, rgba(174, 45, 92, 0.8) 0 3px, transparent 4px),
+        radial-gradient(circle at 28% 84%, rgba(213, 87, 130, 0.86) 0 2px, transparent 3px),
+        radial-gradient(circle at 50% 8%, rgba(174, 45, 92, 0.72) 0 2px, transparent 3px),
+        radial-gradient(circle at 8% 58%, rgba(199, 70, 115, 0.78) 0 2px, transparent 3px);
+    filter: drop-shadow(0 0 7px rgba(174, 45, 92, 0.62));
+    opacity: 0.9;
+    animation: fab-particles 5.6s linear infinite;
     z-index: -1;
     pointer-events: none;
 }
@@ -57,7 +76,7 @@
     border-radius: 50%;
     overflow: visible;
     display: block;
-    filter: drop-shadow(0 10px 18px rgba(128,16,57,0.26));
+    filter: drop-shadow(0 12px 20px rgba(128,16,57,0.30));
 }
 
 .ft-fab-avatar img,
@@ -72,12 +91,20 @@
     -webkit-user-drag: none;
 }
 
-.ft-fab-avatar video {
-    opacity: 0;
-    transition: opacity 0.2s ease;
+.ft-fab-avatar img {
+    transition: opacity 0.16s ease;
 }
 
-.ft-fab-avatar.is-video-ready video {
+.ft-fab-avatar video {
+    opacity: 0;
+    transition: opacity 0.16s ease;
+}
+
+.ft-fab-avatar.is-video-playing img {
+    opacity: 0;
+}
+
+.ft-fab-avatar.is-video-ready.is-video-playing video {
     opacity: 1;
 }
 
@@ -88,7 +115,7 @@
 /* --- Ventana Principal del Chat --- */
 #ft-chat-window {
     position: absolute;
-    bottom: 100px;
+    bottom: 122px;
     right: 0;
     width: 360px;
     height: 550px;
@@ -223,12 +250,21 @@
 /* --- Animaciones --- */
 @keyframes floatUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes typingBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-@keyframes fab-ping { 75%, 100% { transform: scale(1.4); opacity: 0; } }
+@keyframes fab-aura {
+    0%, 100% { transform: scale(0.96); opacity: 0.72; }
+    50% { transform: scale(1.12); opacity: 1; }
+}
+@keyframes fab-particles {
+    0% { transform: rotate(0deg) scale(0.96); opacity: 0.68; }
+    50% { transform: rotate(180deg) scale(1.08); opacity: 1; }
+    100% { transform: rotate(360deg) scale(0.96); opacity: 0.68; }
+}
 @keyframes fab-levitate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
 /* --- Móviles --- */
 @media (max-width: 480px) {
     #ft-chat-container { bottom: 15px; right: 15px; }
-    #ft-chat-window { width: calc(100vw - 30px); height: calc(100vh - 100px); max-height: 600px; bottom: 75px; }
+    #ft-chat-fab { width: 96px; height: 96px; }
+    #ft-chat-window { width: calc(100vw - 30px); height: calc(100vh - 100px); max-height: 600px; bottom: 104px; }
     .ft-chat-body { padding: 15px 12px; }
 }

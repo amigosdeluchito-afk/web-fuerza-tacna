@@ -29,12 +29,27 @@ function initChatIA() {
             markFallbackFormat();
             avatar.classList.add('is-video-ready');
         };
+        let cycleTimer = null;
+        const startCycle = () => {
+            window.clearTimeout(cycleTimer);
+            avatar.classList.remove('is-video-playing');
+            video.loop = false;
+            video.pause();
+            video.currentTime = 0;
+            cycleTimer = window.setTimeout(() => {
+                markFallbackFormat();
+                avatar.classList.add('is-video-playing');
+                video.currentTime = 0;
+                video.play().catch(() => {
+                    avatar.classList.remove('is-video-playing');
+                });
+            }, 6000);
+        };
         video.addEventListener('loadedmetadata', markFallbackFormat, { once: true });
         video.addEventListener('canplay', showVideo, { once: true });
         video.addEventListener('playing', showVideo, { once: true });
-        video.play().catch(() => {
-            // Si el autoplay demora, la imagen queda como respaldo.
-        });
+        video.addEventListener('ended', startCycle);
+        startCycle();
     };
     setupFabAvatarLoop();
 
