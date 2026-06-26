@@ -779,7 +779,7 @@ function injectGlobalAssets() {
             const chatCSS = document.createElement('link');
             chatCSS.id = 'ft-chat-ia-css';
             chatCSS.rel = 'stylesheet';
-            chatCSS.href = 'assets/universoobras/chat-ia.css?v=7'; // Avatar animado Luchito IA
+            chatCSS.href = 'assets/universoobras/chat-ia.css?v=8'; // Avatar animado Luchito IA
             document.head.appendChild(chatCSS);
     
             // 2. Inyectar HTML
@@ -791,7 +791,7 @@ function injectGlobalAssets() {
                 <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
                     <div class="ft-fab-avatar">
                         <img src="assets/img/luchito%20ia.webp" alt="" aria-hidden="true" loading="eager" decoding="async">
-                        <video muted playsinline preload="auto" loop aria-hidden="true">
+                        <video muted playsinline preload="auto" loop aria-hidden="true" data-videos="assets/img/luchito%20ia.webm|assets/img/luchito%20ia%202.webm|assets/img/luchito%20ia%203.webm|assets/img/luchito%204.webm">
                             <source src="assets/img/luchito%20ia.webm" type="video/webm">
                             <source src="assets/img/luchito%20ia.mp4" type="video/mp4">
                         </video>
@@ -834,7 +834,7 @@ function injectGlobalAssets() {
     
             // 3. Inyectar JS
             const chatJS = document.createElement('script');
-            chatJS.src = 'assets/universoobras/chat-ia.js?v=10'; // Avatar animado Luchito IA
+            chatJS.src = 'assets/universoobras/chat-ia.js?v=11'; // Avatar animado Luchito IA
             document.body.appendChild(chatJS);
     };
 

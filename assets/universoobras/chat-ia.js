@@ -21,6 +21,11 @@ function initChatIA() {
         const video = avatar?.querySelector('video');
         if (!avatar || !video || video.dataset.loopReady) return;
         video.dataset.loopReady = 'true';
+        const videoSources = (video.dataset.videos || '')
+            .split('|')
+            .map(src => src.trim())
+            .filter(Boolean);
+        let videoIndex = 0;
 
         const markFallbackFormat = () => {
             avatar.classList.toggle('is-mp4-fallback', /\.mp4(?:$|\?)/i.test(video.currentSrc || ''));
@@ -37,6 +42,11 @@ function initChatIA() {
             video.pause();
             video.currentTime = 0;
             cycleTimer = window.setTimeout(() => {
+                if (videoSources.length) {
+                    video.src = videoSources[videoIndex % videoSources.length];
+                    videoIndex += 1;
+                    video.load();
+                }
                 markFallbackFormat();
                 avatar.classList.add('is-video-playing');
                 video.currentTime = 0;
