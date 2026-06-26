@@ -81,6 +81,10 @@
     opacity: 1;
 }
 
+.ft-fab-avatar.is-mp4-fallback video {
+    mix-blend-mode: screen;
+}
+
 /* --- Ventana Principal del Chat --- */
 #ft-chat-window {
     position: absolute;

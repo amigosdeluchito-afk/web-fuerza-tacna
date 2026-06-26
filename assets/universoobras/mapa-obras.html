@@ -276,12 +276,15 @@
 <!-- ========================================== -->
 <!-- ASISTENTE IA (LUCHITO) -->
 <!-- ========================================== -->
-<link rel="stylesheet" href="chat-ia.css?v=5">
+<link rel="stylesheet" href="chat-ia.css?v=6">
 <div id="ft-chat-container" class="ft-chat-closed" style="opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.5s ease;">
     <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
         <div class="ft-fab-avatar">
             <img src="../img/luchito%20ia.webp" alt="" aria-hidden="true" loading="eager" decoding="async">
-            <video src="../img/luchito%20ia.mp4" muted playsinline preload="auto" loop aria-hidden="true"></video>
+            <video muted playsinline preload="auto" loop aria-hidden="true">
+                <source src="../img/luchito%20ia.webm" type="video/webm">
+                <source src="../img/luchito%20ia.mp4" type="video/mp4">
+            </video>
         </div>
     </button>
     <div id="ft-chat-window">
@@ -317,7 +320,7 @@
         </div>
     </div>
 </div>
-<script src="chat-ia.js?v=8" defer></script>
+<script src="chat-ia.js?v=9" defer></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {

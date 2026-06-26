@@ -22,7 +22,14 @@ function initChatIA() {
         if (!avatar || !video || video.dataset.loopReady) return;
         video.dataset.loopReady = 'true';
 
-        const showVideo = () => avatar.classList.add('is-video-ready');
+        const markFallbackFormat = () => {
+            avatar.classList.toggle('is-mp4-fallback', /\.mp4(?:$|\?)/i.test(video.currentSrc || ''));
+        };
+        const showVideo = () => {
+            markFallbackFormat();
+            avatar.classList.add('is-video-ready');
+        };
+        video.addEventListener('loadedmetadata', markFallbackFormat, { once: true });
         video.addEventListener('canplay', showVideo, { once: true });
         video.addEventListener('playing', showVideo, { once: true });
         video.play().catch(() => {
