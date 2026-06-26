@@ -442,7 +442,7 @@
         right: 8px;
         bottom: 154px;
         width: calc(100vw - 18px);
-        height: min(620px, calc(100vh - 178px));
+        height: min(560px, calc(100vh - 178px));
         max-height: none;
     }
 
@@ -457,9 +457,118 @@
 }
 
 /* --- Móviles --- */
+/* --- Ajustes compactos del panel abierto --- */
+#ft-chat-window {
+    right: 110px;
+    bottom: 22px;
+    width: 360px;
+    height: 560px;
+    max-height: min(76vh, 560px);
+}
+
+.ft-chat-open #ft-chat-fab {
+    transform: translate(-22px, -6px) scale(1.02);
+    z-index: 2;
+}
+
+.ft-chat-open #ft-chat-fab:hover {
+    transform: translate(-22px, -10px) scale(1.05);
+}
+
+.ft-chat-header {
+    min-height: 76px;
+    padding: 12px 16px;
+}
+
+.ft-chat-title {
+    gap: 10px;
+}
+
+.ft-header-avatar {
+    width: 52px;
+    height: 52px;
+    border-width: 2px;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.72), 0 0 16px rgba(255, 195, 0, 0.55);
+}
+
+.ft-header-info span {
+    font-size: 22px;
+}
+
+.ft-header-info small {
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+#ft-chat-close {
+    width: 40px;
+    height: 40px;
+}
+
+.ft-chat-body {
+    padding: 14px 14px 12px;
+    gap: 10px;
+}
+
+.ft-message {
+    max-width: 100%;
+    gap: 8px;
+}
+
+.ft-avatar {
+    width: 30px;
+    height: 30px;
+    border-width: 1px;
+}
+
+.ft-bubble {
+    padding: 12px 14px;
+    font-size: 14px;
+}
+
+.ai-message .ft-bubble {
+    max-width: calc(100% - 38px);
+    border-radius: 18px 18px 18px 5px;
+}
+
+.ft-action-btn {
+    min-height: 36px;
+    padding: 7px 11px;
+    font-size: 12.5px;
+}
+
+.ft-chat-footer {
+    padding: 11px 14px 14px;
+}
+
+.ft-input-wrapper {
+    min-height: 48px;
+    padding: 4px 5px 4px 14px;
+}
+
+#ft-chat-send {
+    width: 40px;
+    height: 40px;
+}
+
 @media (max-width: 480px) {
     #ft-chat-container { bottom: 4px; right: 4px; }
     #ft-chat-fab { width: 144px; height: 144px; }
-    #ft-chat-window { width: calc(100vw - 18px); height: calc(100vh - 178px); max-height: 600px; bottom: 152px; right: 5px; }
+    #ft-chat-window { width: calc(100vw - 18px); height: calc(100vh - 178px); max-height: 560px; bottom: 152px; right: 5px; }
+    .ft-chat-open #ft-chat-fab { transform: translate(-8px, -4px) scale(0.96); }
     .ft-chat-body { padding: 15px 12px; }
+}
+
+@media (min-width: 481px) and (max-width: 760px) {
+    #ft-chat-window {
+        right: 8px;
+        bottom: 154px;
+        width: calc(100vw - 18px);
+        height: min(560px, calc(100vh - 178px));
+        max-height: none;
+    }
+
+    .ft-chat-open #ft-chat-fab {
+        transform: translate(-10px, -5px) scale(0.98);
+    }
 }
