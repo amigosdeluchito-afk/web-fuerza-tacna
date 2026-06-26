@@ -1302,8 +1302,8 @@
             #premium-music-player:hover,
             #premium-music-player.force-expand,
             #premium-music-player.playlist-open {
-                width: 310px;
-                height: 72px;
+                width: min(420px, calc(100vw - 2rem));
+                height: 90px;
                 border-radius: 18px;
                 background: rgba(128, 16, 57, 0.95);
                 border-color: rgba(255, 195, 0, 0.6);
@@ -1311,7 +1311,7 @@
                 padding: 8px 12px;
             }
             #premium-music-player.playlist-open {
-                height: 280px;
+                height: 260px;
                 border-radius: 22px;
             }
         
@@ -1432,7 +1432,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 5px;
-                max-height: 170px;
+                max-height: 132px;
                 overflow-y: auto;
                 padding-right: 3px;
             }
@@ -1501,7 +1501,8 @@
             #premium-music-player:hover ~ #audio-toast,
             #premium-music-player.force-expand ~ #audio-toast,
             #premium-music-player.playlist-open ~ #audio-toast {
-                bottom: 6rem;
+                opacity: 0;
+                transform: translateY(10px);
             }
             #audio-toast .lucho-toast-img {
                 width: 70px; /* Tamaño del dibujo */
@@ -1531,19 +1532,21 @@
             .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
         
             @media (max-width: 768px) {
-                #premium-music-player { bottom: 1rem; left: 1rem; }
+                #premium-music-player { bottom: 0.75rem; left: 0.5rem; }
                 #premium-music-player:hover,
                 #premium-music-player.force-expand,
                 #premium-music-player.playlist-open {
-                    width: calc(100vw - 2rem);
-                    max-width: 360px;
+                    width: calc(100vw - 1rem);
+                    max-width: none;
+                    height: 92px;
                 }
-                #premium-music-player.playlist-open { height: 300px; }
+                #premium-music-player.playlist-open { height: 252px; }
                 .main-controls { gap: 14px; }
                 .ctrl-btn svg { width: 22px; height: 22px; }
                 .ctrl-btn.play-btn svg { width: 30px; height: 30px; }
                 .volume-container { width: 72px; }
-                .playlist-list { max-height: 185px; }
+                .playlist-list { max-height: 124px; }
+                #audio-toast { display: none; }
             }
         </style>
         
@@ -1577,6 +1580,7 @@
                 const statusDisplay = document.getElementById('audio-player-status');
                 
                 const getAudioUrl = (song) => `${AUDIO_BASE_URL}/${encodeURIComponent(song.file)}`;
+                const getPlaylistUrl = () => `${AUDIO_BASE_URL}/playlist.json`;
 
                 const setStatus = (message = '') => {
                     if (statusDisplay) statusDisplay.textContent = message;
@@ -1608,6 +1612,23 @@
                         item.addEventListener('click', () => loadTrack(index, true));
                         playlistList.appendChild(item);
                     });
+                };
+
+                const loadRemotePlaylist = async () => {
+                    try {
+                        const response = await fetch(getPlaylistUrl(), { cache: 'no-store' });
+                        if (!response.ok) return;
+                        const remotePlaylist = await response.json();
+                        if (!Array.isArray(remotePlaylist) || remotePlaylist.length === 0) return;
+                        const cleanPlaylist = remotePlaylist.filter((song) => song && song.title && song.file);
+                        if (cleanPlaylist.length === 0) return;
+                        playlist.splice(0, playlist.length, ...cleanPlaylist);
+                        currentTrack = 0;
+                        renderPlaylist();
+                        loadTrack(currentTrack, false);
+                    } catch (error) {
+                        console.warn('No se pudo cargar playlist.json desde R2.', error);
+                    }
                 };
 
                 const updateCurrentTrackUI = () => {
@@ -1672,6 +1693,7 @@
                     bgAudio.volume = volSlider.value;
                     renderPlaylist();
                     loadTrack(currentTrack, false);
+                    loadRemotePlaylist();
 
                     // Evitar que el panel se cierre al arrastrar el volumen
                     volSlider.addEventListener('mousedown', () => playerWidget.classList.add('force-expand'));
