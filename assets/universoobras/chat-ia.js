@@ -34,6 +34,10 @@ function initChatIA() {
             markFallbackFormat();
             avatar.classList.add('is-video-ready');
         };
+        const playVisibleVideo = () => {
+            showVideo();
+            avatar.classList.add('is-video-playing');
+        };
         let cycleTimer = null;
         const startCycle = () => {
             window.clearTimeout(cycleTimer);
@@ -48,7 +52,6 @@ function initChatIA() {
                     video.load();
                 }
                 markFallbackFormat();
-                avatar.classList.add('is-video-playing');
                 video.currentTime = 0;
                 video.play().catch(() => {
                     avatar.classList.remove('is-video-playing');
@@ -57,7 +60,8 @@ function initChatIA() {
         };
         video.addEventListener('loadedmetadata', markFallbackFormat, { once: true });
         video.addEventListener('canplay', showVideo, { once: true });
-        video.addEventListener('playing', showVideo, { once: true });
+        video.addEventListener('playing', playVisibleVideo);
+        video.addEventListener('error', startCycle);
         video.addEventListener('ended', startCycle);
         startCycle();
     };
