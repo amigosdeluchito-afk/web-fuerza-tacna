@@ -779,7 +779,7 @@ function injectGlobalAssets() {
             const chatCSS = document.createElement('link');
             chatCSS.id = 'ft-chat-ia-css';
             chatCSS.rel = 'stylesheet';
-            chatCSS.href = 'assets/universoobras/chat-ia.css?v=9'; // Avatar animado Luchito IA
+            chatCSS.href = 'assets/universoobras/chat-ia.css?v=10'; // Avatar animado Luchito IA
             document.head.appendChild(chatCSS);
     
             // 2. Inyectar HTML
