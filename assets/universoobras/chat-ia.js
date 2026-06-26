@@ -16,6 +16,21 @@ function initChatIA() {
 
     chatContainer.dataset.initialized = 'true';
 
+    const setupFabAvatarLoop = () => {
+        const avatar = fabBtn.querySelector('.ft-fab-avatar');
+        const video = avatar?.querySelector('video');
+        if (!avatar || !video || video.dataset.loopReady) return;
+        video.dataset.loopReady = 'true';
+
+        const showVideo = () => avatar.classList.add('is-video-ready');
+        video.addEventListener('canplay', showVideo, { once: true });
+        video.addEventListener('playing', showVideo, { once: true });
+        video.play().catch(() => {
+            // Si el autoplay demora, la imagen queda como respaldo.
+        });
+    };
+    setupFabAvatarLoop();
+
     // Detectar si el usuario presionó F5 (Recargar) vs Navegación normal (Click)
     let isReload = false;
     if (window.performance) {
