@@ -1556,6 +1556,7 @@
                 window.musicPlayerInit = true;
 
                 const AUDIO_BASE_URL = "https://pub-0c89cc9473aa46ba893c0661417f95e2.r2.dev";
+                const PLAYLIST_URL = "https://pub-0c89cc9473aa46ba893c0661417f95e2.r2.dev/playlist.json";
 
                 const playlist = [
                     { title: "El Tacne\u00f1o - Himno", file: "El Tacne\u00f1o - Himno.mp3" },
@@ -1580,7 +1581,6 @@
                 const statusDisplay = document.getElementById('audio-player-status');
                 
                 const getAudioUrl = (song) => `${AUDIO_BASE_URL}/${encodeURIComponent(song.file)}`;
-                const getPlaylistUrl = () => `${AUDIO_BASE_URL}/playlist.json`;
 
                 const setStatus = (message = '') => {
                     if (statusDisplay) statusDisplay.textContent = message;
@@ -1616,8 +1616,11 @@
 
                 const loadRemotePlaylist = async () => {
                     try {
-                        const response = await fetch(getPlaylistUrl(), { cache: 'no-store' });
-                        if (!response.ok) return;
+                        setStatus('Cargando playlist...');
+                        const response = await fetch(PLAYLIST_URL);
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
                         const remotePlaylist = await response.json();
                         if (!Array.isArray(remotePlaylist) || remotePlaylist.length === 0) return;
                         const cleanPlaylist = remotePlaylist.filter((song) => song && song.title && song.file);
@@ -1627,7 +1630,8 @@
                         renderPlaylist();
                         loadTrack(currentTrack, false);
                     } catch (error) {
-                        console.warn('No se pudo cargar playlist.json desde R2.', error);
+                        setStatus('No se pudo cargar la playlist.');
+                        console.error('No se pudo cargar playlist.json desde R2.', error);
                     }
                 };
 
