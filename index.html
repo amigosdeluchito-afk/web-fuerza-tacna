@@ -2007,6 +2007,7 @@
 
                 const AUDIO_BASE_URL = "https://pub-0c89cc9473aa46ba893c0661417f95e2.r2.dev";
                 const PLAYLIST_URL = "https://pub-0c89cc9473aa46ba893c0661417f95e2.r2.dev/playlist.json";
+                const PLAYLIST_PROXY_URL = "r2-playlist.php";
 
                 const playlist = [
                     { title: "El Tacne\u00f1o - Himno", file: "El Tacne\u00f1o - Himno.mp3" },
@@ -2067,7 +2068,7 @@
                 const loadRemotePlaylist = async () => {
                     try {
                         setStatus('Cargando playlist...');
-                        const response = await fetch(PLAYLIST_URL);
+                        const response = await fetch(PLAYLIST_PROXY_URL);
                         if (!response.ok) {
                             throw new Error(`HTTP ${response.status}`);
                         }
@@ -2081,7 +2082,7 @@
                         loadTrack(currentTrack, false);
                     } catch (error) {
                         setStatus('No se pudo cargar la playlist.');
-                        console.error('No se pudo cargar playlist.json desde R2.', error);
+                        console.error(`No se pudo cargar playlist.json desde ${PLAYLIST_URL}.`, error);
                     }
                 };
 
