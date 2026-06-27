@@ -2009,10 +2009,7 @@
                 const PLAYLIST_URL = "https://pub-0c89cc9473aa46ba893c0661417f95e2.r2.dev/playlist.json";
                 const PLAYLIST_PROXY_URL = "r2-playlist.php";
 
-                const playlist = [
-                    { title: "El Tacne\u00f1o - Himno", file: "El Tacne\u00f1o - Himno.mp3" },
-                    { title: "Fuerza Tacna, Fuerza Tacna", file: "FUERZA TACNA, FUERZA TACNA.mp3" }
-                ];
+                let playlist = [];
                 let currentTrack = 0;
                 let errorSkips = 0;
 
@@ -2045,10 +2042,10 @@
                     toggleBtn.setAttribute('aria-label', isPlaying ? 'Pausar musica' : 'Reproducir musica');
                 };
 
-                const renderPlaylist = () => {
+                const renderPlaylist = (playlistItems = playlist) => {
                     if (!playlistList) return;
                     playlistList.innerHTML = '';
-                    playlist.forEach((song, index) => {
+                    playlistItems.forEach((song, index) => {
                         const item = document.createElement('button');
                         item.type = 'button';
                         item.className = 'playlist-track';
@@ -2065,28 +2062,52 @@
                     });
                 };
 
+                const setPlaylistState = (nextPlaylist) => {
+                    playlist = nextPlaylist;
+                    currentTrack = 0;
+                    renderPlaylist(playlist);
+                    loadTrack(currentTrack, false);
+                    setStatus(`${playlist.length} canciones cargadas`);
+                    window.setTimeout(() => setStatus(''), 1800);
+                };
+
                 const loadRemotePlaylist = async () => {
                     try {
                         setStatus('Cargando playlist...');
-                        const response = await fetch(PLAYLIST_PROXY_URL);
+                        let response;
+
+                        try {
+                            response = await fetch(PLAYLIST_URL, { cache: "no-store" });
+                        } catch (directError) {
+                            console.error("Error cargando playlist desde R2:", directError);
+                            console.warn("Si el error dice CORS, configura Access-Control-Allow-Origin en Cloudflare R2. Usando proxy local como respaldo.");
+                            response = await fetch(PLAYLIST_PROXY_URL, { cache: "no-store" });
+                        }
+
                         if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}`);
+                            throw new Error(`No se pudo cargar playlist.json: ${response.status}`);
                         }
                         const remotePlaylist = await response.json();
-                        if (!Array.isArray(remotePlaylist) || remotePlaylist.length === 0) return;
+
+                        console.log("Playlist cargada desde R2:", remotePlaylist);
+                        console.log("Cantidad de canciones:", remotePlaylist.length);
+
+                        if (!Array.isArray(remotePlaylist) || remotePlaylist.length === 0) {
+                            throw new Error('playlist.json no contiene canciones.');
+                        }
                         const cleanPlaylist = remotePlaylist.filter((song) => song && song.title && song.file);
-                        if (cleanPlaylist.length === 0) return;
-                        playlist.splice(0, playlist.length, ...cleanPlaylist);
-                        currentTrack = 0;
-                        renderPlaylist();
-                        loadTrack(currentTrack, false);
+                        if (cleanPlaylist.length === 0) {
+                            throw new Error('playlist.json no tiene elementos validos con title y file.');
+                        }
+                        setPlaylistState(cleanPlaylist);
                     } catch (error) {
                         setStatus('No se pudo cargar la playlist.');
-                        console.error(`No se pudo cargar playlist.json desde ${PLAYLIST_URL}.`, error);
+                        console.error("Error cargando playlist desde R2:", error);
                     }
                 };
 
                 const updateCurrentTrackUI = () => {
+                    if (playlist.length === 0) return;
                     const song = playlist[currentTrack];
                     trackDisplay.textContent = `${song.title}   \u2022   ${song.title}`;
                     if (!playlistList) return;
@@ -2098,6 +2119,11 @@
                 };
 
                 const playCurrentTrack = () => {
+                    if (playlist.length === 0) {
+                        setStatus('Cargando playlist...');
+                        loadRemotePlaylist();
+                        return;
+                    }
                     if (!bgAudio.getAttribute('src')) {
                         bgAudio.src = getAudioUrl(playlist[currentTrack]);
                     }
@@ -2114,6 +2140,7 @@
                 };
 
                 const loadTrack = (index, shouldPlay = false) => {
+                    if (playlist.length === 0) return;
                     currentTrack = (index + playlist.length) % playlist.length;
                     bgAudio.pause();
                     bgAudio.removeAttribute('src');
@@ -2127,10 +2154,12 @@
                 };
 
                 const playNext = (shouldPlay = !bgAudio.paused) => {
+                    if (playlist.length === 0) return;
                     loadTrack(currentTrack + 1, shouldPlay);
                 };
 
                 const playPrev = (shouldPlay = !bgAudio.paused) => {
+                    if (playlist.length === 0) return;
                     loadTrack(currentTrack - 1, shouldPlay);
                 };
 
@@ -2146,8 +2175,6 @@
 
                 if(playerWidget && bgAudio) {
                     bgAudio.volume = volSlider.value;
-                    renderPlaylist();
-                    loadTrack(currentTrack, false);
                     loadRemotePlaylist();
 
                     // Evitar que el panel se cierre al arrastrar el volumen
