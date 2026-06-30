@@ -1374,14 +1374,19 @@ window.initMapEngine = async function(container) {
                     if (mobilePanel) {
                         mobilePanel.innerHTML = '';
                         menuItems.forEach(item => {
+                            const displayName = String(item.nombreVis || '').replace(/^acalde\b/i, 'Alcalde');
                             const option = document.createElement('button');
                             option.type = 'button';
                             option.className = 'mobile-category-option';
                             option.setAttribute('data-mobile-map', item.idHtml);
-                            option.textContent = item.nombreVis;
+                            option.textContent = displayName;
                             option.addEventListener('click', () => {
                                 const sourceChip = chipsGroup.querySelector(`.chip[data-map="${item.idHtml}"]`);
                                 if (sourceChip) sourceChip.click();
+                                mobilePanel.querySelectorAll('.mobile-category-option').forEach(btn => btn.classList.remove('is-active'));
+                                option.classList.add('is-active');
+                                const toggleLabel = mobileToggle.querySelector('span');
+                                if (toggleLabel) toggleLabel.textContent = displayName;
                                 mobilePanel.hidden = true;
                                 mobilePanel.classList.remove('is-open');
                                 mobileToggle.setAttribute('aria-expanded', 'false');
