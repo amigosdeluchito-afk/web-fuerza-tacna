@@ -236,6 +236,7 @@ function injectGlobalAssets() {
             #mapa-tacna-container svg { width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
             #mapa-tacna-container svg path, #mapa-tacna-container svg polygon, #mapa-tacna-container svg g { fill: #801039; stroke: url(#map-shiny-border); stroke-width: 2.5px; stroke-linejoin: round; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27); cursor: pointer; transform-origin: center; }
             #mapa-tacna-container svg path:hover, #mapa-tacna-container svg polygon:hover, #mapa-tacna-container svg g:hover { fill: #ffc300; stroke: #ffffff; stroke-width: 3.5px; transform: translateY(-12px) scale(1.03); filter: drop-shadow(0 20px 25px rgba(0,0,0,0.5)); }
+            #mapa-tacna-container svg path.is-random-active, #mapa-tacna-container svg polygon.is-random-active { fill: #ffc300 !important; stroke: #ffffff !important; stroke-width: 3.8px !important; filter: drop-shadow(0 16px 18px rgba(128,16,57,0.42)); transform: translateY(-8px) scale(1.025); }
             #mapa-tacna-container { animation: map-float 6s ease-in-out infinite; }
             @keyframes map-float { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
             #map-tooltip { position: fixed; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 195, 0, 0.4); color: #fff; padding: 0.8rem 1.4rem; border-radius: 8px; pointer-events: none; opacity: 0; visibility: hidden; z-index: 999999; transform: translate(-50%, -100%) scale(0.9); transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27); box-shadow: 0 15px 35px rgba(0,0,0,0.4); text-align: center; }
@@ -2045,6 +2046,37 @@ function initMapaTacna(container) {
                         tooltip.classList.remove('visible');
                     });
                 });
+
+                const startRandomProvinceHighlights = () => {
+                    if (!mapElements.length || mapContainer.dataset.randomHighlights === 'true') return;
+                    mapContainer.dataset.randomHighlights = 'true';
+
+                    const pulseRandom = () => {
+                        mapElements.forEach(el => el.classList.remove('is-random-active'));
+
+                        const shuffled = Array.from(mapElements).sort(() => Math.random() - 0.5);
+                        const activeCount = Math.min(shuffled.length, Math.random() > 0.62 ? 2 : 1);
+
+                        shuffled.slice(0, activeCount).forEach(el => {
+                            el.classList.add('is-random-active');
+                        });
+
+                        window.setTimeout(() => {
+                            mapElements.forEach(el => el.classList.remove('is-random-active'));
+                        }, 1200);
+                    };
+
+                    pulseRandom();
+                    const randomHighlightInterval = window.setInterval(() => {
+                        if (!mapContainer.isConnected) {
+                            window.clearInterval(randomHighlightInterval);
+                            return;
+                        }
+                        pulseRandom();
+                    }, 2200);
+                };
+
+                startRandomProvinceHighlights();
 
                 console.log("Mapa SVG inyectado y reparado correctamente.");
                 setTimeout(() => AOS.refresh(), 200); // Refresca las animaciones
