@@ -1331,10 +1331,32 @@
                 transition: width 0.28s ease, transform 0.28s ease, background 0.25s ease, visibility 0s linear 0s;
                 isolation: isolate;
             }
+            .player-toggle-btn.is-playing::before,
+            .player-toggle-btn.is-playing::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                border: 2px solid rgba(128, 16, 57, 0.62);
+                background: transparent;
+                opacity: 0;
+                transform: scale(1);
+                pointer-events: none;
+                z-index: -1;
+                animation: capsuleMusicWave 1.8s ease-out infinite;
+            }
+            .player-toggle-btn.is-playing::after {
+                animation-delay: 0.9s;
+                border-color: rgba(128, 16, 57, 0.42);
+            }
             .player-toggle-btn:hover {
                 width: 158px;
                 transform: translateY(-2px);
                 background: linear-gradient(135deg, #ffd85d 0%, #ffc300 62%, #e3a100 100%);
+            }
+            @keyframes capsuleMusicWave {
+                0% { opacity: 0.65; transform: scale(1); }
+                100% { opacity: 0; transform: scale(1.28, 1.45); }
             }
         
             #premium-music-player.force-expand .player-toggle-btn,
@@ -1377,32 +1399,6 @@
                 overflow: visible;
                 isolation: isolate;
             }
-            .player-toggle-btn.is-playing .player-disc {
-                box-shadow: 0 3px 8px rgba(0,0,0,0.16);
-            }
-            .player-toggle-btn.is-playing .player-disc::before,
-            .player-toggle-btn.is-playing .player-disc::after {
-                content: "";
-                position: absolute;
-                inset: -8px;
-                border-radius: 50%;
-                border: 2px solid rgba(255, 205, 0, 0.7);
-                background: transparent;
-                opacity: 0;
-                transform: scale(1);
-                animation: cleanMusicWave 1.6s ease-out infinite;
-                pointer-events: none;
-                z-index: -1;
-            }
-            .player-toggle-btn.is-playing .player-disc::after {
-                border-color: rgba(255, 255, 255, 0.58);
-                animation-delay: 0.8s;
-            }
-            @keyframes cleanMusicWave {
-                0% { opacity: 0.7; transform: scale(1); }
-                100% { opacity: 0; transform: scale(1.55); }
-            }
-        
             .play-icon {
                 width: 0; height: 0;
                 border-style: solid;
