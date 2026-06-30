@@ -1740,8 +1740,6 @@
                 flex-direction: column;
                 justify-content: center;
                 background: transparent;
-                backdrop-filter: blur(15px);
-                -webkit-backdrop-filter: blur(15px);
                 border: 1px solid transparent;
                 border-radius: 40px;
                 padding: 4px;
@@ -1758,6 +1756,8 @@
                 height: 90px;
                 border-radius: 18px;
                 background: rgba(128, 16, 57, 0.95);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
                 border-color: rgba(255, 195, 0, 0.6);
                 box-shadow: 0 15px 35px rgba(128,16,57,0.4), 0 0 20px rgba(255,195,0,0.2);
                 padding: 8px 12px;
@@ -1781,10 +1781,11 @@
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                box-shadow: 0 12px 28px rgba(0,0,0,0.22), inset 0 0 0 7px rgba(255,255,255,0.92), inset 0 0 0 8px rgba(128,16,57,0.08);
+                box-shadow: 0 8px 18px rgba(70,36,0,0.18), inset 0 0 0 7px rgba(255,255,255,0.92), inset 0 0 0 8px rgba(128,16,57,0.08);
                 z-index: 3;
                 overflow: visible;
-                transition: width 0.28s ease, transform 0.28s ease, opacity 0.25s ease, background 0.25s ease;
+                transition: width 0.28s ease, transform 0.28s ease, background 0.25s ease, visibility 0s linear 0s;
+                isolation: isolate;
             }
             .player-toggle-btn:hover {
                 width: 158px;
@@ -1794,7 +1795,7 @@
         
             #premium-music-player.force-expand .player-toggle-btn,
             #premium-music-player.playlist-open .player-toggle-btn {
-                opacity: 0;
+                visibility: hidden;
                 pointer-events: none;
                 transform: scale(0.75) translateY(8px);
             }
@@ -1807,7 +1808,7 @@
                 height: auto;
                 z-index: 4;
                 pointer-events: none;
-                filter: drop-shadow(0 7px 8px rgba(0,0,0,0.22));
+                filter: drop-shadow(0 4px 5px rgba(0,0,0,0.16));
                 -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 76%, transparent 100%);
                 mask-image: linear-gradient(to bottom, #000 0%, #000 76%, transparent 100%);
                 transform-origin: 50% 100%;
@@ -1828,37 +1829,39 @@
                 justify-content: center;
                 background: #801039;
                 border: 4px solid rgba(255,255,255,0.7);
-                box-shadow: 0 7px 14px rgba(0,0,0,0.24), inset 0 -4px 8px rgba(0,0,0,0.16);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.2), inset 0 -4px 8px rgba(0,0,0,0.14);
                 overflow: visible;
+                isolation: isolate;
             }
             .player-toggle-btn.is-playing .player-disc {
-                box-shadow: 0 7px 14px rgba(0,0,0,0.24), inset 0 -4px 8px rgba(0,0,0,0.16);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.2), inset 0 -4px 8px rgba(0,0,0,0.14);
             }
             .player-toggle-btn.is-playing .player-disc::before,
-            .player-toggle-btn.is-playing .player-disc::after {
+            .player-toggle-btn.is-playing .player-disc::after,
+            .player-toggle-btn:hover .player-disc::before {
                 content: "";
                 position: absolute;
-                left: calc(100% - 2px);
-                top: 50%;
-                width: 16px;
-                height: 28px;
-                border: 2px solid transparent;
-                border-right-color: rgba(128,16,57,0.58);
-                border-radius: 50%;
-                transform: translateY(-50%) scaleX(0.8);
-                animation: musicLineWave 1.25s ease-out infinite;
+                inset: -6px;
+                border-radius: 999px;
+                border: 2px solid rgba(255, 205, 0, 0.7);
+                background: transparent;
+                opacity: 0;
+                transform: scale(1);
+                animation: musicRingWave 1.8s ease-out infinite;
                 pointer-events: none;
+                z-index: 0;
             }
             .player-toggle-btn.is-playing .player-disc::after {
-                width: 26px;
-                height: 40px;
-                border-right-color: rgba(255,195,0,0.72);
-                animation-delay: 0.32s;
+                border-color: rgba(255, 255, 255, 0.58);
+                animation-delay: 0.9s;
             }
-            @keyframes musicLineWave {
-                0% { opacity: 0; transform: translateY(-50%) translateX(-4px) scaleX(0.6); }
-                35% { opacity: 0.9; }
-                100% { opacity: 0; transform: translateY(-50%) translateX(9px) scaleX(1); }
+            .player-toggle-btn:hover .player-disc::before {
+                animation-duration: 1.2s;
+                animation-iteration-count: 1;
+            }
+            @keyframes musicRingWave {
+                0% { opacity: 0.65; transform: scale(1); }
+                100% { opacity: 0; transform: scale(1.58); }
             }
         
             .play-icon {
@@ -1869,9 +1872,13 @@
                 margin-left: 3px;
                 filter: none;
                 transition: opacity 0.3s ease;
+                position: relative;
+                z-index: 1;
             }
             .equalizer {
                 display: none; align-items: flex-end; justify-content: center; gap: 2px; height: 15px;
+                position: relative;
+                z-index: 1;
             }
             .eq-bar {
                 width: 3px; background: #ffc300; border-radius: 4px; animation: eq-bounce 0.8s infinite alternate ease-in-out;
