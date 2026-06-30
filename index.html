@@ -1681,12 +1681,6 @@
             
             <!-- BotÃ³n circular (Estado colapsado) -->
             <button class="player-toggle-btn" id="player-toggle-btn" type="button" aria-label="Reproducir musica">
-                <span class="capsule-waves" aria-hidden="true">
-                    <span class="capsule-wave"></span>
-                    <span class="capsule-wave"></span>
-                    <span class="capsule-wave"></span>
-                    <span class="capsule-wave"></span>
-                </span>
                 <img src="assets/img/LUCHO%20MUSICA.svg" alt="" class="player-mascot" aria-hidden="true">
                 <span class="player-disc" aria-hidden="true">
                     <span class="play-icon"></span>
@@ -1782,7 +1776,7 @@
                 height: 72px;
                 border-radius: 999px;
                 border: none;
-                background: linear-gradient(135deg, #ffd14a 0%, #ffc300 62%, #e6a700 100%);
+                background: #ffc300;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -1791,42 +1785,13 @@
                 z-index: 3;
                 overflow: visible;
                 transition: width 0.28s ease, transform 0.28s ease, background 0.25s ease, visibility 0s linear 0s;
+                isolation: isolate;
             }
 
-            .capsule-waves {
-                position: absolute;
-                inset: 0;
-                border-radius: 999px;
-                overflow: visible;
-                pointer-events: none;
-                z-index: 1;
-            }
-            .capsule-wave {
-                position: absolute;
-                inset: 0;
-                border-radius: inherit;
-                border: 2px solid rgba(128, 16, 57, 0.58);
-                background: transparent;
-                opacity: 0;
-                transform: scale(1, 1);
-                transform-origin: center;
-                pointer-events: none;
-            }
-            .player-toggle-btn.is-playing .capsule-wave {
-                animation: capsuleContourWave 2.4s ease-out infinite;
-            }
-            .player-toggle-btn.is-playing .capsule-wave:nth-child(2) { animation-delay: 0.32s; }
-            .player-toggle-btn.is-playing .capsule-wave:nth-child(3) { animation-delay: 0.64s; }
-            .player-toggle-btn.is-playing .capsule-wave:nth-child(4) { animation-delay: 0.96s; }
-            @keyframes capsuleContourWave {
-                0% { opacity: 0.72; transform: scale(1, 1); }
-                78% { opacity: 0.18; }
-                100% { opacity: 0; transform: scale(1.42, 1.68); }
-            }
             .player-toggle-btn:hover {
                 width: 158px;
                 transform: translateY(-2px);
-                background: linear-gradient(135deg, #ffd85d 0%, #ffc300 62%, #e3a100 100%);
+                background: #ffd238;
             }
         
             #premium-music-player.force-expand .player-toggle-btn,
