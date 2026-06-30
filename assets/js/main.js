@@ -2054,12 +2054,14 @@ function initMapaTacna(container) {
                     const pulseRandom = () => {
                         mapElements.forEach(el => el.classList.remove('is-random-active'));
 
-                        const shuffled = Array.from(mapElements).sort(() => Math.random() - 0.5);
-                        const activeCount = Math.min(shuffled.length, Math.random() > 0.62 ? 2 : 1);
+                        const activeCount = Math.min(mapElements.length, Math.random() > 0.62 ? 2 : 1);
+                        const usedIndexes = new Set();
 
-                        shuffled.slice(0, activeCount).forEach(el => {
-                            el.classList.add('is-random-active');
-                        });
+                        while (usedIndexes.size < activeCount) {
+                            usedIndexes.add(Math.floor(Math.random() * mapElements.length));
+                        }
+
+                        usedIndexes.forEach(index => mapElements[index].classList.add('is-random-active'));
 
                         window.setTimeout(() => {
                             mapElements.forEach(el => el.classList.remove('is-random-active'));

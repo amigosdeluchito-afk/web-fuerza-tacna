@@ -7,9 +7,6 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta http-equiv="Pragma" content="no-cache" />
-        <meta http-equiv="Expires" content="0" />
         <title>Fuerza Tacna | El futuro es ahora</title>
         <meta name="description" content="Conoce Fuerza Tacna, sus propuestas, candidatos y el universo de obras para el desarrollo de la región Tacna.">
         <link rel="canonical" href="https://fuerzatacna.tacnavuelveasonreir.com/index.html">
@@ -2492,6 +2489,7 @@
                 let currentTrack = 0;
                 let errorSkips = 0;
                 let shuffleEnabled = false;
+                let playlistLoadingPromise = null;
 
                 const playerWidget = document.getElementById('premium-music-player');
                 const bgAudio = document.getElementById('bg-audio');
@@ -2622,10 +2620,23 @@
                             throw new Error('playlist.json no tiene elementos validos con title y file.');
                         }
                         setPlaylistState(cleanPlaylist);
+                        return cleanPlaylist;
                     } catch (error) {
                         setStatus('No se pudo cargar la playlist.');
                         console.error("Error cargando playlist desde R2:", error);
+                        return [];
                     }
+                };
+
+                const ensurePlaylistLoaded = () => {
+                    if (playlist.length > 0) return Promise.resolve(playlist);
+                    if (!playlistLoadingPromise) {
+                        playlistLoadingPromise = loadRemotePlaylist()
+                            .finally(() => {
+                                playlistLoadingPromise = null;
+                            });
+                    }
+                    return playlistLoadingPromise;
                 };
 
                 const updateCurrentTrackUI = () => {
@@ -2643,7 +2654,9 @@
                 const playCurrentTrack = () => {
                     if (playlist.length === 0) {
                         setStatus('Cargando playlist...');
-                        loadRemotePlaylist();
+                        ensurePlaylistLoaded().then((loadedPlaylist) => {
+                            if (loadedPlaylist.length > 0) playCurrentTrack();
+                        });
                         return;
                     }
                     if (!bgAudio.getAttribute('src')) {
@@ -2710,7 +2723,6 @@
                 if(playerWidget && bgAudio) {
                     bgAudio.volume = volSlider.value;
                     setRangeFill(volSlider, Number(volSlider.value) * 100);
-                    loadRemotePlaylist();
 
                     // Evitar que el panel se cierre al arrastrar el volumen
                     volSlider.addEventListener('mousedown', () => playerWidget.classList.add('force-expand'));
@@ -2752,6 +2764,7 @@
                         playlistToggleBtn.addEventListener('click', () => {
                             const isOpen = !playerWidget.classList.contains('playlist-open');
                             setPlaylistOpen(isOpen);
+                            if (isOpen) ensurePlaylistLoaded();
                         });
                     }
                     if (playlistList) {
@@ -2852,7 +2865,7 @@
     <script type="text/javascript" src="assets/js/cursor.js" defer></script>
     <script src="https://unpkg.com/@barba/core" defer></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js' defer></script>
-    <script src="assets/js/main.js?v=161" defer></script>
+    <script src="assets/js/main.js?v=162" defer></script>
 
 <!-- Mirrored from le-lab.io/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:47:53 GMT -->
 </html>

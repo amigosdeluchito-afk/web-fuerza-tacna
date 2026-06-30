@@ -1420,16 +1420,18 @@ window.initMapEngine = async function(container) {
     window.addEventListener('resize', window._mapResizeHandler);
     
     // Auto-arranque de Obras
-    setTimeout(async () => {
+    setTimeout(() => {
         if (map) map.resize();
+        swapSegment('base');
         
         // Construir menú dinámico desde la pestaña SEGMENTOS
         if (typeof window.loadDynamicMenu === 'function') {
-            await window.loadDynamicMenu();
+            window.loadDynamicMenu().catch(error => {
+                console.warn("[Mapa] Menu dinamico no disponible al iniciar.", error);
+            });
         }
         
         // FORMA NATURAL RESTAURADA: Encadenamos todo desde la base de manera orgánica.
-        swapSegment('base');
     }, 500);
 
     // Función de limpieza obligatoria para Barba.js
