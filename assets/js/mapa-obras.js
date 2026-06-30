@@ -1351,6 +1351,53 @@ window.initMapEngine = async function(container) {
                         chipsGroup.appendChild(btn);
                     });
 
+                    let mobileToggle = chipsGroup.querySelector('.chip-more');
+                    if (!mobileToggle) {
+                        mobileToggle = document.createElement('button');
+                        mobileToggle.className = 'chip chip-more';
+                        mobileToggle.type = 'button';
+                        mobileToggle.setAttribute('aria-expanded', 'false');
+                        mobileToggle.setAttribute('aria-controls', 'mobileCategoryPanel');
+                        mobileToggle.innerHTML = '<span>Categorias</span>';
+                        chipsGroup.appendChild(mobileToggle);
+                    }
+
+                    let mobilePanel = navChips ? navChips.querySelector('#mobileCategoryPanel') : null;
+                    if (!mobilePanel && navChips) {
+                        mobilePanel = document.createElement('div');
+                        mobilePanel.id = 'mobileCategoryPanel';
+                        mobilePanel.className = 'mobile-category-panel';
+                        mobilePanel.hidden = true;
+                        navChips.appendChild(mobilePanel);
+                    }
+
+                    if (mobilePanel) {
+                        mobilePanel.innerHTML = '';
+                        menuItems.forEach(item => {
+                            const option = document.createElement('button');
+                            option.type = 'button';
+                            option.className = 'mobile-category-option';
+                            option.setAttribute('data-mobile-map', item.idHtml);
+                            option.textContent = item.nombreVis;
+                            option.addEventListener('click', () => {
+                                const sourceChip = chipsGroup.querySelector(`.chip[data-map="${item.idHtml}"]`);
+                                if (sourceChip) sourceChip.click();
+                                mobilePanel.hidden = true;
+                                mobilePanel.classList.remove('is-open');
+                                mobileToggle.setAttribute('aria-expanded', 'false');
+                            });
+                            mobilePanel.appendChild(option);
+                        });
+                    }
+
+                    mobileToggle.addEventListener('click', () => {
+                        if (!mobilePanel) return;
+                        const isOpen = mobilePanel.hidden;
+                        mobilePanel.hidden = !isOpen;
+                        mobilePanel.classList.toggle('is-open', isOpen);
+                        mobileToggle.setAttribute('aria-expanded', String(isOpen));
+                    });
+
                     attachChipListeners();
                     console.log("[Mapa] ✅ Menú visual inyectado exitosamente:", menuItems);
                 }
