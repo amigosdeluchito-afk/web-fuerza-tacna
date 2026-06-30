@@ -123,7 +123,7 @@ function ft_normalizar_busqueda($texto) {
     $texto = mb_strtolower((string)$texto, 'UTF-8');
     $texto = strtr($texto, [
         'á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ü'=>'u', 'ñ'=>'n',
-        'Ã¡'=>'a', 'Ã©'=>'e', 'Ã­'=>'i', 'Ã³'=>'o', 'Ãº'=>'u', 'Ã¼'=>'u', 'Ã±'=>'n'
+        'á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ü'=>'u', 'ñ'=>'n'
     ]);
     $texto = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $texto);
     return trim(preg_replace('/\s+/', ' ', $texto));

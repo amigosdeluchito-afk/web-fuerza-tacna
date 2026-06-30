@@ -1,5 +1,5 @@
-﻿// =========================================================
-// ===== BASE CARTOGRÃƒÂFICA ESTABLE (v118) =====
+// =========================================================
+// ===== BASE CARTOGRÁFICA ESTABLE (v118) =====
 // PMTiles + Proxy PHP + Perfil Ciudadano y Servicios validado
 // =========================================================
 
@@ -8,13 +8,13 @@
    ========================================================= */
 
 window.redVialMapInstance = null;
-window.isRedVialLoading = false; // Bloqueo para evitar doble inicializaciÃƒÂ³n
+window.isRedVialLoading = false; // Bloqueo para evitar doble inicialización
 window.isRedVialActive = false;
 window.isRedVialPreloading = false;
-const DEBUG_RV = false; // Flag para silenciar bucles y diagnÃƒÂ³sticos ruidosos
-const PERF_RV = false;  // Apagado para producciÃƒÂ³n (RV5-PERF-A2)
+const DEBUG_RV = false; // Flag para silenciar bucles y diagnósticos ruidosos
+const PERF_RV = false;  // Apagado para producción (RV5-PERF-A2)
 
-// Constante ÃƒÂºnica para la ruta de la base de datos vectorial
+// Constante única para la ruta de la base de datos vectorial
 const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
 const RED_VIAL_SCRIPT_URL = document.currentScript?.src || document.querySelector('script[src*="red-vial-module.js"]')?.src || window.location.href;
 const PMTILES_LIB_URL = new URL('../vendor/pmtiles/pmtiles-3.0.6.js', RED_VIAL_SCRIPT_URL).href;
@@ -29,7 +29,7 @@ const RV_DEFAULT_INITIAL_VIEW = {
 };
 
 // =========================================================
-// GEOJSON DE ETIQUETAS ESTRATÃƒâ€°GICAS (RV6-MAP-B2.2)
+// GEOJSON DE ETIQUETAS ESTRATÉGICAS (RV6-MAP-B2.2)
 // =========================================================
 const regionalLabelsGeoJSON = {
     "type": "FeatureCollection",
@@ -41,13 +41,13 @@ const regionalLabelsGeoJSON = {
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5144, -17.4208] }, "properties": { "name": "Ilabaya", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.9631, -17.8361] }, "properties": { "name": "Ite", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.5361, -17.8967] }, "properties": { "name": "Sama", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1539, -17.8931] }, "properties": { "name": "PachÃƒÂ­a", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1539, -17.8931] }, "properties": { "name": "Pachía", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-69.9575, -17.7817] }, "properties": { "name": "Palca", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.4357, -18.1565] }, "properties": { "name": "La Yarada", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1878, -17.9542] }, "properties": { "name": "Calana", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.0461, -17.4428] }, "properties": { "name": "Ticaco", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.2444, -17.3197] }, "properties": { "name": "Quilahuani", "type": "distrito_principal", "priority": 3, "minzoom": 8.8 } },
-        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6756, -18.1636] }, "properties": { "name": "Boca del RÃƒÂ­o", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
+        { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6756, -18.1636] }, "properties": { "name": "Boca del Río", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.6133, -17.2475] }, "properties": { "name": "Toquepala", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.1067, -17.8744] }, "properties": { "name": "Miculla", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
         { "type": "Feature", "geometry": { "type": "Point", "coordinates": [-70.7850, -17.6711] }, "properties": { "name": "Camiara", "type": "centro_poblado", "priority": 4, "minzoom": 9.5 } },
@@ -71,7 +71,7 @@ window.rvStyleConfig = {
         'transit': false,
         'tramos': true,
         'places-text': true,
-        'ref-urbanas': true, // Ahora controlan a tus Titanes de la BD y estÃƒÂ¡n visibles por defecto
+        'ref-urbanas': true, // Ahora controlan a tus Titanes de la BD y están visibles por defecto
         'srv-edu': true,
         'srv-salud': true,
         'srv-seguridad': true,
@@ -244,7 +244,7 @@ const RV_THEMES = {
         road_main: "#cccccc", road_main_case: "#bbbbbb",
         road_minor: "#cccccc", road_minor_case: "#bbbbbb",
         transit: "#999999",
-        building: "#d9d6ce", boundary: "#999999", 
+        building: "#d9d6ce", boundary: "#999999",
         text: "#666666", poi: "#888888", road_text: "#666666",
         routeBg: "#ffffff"
     },
@@ -255,7 +255,7 @@ const RV_THEMES = {
         road_main: "#94AEC4", road_main_case: "#819BB1",
         road_secondary: "#C7D6E1", road_secondary_case: "#B5C7D5",
         road_minor: "#C6CED3", road_minor_case: "#D8E0E5",
-        transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1", 
+        transit: "#f87171", building: "#e6e4df", boundary: "#cbd5e1",
         text: "#1e293b", poi: "#666666", road_text: "#3f3f46", places_text: "#64748b",
         routeBg: "#ffffff"
     },
@@ -265,7 +265,7 @@ const RV_THEMES = {
         road_main: "#334155", road_main_case: "#1e293b",
         road_minor: "#334155", road_minor_case: "#1e293b",
         transit: "#7f1d1d",
-        building: "#1e293b", boundary: "#475569", 
+        building: "#1e293b", boundary: "#475569",
         text: "#94a3b8", poi: "#cbd5e1", road_text: "#64748b", places_text: "#475569",
         routeBg: "#000000"
     }
@@ -290,12 +290,12 @@ window.rvApplyStyle = function() {
             "protomaps": {
                 type: "vector",
                 url: `pmtiles://${PMTILES_SOURCE_URL}`, // Ruta centralizada y apuntando al archivo real
-                attribution: "<a href='https://protomaps.com'>Protomaps</a> Ã‚Â© <a href='https://openstreetmap.org'>OpenStreetMap</a>"
+                attribution: "<a href='https://protomaps.com'>Protomaps</a> © <a href='https://openstreetmap.org'>OpenStreetMap</a>"
             },
-            "tramos-viales": { 
-                type: "geojson", 
+            "tramos-viales": {
+                type: "geojson",
                 lineMetrics: true,
-                data: "../panel-admin-universo/mapa_redvial_api.php?action=geojson" 
+                data: "../panel-admin-universo/mapa_redvial_api.php?action=geojson"
             },
             "tramos-viales-entry": {
                 type: "geojson",
@@ -319,7 +319,7 @@ window.rvApplyStyle = function() {
                 type: "geojson",
                 data: regionalLabelsGeoJSON
             },
-            // TEMP RV6-MAP-C1: delimitaciÃƒÂ³n regional desactivada hasta crear assets/data/tacna_region.geojson
+            // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
             /*
             "tacna-region": {
                 type: "geojson",
@@ -333,39 +333,39 @@ window.rvApplyStyle = function() {
     };
 
     // =========================================================
-    // DELIMITACIÃƒâ€œN VISUAL DE LA REGIÃƒâ€œN TACNA (RV6-MAP-C1)
+    // DELIMITACIÓN VISUAL DE LA REGIÓN TACNA (RV6-MAP-C1)
     // =========================================================
-    // TEMP RV6-MAP-C1: delimitaciÃƒÂ³n regional desactivada hasta crear assets/data/tacna_region.geojson
+    // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
     /*
     style.layers.push({
         id: "tacna-region-fill",
         type: "fill",
         source: "tacna-region",
-        paint: { 
-            "fill-color": "#ffc300", 
-            "fill-opacity": 0.03 
+        paint: {
+            "fill-color": "#ffc300",
+            "fill-opacity": 0.03
         }
     });
     */
-    
-    // TEMP RV6-MAP-C1: delimitaciÃƒÂ³n regional desactivada hasta crear assets/data/tacna_region.geojson
+
+    // TEMP RV6-MAP-C1: delimitación regional desactivada hasta crear assets/data/tacna_region.geojson
     /*
     style.layers.push({
         id: "tacna-region-outline",
         type: "line",
         source: "tacna-region",
-        paint: { 
-            "line-color": "#801039", 
+        paint: {
+            "line-color": "#801039",
             "line-width": ["interpolate", ["linear"], ["zoom"], 7, 1.5, 10, 2.5, 13, 3.5],
             "line-opacity": 0.8,
-            "line-dasharray": [3, 2] // Efecto de lÃƒÂ­nea institucional punteada
+            "line-dasharray": [3, 2] // Efecto de línea institucional punteada
         }
     });
     */
 
     // 1. Capas Vectoriales Base (Controlables por el Studio)
     if (toggles['water']) {
-        // Masas de agua: ocÃƒÂ©ano, lagos, lagunas
+        // Masas de agua: océano, lagos, lagunas
         style.layers.push({
             id: "water",
             type: "fill",
@@ -374,8 +374,8 @@ window.rvApplyStyle = function() {
             filter: ["==", ["geometry-type"], "Polygon"],
             paint: { "fill-color": t.water, "fill-opacity": 0.75 }
         });
-    
-        // RÃƒÂ­os, canales y cauces lineales (Brillo / Halo base)
+
+        // Ríos, canales y cauces lineales (Brillo / Halo base)
         style.layers.push({
             id: "water-line-glow",
             type: "line",
@@ -385,7 +385,7 @@ window.rvApplyStyle = function() {
             paint: { "line-color": "#9FD8FF", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1.5, 12, 2.5, 15, 4.5], "line-opacity": 0.28, "line-blur": 0.8 }
         });
 
-        // RÃƒÂ­os, canales y cauces lineales (LÃƒÂ­nea central)
+        // Ríos, canales y cauces lineales (Línea central)
         style.layers.push({
             id: "water-line",
             type: "line",
@@ -395,7 +395,7 @@ window.rvApplyStyle = function() {
             paint: { "line-color": "#5FAFEF", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.8, 11, 1.2, 13, 1.8, 15, 3.0], "line-opacity": 0.8, "line-blur": 0.1 }
         });
     }
-    
+
     if (toggles['parks']) {
         style.layers.push({ id: "parks", type: "fill", source: "protomaps", "source-layer": "landuse", filter: ["match", ["get", "kind"], ["park", "grass", "recreation_ground", "cemetery", "forest", "wood"], true, false], paint: { "fill-color": t.parks } });
     }
@@ -413,7 +413,7 @@ window.rvApplyStyle = function() {
     }
 
     if (toggles['transit']) style.layers.push({ id: "transit", type: "line", source: "protomaps", "source-layer": "transit", paint: { "line-color": t.transit, "line-dasharray": [2,2] } });
-    
+
     const isMajorRoad = ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"]];
     const isHighway = ["==", ["get", "kind"], "highway"];
     const isRegionalRoad = ["any", isHighway, ["has", "ref"], ["has", "shield_text"]];
@@ -424,7 +424,7 @@ window.rvApplyStyle = function() {
         style.layers.push({ id: "roads-casing", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway_case, isMajorRoad, t.road_main_case, isAvenida, t.road_secondary_case, t.road_minor_case], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 3.8, 0], 9.5, ["case", isRegionalRoad, 5.0, isMajorRoad, 2.0, 0], 11, ["case", isRegionalRoad, 6.4, isMajorRoad, 3.0, 0], 13, ["case", isRegionalRoad, 8.4, isMajorRoad, 4.5, isAvenida, 3.0, 1.2 + minorRoadWidthBoost], 16, ["case", isRegionalRoad, 20.0, isMajorRoad, 16.0, isAvenida, 10.0, 4.8 + minorRoadWidthBoost]] } });
         style.layers.push({ id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": ["case", isHighway, t.road_highway, isMajorRoad, t.road_main, isAvenida, t.road_secondary, t.road_minor], "line-width": ["interpolate", ["linear"], ["zoom"], 8, ["case", isRegionalRoad, 2.2, 0], 9.5, ["case", isRegionalRoad, 3.0, isMajorRoad, 1.0, 0], 11, ["case", isRegionalRoad, 4.1, isMajorRoad, 1.8, 0], 13, ["case", isRegionalRoad, 5.6, isMajorRoad, 2.5, isAvenida, 1.5, 0.55 + minorRoadWidthBoost], 16, ["case", isRegionalRoad, 15.0, isMajorRoad, 12.0, isAvenida, 7.0, 3.0 + minorRoadWidthBoost]] } });
     }
-    
+
     if (toggles['buildings'] || toggles['buildings3d']) {
         if (toggles['buildings3d']) {
             style.layers.push({ id: "buildings", type: "fill-extrusion", source: "protomaps", "source-layer": "buildings", paint: { "fill-extrusion-color": t.building, "fill-extrusion-height": ["get", "height"], "fill-extrusion-base": 0, "fill-extrusion-opacity": 0.8 } });
@@ -433,28 +433,28 @@ window.rvApplyStyle = function() {
         }
     }
     if (toggles['boundaries']) style.layers.push({ id: "boundaries", type: "line", source: "protomaps", "source-layer": "boundaries", filter: ["in", "admin_level", 4, 6], paint: { "line-color": t.boundary, "line-dasharray": [4,4], "line-width": 1.5 } });
-    
+
     // 2. Capas Vectoriales Textos
     if (toggles['places-text']) {
-        // RV6-MAP-B2: AdaptaciÃƒÂ³n basada en 'locality' y 'min_zoom' de Protomaps local
+        // RV6-MAP-B2: Adaptación basada en 'locality' y 'min_zoom' de Protomaps local
         const isLocality = ["==", ["get", "kind"], "locality"];
-        
-        // ExclusiÃƒÂ³n para evitar duplicados de nuestras etiquetas estratÃƒÂ©gicas en el texto base
-        const isCustomLabel = ["match", ["get", "name"], ["Tacna", "Tarata", "Candarave", "Locumba", "Ilabaya", "Ite", "Sama", "PachÃƒÂ­a", "Palca", "La Yarada", "Calana", "Ticaco", "Quilahuani", "Boca del RÃƒÂ­o", "Toquepala", "Miculla", "Camiara", "Mirave"], true, false];
-        
+
+        // Exclusión para evitar duplicados de nuestras etiquetas estratégicas en el texto base
+        const isCustomLabel = ["match", ["get", "name"], ["Tacna", "Tarata", "Candarave", "Locumba", "Ilabaya", "Ite", "Sama", "Pachía", "Palca", "La Yarada", "Calana", "Ticaco", "Quilahuani", "Boca del Río", "Toquepala", "Miculla", "Camiara", "Mirave"], true, false];
+
         const isMajorPlace = ["all", isLocality, ["<=", ["coalesce", ["get", "min_zoom"], 99], 8], ["!", isCustomLabel]];
         const isVillagePlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 8], ["<=", ["coalesce", ["get", "min_zoom"], 99], 11], ["!", isCustomLabel]];
         const isMinorPlace = ["all", isLocality, [">", ["coalesce", ["get", "min_zoom"], 99], 11], ["!", isCustomLabel]];
-        
+
         const isTacna = ["==", ["get", "name"], "Tacna"];
         const textFieldName = ["coalesce", ["get", "name:es"], ["get", "name"]];
-        
+
         const sortKeyField = ["coalesce", ["get", "sort_key"], 999999];
-        
+
         // =========================================================
-        // ETIQUETAS REGIONALES ESTRATÃƒâ€°GICAS (Divididas por jerarquÃƒÂ­a)
+        // ETIQUETAS REGIONALES ESTRATÉGICAS (Divididas por jerarquía)
         // =========================================================
-        
+
         // 1. Capital Regional (Tacna)
         style.layers.push({
             id: "regional-labels-capital",
@@ -528,7 +528,7 @@ window.rvApplyStyle = function() {
             }
         });
 
-        // 4. Centros Poblados Secundarios (Boca del RÃƒÂ­o, Toquepala, Miculla, etc.)
+        // 4. Centros Poblados Secundarios (Boca del Río, Toquepala, Miculla, etc.)
         style.layers.push({
             id: "regional-labels-minor",
             type: "symbol",
@@ -553,63 +553,63 @@ window.rvApplyStyle = function() {
         });
 
         // Ciudades y Capitales Provinciales (Tacna, Tarata, Candarave, Locumba)
-        style.layers.push({ 
-            id: "places-major-text", 
-            type: "symbol", 
-            source: "protomaps", 
-            "source-layer": "places", 
-            filter: ["all", ["has", "name"], isMajorPlace], 
-            layout: { 
-                "text-field": textFieldName, 
-                "text-font": ["Noto Sans Regular"], 
-                "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isTacna, 18, 14], 10, ["case", isTacna, 22, 16], 14, ["case", isTacna, 26, 18]], 
+        style.layers.push({
+            id: "places-major-text",
+            type: "symbol",
+            source: "protomaps",
+            "source-layer": "places",
+            filter: ["all", ["has", "name"], isMajorPlace],
+            layout: {
+                "text-field": textFieldName,
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 8, ["case", isTacna, 18, 14], 10, ["case", isTacna, 22, 16], 14, ["case", isTacna, 26, 18]],
                 "text-letter-spacing": 0.05,
                 "text-transform": ["case", isTacna, "uppercase", "none"],
                 "text-allow-overlap": true,
                 "text-ignore-placement": true,
                 "symbol-sort-key": sortKeyField
-            }, 
-            paint: { 
-                "text-color": ["case", isTacna, "#000000", t.text], 
-                "text-halo-color": "#ffffff", 
-                "text-halo-width": ["case", isTacna, 4, 3] 
-            } 
-        });
-        
-        // Centros Poblados y Capitales Distritales (Ilabaya, Sama, Ticaco, etc.)
-        style.layers.push({ 
-            id: "places-village-text", 
-            type: "symbol", 
-            source: "protomaps", 
-            "source-layer": "places", 
-            minzoom: 9.5, 
-            filter: ["all", ["has", "name"], isVillagePlace], 
-            layout: { 
-                "text-field": textFieldName, 
-                "text-font": ["Noto Sans Regular"], 
-                "text-size": ["interpolate", ["linear"], ["zoom"], 9.5, 11, 14, 13], 
-                "text-letter-spacing": 0.05, 
-                "symbol-sort-key": sortKeyField 
-            }, 
-            paint: { "text-color": t.places_text || t.text, "text-halo-color": "#ffffff", "text-halo-width": 2.5 } 
+            },
+            paint: {
+                "text-color": ["case", isTacna, "#000000", t.text],
+                "text-halo-color": "#ffffff",
+                "text-halo-width": ["case", isTacna, 4, 3]
+            }
         });
 
-        // Barrios urbanos, anexos menores y vecindarios (ViÃƒÂ±ani, Para Chico, etc.)
-        style.layers.push({ 
-            id: "places-minor-text", 
-            type: "symbol", 
-            source: "protomaps", 
-            "source-layer": "places", 
-            minzoom: 13, 
-            filter: ["all", ["has", "name"], isMinorPlace], 
-            layout: { 
-                "text-field": textFieldName, 
-                "text-font": ["Noto Sans Regular"], 
-                "text-size": ["interpolate", ["linear"], ["zoom"], 13, 10, 15, 12, 17, 14], 
-                "text-letter-spacing": 0.05, 
-                "symbol-sort-key": sortKeyField 
-            }, 
-            paint: { "text-color": t.places_text || t.text, "text-halo-color": "#ffffff", "text-halo-width": 2 } 
+        // Centros Poblados y Capitales Distritales (Ilabaya, Sama, Ticaco, etc.)
+        style.layers.push({
+            id: "places-village-text",
+            type: "symbol",
+            source: "protomaps",
+            "source-layer": "places",
+            minzoom: 9.5,
+            filter: ["all", ["has", "name"], isVillagePlace],
+            layout: {
+                "text-field": textFieldName,
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 9.5, 11, 14, 13],
+                "text-letter-spacing": 0.05,
+                "symbol-sort-key": sortKeyField
+            },
+            paint: { "text-color": t.places_text || t.text, "text-halo-color": "#ffffff", "text-halo-width": 2.5 }
+        });
+
+        // Barrios urbanos, anexos menores y vecindarios (Viñani, Para Chico, etc.)
+        style.layers.push({
+            id: "places-minor-text",
+            type: "symbol",
+            source: "protomaps",
+            "source-layer": "places",
+            minzoom: 13,
+            filter: ["all", ["has", "name"], isMinorPlace],
+            layout: {
+                "text-field": textFieldName,
+                "text-font": ["Noto Sans Regular"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 13, 10, 15, 12, 17, 14],
+                "text-letter-spacing": 0.05,
+                "symbol-sort-key": sortKeyField
+            },
+            paint: { "text-color": t.places_text || t.text, "text-halo-color": "#ffffff", "text-halo-width": 2 }
         });
 
         if (toggles['roads']) {
@@ -617,7 +617,7 @@ window.rvApplyStyle = function() {
             style.layers.push({ id: "roads-text", type: "symbol", source: "protomaps", "source-layer": "roads", filter: ["all", ["has", "name"], ["any", ["==", ["get", "kind"], "highway"], ["==", ["get", "kind"], "major_road"], ["==", ["get", "kind"], "minor_road"]]], layout: { "text-field": ["get", "name"], "symbol-placement": "line", "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 11, ["case", isMajorRoad, 11, 0], 13, ["case", isMajorRoad, 13, isAvenida, 11, 0], 15, ["case", isMajorRoad, 14, isAvenida, 13, 10], 17, ["case", isMajorRoad, 16, isAvenida, 14, 12]], "text-max-angle": 30, "text-pitch-alignment": "viewport" }, paint: { "text-color": t.road_text, "text-halo-color": "#FFFFFF", "text-halo-width": 2.5 } });
         }
     }
-    
+
     const poiFilters = [];
     if (toggles['srv-salud']) poiFilters.push(["==", ["get", "kind"], "hospital"], ["==", ["get", "kind"], "clinic"]);
     if (toggles['srv-edu']) poiFilters.push(["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "university"], ["==", ["get", "kind"], "college"], ["==", ["get", "kind"], "kindergarten"]);
@@ -629,17 +629,17 @@ window.rvApplyStyle = function() {
     if (toggles['parks']) poiFilters.push(["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "recreation_ground"]);
 
     if (poiFilters.length > 0) {
-        style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ...poiFilters]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "Ã°Å¸ÂÂ¥ ", "clinic", "Ã°Å¸ÂÂ¥ ", "school", "Ã°Å¸ÂÂ« ", "university", "Ã°Å¸Å½â€œ ", "college", "Ã°Å¸Å½â€œ ", "kindergarten", "Ã°Å¸Â§Â¸ ", "police", "Ã°Å¸Å¡â€œ ", "fire_station", "Ã°Å¸Å¡â€™ ", "marketplace", "ðŸ›’ ", "market", "ðŸ›’ ", "stadium", "Ã¢Å¡Â½ ", "pitch", "Ã¢Å¡Â½ ", "bus_station", "Ã°Å¸Å¡Å’ ", "townhall", "ðŸ›ï¸ ", "town_hall", "ðŸ›ï¸ ", "park", "Ã°Å¸Å’Â³ ", "recreation_ground", "Ã°Å¸Å’Â³ ", "Ã°Å¸â€œÂ "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
+        style.layers.push({ id: "pois-text", type: "symbol", source: "protomaps", "source-layer": "pois", minzoom: 15, filter: ["all", ["has", "name"], ["any", ...poiFilters]], layout: { "text-field": ["concat", ["match", ["get", "kind"], "hospital", "🏥 ", "clinic", "🏥 ", "school", "🏫 ", "university", "🎓 ", "college", "🎓 ", "kindergarten", "🧸 ", "police", "🚓 ", "fire_station", "🚒 ", "marketplace", "🛒 ", "market", "🛒 ", "stadium", "⚽ ", "pitch", "⚽ ", "bus_station", "🚌 ", "townhall", "🏛️ ", "town_hall", "🏛️ ", "park", "🌳 ", "recreation_ground", "🌳 ", "📍 "], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 15, 10, 18, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] }, paint: { "text-color": t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } });
     }
 
-    // CAPA DE NEGOCIOS PRIVADOS (Aparece solo con muchÃƒÂ­simo zoom)
+    // CAPA DE NEGOCIOS PRIVADOS (Aparece solo con muchísimo zoom)
     if (toggles['srv-negocios']) {
-        style.layers.push({ 
-            id: "negocios-text", type: "symbol", source: "protomaps", "source-layer": "pois", 
-            minzoom: 16.5, 
-            filter: ["all", 
-                ["has", "name"], 
-                ["!", ["any", 
+        style.layers.push({
+            id: "negocios-text", type: "symbol", source: "protomaps", "source-layer": "pois",
+            minzoom: 16.5,
+            filter: ["all",
+                ["has", "name"],
+                ["!", ["any",
                     ["==", ["get", "kind"], "hospital"], ["==", ["get", "kind"], "clinic"],
                     ["==", ["get", "kind"], "school"], ["==", ["get", "kind"], "university"], ["==", ["get", "kind"], "college"], ["==", ["get", "kind"], "kindergarten"],
                     ["==", ["get", "kind"], "police"], ["==", ["get", "kind"], "fire_station"],
@@ -649,34 +649,34 @@ window.rvApplyStyle = function() {
                     ["==", ["get", "kind"], "bus_station"],
                     ["==", ["get", "kind"], "park"], ["==", ["get", "kind"], "recreation_ground"]
                 ]]
-            ], 
-            layout: { 
-                "text-field": ["concat", ["match", ["get", "kind"], 
-                    "restaurant", "Ã°Å¸ÂÂ½Ã¯Â¸Â ", "cafe", "Ã¢Ëœâ€¢ ", "fast_food", "Ã°Å¸Ââ€ ", "bar", "Ã°Å¸ÂÂº ", "pub", "Ã°Å¸ÂÂ» ",
-                    "pharmacy", "Ã°Å¸â€™Å  ", "dentist", "Ã°Å¸Â¦Â· ", "doctors", "Ã°Å¸Â©Âº ", "veterinary", "Ã°Å¸Ââ€¢ ",
-                    "bakery", "Ã°Å¸Â¥Â ", "supermarket", "ðŸ›’ ", "convenience", "Ã°Å¸ÂÂª ", "butcher", "Ã°Å¸Â¥Â© ",
-                    "bank", "Ã°Å¸ÂÂ¦ ", "atm", "Ã°Å¸ÂÂ§ ", 
-                    "hotel", "Ã°Å¸ÂÂ¨ ", "motel", "ðŸ›ï¸ ",
-                    "gas_station", "â›½ ", "car_wash", "Ã°Å¸Å¡â€” ", "parking", "Ã°Å¸â€¦Â¿Ã¯Â¸Â ",
-                    "hairdresser", "Ã¢Å“â€šÃ¯Â¸Â ", "clothes", "Ã°Å¸â€˜â€¢ ", "shoes", "Ã°Å¸â€˜Å¸ ",
-                    "cinema", "Ã°Å¸ÂÂ¿ ", "theatre", "Ã°Å¸Å½Â­ ", "gym", "Ã°Å¸Ââ€¹Ã¯Â¸Â ", "sports_centre", "Ã°Å¸Ââ€¹Ã¯Â¸Â ",
-                    "Ã°Å¸ÂÂª " // Fallback universal
-                ], ["get", "name"]], 
-                "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 16.5, 9, 19, 12], "text-anchor": "bottom", "text-offset": [0, 0.5] 
-            }, 
-            paint: { "text-color": t.places_text || t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 } 
+            ],
+            layout: {
+                "text-field": ["concat", ["match", ["get", "kind"],
+                    "restaurant", "🍽️ ", "cafe", "☕ ", "fast_food", "🍔 ", "bar", "🍺 ", "pub", "🍻 ",
+                    "pharmacy", "💊 ", "dentist", "🦷 ", "doctors", "🩺 ", "veterinary", "🐕 ",
+                    "bakery", "🥐 ", "supermarket", "🛒 ", "convenience", "🏪 ", "butcher", "🥩 ",
+                    "bank", "🏦 ", "atm", "🏧 ",
+                    "hotel", "🏨 ", "motel", "🛏️ ",
+                    "gas_station", "⛽ ", "car_wash", "🚗 ", "parking", "🅿️ ",
+                    "hairdresser", "✂️ ", "clothes", "👕 ", "shoes", "👟 ",
+                    "cinema", "🍿 ", "theatre", "🎭 ", "gym", "🏋️ ", "sports_centre", "🏋️ ",
+                    "🏪 " // Fallback universal
+                ], ["get", "name"]],
+                "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 16.5, 9, 19, 12], "text-anchor": "bottom", "text-offset": [0, 0.5]
+            },
+            paint: { "text-color": t.places_text || t.poi, "text-halo-color": "#FFFFFF", "text-halo-width": 1.5 }
         });
     }
 
     // =========================================================
-    // CAPA DE REFERENCIAS ESTRATÃƒâ€°GICAS (TITANES DESDE BD)
+    // CAPA DE REFERENCIAS ESTRATÉGICAS (TITANES DESDE BD)
     // =========================================================
     if (toggles['ref-urbanas']) {
-        style.layers.push({ 
-            id: "ref-estrategicas-pois", 
-            type: "symbol", 
-            source: "referencias-estrategicas", 
-            minzoom: 10, 
+        style.layers.push({
+            id: "ref-estrategicas-pois",
+            type: "symbol",
+            source: "referencias-estrategicas",
+            minzoom: 10,
             filter: ["<=", ["get", "min_zoom"], ["zoom"]],
             layout: {
                 "icon-image": ["match", ["get", "icon_type"],
@@ -706,16 +706,16 @@ window.rvApplyStyle = function() {
                 "text-offset": [0, 0.8],
                 "text-allow-overlap": true,
                 "text-ignore-placement": true
-            }, 
-            paint: { 
-                "text-color": t.text, 
-                "text-halo-color": "#FFFFFF", 
+            },
+            paint: {
+                "text-color": t.text,
+                "text-halo-color": "#FFFFFF",
                 "text-halo-width": 2.5
-            } 
+            }
         });
     }
 
-    // 3. Capas Operativas (Efecto Normal vs NeÃƒÂ³n para el Modo Impacto)
+    // 3. Capas Operativas (Efecto Normal vs Neón para el Modo Impacto)
     if (toggles['tramos']) {
     style.layers.push({
         'id': 'tramos-viales-outline',
@@ -893,7 +893,7 @@ window.rvApplyStyle = function() {
     }
 
     // =========================================================
-    // 4. CAPAS FANTASMA DE AUDITORÃƒÂA (Forzar carga en memoria RAM)
+    // 4. CAPAS FANTASMA DE AUDITORÍA (Forzar carga en memoria RAM)
     if (DEBUG_RV) {
         style.layers.push({ id: "debug-pois", type: "circle", source: "protomaps", "source-layer": "pois", paint: { "circle-opacity": 0, "circle-radius": 0 } });
         style.layers.push({ id: "debug-places", type: "circle", source: "protomaps", "source-layer": "places", paint: { "circle-opacity": 0, "circle-radius": 0 } });
@@ -903,7 +903,7 @@ window.rvApplyStyle = function() {
         const map = window.redVialMapInstance;
         map.once('style.load', () => window.rvScheduleTerritorialLayers(map));
         map.setStyle(style);
-        // Restaurar filtro espacial si estaba activo al cambiar la estÃƒÂ©tica
+        // Restaurar filtro espacial si estaba activo al cambiar la estética
         setTimeout(() => {
             const btn = document.querySelector('.rv-filter-btn.is-active');
             if (btn && btn.getAttribute('data-tipo') !== 'Todos') {
@@ -954,7 +954,7 @@ window.rvGetBaseTramoOpacity = function(layerId) {
     return 1;
 };
 
-// Utilidades seguras: evitan lanzar excepciones si MapLibre no estÃƒÂ¡ en estado esperado
+// Utilidades seguras: evitan lanzar excepciones si MapLibre no está en estado esperado
 window.rvSafeSetPaint = function(layerId, prop, value) {
     try {
         const map = window.redVialMapInstance;
@@ -1722,15 +1722,15 @@ window.initRedVial = async function() {
     // Guard Clause de seguridad
     if (window.redVialMapInstance || window.isRedVialLoading) return;
     window.isRedVialLoading = true;
-    
+
     if (PERF_RV) performance.mark('rv_inicio');
-    
-    // Asegurar que MapLibre estÃƒÂ© disponible (fallback por si no se cargÃƒÂ³ globalmente).
+
+    // Asegurar que MapLibre esté disponible (fallback por si no se cargó globalmente).
     if (typeof window.maplibregl === 'undefined') {
         if (typeof window.loadMapLibre === 'function') {
             await window.loadMapLibre();
         } else {
-            console.error("[Red Vial] Error: MapLibre GL no estÃƒÂ¡ disponible.");
+            console.error("[Red Vial] Error: MapLibre GL no está disponible.");
             window.isRedVialLoading = false;
             window.isRedVialActive = false;
             window.isRedVialPreloading = false;
@@ -1738,11 +1738,11 @@ window.initRedVial = async function() {
         }
     }
 
-    // 1. Cargar el lector de PMTiles dinÃƒÂ¡micamente si no existe
+    // 1. Cargar el lector de PMTiles dinámicamente si no existe
     await window.rvLoadPublicMapConfig();
 
     if (typeof window.pmtiles === 'undefined') {
-        console.log("[Red Vial] Cargando librerÃƒÂ­a PMTiles...");
+        console.log("[Red Vial] Cargando librería PMTiles...");
         try {
             window.pmtiles = await import(PMTILES_LIB_URL);
         } catch (error) {
@@ -1769,8 +1769,8 @@ window.initRedVial = async function() {
     if (PERF_RV) performance.mark('rv_librerias_listas');
 
     console.log("[Red Vial] Inicializando mapa Vectorial PMTiles Offline...");
-    
-    // 3. Instanciar mapa con la arquitectura de Estilos DinÃƒÂ¡micos
+
+    // 3. Instanciar mapa con la arquitectura de Estilos Dinámicos
     const initialView = window.rvGetInitialView();
     window.redVialMapInstance = new maplibregl.Map({
         container: 'red-vial-map-container',
@@ -1894,12 +1894,12 @@ window.initRedVial = async function() {
         });
 
         setupRedVialFilters();
-        
+
         // Levantar el Panel de Control Visual (Studio)
         initRedVialStudio();
 
         // =========================================================
-        // Ã°Å¸Å¡â‚¬ REGISTRO DE ICONOS PERSONALIZADOS (FASE D)
+        // 🚀 REGISTRO DE ICONOS PERSONALIZADOS (FASE D)
         // =========================================================
         const createAndAddIcon = (id, emoji, size = 64) => {
             if (window.redVialMapInstance.hasImage(id)) return;
@@ -1908,10 +1908,10 @@ window.initRedVial = async function() {
             canvas.width = size;
             canvas.height = size;
             const ctx = canvas.getContext('2d');
-            
+
             // Suavizado de bordes activado
             ctx.imageSmoothingEnabled = true;
-            
+
             ctx.font = `${size * 0.85}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -1940,10 +1940,10 @@ window.initRedVial = async function() {
         });
 
         // =========================================================
-        // Ã°Å¸â€Â MÃƒâ€œDULO DE DIAGNÃƒâ€œSTICO ESTRICTO (SOLO LECTURA)
+        // 🔍 MÓDULO DE DIAGNÓSTICO ESTRICTO (SOLO LECTURA)
         // =========================================================
         const inspectFeatures = (features, context) => {
-            console.log(`\n=== Ã°Å¸â€Â DIAGNÃƒâ€œSTICO: ${context} ===`);
+            console.log(`\n=== 🔍 DIAGNÓSTICO: ${context} ===`);
             const protoFeatures = features.filter(f => f.source === 'protomaps');
             if (protoFeatures.length === 0) console.log("No se encontraron features vectoriales de Protomaps en este punto.");
             protoFeatures.forEach((f, i) => {
@@ -1954,14 +1954,14 @@ window.initRedVial = async function() {
         };
 
         // =========================================================
-        // Ã°Å¸â€™Â§ DEBUG DE AGUA (TEMPORAL)
+        // 💧 DEBUG DE AGUA (TEMPORAL)
         // =========================================================
         window.redVialMapInstance.on('click', (e) => {
             const waterFeatures = window.redVialMapInstance.queryRenderedFeatures(e.point)
                 .filter(f => f.sourceLayer === 'water' || f.sourceLayer === 'waterway' || f.layer.id === 'water');
-            
+
             if (waterFeatures.length > 0) {
-                console.log(`\nÃ°Å¸â€™Â§ === CLIC EN ZONA DE AGUA ===`);
+                console.log(`\n💧 === CLIC EN ZONA DE AGUA ===`);
                 waterFeatures.forEach((f, i) => {
                     console.log(`[${i+1}] Layer ID: ${f.layer.id} | Source-Layer: ${f.sourceLayer}`);
                     console.log(`    Kind: ${f.properties.kind || 'N/A'} | Detail: ${f.properties.kind_detail || 'N/A'} | Name: ${f.properties.name || 'N/A'}`);
@@ -1971,20 +1971,20 @@ window.initRedVial = async function() {
         });
 
         if (DEBUG_RV) {
-            // DiagnÃƒÂ³stico Inicial (Centro de la pantalla tras 2 segundos de carga)
+            // Diagnóstico Inicial (Centro de la pantalla tras 2 segundos de carga)
             setTimeout(() => {
                 const centerPoint = window.redVialMapInstance.project(window.redVialMapInstance.getCenter());
                 inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(centerPoint), "CENTRO DEL MAPA (INICIO)");
             }, 2000);
 
-            // DiagnÃƒÂ³stico por Clic (Global y pasivo, NO rompe los paneles)
+            // Diagnóstico por Clic (Global y pasivo, NO rompe los paneles)
             window.redVialMapInstance.on('click', (e) => {
                 inspectFeatures(window.redVialMapInstance.queryRenderedFeatures(e.point), "CLIC DEL USUARIO");
             });
         }
-        
+
         // =========================================================
-        // Ã°Å¸â€Â AUDITORÃƒÂA AUTOMÃƒÂTICA DE HITOS URBANOS (FASE D)
+        // 🔍 AUDITORÍA AUTOMÁTICA DE HITOS URBANOS (FASE D)
         // =========================================================
         const targetKeywords = ['aeropuerto', 'terminal', 'unanue', 'basadre', 'mercado', 'grau', 'cenepa', 'plaza', 'paseo', 'arco', 'universidad', 'privada', 'jorge basadre', 'essalud'];
         const auditedFeatures = new Set();
@@ -2002,7 +2002,7 @@ window.initRedVial = async function() {
                         if (!auditedFeatures.has(uniqueKey)) {
                             auditedFeatures.add(uniqueKey);
                             uniqueCount++;
-                            console.log(`\n[${uniqueCount}] Ã°Å¸â€œÂ HITO ENCONTRADO`);
+                            console.log(`\n[${uniqueCount}] 📍 HITO ENCONTRADO`);
                             console.log(`   - source-layer: ${f.sourceLayer}`);
                             console.log(`   - kind: ${f.properties.kind || 'N/A'}`);
                             console.log(`   - name: ${f.properties.name}`);
@@ -2016,36 +2016,36 @@ window.initRedVial = async function() {
 
         if (DEBUG_RV) {
             window.redVialMapInstance.on('moveend', scanFeatures);
-            setTimeout(scanFeatures, 3000); // Primer escaneo automÃƒÂ¡tico
+            setTimeout(scanFeatures, 3000); // Primer escaneo automático
         }
-        
+
         // =========================================================
-        // Ã°Å¸â€Â AUDITORÃƒÂA OBJETIVA FASE D: REFERENCIAS URBANAS
+        // 🔍 AUDITORÍA OBJETIVA FASE D: REFERENCIAS URBANAS
         // =========================================================
         if (DEBUG_RV) {
             setTimeout(() => {
-                console.log("\n=== AUDITORÃƒÂA OBJETIVA: REFERENCIAS URBANAS ===");
+                console.log("\n=== AUDITORÍA OBJETIVA: REFERENCIAS URBANAS ===");
                 const layers = window.redVialMapInstance.getStyle().layers;
                 console.log("Captura 1: Stack de capas completo", layers);
-    
+
                 const refLayerId = 'ref-urbanas-pois';
                 const refLayer = layers.find(l => l.id === refLayerId);
-                
+
                 if (!refLayer) {
-                    console.log(`1. Ã‚Â¿La capa existe?: NO SE ENCONTRÃƒâ€œ '${refLayerId}'`);
+                    console.log(`1. ¿La capa existe?: NO SE ENCONTRÓ '${refLayerId}'`);
                     return;
                 }
-    
-                console.log("1. Ã‚Â¿La capa existe?: SÃƒÂ");
+
+                console.log("1. ¿La capa existe?: SÍ");
                 console.log("2. ID exacto:", refLayer.id);
                 console.log("3. source-layer exacto:", refLayer['source-layer']);
             }, 3500);
         }
 
         // =========================================================
-        // Ã¢ÂÂ±Ã¯Â¸Â LÃƒâ€œGICA DE MEDICIÃƒâ€œN (RV5-PERF-A1)
+        // ⏱️ LÓGICA DE MEDICIÓN (RV5-PERF-A1)
         // =========================================================
-        
+
         if (PERF_RV) {
             window.redVialMapInstance.on('sourcedata', (e) => {
                 if (e.isSourceLoaded) {
@@ -2067,8 +2067,8 @@ window.initRedVial = async function() {
             window.redVialMapInstance.once('idle', () => {
                 try {
                     performance.mark('rv_mapa_idle');
-                    console.log('\n=== Ã°Å¸â€œÅ  AUDITORÃƒÂA FINA DE CARGA (RV5-PERF-A1.1) ===');
-                    
+                    console.log('\n=== 📊 AUDITORÍA FINA DE CARGA (RV5-PERF-A1.1) ===');
+
                     // 1. Network Waterfall
                     const resources = performance.getEntriesByType('resource')
                         .filter(r => r.name.match(/pmtiles|maplibre|php|pbf|json|png|webp|css|js|font/i))
@@ -2080,8 +2080,8 @@ window.initRedVial = async function() {
                         }))
                         .sort((a, b) => b.Duracion_ms - a.Duracion_ms)
                         .slice(0, 15);
-                    
-                    console.log('Top 15 Recursos mÃƒÂ¡s pesados/lentos:');
+
+                    console.log('Top 15 Recursos más pesados/lentos:');
                     console.table(resources);
 
                     // 2. Fases Granulares
@@ -2090,14 +2090,14 @@ window.initRedVial = async function() {
                     performance.measure('C. First Data -> First Render', 'rv_first_data', 'rv_first_render');
                     performance.measure('D. First Render -> Event Load', 'rv_first_render', 'rv_mapa_load');
                     if (window._rv_perf_pmtiles) performance.measure('E. Carga Base PMTiles Source', 'rv_mapa_creado', 'rv_pmtiles_source_ok');
-                    
+
                     const measures = performance.getEntriesByType('measure').filter(m => m.name.match(/^[A-E]\./));
                     console.table(measures.map(m => ({
                         'Fase Interna MapLibre': m.name,
-                        'DuraciÃƒÂ³n (ms)': parseFloat(m.duration.toFixed(2))
+                        'Duración (ms)': parseFloat(m.duration.toFixed(2))
                     })));
-                } catch(e) { 
-                    console.log('Esperando mÃƒÂ©tricas...', e); 
+                } catch(e) {
+                    console.log('Esperando métricas...', e);
                 }
             });
         }
@@ -2106,11 +2106,11 @@ window.initRedVial = async function() {
             window.isRedVialActive = false;
             window.isRedVialPreloading = false;
     });
-    
-    // PrevenciÃƒÂ³n de cuelgues si el usuario cambia de pÃƒÂ¡gina antes de cargar los tiles
-    window.redVialMapInstance.on('error', (e) => { 
+
+    // Prevención de cuelgues si el usuario cambia de página antes de cargar los tiles
+    window.redVialMapInstance.on('error', (e) => {
         console.error("[MapLibre Error Detalle]:", e.error || e);
-        window.isRedVialLoading = false; 
+        window.isRedVialLoading = false;
             window.isRedVialActive = false;
             window.isRedVialPreloading = false;
     });
@@ -2145,7 +2145,7 @@ function setupRedVialFilters() {
             btn.classList.add('is-active');
 
             const tipoSeleccionado = btn.getAttribute('data-tipo');
-            
+
             // Aplicar filtro espacial a las capas nativas
             if (tipoSeleccionado === 'Todos') {
                 window.rvSafeSetFilter('tramos-viales-outline', null);
@@ -2182,7 +2182,7 @@ function initRedVialStudio() {
                 <button class="rv-profile-btn" data-profile="tecnico">Tecnico</button>
                 <button class="rv-profile-btn" data-profile="impacto">Impacto</button>
             </div>
-            
+
             <div class="rv-advanced-header" id="rv-advanced-toggle">
                 <span>&#9881;&#65039; Opciones Avanzadas</span>
                 <span>&#9662;</span>
@@ -2238,26 +2238,26 @@ function initRedVialStudio() {
     panel.querySelector('#rv-panel-header-btn').addEventListener('click', () => {
         panel.classList.toggle('is-collapsed');
     });
-    
-    // Evento AcordeÃƒÂ³n Avanzado
+
+    // Evento Acordeón Avanzado
     panel.querySelector('#rv-advanced-toggle').addEventListener('click', () => {
         panel.querySelector('#rv-advanced-content').classList.toggle('is-open');
     });
 
-    // LÃƒÂ³gica de Perfiles PÃƒÂºblicos
+    // Lógica de Perfiles Públicos
     panel.querySelectorAll('.rv-profile-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const profile = e.target.getAttribute('data-profile');
             window.rvStyleConfig.theme = profile;
-            
+
             panel.querySelectorAll('.rv-profile-btn').forEach(b => b.classList.remove('is-active'));
             e.target.classList.add('is-active');
-            
+
             const t = window.rvStyleConfig.toggles;
             if (profile === 'ciudadano') { Object.assign(t, { water: true, parks: true, buildings: true, buildings3d: false, boundaries: false, transit: false, tramos: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': true, 'srv-salud': true, 'srv-seguridad': true, 'srv-gobierno': true, 'srv-mercados': true, 'srv-deporte': true, 'srv-transporte': true, 'srv-negocios': true }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'tecnico') { Object.assign(t, { water: false, parks: false, buildings: false, buildings3d: false, boundaries: true, transit: true, tramos: true, 'places-text': true, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 0, bearing: 0 }); }
             if (profile === 'impacto') { Object.assign(t, { water: true, parks: false, buildings: false, buildings3d: true, boundaries: true, transit: false, tramos: true, 'places-text': false, 'ref-urbanas': true, roads: true, 'srv-edu': false, 'srv-salud': false, 'srv-seguridad': false, 'srv-gobierno': false, 'srv-mercados': false, 'srv-deporte': false, 'srv-transporte': false, 'srv-negocios': false }); window.redVialMapInstance.easeTo({ pitch: 60, bearing: -20 }); }
-            
+
             // Sincronizar checkboxes avanzados
             Object.keys(t).forEach(key => { const chk = panel.querySelector(`input[data-layer="${key}"]`); if (chk) chk.checked = t[key]; });
 
@@ -2271,7 +2271,7 @@ function initRedVialStudio() {
         });
     });
 
-    // LÃƒÂ³gica Controles Avanzados Manuales
+    // Lógica Controles Avanzados Manuales
     panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
         const layerKey = chk.getAttribute('data-layer');
         chk.checked = window.rvStyleConfig.toggles[layerKey];
@@ -2280,7 +2280,7 @@ function initRedVialStudio() {
             if (layerKey === 'buildings' && e.target.checked) { window.rvStyleConfig.toggles['buildings3d'] = false; panel.querySelector('[data-layer="buildings3d"]').checked = false; }
             window.rvStyleConfig.toggles[layerKey] = e.target.checked;
 
-            // LÃƒÂ³gica para mostrar/ocultar lista de Referencias Urbanas
+            // Lógica para mostrar/ocultar lista de Referencias Urbanas
             if (layerKey === 'ref-urbanas') {
                 const list = document.getElementById('ref-urbanas-list');
                 if (list) {
@@ -2301,12 +2301,12 @@ function initRedVialStudio() {
         });
     });
 
-    // SincronizaciÃƒÂ³n inicial de la lista de referencias
+    // Sincronización inicial de la lista de referencias
     const refList = document.getElementById('ref-urbanas-list');
     if (refList) {
         refList.style.display = window.rvStyleConfig.toggles['ref-urbanas'] ? 'block' : 'none';
-        
-        // Cargar desde la BD y dibujar la lista dinÃƒÂ¡mica con vuelos de cÃƒÂ¡mara
+
+        // Cargar desde la BD y dibujar la lista dinámica con vuelos de cámara
         fetch('../panel-admin-universo/mapa_referencias_api.php?action=geojson')
             .then(res => res.json())
             .then(data => {
@@ -2449,7 +2449,7 @@ function rv_formatLongitud(props) {
 function abrirPanelRedVial(props = {}) {
     const panel = document.getElementById('redVialInfoPanel');
     if (!panel) return;
-    
+
     const nombreSafe = rv_escapeHTML(props.nombre);
     const tipoSafe = rv_escapeHTML(props.tipo || 'Local');
     const estadoSafe = rv_escapeHTML(props.estado || 'En estudios');
@@ -2458,7 +2458,7 @@ function abrirPanelRedVial(props = {}) {
     const idEncoded = rawId ? encodeURIComponent(rawId) : '';
     const descSafe = rv_escapeHTML(props.descripcion || '').replace(/\n/g, '<br>');
 
-    // RV3-C3: ExtracciÃƒÂ³n Segura de Nuevos Campos EstratÃƒÂ©gicos
+    // RV3-C3: Extracción Segura de Nuevos Campos Estratégicos
     const mensajeSafe = rv_escapeHTML(props.mensaje_principal);
     const distritoSafe = rv_escapeHTML(props.distrito);
     const sectorSafe = rv_escapeHTML(props.sector);
@@ -2478,28 +2478,28 @@ function abrirPanelRedVial(props = {}) {
     let estadoClass = 'pill--estudios';
     const estLow = estadoSafe.toLowerCase();
     if (estLow.includes('entregado')) estadoClass = 'pill--entregado';
-    else if (estLow.includes('ejecuciÃƒÂ³n') || estLow.includes('construccion')) estadoClass = 'pill--construccion';
+    else if (estLow.includes('ejecución') || estLow.includes('construccion')) estadoClass = 'pill--construccion';
     else if (estLow.includes('paralizado')) estadoClass = 'pill--paralizado';
     else if (estLow.includes('buena pro')) estadoClass = 'pill--buenapro';
     else if (estLow.includes('transferencia')) estadoClass = 'pill--transferencia';
 
     // ==========================================
-    // CONSTRUCCIÃƒâ€œN CONDICIONAL DE BLOQUES
+    // CONSTRUCCIÓN CONDICIONAL DE BLOQUES
     // ==========================================
     let htmlMensaje = '';
     if (rv_hasValue(mensajeSafe)) htmlMensaje = `<div class="rd-rv-hook" style="color: ${colorSafe};">${mensajeSafe}</div>`;
 
-    // UbicaciÃƒÂ³n (Debajo del tÃƒÂ­tulo)
+    // Ubicación (Debajo del título)
     let locParts = [];
     if (rv_hasValue(distritoSafe)) locParts.push(`<strong>${distritoSafe}</strong>`);
     if (rv_hasValue(sectorSafe)) locParts.push(`Sector ${sectorSafe}`);
     let htmlUbicacion = locParts.length > 0 ? `<div class="rd-rv-location"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg> ${locParts.join(' &middot; ')}</div>` : '';
 
     // ==========================================
-    // JERARQUÃƒÂA DE MÃƒâ€°TRICAS (RV3-C3.2)
+    // JERARQUÍA DE MÉTRICAS (RV3-C3.2)
     // ==========================================
-    
-    // NIVEL 1: PROTAGONISTAS (InversiÃƒÂ³n y Longitud)
+
+    // NIVEL 1: PROTAGONISTAS (Inversión y Longitud)
     let htmlNivel1 = '';
     if (rv_hasValue(montoSafe) || rv_hasValue(longitudSafe)) {
         htmlNivel1 += `<div class="rd-rv-metrics-primary">`;
@@ -2515,7 +2515,7 @@ function abrirPanelRedVial(props = {}) {
         htmlNivel1 += `</div>`;
     }
 
-    // NIVEL 2: AVANCE FÃƒÂSICO (Secundario pero altamente visible)
+    // NIVEL 2: AVANCE FÍSICO (Secundario pero altamente visible)
     let htmlNivel2 = '';
     if (hasAvance) {
         let avanceTxt = `${avance}%`;
@@ -2548,7 +2548,7 @@ function abrirPanelRedVial(props = {}) {
     }
     if (tramoTxt) htmlTramo = `<div class="rd-rv-tramo-compact"><span>&#128205;</span> <div>${tramoTxt}</div></div>`;
 
-    // NIVEL 3: NARRATIVA (DescripciÃƒÂ³n y Antes/Ahora)
+    // NIVEL 3: NARRATIVA (Descripción y Antes/Ahora)
     let htmlAntesAhora = '';
     if (rv_hasValue(antesSafe) || rv_hasValue(ahoraSafe)) {
         htmlAntesAhora = `<div class="rd-rv-antes-ahora">`;
@@ -2603,17 +2603,17 @@ function abrirPanelRedVial(props = {}) {
             </div>
         </div>
     `;
-    
+
     panel.querySelector('#btnCerrarRV').addEventListener('click', () => {
         panel.classList.remove('is-active');
         window.rvClearTramoSelection();
     });
 
     panel.querySelector('#btnCompartirRV').addEventListener('click', () => {
-        window.rv_compartirViaSeguro(idEncoded, props.nombre || 'Tramo Vial'); 
+        window.rv_compartirViaSeguro(idEncoded, props.nombre || 'Tramo Vial');
     });
-    
-    // LÃƒÂ³gica "Ver mÃƒÂ¡s" de la descripciÃƒÂ³n
+
+    // Lógica "Ver más" de la descripción
     const btnMore = panel.querySelector('#rvBtnMoreDesc');
     const descText = panel.querySelector('#rvDescText');
     if (btnMore && descText) {
@@ -2621,15 +2621,15 @@ function abrirPanelRedVial(props = {}) {
             if (descText.scrollHeight > descText.clientHeight) {
                 btnMore.style.display = 'block';
             }
-        }, 20); // Retraso mÃƒÂ­nimo para asegurar render del DOM
-        
+        }, 20); // Retraso mínimo para asegurar render del DOM
+
         btnMore.addEventListener('click', () => {
             descText.classList.toggle('rd-rv-desc-clamp');
             btnMore.textContent = descText.classList.contains('rd-rv-desc-clamp') ? 'Ver mas' : 'Ver menos';
         });
     }
-    
-    // PeticiÃƒÂ³n AsÃƒÂ­ncrona (Lazy Load) de la GalerÃƒÂ­a PÃƒÂºblica
+
+    // Petición Asíncrona (Lazy Load) de la Galería Pública
     if (rawId) {
         fetch(`../panel-admin-universo/fotos_redvial_api.php?action=listar_publico&tramo_id=${idEncoded}`)
             .then(res => res.json())
@@ -2638,7 +2638,7 @@ function abrirPanelRedVial(props = {}) {
                     // Buscar la foto marcada como portada, o usar la primera como fallback
                     const portada = data.fotos.find(f => f.tipo === 'portada') || data.fotos[0];
                     const heroEl = document.getElementById('rv-hero-container');
-                    
+
                     if (portada) {
                         if (heroEl) {
                             const imgUrl = `IMG/red-vial/${idEncoded}/${encodeURIComponent(portada.archivo)}`;
@@ -2646,7 +2646,7 @@ function abrirPanelRedVial(props = {}) {
                             heroEl.style.display = 'block';
                         }
 
-                        // Mostrar mini galerÃƒÂ­a si hay mÃƒÂ¡s de 1 foto
+                        // Mostrar mini galería si hay más de 1 foto
                         if (data.fotos.length > 1) {
                             const galContainer = document.getElementById('rv-gallery-container');
                             if (galContainer) {
@@ -2678,7 +2678,7 @@ function abrirPanelRedVial(props = {}) {
                 }
             })
             .catch(err => {
-                console.warn("[Red Vial] OcurriÃƒÂ³ un error al consultar la galerÃƒÂ­a pÃƒÂºblica:", err);
+                console.warn("[Red Vial] Ocurrió un error al consultar la galería pública:", err);
             });
     }
 
@@ -2758,15 +2758,15 @@ if (!window._rvPreloadScheduled) {
 }
 
 window.activateRedVial = async function() {
-    console.log("[Red Vial] Activando mÃƒÂ³dulo...");
+    console.log("[Red Vial] Activando módulo...");
     window.isRedVialActive = true;
-    
+
     const container = document.getElementById('red-vial-map-container');
     const svg = document.getElementById('synced-svg-container');
     const filters = document.getElementById('red-vial-filters');
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
-    
-    // Ã°Å¸â€Â¥ FIX 1: Ocultar INMEDIATAMENTE el SVG y los pines del mapa base antes de cargar nada
+
+    // 🔥 FIX 1: Ocultar INMEDIATAMENTE el SVG y los pines del mapa base antes de cargar nada
     if (svg) svg.style.setProperty('opacity', '0', 'important');
     if (baseCanvas) baseCanvas.style.setProperty('opacity', '0', 'important');
     if (container) {
@@ -2777,7 +2777,7 @@ window.activateRedVial = async function() {
         filters.style.opacity = '0';
         filters.style.pointerEvents = 'none';
     }
-    
+
     if (!window.redVialMapInstance && window.isRedVialLoading) {
         await window.rvWaitForRedVialInstance();
     }
@@ -2789,7 +2789,7 @@ window.activateRedVial = async function() {
     if (!window.redVialMapInstance) return;
 
     rvOpenStudioPanel();
-    
+
     if (container) {
         container.style.opacity = '1';
         container.style.pointerEvents = 'auto';
@@ -2800,7 +2800,7 @@ window.activateRedVial = async function() {
         filters.style.pointerEvents = 'auto';
     }
 
-    // Ã°Å¸â€Â¥ FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
+    // 🔥 FIX: MapLibre necesita redibujarse al volverse visible para no quedar en 0x0
     if (window.redVialMapInstance) {
         setTimeout(() => {
             if(window.redVialMapInstance) {
@@ -2826,16 +2826,16 @@ window.deactivateRedVial = function() {
     const filters = document.getElementById('red-vial-filters');
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
     window.rvClearTramoEntryAnimation?.();
-    
+
     if (container) {
         container.style.opacity = '0';
         container.style.pointerEvents = 'none';
     }
-    
-    // Ã°Å¸â€Â¥ FIX 2: Restaurar INMEDIATAMENTE el SVG y los pines del mapa base
+
+    // 🔥 FIX 2: Restaurar INMEDIATAMENTE el SVG y los pines del mapa base
     if (svg) svg.style.setProperty('opacity', '1', 'important');
     if (baseCanvas) baseCanvas.style.setProperty('opacity', '1', 'important');
-    
+
     if (filters) {
         filters.style.opacity = '0';
         filters.style.pointerEvents = 'none';
