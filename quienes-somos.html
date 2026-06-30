@@ -2111,6 +2111,13 @@
                             setPlaylistOpen(isOpen);
                         });
                     }
+                    if (playlistList) {
+                        playlistList.addEventListener('wheel', (event) => {
+                            if (playlistList.scrollHeight > playlistList.clientHeight) {
+                                event.stopPropagation();
+                            }
+                        }, { passive: true });
+                    }
 
                     nextBtn.addEventListener('click', () => {
                         playNext(!bgAudio.paused || playerWidget.classList.contains('music-playing'));
