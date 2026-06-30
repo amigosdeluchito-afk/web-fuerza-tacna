@@ -1358,7 +1358,7 @@ window.initMapEngine = async function(container) {
                         mobileToggle.type = 'button';
                         mobileToggle.setAttribute('aria-expanded', 'false');
                         mobileToggle.setAttribute('aria-controls', 'mobileCategoryPanel');
-                        mobileToggle.innerHTML = '<span>Categorias</span>';
+                        mobileToggle.innerHTML = '<span>Categorías</span>';
                         chipsGroup.appendChild(mobileToggle);
                     }
 
@@ -1373,20 +1373,33 @@ window.initMapEngine = async function(container) {
 
                     if (mobilePanel) {
                         mobilePanel.innerHTML = '';
+                        const mobileIcon = (id, name) => {
+                            const label = `${id} ${name}`.toLowerCase();
+                            if (label.includes('educ')) return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3 2 8l10 5 8-4v6h2V8L12 3Zm-6 8.18V15c0 1.76 3.58 4 6 4s6-2.24 6-4v-3.82l-6 3-6-3Z"/></svg>';
+                            if (label.includes('agua')) return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3.25S6 10.1 6 14.2A6 6 0 0 0 18 14.2c0-4.1-6-10.95-6-10.95Zm0 13.95a3 3 0 0 1-3-3h2a1 1 0 0 0 1 1v2Z"/></svg>';
+                            if (label.includes('formal')) return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h7l4 4v14H7V3Zm6 1.5V8h3.5L13 4.5ZM9 11h6v2H9v-2Zm0 4h7v2H9v-2Z"/></svg>';
+                            if (label.includes('alcalde') || label.includes('provincial')) return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Zm0 4.1 4 1.5v3.5c0 3.1-1.7 6-4 7.2-2.3-1.2-4-4.1-4-7.2V7.6l4-1.5Zm-1 9.4 5-5-1.4-1.4-3.6 3.6-1.6-1.6L8 12.5l3 3Z"/></svg>';
+                            return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 20 6.5v9L12 20 4 15.5v-9L12 2Zm0 2.3L6 7.7v6.6l6 3.4 6-3.4V7.7l-6-3.4Z"/></svg>';
+                        };
                         menuItems.forEach(item => {
                             const displayName = String(item.nombreVis || '').replace(/^acalde\b/i, 'Alcalde');
                             const option = document.createElement('button');
                             option.type = 'button';
                             option.className = 'mobile-category-option';
                             option.setAttribute('data-mobile-map', item.idHtml);
-                            option.textContent = displayName;
+                            option.innerHTML = `
+                                <span class="mobile-category-option__icon">${mobileIcon(item.idHtml, displayName)}</span>
+                                <span class="mobile-category-option__label"></span>
+                                <span class="mobile-category-option__chevron" aria-hidden="true"></span>
+                            `;
+                            option.querySelector('.mobile-category-option__label').textContent = displayName;
                             option.addEventListener('click', () => {
                                 const sourceChip = chipsGroup.querySelector(`.chip[data-map="${item.idHtml}"]`);
                                 if (sourceChip) sourceChip.click();
                                 mobilePanel.querySelectorAll('.mobile-category-option').forEach(btn => btn.classList.remove('is-active'));
                                 option.classList.add('is-active');
                                 const toggleLabel = mobileToggle.querySelector('span');
-                                if (toggleLabel) toggleLabel.textContent = displayName;
+                                if (toggleLabel) toggleLabel.textContent = 'Categorías';
                                 mobilePanel.hidden = true;
                                 mobilePanel.classList.remove('is-open');
                                 mobileToggle.setAttribute('aria-expanded', 'false');
