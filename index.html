@@ -2110,6 +2110,8 @@
                 overflow: hidden;
                 flex: 1;
                 min-height: 0;
+                display: flex;
+                flex-direction: column;
             }
             .playlist-heading {
                 display: flex;
@@ -2125,21 +2127,27 @@
             .playlist-list {
                 display: flex;
                 flex-direction: column;
-                gap: 3px;
-                max-height: 246px;
+                gap: 2px;
+                flex: 1;
+                min-height: 0;
+                max-height: none;
                 overflow-y: auto;
-                padding-right: 6px;
+                padding-right: 8px;
+                overscroll-behavior: contain;
+                scrollbar-width: auto;
+                scrollbar-color: rgba(255,195,0,0.78) rgba(255,255,255,0.12);
             }
-            .playlist-list::-webkit-scrollbar { width: 4px; }
-            .playlist-list::-webkit-scrollbar-thumb { background: rgba(255,195,0,0.55); border-radius: 99px; }
+            .playlist-list::-webkit-scrollbar { width: 8px; }
+            .playlist-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.12); border-radius: 99px; }
+            .playlist-list::-webkit-scrollbar-thumb { background: rgba(255,195,0,0.78); border-radius: 99px; }
             .playlist-track {
                 width: 100%;
                 display: grid;
-                grid-template-columns: 34px 1fr auto;
+                grid-template-columns: 30px 1fr auto;
                 align-items: center;
-                gap: 8px;
-                min-height: 40px;
-                padding: 8px 12px;
+                gap: 7px;
+                min-height: 34px;
+                padding: 6px 10px;
                 border: 1px solid transparent;
                 border-radius: 12px;
                 background: transparent;
@@ -2162,18 +2170,18 @@
             .playlist-track-number {
                 color: #ffc300;
                 font-weight: 800;
-                font-size: 0.82rem;
+                font-size: 0.78rem;
             }
             .playlist-track-title {
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                font-size: 0.82rem;
+                font-size: 0.76rem;
                 font-weight: 700;
             }
             .playlist-track-state {
-                width: 8px;
-                height: 8px;
+                width: 7px;
+                height: 7px;
                 border-radius: 50%;
                 background: rgba(255,255,255,0.22);
             }
