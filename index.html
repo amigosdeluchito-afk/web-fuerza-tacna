@@ -2244,33 +2244,48 @@
 
             @media (max-width: 768px) {
                 #premium-music-player {
-                    bottom: 0.75rem;
-                    left: 0.5rem;
-                    width: 156px;
-                    height: 96px;
+                    bottom: 0.65rem;
+                    left: 0.45rem;
+                    width: 92px;
+                    height: 74px;
                 }
                 #premium-music-player.force-expand,
                 #premium-music-player.playlist-open {
+                    left: 0.5rem;
+                    bottom: 0.75rem;
                     width: calc(100vw - 1rem);
                     max-width: none;
                     height: 318px;
                 }
                 #premium-music-player.playlist-open { height: min(520px, calc(100vh - 1.5rem)); }
                 .player-toggle-btn {
-                    width: 142px;
-                    height: 64px;
+                    width: 82px;
+                    height: 58px;
+                    border-width: 2px;
+                    box-shadow: 0 7px 14px rgba(128, 16, 57, 0.18), inset 0 0 0 2px rgba(255, 255, 255, 0.32);
                 }
-                .player-toggle-btn:hover { width: 150px; }
+                .player-toggle-btn:hover { width: 82px; }
                 .player-mascot {
-                    width: 78px;
-                    left: 3px;
-                    bottom: -2px;
+                    width: 58px;
+                    left: -9px;
+                    bottom: -1px;
+                    opacity: 0.94;
                 }
                 .player-disc {
-                    width: 48px;
-                    height: 48px;
-                    right: 11px;
-                    bottom: 9px;
+                    width: 39px;
+                    height: 39px;
+                    right: 5px;
+                    bottom: 8px;
+                    border-width: 3px;
+                }
+                .play-icon {
+                    border-width: 6px 0 6px 9px;
+                    margin-left: 2px;
+                }
+                #premium-music-player .player-toggle-btn::before,
+                #premium-music-player .player-toggle-btn::after {
+                    inset: -4px;
+                    opacity: 0.35;
                 }
                 .player-header { min-height: 66px; padding: 9px 12px; grid-template-columns: 44px 1fr 30px; }
                 .player-header-avatar { width: 42px; height: 42px; }
@@ -2289,6 +2304,25 @@
                 .playlist-panel { margin: 6px 12px 12px; }
                 .playlist-list { max-height: calc(100vh - 298px); }
                 #audio-toast { display: none; }
+            }
+
+            @media (max-width: 768px) {
+                #hero-main-content .glass-button-wrap {
+                    transform: scale(0.82);
+                    transform-origin: center bottom;
+                }
+                #hero-main-content .glass-button {
+                    border-radius: 24px;
+                }
+                #hero-main-content .glass-button-text {
+                    padding: 0.82rem 2rem !important;
+                    font-size: 0.95rem !important;
+                    letter-spacing: 1.4px !important;
+                    white-space: nowrap;
+                }
+                #hero-main-content .glass-button-shadow {
+                    transform: scaleX(0.86);
+                }
             }
         </style>
 
@@ -2665,7 +2699,7 @@
     <script type="text/javascript" src="assets/js/cursor.js" defer></script>
     <script src="https://unpkg.com/@barba/core" defer></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js' defer></script>
-    <script src="assets/js/main.js?v=158" defer></script>
+    <script src="assets/js/main.js?v=159" defer></script>
 
 <!-- Mirrored from le-lab.io/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 23 Apr 2026 03:47:53 GMT -->
 </html>

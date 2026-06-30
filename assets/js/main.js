@@ -430,6 +430,27 @@ function injectGlobalAssets() {
             .glass-button-wrap:hover .glass-button::before { left: 150%; }
             .glass-button-wrap:hover .glass-button-shadow { opacity: 1; transform: scale(1.05); }
             .glass-button-wrap:active { transform: translateY(0) scale(0.98); }
+            @media (max-width: 768px) {
+                #hero-main-content .glass-button-wrap {
+                    transform: scale(0.82);
+                    transform-origin: center bottom;
+                }
+                #hero-main-content .glass-button-text {
+                    padding: 0.82rem 2rem !important;
+                    font-size: 0.95rem !important;
+                    letter-spacing: 1.4px !important;
+                    white-space: nowrap;
+                }
+                #hero-main-content .glass-button-shadow {
+                    transform: scaleX(0.86);
+                }
+                #hero-main-content .glass-button-wrap:hover {
+                    transform: scale(0.82) translateY(-3px);
+                }
+                #hero-main-content .glass-button-wrap:active {
+                    transform: scale(0.8);
+                }
+            }
 
             /* --- Estilos Dinámicos de la Sección de Detalle de Candidatos --- */
             #detalle-candidato-wrapper { display: none; width: 100%; flex-shrink: 0; clear: both; box-sizing: border-box; padding: 5rem 5%; min-height: 100vh; background: transparent; position: relative; z-index: 40; margin-top: -10vh; border-top: 1px solid rgba(255, 255, 255, 0.1); }
@@ -779,7 +800,7 @@ function injectGlobalAssets() {
             const chatCSS = document.createElement('link');
             chatCSS.id = 'ft-chat-ia-css';
             chatCSS.rel = 'stylesheet';
-            chatCSS.href = 'assets/universoobras/chat-ia.css?v=14'; // Avatar animado Luchito IA
+            chatCSS.href = 'assets/universoobras/chat-ia.css?v=15'; // Avatar animado Luchito IA
             document.head.appendChild(chatCSS);
     
             // 2. Inyectar HTML

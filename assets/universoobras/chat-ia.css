@@ -552,23 +552,30 @@
 }
 
 @media (max-width: 480px) {
-    #ft-chat-container { bottom: 4px; right: 4px; }
-    #ft-chat-fab { width: 144px; height: 144px; }
-    #ft-chat-window { width: calc(100vw - 18px); height: calc(100vh - 178px); max-height: 560px; bottom: 152px; right: 5px; }
-    .ft-chat-open #ft-chat-fab { transform: translate(-8px, -4px) scale(0.96); }
+    #ft-chat-container { bottom: 0.8rem; right: 0.6rem; }
+    #ft-chat-fab { width: 104px; height: 104px; }
+    #ft-chat-fab::before { inset: 11px; opacity: 0.72; }
+    #ft-chat-fab::after { inset: 8px; opacity: 0.72; }
+    #ft-chat-window { width: calc(100vw - 18px); height: calc(100vh - 142px); max-height: 560px; bottom: 118px; right: 5px; }
+    .ft-chat-open #ft-chat-fab { transform: translate(-4px, -2px) scale(0.9); }
     .ft-chat-body { padding: 15px 12px; }
 }
 
 @media (min-width: 481px) and (max-width: 760px) {
+    #ft-chat-container { bottom: 0.9rem; right: 0.75rem; }
+    #ft-chat-fab { width: 118px; height: 118px; }
+    #ft-chat-fab::before { inset: 12px; opacity: 0.74; }
+    #ft-chat-fab::after { inset: 8px; opacity: 0.74; }
+
     #ft-chat-window {
         right: 8px;
-        bottom: 154px;
+        bottom: 128px;
         width: calc(100vw - 18px);
-        height: min(560px, calc(100vh - 178px));
+        height: min(560px, calc(100vh - 152px));
         max-height: none;
     }
 
     .ft-chat-open #ft-chat-fab {
-        transform: translate(-10px, -5px) scale(0.98);
+        transform: translate(-6px, -3px) scale(0.92);
     }
 }
