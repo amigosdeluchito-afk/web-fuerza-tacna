@@ -2324,6 +2324,30 @@
                     transform: scaleX(0.86);
                 }
             }
+
+            @media (max-width: 768px) {
+                #intro,
+                #video-section,
+                #drone-section,
+                #votar-section {
+                    height: auto !important;
+                    min-height: auto !important;
+                    scroll-snap-align: none !important;
+                    scroll-snap-stop: normal !important;
+                }
+
+                #intro {
+                    padding-top: 11vh !important;
+                    padding-bottom: 9vh !important;
+                }
+
+                #video-section,
+                #drone-section,
+                #votar-section {
+                    padding-top: 9vh !important;
+                    padding-bottom: 10vh !important;
+                }
+            }
         </style>
 
         <script>
