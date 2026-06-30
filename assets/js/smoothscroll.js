@@ -1,6 +1,10 @@
 window.scroller = null;
 
 function init(){
+	if (window.matchMedia && window.matchMedia('(max-width: 1024px), (pointer: coarse)').matches) {
+		window.scroller = null;
+		return;
+	}
 	window.scroller = new SmoothScroll(document,220,24);
 }
 
@@ -39,6 +43,12 @@ function SmoothScroll(target, speed, smooth) {
 	};
 
 	function scrolled(e) {
+		if (window.matchMedia && window.matchMedia('(max-width: 1024px), (pointer: coarse)').matches) {
+			moving = false;
+			pos = target.scrollTop;
+			return;
+		}
+
 		// FIX DEFINITIVO Y ARQUITECTÓNICO:
 		// Si el cursor está sobre el mapa interactivo de Leaflet (#map) o sobre cualquier panel
 		// que tenga su propio scroll interno, apagamos SmoothScroll temporalmente para que 

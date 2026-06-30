@@ -1682,6 +1682,7 @@ function initTimelineCarousels(container) {
 let isMagneticScrollInitialized = false;
 function initSafeMagneticScroll() {
     if (isMagneticScrollInitialized) return;
+    if (window.matchMedia && window.matchMedia('(max-width: 1024px), (pointer: coarse)').matches) return;
     isMagneticScrollInitialized = true;
     
     let inputTimeout;
