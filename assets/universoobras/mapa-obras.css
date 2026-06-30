@@ -238,8 +238,84 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
 /* En móviles, que no rompa la barra de chips */
 @media (max-width:700px){
-  .chips{ flex-wrap:wrap; }
-  .search-pill{ max-width: 100%; flex: 1 1 auto; }
+  .chips{
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    left: 8px !important;
+    right: 8px !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    width: auto !important;
+    overflow: visible !important;
+  }
+
+  .chips-group{
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+    padding: 5px 8px !important;
+    border-radius: 22px !important;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .chips-group::-webkit-scrollbar{
+    display: none;
+  }
+
+  .chip{
+    flex: 0 0 auto !important;
+    min-height: 38px;
+    padding: 6px 14px !important;
+    font-size: 10px !important;
+    scroll-snap-align: start;
+  }
+
+  .divider-v{
+    flex: 0 0 1px;
+    height: 28px;
+    margin: 0 5px;
+  }
+
+  .search-pill{
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    max-width: 48px !important;
+    height: 38px;
+    padding: 0 14px !important;
+    justify-content: center;
+  }
+
+  .search-pill input{
+    width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .search-pill:focus-within{
+    flex-basis: min(210px, 58vw) !important;
+    width: min(210px, 58vw) !important;
+    max-width: min(210px, 58vw) !important;
+    justify-content: flex-start;
+  }
+
+  .search-pill:focus-within input{
+    width: 100% !important;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .search-list{
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: calc(env(safe-area-inset-top, 0px) + 62px);
+  }
 }
 
 /* Crossfade de capas de imagen */
