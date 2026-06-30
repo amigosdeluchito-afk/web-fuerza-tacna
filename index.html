@@ -30,7 +30,8 @@
         <link rel="icon" type="image/png" href="assets/img/favicon.png">
 
         <!-- Optimización LCP Hero FASE 1 -->
-        <link rel="preload" as="image" href="assets/img/img-hero.webp" fetchpriority="high">
+        <link rel="preload" as="image" href="assets/img/img-hero.webp" media="(min-width: 768px)" fetchpriority="high">
+        <link rel="preload" as="image" href="assets/img/img-hero-responsive.png" media="(max-width: 767px)" fetchpriority="high">
 
         <link rel="stylesheet" href="assets/css/main.css?v=139">
         <link rel="stylesheet" href="assets/css/button.css?v=139">
@@ -2337,15 +2338,15 @@
                 }
 
                 #intro {
-                    min-height: 100svh !important;
-                    padding-top: 12vh !important;
-                    padding-bottom: 12vh !important;
+                    min-height: 112svh !important;
+                    padding-top: 10vh !important;
+                    padding-bottom: 16vh !important;
                     overflow: hidden;
                 }
 
                 #intro .candidatos-intro-split {
-                    min-height: 76svh !important;
-                    justify-content: center !important;
+                    min-height: 88svh !important;
+                    justify-content: flex-start !important;
                 }
 
                 #intro .candidatos-intro-text {
@@ -2355,26 +2356,43 @@
                 }
 
                 #intro .title-mobile {
-                    margin-bottom: 1vh !important;
+                    margin-bottom: 2vh !important;
+                }
+
+                #intro .title-mobile .t-line1 {
+                    font-size: 17.2vw !important;
+                }
+
+                #intro .title-mobile .t-line2 {
+                    font-size: 11.6vw !important;
+                }
+
+                #intro .title-mobile .t-line3 {
+                    font-size: 11.1vw !important;
                 }
 
                 #intro .luchito-img {
-                    max-width: 58vw !important;
-                    max-height: 27vh !important;
-                    margin-top: -1vh !important;
-                    margin-bottom: -5vh !important;
+                    max-width: 52vw !important;
+                    max-height: 24vh !important;
+                    margin-top: 0 !important;
+                    margin-bottom: -2vh !important;
                 }
 
                 #intro .values-container {
-                    margin-top: -5vh !important;
-                    margin-bottom: 2vh !important;
-                    gap: 1.5vh !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 3vh !important;
+                    gap: 2vh !important;
                 }
 
                 #intro .value-box {
-                    width: 68vw !important;
-                    font-size: 4.1vw !important;
-                    padding: 2vh 0 !important;
+                    width: 70vw !important;
+                    font-size: 3.8vw !important;
+                    padding: 1.45vh 0 !important;
+                }
+
+                #intro .intro-btn-container {
+                    margin-top: 0 !important;
+                    margin-bottom: 0 !important;
                 }
 
                 #video-section,
