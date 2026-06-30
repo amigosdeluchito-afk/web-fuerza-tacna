@@ -1786,6 +1786,57 @@
                 overflow: visible;
                 transition: width 0.28s ease, transform 0.28s ease, background 0.25s ease, visibility 0s linear 0s;
                 isolation: isolate;
+                padding: 0;
+            }
+
+            #premium-music-player .player-toggle-btn::before,
+            #premium-music-player .player-toggle-btn::after {
+                content: "";
+                position: absolute;
+                inset: -6px;
+                border-radius: 999px;
+                border: 2px solid rgba(128, 16, 57, 0.55);
+                background: transparent;
+                box-shadow: none;
+                filter: none;
+                opacity: 0;
+                transform: scale(1);
+                animation: none;
+                pointer-events: none;
+                z-index: -1;
+            }
+
+            #premium-music-player.music-playing .player-toggle-btn::before,
+            #premium-music-player .player-toggle-btn:hover::before {
+                animation: playerCapsuleWave 1.8s ease-out infinite;
+            }
+
+            #premium-music-player.music-playing .player-toggle-btn::after,
+            #premium-music-player .player-toggle-btn:hover::after {
+                animation: playerCapsuleWave 1.8s ease-out infinite;
+                animation-delay: 0.9s;
+            }
+
+            @keyframes playerCapsuleWave {
+                0% {
+                    opacity: 0.65;
+                    transform: scale(1);
+                }
+
+                100% {
+                    opacity: 0;
+                    transform: scale(1.28, 1.45);
+                }
+            }
+
+            #premium-music-player button:not(.player-toggle-btn)::before,
+            #premium-music-player button:not(.player-toggle-btn)::after {
+                content: none;
+                display: none;
+                animation: none;
+                background: transparent;
+                box-shadow: none;
+                filter: none;
             }
 
             .player-toggle-btn:hover {
