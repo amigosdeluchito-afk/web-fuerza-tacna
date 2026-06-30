@@ -790,10 +790,9 @@ function injectGlobalAssets() {
             chatDiv.innerHTML = `
                 <button id="ft-chat-fab" aria-label="Abrir Asistente IA">
                     <div class="ft-fab-avatar">
-                        <img src="assets/img/luchito%20ia.webp" alt="" aria-hidden="true" loading="eager" decoding="async">
-                        <video muted playsinline preload="auto" loop aria-hidden="true" data-videos="assets/img/luchito%20ia.webm|assets/img/luchito%20ia%202.webm|assets/img/luchito%20ia%203.webm|assets/img/luchito%204.webm">
+                        <img src="assets/img/luchito%20ia.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                        <video muted playsinline preload="none" loop aria-hidden="true" data-videos="assets/img/luchito%20ia.webm|assets/img/luchito%20ia%202.webm|assets/img/luchito%20ia%203.webm|assets/img/luchito%204.webm">
                             <source src="assets/img/luchito%20ia.webm" type="video/webm">
-                            <source src="assets/img/luchito%20ia.mp4" type="video/mp4">
                         </video>
                     </div>
                 </button>
