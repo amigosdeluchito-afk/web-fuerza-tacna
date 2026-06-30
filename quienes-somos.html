@@ -1261,6 +1261,7 @@
                 
                 <div class="controls-container">
                     <div class="main-controls">
+                        <button id="shuffle-btn" class="ctrl-btn shuffle-btn" title="Aleatorio" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M10.59 9.17 5.41 4H3v2h1.59l4.59 4.59 1.41-1.42zM14.5 4l2.04 2.04-9.13 9.13L5.41 13H3v2h1.59l2.82 2.83 10.54-10.54L20 9.34V4h-5.5zm3.45 12.71-3.13-3.13-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.05 2.21z"/></svg></button>
                         <button id="prev-btn" class="ctrl-btn" title="Anterior"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
                         <button id="main-play-btn" class="ctrl-btn play-btn" title="Play/Pausa"><svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
                         <button id="next-btn" class="ctrl-btn" title="Siguiente"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
@@ -1322,7 +1323,7 @@
             #premium-music-player.force-expand,
             #premium-music-player.playlist-open {
                 width: min(390px, calc(100vw - 2rem));
-                height: 382px;
+                height: 324px;
                 border-radius: 24px;
                 background: radial-gradient(circle at 30% 0%, rgba(180, 34, 82, 0.45), transparent 34%), linear-gradient(160deg, #8b123f 0%, #6f0d31 58%, #520821 100%);
                 backdrop-filter: blur(16px);
@@ -1334,7 +1335,7 @@
                 animation: playerPanelIn 0.42s cubic-bezier(0.25, 1, 0.5, 1);
             }
             #premium-music-player.playlist-open {
-                height: 548px;
+                height: 520px;
             }
 
             @keyframes playerPanelIn {
@@ -1511,17 +1512,17 @@
         
             .player-header {
                 display: grid;
-                grid-template-columns: 58px 1fr 34px;
+                grid-template-columns: 48px 1fr 32px;
                 align-items: center;
-                gap: 12px;
-                min-height: 96px;
-                padding: 18px 18px 16px;
+                gap: 10px;
+                min-height: 72px;
+                padding: 10px 16px;
                 border-bottom: 1px solid rgba(255,255,255,0.12);
                 background: rgba(255,255,255,0.03);
             }
             .player-header-avatar {
-                width: 56px;
-                height: 56px;
+                width: 46px;
+                height: 46px;
                 object-fit: cover;
                 object-position: 42% 20%;
                 border-radius: 50%;
@@ -1533,14 +1534,14 @@
             .player-header-copy strong {
                 display: block;
                 color: #fff;
-                font-size: 1.12rem;
+                font-size: 1rem;
                 line-height: 1.1;
             }
             .player-header-copy span {
                 display: block;
-                margin-top: 4px;
+                margin-top: 2px;
                 color: rgba(255,255,255,0.72);
-                font-size: 0.8rem;
+                font-size: 0.74rem;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -1548,15 +1549,15 @@
             .close-player-btn svg { width: 24px; height: 24px; fill: rgba(255,255,255,0.9); }
             .close-player-btn:hover svg { fill: #ffc300; transform: rotate(90deg) scale(1.06); }
             .now-playing {
-                padding: 18px 22px 8px;
+                padding: 12px 22px 4px;
                 min-width: 0;
             }
             .now-playing-label {
                 display: block;
-                margin-bottom: 8px;
+                margin-bottom: 5px;
                 color: #ffc300;
                 font-family: Arial, sans-serif;
-                font-size: 0.76rem;
+                font-size: 0.72rem;
                 font-weight: 900;
                 letter-spacing: 0.06em;
             }
@@ -1572,7 +1573,7 @@
                 white-space: nowrap;
                 color: #fff;
                 font-family: Arial, sans-serif;
-                font-size: 1.02rem;
+                font-size: 0.95rem;
                 font-weight: 800;
                 line-height: 1.25;
             }
@@ -1581,26 +1582,27 @@
             }
             @keyframes scrollText { 0% { transform: translateX(8%); } 100% { transform: translateX(-55%); } }
         
-            .controls-container { display: flex; align-items: center; justify-content: center; padding: 10px 20px 12px; }
-            .main-controls { display: grid; grid-template-columns: 42px 42px 66px 42px 42px; align-items: center; justify-items: center; gap: 12px; }
+            .controls-container { display: flex; align-items: center; justify-content: center; padding: 6px 18px 8px; }
+            .main-controls { display: grid; grid-template-columns: 34px 34px 56px 34px 34px; align-items: center; justify-items: center; gap: 12px; }
             .ctrl-btn { background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; outline: none; color: #fff; }
             #premium-music-player .ctrl-btn:hover { transform: none; }
-            .ctrl-btn svg { width: 24px; height: 24px; fill: #fff; transition: fill 0.2s ease, transform 0.2s; }
+            .ctrl-btn svg { width: 22px; height: 22px; fill: #fff; transition: fill 0.2s ease, transform 0.2s; }
             .ctrl-btn:hover svg { fill: #ffc300; transform: scale(1.15); }
             .ctrl-btn.play-btn {
-                width: 62px;
-                height: 62px;
+                width: 54px;
+                height: 54px;
                 border-radius: 50%;
                 background: linear-gradient(145deg, #ffd64a, #ffc300 62%, #e59b00);
                 box-shadow: 0 12px 24px rgba(0,0,0,0.28), inset 0 2px 0 rgba(255,255,255,0.35);
                 transition: transform 0.24s ease, box-shadow 0.24s ease;
             }
             .ctrl-btn.play-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 16px 28px rgba(0,0,0,0.32); }
-            .ctrl-btn.play-btn svg { width: 30px; height: 30px; fill: #801039; }
+            .ctrl-btn.play-btn svg { width: 27px; height: 27px; fill: #801039; }
             .ctrl-btn.play-btn:hover svg { fill: #801039; transform: scale(1.04); }
-            .playlist-btn.is-active svg { fill: #ffc300; }
+            .playlist-btn.is-active svg,
+            .shuffle-btn.is-active svg { fill: #ffc300; }
             .progress-container {
-                padding: 0 24px 8px;
+                padding: 0 24px 4px;
             }
             .progress-slider,
             .volume-slider {
@@ -1631,7 +1633,7 @@
             .time-row {
                 display: flex;
                 justify-content: space-between;
-                margin-top: 6px;
+                margin-top: 4px;
                 color: rgba(255,255,255,0.72);
                 font-family: Arial, sans-serif;
                 font-size: 0.75rem;
@@ -1646,8 +1648,8 @@
                 padding: 0 24px;
             }
             .playlist-panel {
-                margin: 8px 18px 16px;
-                padding-top: 14px;
+                margin: 6px 18px 14px;
+                padding-top: 10px;
                 border-top: 1px solid rgba(255,195,0,0.22);
                 overflow: hidden;
                 flex: 1;
@@ -1662,13 +1664,13 @@
                 font-size: 0.75rem;
                 font-weight: 900;
                 letter-spacing: 0.05em;
-                margin-bottom: 10px;
+                margin-bottom: 8px;
             }
             .playlist-list {
                 display: flex;
                 flex-direction: column;
                 gap: 3px;
-                max-height: 200px;
+                max-height: 246px;
                 overflow-y: auto;
                 padding-right: 6px;
             }
@@ -1680,8 +1682,8 @@
                 grid-template-columns: 34px 1fr auto;
                 align-items: center;
                 gap: 8px;
-                min-height: 42px;
-                padding: 9px 12px;
+                min-height: 40px;
+                padding: 8px 12px;
                 border: 1px solid transparent;
                 border-radius: 12px;
                 background: transparent;
@@ -1772,7 +1774,7 @@
                 align-items: center;
                 gap: 10px;
                 width: auto;
-                padding: 4px 24px 10px;
+                padding: 2px 24px 6px;
             }
             .volume-container svg { width: 20px; height: 20px; fill: rgba(255,255,255,0.78); flex-shrink: 0; }
         
@@ -1787,9 +1789,9 @@
                 #premium-music-player.playlist-open {
                     width: calc(100vw - 1rem);
                     max-width: none;
-                    height: 372px;
+                    height: 318px;
                 }
-                #premium-music-player.playlist-open { height: min(548px, calc(100vh - 1.5rem)); }
+                #premium-music-player.playlist-open { height: min(520px, calc(100vh - 1.5rem)); }
                 .player-toggle-btn {
                     width: 142px;
                     height: 64px;
@@ -1806,21 +1808,22 @@
                     right: 11px;
                     bottom: 9px;
                 }
-                .player-header { min-height: 86px; padding: 14px 14px 12px; grid-template-columns: 52px 1fr 32px; }
-                .player-header-avatar { width: 50px; height: 50px; }
-                .player-header-copy strong { font-size: 1rem; }
-                .player-header-copy span { font-size: 0.74rem; }
-                .now-playing { padding: 14px 18px 6px; }
-                .scrolling-text { font-size: 0.92rem; }
-                .controls-container { padding: 8px 14px 10px; }
-                .main-controls { grid-template-columns: 38px 38px 58px 38px 38px; gap: 8px; }
-                .ctrl-btn svg { width: 21px; height: 21px; }
-                .ctrl-btn.play-btn { width: 56px; height: 56px; }
-                .ctrl-btn.play-btn svg { width: 28px; height: 28px; }
-                .progress-container { padding: 0 18px 8px; }
-                .volume-container { padding: 4px 18px 8px; }
+                .player-header { min-height: 66px; padding: 9px 12px; grid-template-columns: 44px 1fr 30px; }
+                .player-header-avatar { width: 42px; height: 42px; }
+                .player-header-copy strong { font-size: 0.96rem; }
+                .player-header-copy span { font-size: 0.7rem; }
+                .now-playing { padding: 10px 16px 4px; }
+                .now-playing-label { font-size: 0.68rem; margin-bottom: 4px; }
+                .scrolling-text { font-size: 0.88rem; }
+                .controls-container { padding: 5px 12px 7px; }
+                .main-controls { grid-template-columns: 32px 32px 52px 32px 32px; gap: 8px; }
+                .ctrl-btn svg { width: 20px; height: 20px; }
+                .ctrl-btn.play-btn { width: 50px; height: 50px; }
+                .ctrl-btn.play-btn svg { width: 25px; height: 25px; }
+                .progress-container { padding: 0 16px 4px; }
+                .volume-container { padding: 2px 16px 5px; }
                 .playlist-panel { margin: 6px 12px 12px; }
-                .playlist-list { max-height: calc(100vh - 348px); }
+                .playlist-list { max-height: calc(100vh - 298px); }
                 #audio-toast { display: none; }
             }
         </style>
@@ -1837,11 +1840,13 @@
                 let playlist = [];
                 let currentTrack = 0;
                 let errorSkips = 0;
+                let shuffleEnabled = false;
 
                 const playerWidget = document.getElementById('premium-music-player');
                 const bgAudio = document.getElementById('bg-audio');
                 const toggleBtn = document.getElementById('player-toggle-btn');
                 const mainPlayBtn = document.getElementById('main-play-btn');
+                const shuffleBtn = document.getElementById('shuffle-btn');
                 const prevBtn = document.getElementById('prev-btn');
                 const nextBtn = document.getElementById('next-btn');
                 const playlistToggleBtn = document.getElementById('playlist-toggle-btn');
@@ -2025,6 +2030,14 @@
 
                 const playNext = (shouldPlay = !bgAudio.paused) => {
                     if (playlist.length === 0) return;
+                    if (shuffleEnabled && playlist.length > 1) {
+                        let nextTrack = currentTrack;
+                        while (nextTrack === currentTrack) {
+                            nextTrack = Math.floor(Math.random() * playlist.length);
+                        }
+                        loadTrack(nextTrack, shouldPlay);
+                        return;
+                    }
                     loadTrack(currentTrack + 1, shouldPlay);
                 };
 
@@ -2074,6 +2087,13 @@
                         }
                     });
                     mainPlayBtn.addEventListener('click', togglePlay);
+                    if (shuffleBtn) {
+                        shuffleBtn.addEventListener('click', () => {
+                            shuffleEnabled = !shuffleEnabled;
+                            shuffleBtn.classList.toggle('is-active', shuffleEnabled);
+                            shuffleBtn.setAttribute('aria-pressed', String(shuffleEnabled));
+                        });
+                    }
                     if (closePlayerBtn) {
                         closePlayerBtn.addEventListener('click', () => setPlaylistOpen(false));
                     }
