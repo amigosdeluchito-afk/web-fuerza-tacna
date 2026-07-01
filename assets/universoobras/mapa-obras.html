@@ -37,7 +37,7 @@
 <!-- Estilos de la Interfaz del Mapa (sidebar, overlays, chips, leyenda) -->
 <link rel="stylesheet" href="mapa-sidebar.css?v=1015">
 <link rel="stylesheet" href="mapa-overlays.css">
-<link rel="stylesheet" href="mapa-obras.css?v=1043">
+<link rel="stylesheet" href="mapa-obras.css?v=1044">
 <link rel="stylesheet" href="../css/red-vial.css?v=3">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
@@ -45,7 +45,7 @@
 <script src="panel-obra.js" defer></script> <!-- Inclusión correcta de panel-obra.js -->
 <script src="mapa-utils.js?v=1018" defer></script>
 <script src="mapa-buscador.js" defer></script>
-<script src="../js/mapa-obras.js?v=1073" defer></script>
+<script src="../js/mapa-obras.js?v=1076" defer></script>
 <script src="mapa-filtros.js?v=10" defer></script>
 <script src="red-vial-module.js?v=172" defer></script>
 <script src="dashboard.js" defer></script>
@@ -326,6 +326,9 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const mobilePanel = document.getElementById('mobileCategoryPanel');
+    if (mobilePanel && mobilePanel.parentElement !== document.body) {
+      document.body.appendChild(mobilePanel);
+    }
     const iconFor = (key = '') => {
       const iconPaths = {
         educacion: 'M12 3 2 8l10 5 8-4v6h2V8L12 3Zm-6 8.18V15c0 1.76 3.58 4 6 4s6-2.24 6-4v-3.82l-6 3-6-3Z',
@@ -337,11 +340,16 @@
       return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="${path}"/></svg>`;
     };
 
-    const fillMobilePanel = () => {
-      if (!mobilePanel || mobilePanel.children.length) return;
-      document.querySelectorAll('.chips-group .chip[data-map]:not([data-map="base"])').forEach(chip => {
-        const key = chip.getAttribute('data-map') || '';
-        const label = chip.textContent.trim();
+    window.renderMobileCategoryPanel = (items = [], options = {}) => {
+      if (!mobilePanel) return;
+      const shouldReplace = options.replace !== false;
+      if (shouldReplace) mobilePanel.innerHTML = '';
+      if (mobilePanel.children.length && !shouldReplace) return;
+
+      items.forEach(item => {
+        const key = item.idHtml || item.key || '';
+        const label = item.nombreVis || item.label || '';
+        if (!key || !label) return;
         const option = document.createElement('button');
         option.type = 'button';
         option.className = 'mobile-category-option';
@@ -356,12 +364,20 @@
       });
     };
 
+    const fillMobilePanel = () => {
+      if (!mobilePanel || mobilePanel.children.length) return;
+      const staticItems = Array.from(document.querySelectorAll('.chips-group .chip[data-map]:not([data-map="base"])')).map(chip => ({
+        idHtml: chip.getAttribute('data-map') || '',
+        nombreVis: chip.textContent.trim()
+      }));
+      window.renderMobileCategoryPanel(staticItems, { replace: false });
+    };
+
     fillMobilePanel();
 
     document.addEventListener('click', (event) => {
       const toggle = event.target.closest('.chip-more');
       if (toggle) {
-        if (event.mobileCategoryHandled) return;
         event.preventDefault();
         event.stopPropagation();
         fillMobilePanel();
@@ -369,6 +385,10 @@
         const isOpen = mobilePanel.hidden;
         mobilePanel.hidden = !isOpen;
         mobilePanel.classList.toggle('is-open', isOpen);
+        mobilePanel.style.display = isOpen ? 'grid' : 'none';
+        mobilePanel.style.visibility = isOpen ? 'visible' : '';
+        mobilePanel.style.opacity = isOpen ? '1' : '';
+        mobilePanel.style.zIndex = isOpen ? '2147483001' : '';
         document.querySelectorAll('.chip-more').forEach(btn => btn.setAttribute('aria-expanded', String(isOpen)));
         return;
       }
@@ -382,6 +402,10 @@
         option.classList.add('is-active');
         mobilePanel.hidden = true;
         mobilePanel.classList.remove('is-open');
+        mobilePanel.style.display = 'none';
+        mobilePanel.style.visibility = '';
+        mobilePanel.style.opacity = '';
+        mobilePanel.style.zIndex = '';
         document.querySelectorAll('.chip-more').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
       }
     });
