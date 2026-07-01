@@ -276,10 +276,8 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   }
 
   .chips-group{
-    width: min(360px, calc(100vw - 22px)) !important;
-    max-width: calc(100vw - 22px) !important;
-    width: min(360px, calc(100dvw - 22px)) !important;
-    max-width: calc(100dvw - 22px) !important;
+    width: calc(var(--mobile-vv-width, 100vw) - 32px) !important;
+    max-width: calc(var(--mobile-vv-width, 100vw) - 32px) !important;
     min-width: 0 !important;
     margin: 0 auto !important;
     box-sizing: border-box !important;
@@ -432,8 +430,9 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
   .search-list{
     position: fixed;
-    left: 18px;
-    right: 18px;
+    left: calc(var(--mobile-vv-left, 0px) + 18px);
+    right: auto;
+    width: calc(var(--mobile-vv-width, 100vw) - 36px);
     top: calc(env(safe-area-inset-top, 0px) + 56px);
   }
 

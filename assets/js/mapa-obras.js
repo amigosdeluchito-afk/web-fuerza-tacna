@@ -491,7 +491,7 @@ window.initMapEngine = async function(container) {
         });
     });
 
-    map.on('click', 'obras-layer', (e) => {
+    const openObraFromFeature = (e) => {
         if (!e.features.length) return;
         ghostTooltip.remove(); // Cerramos tarjeta fantasma
         
@@ -523,7 +523,10 @@ window.initMapEngine = async function(container) {
                 if (typeof window.recordVisit === 'function') window.recordVisit(key, currentKey);
             }
         }
-    });
+    };
+
+    map.on('click', 'obras-layer', openObraFromFeature);
+    map.on('click', 'obras-labels-layer', openObraFromFeature);
 
     window.__OBRA_MARKERS = new Map();
     window.__OBRA_DATA    = new Map();

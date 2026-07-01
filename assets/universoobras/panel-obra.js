@@ -372,7 +372,7 @@ function open(data){
   // 4) animación de apertura:
   //    - en móvil: es un bottom sheet que sube desde abajo
   //    - en desktop: tu lateral derecho con re-entrada suave si ya estaba abierto
-  const isMobile = window.matchMedia('(max-width:700px)').matches;
+  const isMobile = window.matchMedia('(max-width:1024px)').matches;
   console.log("PanelObra: Modo " + (isMobile ? "Móvil" : "Desktop"));
 
 if (isMobile){
