@@ -2418,20 +2418,59 @@ function rvEnsureStudioFab(panel) {
     }
 
     fab.onclick = () => {
-        panel.classList.toggle('is-collapsed');
-        fab.classList.toggle('is-open', !panel.classList.contains('is-collapsed'));
+        rvSetStudioPanelOpen(panel, panel.classList.contains('is-collapsed'));
     };
 
-    fab.classList.toggle('is-open', !panel.classList.contains('is-collapsed'));
+    rvSetStudioPanelOpen(panel, !panel.classList.contains('is-collapsed'));
     return fab;
+}
+
+function rvSetStudioPanelOpen(panel, open) {
+    if (!panel) return;
+
+    const fab = document.getElementById('rv-studio-fab');
+    panel.classList.toggle('is-collapsed', !open);
+    fab?.classList.toggle('is-open', open);
+
+    const visibleStyles = {
+        position: 'fixed',
+        top: 'calc(env(safe-area-inset-top, 0px) + 294px)',
+        left: '92px',
+        right: '14px',
+        width: 'auto',
+        maxHeight: 'min(64dvh, 520px)',
+        display: 'block',
+        opacity: '1',
+        visibility: 'visible',
+        pointerEvents: 'auto',
+        transform: 'none',
+        zIndex: '2147483500'
+    };
+
+    const hiddenStyles = {
+        display: 'none',
+        opacity: '0',
+        visibility: 'hidden',
+        pointerEvents: 'none'
+    };
+
+    Object.entries(open ? visibleStyles : hiddenStyles).forEach(([prop, value]) => {
+        panel.style.setProperty(prop.replace(/[A-Z]/g, match => '-' + match.toLowerCase()), value, 'important');
+    });
+
+    if (open) {
+        const advancedContent = panel.querySelector('#rv-advanced-content');
+        if (advancedContent) {
+            advancedContent.classList.add('is-open');
+        }
+    }
 }
 
 function rvOpenStudioPanel() {
     const panel = document.getElementById('rv-studio-panel');
     if (!panel) return;
 
-    panel.classList.remove('is-collapsed');
-    document.getElementById('rv-studio-fab')?.classList.add('is-open');
+    rvSetStudioPanelOpen(panel, true);
 
     const advancedContent = panel.querySelector('#rv-advanced-content');
     if (advancedContent) {
@@ -2853,8 +2892,7 @@ window.activateRedVial = async function() {
 
     const earlyStudioPanel = initRedVialStudio();
     if (earlyStudioPanel && window.matchMedia('(max-width: 1024px)').matches) {
-        earlyStudioPanel.classList.add('is-collapsed');
-        rvEnsureStudioFab(earlyStudioPanel);
+        rvSetStudioPanelOpen(earlyStudioPanel, false);
     }
 
     if (!window.redVialMapInstance && window.isRedVialLoading) {
@@ -2870,7 +2908,7 @@ window.activateRedVial = async function() {
     const studioPanel = initRedVialStudio() || document.getElementById('rv-studio-panel');
     if (studioPanel) {
         if (window.matchMedia('(max-width: 1024px)').matches) {
-            studioPanel.classList.add('is-collapsed');
+            rvSetStudioPanelOpen(studioPanel, false);
         } else {
             rvOpenStudioPanel();
         }
@@ -2913,7 +2951,7 @@ window.deactivateRedVial = function() {
     const filters = document.getElementById('red-vial-filters');
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
     window.rvClearTramoEntryAnimation?.();
-    document.getElementById('rv-studio-panel')?.classList.add('is-collapsed');
+    rvSetStudioPanelOpen(document.getElementById('rv-studio-panel'), false);
     const studioFab = document.getElementById('rv-studio-fab');
     if (studioFab) {
         studioFab.classList.remove('is-open');
