@@ -116,6 +116,21 @@ window.initMapEngine = async function(container) {
     // Configuraciones
     const stepsBack = () => (window.innerWidth <= 900 ? 4 : 3);
     const isMobileMapView = () => window.matchMedia('(max-width: 1024px)').matches;
+    const syncMobileViewportFrame = () => {
+        if (!isMobileMapView()) return;
+
+        const vv = window.visualViewport;
+        const width = Math.round(vv?.width || window.innerWidth || document.documentElement.clientWidth);
+        const left = Math.round(vv?.offsetLeft || 0);
+
+        document.documentElement.style.setProperty('--mobile-vv-left', `${left}px`);
+        document.documentElement.style.setProperty('--mobile-vv-width', `${width}px`);
+        document.documentElement.style.setProperty('--mobile-vv-center', `${left + (width / 2)}px`);
+
+        if (window.scrollX) {
+            window.scrollTo(0, window.scrollY || 0);
+        }
+    };
 
     const FOCUS = { base: [0.50, 0.50], educacion: [0.50, 0.50], agua: [0.50, 0.50], transporte: [0.50, 0.50], agricultura: [0.50, 0.50], social: [0.50, 0.50], vias: [0.50, 0.50] };
 
@@ -1404,11 +1419,22 @@ window.initMapEngine = async function(container) {
     if (window._mapResizeHandler) {
         window.removeEventListener('resize', window._mapResizeHandler);
     }
-    window._mapResizeHandler = () => { if (map) map.resize(); };
+    window._mapResizeHandler = () => {
+        syncMobileViewportFrame();
+        if (map) map.resize();
+    };
     window.addEventListener('resize', window._mapResizeHandler);
+    window.addEventListener('orientationchange', syncMobileViewportFrame, { passive: true });
+    window.addEventListener('scroll', syncMobileViewportFrame, { passive: true });
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', syncMobileViewportFrame, { passive: true });
+        window.visualViewport.addEventListener('scroll', syncMobileViewportFrame, { passive: true });
+    }
+    syncMobileViewportFrame();
     
     // Auto-arranque de Obras
     setTimeout(() => {
+        syncMobileViewportFrame();
         if (map) map.resize();
         swapSegment('base');
         

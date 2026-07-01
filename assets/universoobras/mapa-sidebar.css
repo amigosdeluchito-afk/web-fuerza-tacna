@@ -454,7 +454,7 @@
 @media (max-width: 1024px) {
   #filtersDock.fp {
     top: calc(env(safe-area-inset-top, 0px) + 116px) !important;
-    left: 16px !important;
+    left: calc(var(--mobile-vv-left, 0px) + 16px) !important;
     width: auto !important;
     height: auto !important;
     display: block !important;
