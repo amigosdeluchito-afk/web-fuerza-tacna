@@ -2228,7 +2228,8 @@ function initRedVialStudio() {
                 </div>
             </div>
         </div>
-    `;    container.appendChild(panel);
+    `;
+    document.body.appendChild(panel);
 
     panel.querySelectorAll('.rv-profile-btn').forEach(btn => {
         btn.classList.toggle('is-active', btn.getAttribute('data-profile') === window.rvStyleConfig.theme);

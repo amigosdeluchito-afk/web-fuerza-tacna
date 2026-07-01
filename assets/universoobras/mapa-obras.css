@@ -1046,6 +1046,10 @@ body.segmento-alcalde_provincial #legend {
   display: block;
 }
 
+body:not(.segmento-alcalde_provincial) #rv-studio-panel {
+  display: none !important;
+}
+
 @media (max-width: 1024px) {
   body.segmento-alcalde_provincial .rv-panel {
     position: fixed !important;
