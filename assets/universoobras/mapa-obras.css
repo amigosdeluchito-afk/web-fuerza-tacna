@@ -243,7 +243,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 /* En móviles, que no rompa la barra de chips */
 @media (max-width:1024px){
   .chips{
-    top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
     left: 0 !important;
     right: auto !important;
     justify-content: center !important;
@@ -259,10 +259,10 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   }
 
   .chips-group{
-    width: min(460px, calc(100vw - 24px)) !important;
-    max-width: calc(100vw - 24px) !important;
-    width: min(460px, calc(100dvw - 24px)) !important;
-    max-width: calc(100dvw - 24px) !important;
+    width: min(360px, calc(100vw - 22px)) !important;
+    max-width: calc(100vw - 22px) !important;
+    width: min(360px, calc(100dvw - 22px)) !important;
+    max-width: calc(100dvw - 22px) !important;
     min-width: 0 !important;
     margin: 0 auto !important;
     box-sizing: border-box !important;
@@ -270,34 +270,38 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     overflow-y: visible !important;
     justify-content: stretch !important;
     gap: 8px !important;
-    padding: 6px 8px !important;
-    min-height: 50px;
-    border-radius: 27px !important;
+    padding: 0 !important;
+    min-height: 0;
+    border-radius: 0 !important;
     display: grid !important;
-    grid-template-columns: minmax(82px, 1fr) 40px minmax(104px, 1.25fr) !important;
+    grid-template-columns: 82px minmax(148px, 1fr) !important;
+    grid-template-rows: 40px 40px !important;
     align-items: center;
-    background: linear-gradient(115deg, rgba(255,255,255,0.58), rgba(255,195,0,0.62) 38%, rgba(238,177,45,0.72)) !important;
-    border: 2px solid rgba(255,255,255,0.9) !important;
-    box-shadow: 0 12px 22px rgba(0,0,0,0.24), inset 0 -5px 11px rgba(128,16,57,0.08) !important;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .chip{
-    min-height: 38px;
+    min-height: 40px;
     width: auto !important;
     min-width: 0 !important;
-    padding: 6px 8px !important;
-    font-size: clamp(9px, 2.45vw, 12.5px) !important;
+    padding: 6px 10px !important;
+    font-size: clamp(9px, 2.5vw, 12px) !important;
     letter-spacing: 0 !important;
+    border: 2px solid rgba(255,255,255,0.9) !important;
   }
 
   .chips-group > .chip[data-map="base"]{
     grid-column: 1;
-    gap: 8px;
+    grid-row: 2;
+    gap: 6px;
     background: #801039 !important;
     color: #fff4bd !important;
-    box-shadow: 0 10px 20px rgba(61,20,22,0.24);
+    border-radius: 999px !important;
+    box-shadow: 0 9px 18px rgba(61,20,22,0.25);
   }
 
   .chips-group > .chip[data-map="base"] span{
@@ -324,15 +328,16 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
   .chip-more{
     display: inline-flex !important;
-    grid-column: 3;
+    grid-column: 2;
+    grid-row: 2;
     justify-content: center;
     pointer-events: auto !important;
     gap: 7px;
     background: linear-gradient(180deg, rgba(245,211,113,0.94), rgba(220,173,61,0.96));
     color: #801039;
     overflow: hidden;
-    border-radius: 23px !important;
-    box-shadow: 0 8px 14px rgba(61,20,22,0.14), inset 0 1px 0 rgba(255,255,255,0.3);
+    border-radius: 999px !important;
+    box-shadow: 0 9px 18px rgba(61,20,22,0.18), inset 0 1px 0 rgba(255,255,255,0.3);
   }
 
   .chip-more span{
@@ -357,17 +362,18 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   }
 
   .search-pill{
-    flex: 0 0 40px !important;
-    width: 40px !important;
-    max-width: 40px !important;
-    height: 38px;
-    padding: 0 !important;
-    justify-content: center;
-    grid-column: 2;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 40px;
+    padding: 0 14px !important;
+    justify-content: flex-start;
+    grid-column: 1 / -1;
     grid-row: 1;
     border-radius: 999px;
-    background: linear-gradient(180deg, #e4ad15, #d89d0f);
-    box-shadow: 0 8px 15px rgba(61,20,22,0.16), inset 0 1px 0 rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.94);
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 10px 20px rgba(61,20,22,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
   }
 
   .search-pill svg{
@@ -376,24 +382,25 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   }
 
   .search-pill input{
-    width: 0 !important;
+    width: 100% !important;
     min-width: 0 !important;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 1;
+    pointer-events: auto;
+    font-size: 11px;
   }
 
   .search-pill:focus-within{
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    top: 8px;
-    z-index: 2;
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    z-index: auto;
     flex-basis: auto !important;
-    width: auto !important;
+    width: 100% !important;
     max-width: none !important;
-    height: 56px;
+    height: 40px;
     justify-content: flex-start;
-    padding: 0 18px !important;
+    padding: 0 14px !important;
     background: rgba(255,255,255,0.94);
   }
 
@@ -405,14 +412,14 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
   .search-list{
     position: fixed;
-    left: 20px;
-    right: 20px;
-    top: calc(env(safe-area-inset-top, 0px) + 74px);
+    left: 18px;
+    right: 18px;
+    top: calc(env(safe-area-inset-top, 0px) + 56px);
   }
 
   .mobile-category-panel{
     position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 78px);
+    top: calc(env(safe-area-inset-top, 0px) + 104px);
     left: 50vw;
     left: 50dvw;
     right: auto;

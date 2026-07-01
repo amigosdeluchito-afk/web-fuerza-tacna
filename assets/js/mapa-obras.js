@@ -115,6 +115,7 @@ window.initMapEngine = async function(container) {
 
     // Configuraciones
     const stepsBack = () => (window.innerWidth <= 900 ? 4 : 3);
+    const isMobileMapView = () => window.matchMedia('(max-width: 1024px)').matches;
 
     const FOCUS = { base: [0.50, 0.50], educacion: [0.50, 0.50], agua: [0.50, 0.50], transporte: [0.50, 0.50], agricultura: [0.50, 0.50], social: [0.50, 0.50], vias: [0.50, 0.50] };
 
@@ -1056,9 +1057,18 @@ window.initMapEngine = async function(container) {
             const cy = lat * gFy; 
 
             if (isFromBase || !isAutoCenterBlocked) {
-                map.fitBounds(bounds, { padding: 50, duration: 0 });
+                const mobileView = isMobileMapView();
+                const fitPadding = mobileView
+                    ? { top: 150, right: 28, bottom: 46, left: 28 }
+                    : 50;
+
+                map.fitBounds(bounds, { padding: fitPadding, duration: 0 });
                 map.setMaxBounds([ [-lon*0.5, -lat*0.5], [lon*1.5, lat*1.5] ]);
                 map.setCenter([cx, cy]);
+
+                if (mobileView) {
+                    map.setZoom(Math.max(map.getMinZoom ? map.getMinZoom() : 2, map.getZoom() - 0.18));
+                }
                 
             }
 

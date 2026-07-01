@@ -450,3 +450,79 @@
   border-radius: 4px !important;
   text-transform: uppercase !important;
 }
+
+@media (max-width: 1024px) {
+  #filtersDock.fp {
+    top: calc(env(safe-area-inset-top, 0px) + 116px) !important;
+    left: 16px !important;
+    width: auto !important;
+    height: auto !important;
+    display: block !important;
+    background: transparent !important;
+    pointer-events: none !important;
+    z-index: 2147482500 !important;
+  }
+
+  #filtersDock .fp-rail {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    gap: 14px !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    pointer-events: auto !important;
+  }
+
+  #filtersDock .fp-home-btn {
+    display: none !important;
+  }
+
+  #filtersDock .fp-pill {
+    width: 54px !important;
+    height: 54px !important;
+    border: 1px solid rgba(255,255,255,0.92) !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,0.96) !important;
+    color: #801039 !important;
+    box-shadow: 0 13px 24px rgba(61,20,22,0.24), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  }
+
+  #filtersDock .fp-rail .fp-pill + .fp-pill {
+    border-top: 1px solid rgba(255,255,255,0.92) !important;
+  }
+
+  #filtersDock .fp-pill svg {
+    width: 27px !important;
+    height: 27px !important;
+  }
+
+  #filtersDock.fp:not(.is-collapsed) .fp-pill {
+    background: #fff !important;
+  }
+
+  #filtersDock.fp:not(.is-collapsed) .fp-pill svg {
+    transform: none;
+  }
+
+  #filtersDock .fp-drawer {
+    left: 68px !important;
+    top: 0 !important;
+    width: min(300px, calc(100vw - 96px)) !important;
+    width: min(300px, calc(100dvw - 96px)) !important;
+    max-height: min(70vh, 520px) !important;
+    height: auto !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 16px 30px rgba(0,0,0,0.22) !important;
+  }
+
+  #filtersDock .fp-panel {
+    width: 100% !important;
+    max-height: calc(min(70vh, 520px) - 54px) !important;
+    overflow-y: auto !important;
+  }
+}
