@@ -159,6 +159,7 @@
     <button class="chip" data-map="cultura"><span>Cultura</span></button>
     <button class="chip chip-more" type="button" aria-expanded="false" aria-controls="mobileCategoryPanel"><span>Categorías</span></button>
   </div>
+  <div id="mobileCategoryPanel" class="mobile-category-panel" hidden></div>
 </nav>
 
 <!-- Panel de Filtros (Dock Izquierdo) -->
@@ -324,6 +325,66 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    const mobilePanel = document.getElementById('mobileCategoryPanel');
+    const iconFor = (key = '') => {
+      const iconPaths = {
+        educacion: 'M12 3 2 8l10 5 8-4v6h2V8L12 3Zm-6 8.18V15c0 1.76 3.58 4 6 4s6-2.24 6-4v-3.82l-6 3-6-3Z',
+        agua: 'M12 3.25S6 10.1 6 14.2A6 6 0 0 0 18 14.2c0-4.1-6-10.95-6-10.95Zm0 13.95a3 3 0 0 1-3-3h2a1 1 0 0 0 1 1v2Z',
+        formalizacion: 'M7 3h7l4 4v14H7V3Zm6 1.5V8h3.5L13 4.5ZM9 11h6v2H9v-2Zm0 4h7v2H9v-2Z',
+        alcalde_provincial: 'M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Zm0 4.1 4 1.5v3.5c0 3.1-1.7 6-4 7.2-2.3-1.2-4-4.1-4-7.2V7.6l4-1.5Zm-1 9.4 5-5-1.4-1.4-3.6 3.6-1.6-1.6L8 12.5l3 3Z'
+      };
+      const path = iconPaths[key] || 'M12 2 20 6.5v9L12 20 4 15.5v-9L12 2Zm0 2.3L6 7.7v6.6l6 3.4 6-3.4V7.7l-6-3.4Z';
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="${path}"/></svg>`;
+    };
+
+    const fillMobilePanel = () => {
+      if (!mobilePanel || mobilePanel.children.length) return;
+      document.querySelectorAll('.chips-group .chip[data-map]:not([data-map="base"])').forEach(chip => {
+        const key = chip.getAttribute('data-map') || '';
+        const label = chip.textContent.trim();
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'mobile-category-option';
+        option.setAttribute('data-mobile-map', key);
+        option.innerHTML = `
+          <span class="mobile-category-option__icon">${iconFor(key)}</span>
+          <span class="mobile-category-option__label"></span>
+          <span class="mobile-category-option__chevron" aria-hidden="true"></span>
+        `;
+        option.querySelector('.mobile-category-option__label').textContent = label;
+        mobilePanel.appendChild(option);
+      });
+    };
+
+    fillMobilePanel();
+
+    document.addEventListener('click', (event) => {
+      const toggle = event.target.closest('.chip-more');
+      if (toggle) {
+        event.preventDefault();
+        event.stopPropagation();
+        fillMobilePanel();
+        if (!mobilePanel) return;
+        const isOpen = mobilePanel.hidden;
+        mobilePanel.hidden = !isOpen;
+        mobilePanel.classList.toggle('is-open', isOpen);
+        document.querySelectorAll('.chip-more').forEach(btn => btn.setAttribute('aria-expanded', String(isOpen)));
+        return;
+      }
+
+      const option = event.target.closest('.mobile-category-option');
+      if (option && mobilePanel && mobilePanel.contains(option)) {
+        const key = option.getAttribute('data-mobile-map');
+        const sourceChip = key ? document.querySelector(`.chips-group .chip[data-map="${key}"]`) : null;
+        if (sourceChip) sourceChip.click();
+        mobilePanel.querySelectorAll('.mobile-category-option').forEach(btn => btn.classList.remove('is-active'));
+        option.classList.add('is-active');
+        mobilePanel.hidden = true;
+        mobilePanel.classList.remove('is-open');
+        document.querySelectorAll('.chip-more').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+      }
+    });
+
     // 1. Mostrar fondo
     document.querySelector('.app-bg')?.classList.add('show');
 
