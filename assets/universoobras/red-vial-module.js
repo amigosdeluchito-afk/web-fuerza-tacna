@@ -2431,18 +2431,19 @@ function rvSetStudioPanelOpen(panel, open) {
 
     const fab = document.getElementById('rv-studio-fab');
     const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+    window.clearTimeout(panel._rvCloseTimer);
     panel.classList.toggle('is-collapsed', !open);
     fab?.classList.toggle('is-open', open);
 
     const mobileVisibleStyles = {
         position: 'fixed',
-        top: 'calc(env(safe-area-inset-top, 0px) + 132px)',
+        top: 'calc(env(safe-area-inset-top, 0px) + 214px)',
         left: '0',
         right: '0',
         bottom: '0',
         width: '100%',
         height: 'auto',
-        maxHeight: 'calc(100dvh - 132px - env(safe-area-inset-top, 0px))',
+        maxHeight: 'calc(100dvh - 214px - env(safe-area-inset-top, 0px))',
         display: 'block',
         opacity: '1',
         visibility: 'visible',
@@ -2468,11 +2469,10 @@ function rvSetStudioPanelOpen(panel, open) {
     };
 
     const hiddenStyles = {
-        display: 'none',
         opacity: '0',
         visibility: 'hidden',
         pointerEvents: 'none',
-        transform: isMobile ? 'translateY(18px)' : 'none'
+        transform: isMobile ? 'translateY(32px)' : 'none'
     };
 
     const styles = open ? (isMobile ? mobileVisibleStyles : desktopVisibleStyles) : hiddenStyles;
@@ -2496,6 +2496,13 @@ function rvSetStudioPanelOpen(panel, open) {
         fab.style.setProperty('transform', 'none', 'important');
         fab.style.setProperty('background', 'rgba(255,255,255,0.98)', 'important');
         fab.style.setProperty('color', '#801039', 'important');
+
+        window.clearTimeout(panel._rvCloseTimer);
+        panel._rvCloseTimer = window.setTimeout(() => {
+            if (panel.classList.contains('is-collapsed')) {
+                panel.style.setProperty('display', 'none', 'important');
+            }
+        }, 220);
     }
 }
 
