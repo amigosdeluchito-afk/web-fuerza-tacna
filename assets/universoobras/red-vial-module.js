@@ -2378,7 +2378,43 @@ function rvEnsureStudioFab(panel) {
         fab.type = 'button';
         fab.setAttribute('aria-label', 'Opciones del mapa');
         fab.setAttribute('title', 'Opciones del mapa');
+        fab.innerHTML = `
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M4 7h10M18 7h2M4 17h2M10 17h10M8 5v4M16 15v4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        `;
         document.body.appendChild(fab);
+    }
+
+    const fabStyle = {
+        position: 'fixed',
+        top: 'calc(env(safe-area-inset-top, 0px) + 294px)',
+        left: '22px',
+        right: 'auto',
+        width: '56px',
+        height: '56px',
+        display: 'grid',
+        placeItems: 'center',
+        padding: '0',
+        border: '1px solid rgba(255,255,255,0.92)',
+        borderRadius: '999px',
+        background: 'rgba(255,255,255,0.98)',
+        color: '#801039',
+        boxShadow: '0 13px 24px rgba(61,20,22,0.26)',
+        zIndex: '2147483600',
+        pointerEvents: 'auto',
+        opacity: '1',
+        visibility: 'visible'
+    };
+    Object.entries(fabStyle).forEach(([prop, value]) => {
+        fab.style.setProperty(prop.replace(/[A-Z]/g, match => '-' + match.toLowerCase()), value, 'important');
+    });
+
+    const icon = fab.querySelector('svg');
+    if (icon) {
+        icon.style.setProperty('width', '28px', 'important');
+        icon.style.setProperty('height', '28px', 'important');
+        icon.style.setProperty('display', 'block', 'important');
     }
 
     fab.onclick = () => {
@@ -2815,6 +2851,12 @@ window.activateRedVial = async function() {
         filters.style.pointerEvents = 'none';
     }
 
+    const earlyStudioPanel = initRedVialStudio();
+    if (earlyStudioPanel && window.matchMedia('(max-width: 1024px)').matches) {
+        earlyStudioPanel.classList.add('is-collapsed');
+        rvEnsureStudioFab(earlyStudioPanel);
+    }
+
     if (!window.redVialMapInstance && window.isRedVialLoading) {
         await window.rvWaitForRedVialInstance();
     }
@@ -2872,7 +2914,11 @@ window.deactivateRedVial = function() {
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
     window.rvClearTramoEntryAnimation?.();
     document.getElementById('rv-studio-panel')?.classList.add('is-collapsed');
-    document.getElementById('rv-studio-fab')?.classList.remove('is-open');
+    const studioFab = document.getElementById('rv-studio-fab');
+    if (studioFab) {
+        studioFab.classList.remove('is-open');
+        studioFab.style.setProperty('display', 'none', 'important');
+    }
 
     if (container) {
         container.style.opacity = '0';

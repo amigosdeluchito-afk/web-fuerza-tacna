@@ -1074,10 +1074,10 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
   body.segmento-alcalde_provincial .rv-studio-fab {
     position: fixed !important;
     top: calc(env(safe-area-inset-top, 0px) + 294px) !important;
-    right: 14px !important;
-    left: auto !important;
-    width: 54px !important;
-    height: 54px !important;
+    left: 22px !important;
+    right: auto !important;
+    width: 56px !important;
+    height: 56px !important;
     border: 1px solid rgba(255,255,255,0.9) !important;
     border-radius: 999px !important;
     background: rgba(255,255,255,0.96) !important;
@@ -1089,21 +1089,15 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     cursor: pointer !important;
   }
 
-  body.segmento-alcalde_provincial .rv-studio-fab::before {
-    content: "";
-    width: 27px;
-    height: 27px;
-    background: #801039;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65-2-3.46-2.49 1a7.2 7.2 0 0 0-1.7-.98L15 3h-4l-.35 2.93c-.62.24-1.19.56-1.7.98l-2.49-1-2 3.46 2.11 1.65c-.04.32-.07.65-.07.98s.02.66.07.98l-2.11 1.65 2 3.46 2.49-1c.51.4 1.08.73 1.7.98L11 21h4l.35-2.93c.62-.24 1.19-.56 1.7-.98l2.49 1 2-3.46-2.11-1.65ZM13 15.5A3.5 3.5 0 1 1 13 8a3.5 3.5 0 0 1 0 7.5Z'/%3E%3C/svg%3E") center/contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65-2-3.46-2.49 1a7.2 7.2 0 0 0-1.7-.98L15 3h-4l-.35 2.93c-.62.24-1.19.56-1.7.98l-2.49-1-2 3.46 2.11 1.65c-.04.32-.07.65-.07.98s.02.66.07.98l-2.11 1.65 2 3.46 2.49-1c.51.4 1.08.73 1.7.98L11 21h4l.35-2.93c.62-.24 1.19-.56 1.7-.98l2.49 1 2-3.46-2.11-1.65ZM13 15.5A3.5 3.5 0 1 1 13 8a3.5 3.5 0 0 1 0 7.5Z'/%3E%3C/svg%3E") center/contain no-repeat;
-  }
-
   body.segmento-alcalde_provincial .rv-studio-fab.is-open {
     background: #801039 !important;
+    color: #ffc300 !important;
   }
 
-  body.segmento-alcalde_provincial .rv-studio-fab.is-open::before {
-    background: #ffc300;
+  body.segmento-alcalde_provincial .rv-studio-fab svg {
+    width: 28px !important;
+    height: 28px !important;
+    display: block !important;
   }
 
   body.segmento-alcalde_provincial .rv-panel.is-collapsed .rv-panel-header {
