@@ -142,21 +142,6 @@ window.initMapEngine = async function(container) {
         document.documentElement.style.setProperty('--mobile-vv-height', `${height}px`);
         document.documentElement.style.setProperty('--mobile-vv-center', `${left + (width / 2)}px`);
 
-        const frameEl = document.getElementById('video-intro-container') || mapEl || document.body;
-        const frameRect = frameEl.getBoundingClientRect();
-        const frameLeft = Math.round(frameRect.left || 0);
-        const frameWidth = Math.round(frameRect.width || document.documentElement.clientWidth || window.innerWidth || width);
-        const chips = document.getElementById('chips');
-        if (chips) {
-            const headerWidth = Math.max(280, Math.min(430, frameWidth - 48));
-            chips.style.left = `${frameLeft + (frameWidth / 2)}px`;
-            chips.style.right = 'auto';
-            chips.style.width = `${headerWidth}px`;
-            chips.style.maxWidth = `${headerWidth}px`;
-            chips.style.transform = 'translateX(-50%)';
-            chips.style.padding = '0';
-        }
-
         if (window.scrollX) {
             window.scrollTo(0, window.scrollY || 0);
         }
