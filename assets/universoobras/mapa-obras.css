@@ -390,6 +390,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     transform: none !important;
     width: 100% !important;
     max-width: none !important;
+    box-sizing: border-box !important;
     height: 40px;
     padding: 0 14px !important;
     justify-content: flex-start;
@@ -425,6 +426,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     flex-basis: auto !important;
     width: 100% !important;
     max-width: none !important;
+    box-sizing: border-box !important;
     height: 40px;
     justify-content: flex-start;
     padding: 0 14px !important;
