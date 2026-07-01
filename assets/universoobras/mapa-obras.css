@@ -413,8 +413,9 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   .mobile-category-panel{
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 78px);
-    left: auto;
-    right: 22px;
+    left: 50vw;
+    left: 50dvw;
+    right: auto;
     width: max-content;
     min-width: 238px;
     max-width: min(318px, calc(100vw - 44px));
@@ -422,7 +423,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     max-height: min(66vh, 390px);
     overflow-y: auto;
     pointer-events: auto !important;
-    transform: none;
+    transform: translateX(-50%);
     z-index: 2147483001 !important;
     display: grid;
     opacity: 1;
@@ -442,8 +443,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     content: "";
     position: absolute;
     top: -12px;
-    right: clamp(34px, 14vw, 76px);
-    left: auto;
+    left: 70%;
     width: 0;
     height: 0;
     border-left: 11px solid transparent;
