@@ -262,22 +262,25 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
   .chips{
     top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
-    left: 0 !important;
+    left: 50vw !important;
+    left: 50dvw !important;
     right: 0 !important;
     justify-content: center !important;
     flex-wrap: nowrap !important;
-    width: auto !important;
-    max-width: none !important;
+    width: min(430px, calc(100vw - 48px)) !important;
+    width: min(430px, calc(100dvw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+    max-width: calc(100dvw - 48px) !important;
     overflow: visible !important;
-    transform: none !important;
+    transform: translateX(-50%) !important;
     box-sizing: border-box !important;
-    padding: 0 24px !important;
+    padding: 0 !important;
     touch-action: none !important;
   }
 
   .chips-group{
     width: 100% !important;
-    max-width: 430px !important;
+    max-width: 100% !important;
     min-width: 0 !important;
     margin: 0 auto !important;
     box-sizing: border-box !important;

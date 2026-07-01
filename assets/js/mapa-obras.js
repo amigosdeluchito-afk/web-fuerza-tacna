@@ -117,7 +117,18 @@ window.initMapEngine = async function(container) {
     const stepsBack = () => (window.innerWidth <= 900 ? 4 : 3);
     const isMobileMapView = () => window.matchMedia('(max-width: 1024px)').matches;
     const syncMobileViewportFrame = () => {
-        if (!isMobileMapView()) return;
+        if (!isMobileMapView()) {
+            const chips = document.getElementById('chips');
+            if (chips) {
+                chips.style.left = '';
+                chips.style.right = '';
+                chips.style.width = '';
+                chips.style.maxWidth = '';
+                chips.style.transform = '';
+                chips.style.padding = '';
+            }
+            return;
+        }
 
         const vv = window.visualViewport;
         const width = Math.round(vv?.width || window.innerWidth || document.documentElement.clientWidth);
@@ -130,6 +141,18 @@ window.initMapEngine = async function(container) {
         document.documentElement.style.setProperty('--mobile-vv-width', `${width}px`);
         document.documentElement.style.setProperty('--mobile-vv-height', `${height}px`);
         document.documentElement.style.setProperty('--mobile-vv-center', `${left + (width / 2)}px`);
+
+        const layoutWidth = Math.round(document.documentElement.clientWidth || window.innerWidth || width);
+        const chips = document.getElementById('chips');
+        if (chips) {
+            const headerWidth = Math.max(280, Math.min(430, layoutWidth - 48));
+            chips.style.left = `${layoutWidth / 2}px`;
+            chips.style.right = 'auto';
+            chips.style.width = `${headerWidth}px`;
+            chips.style.maxWidth = `${headerWidth}px`;
+            chips.style.transform = 'translateX(-50%)';
+            chips.style.padding = '0';
+        }
 
         if (window.scrollX) {
             window.scrollTo(0, window.scrollY || 0);
