@@ -1410,7 +1410,7 @@ window.initMapEngine = async function(container) {
 
                     mobileToggle.onclick = (event) => {
                         event.preventDefault();
-                        event.stopPropagation();
+                        event.mobileCategoryHandled = true;
                         if (!mobilePanel) return;
                         const isOpen = mobilePanel.hidden;
                         mobilePanel.hidden = !isOpen;

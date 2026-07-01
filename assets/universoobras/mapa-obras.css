@@ -423,8 +423,10 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     overflow-y: auto;
     pointer-events: auto !important;
     transform: none;
-    z-index: 10001;
+    z-index: 2147483001 !important;
     display: grid;
+    opacity: 1;
+    visibility: visible;
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 10px;
@@ -451,6 +453,13 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
   .mobile-category-panel[hidden]{
     display: none !important;
+  }
+
+  .mobile-category-panel.is-open{
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 
   .mobile-category-option{
