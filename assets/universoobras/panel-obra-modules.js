@@ -115,12 +115,13 @@
             const body = sheetEl.querySelector('.sheet-body');
             let startY = 0, startH = 0, curY = 0, dragging = false;
 
-            const minH = Math.round(window.innerHeight * 0.40);
-            const fullH = Math.round(window.innerHeight * 0.88);
-            const peekH = Math.round(window.innerHeight * 0.55);
+            const viewportH = Math.round(window.visualViewport?.height || window.innerHeight);
+            const minH = Math.round(viewportH * 0.50);
+            const fullH = Math.round(viewportH - 118);
+            const peekH = Math.round(viewportH - 118);
 
             const onStart = (e) => {
-                if (window.innerWidth > 700) return;
+                if (window.innerWidth > 1024) return;
                 const t = e.touches ? e.touches[0] : e;
                 if (body.scrollTop > 0 && t.clientY > hero.getBoundingClientRect().bottom) return;
                 

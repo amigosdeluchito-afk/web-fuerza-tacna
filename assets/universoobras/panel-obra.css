@@ -38,12 +38,14 @@
   #sheet{
     left: var(--mobile-vv-left, 0px) !important;
     right: auto !important;
-    top:auto; bottom:0;
+    top: calc(var(--mobile-vv-top, 0px) + 118px) !important;
+    bottom: auto !important;
     width: var(--mobile-vv-width, 100vw) !important;
     max-width: var(--mobile-vv-width, 100vw) !important;
-    height: min(62vh, 560px);
+    height: calc(var(--mobile-vv-height, 100vh) - 118px);
+    max-height: calc(var(--mobile-vv-height, 100vh) - 118px);
     border-top-left-radius:16px; border-top-right-radius:16px;
-    transform: translateY(100%);   /* oculto abajo */
+    transform: translateY(calc(100% + 24px));   /* oculto abajo */
     box-shadow: 0 -12px 30px rgba(0,0,0,.28);
   }
   #sheet.is-open{ transform: translateY(0) !important; } /* visible */

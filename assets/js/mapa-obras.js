@@ -122,9 +122,13 @@ window.initMapEngine = async function(container) {
         const vv = window.visualViewport;
         const width = Math.round(vv?.width || window.innerWidth || document.documentElement.clientWidth);
         const left = Math.round(vv?.offsetLeft || 0);
+        const top = Math.round(vv?.offsetTop || 0);
+        const height = Math.round(vv?.height || window.innerHeight || document.documentElement.clientHeight);
 
         document.documentElement.style.setProperty('--mobile-vv-left', `${left}px`);
+        document.documentElement.style.setProperty('--mobile-vv-top', `${top}px`);
         document.documentElement.style.setProperty('--mobile-vv-width', `${width}px`);
+        document.documentElement.style.setProperty('--mobile-vv-height', `${height}px`);
         document.documentElement.style.setProperty('--mobile-vv-center', `${left + (width / 2)}px`);
 
         if (window.scrollX) {
