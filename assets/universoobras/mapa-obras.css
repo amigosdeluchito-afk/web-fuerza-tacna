@@ -242,9 +242,28 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
 /* En móviles, que no rompa la barra de chips */
 @media (max-width:1024px){
+  html,
+  body{
+    max-width: 100vw !important;
+    max-width: 100dvw !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
+  .app-bg,
+  #map,
+  #video-intro-container{
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    max-width: 100vw !important;
+    max-width: 100dvw !important;
+  }
+
   .chips{
     top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
-    left: 0 !important;
+    left: 50% !important;
     right: auto !important;
     justify-content: center !important;
     flex-wrap: nowrap !important;
@@ -253,9 +272,10 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     width: 100dvw !important;
     max-width: 100dvw !important;
     overflow: visible !important;
-    transform: none !important;
+    transform: translateX(-50%) !important;
     box-sizing: border-box !important;
     padding: 0 12px !important;
+    touch-action: none !important;
   }
 
   .chips-group{
@@ -282,6 +302,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     box-shadow: none !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    touch-action: pan-y !important;
   }
 
   .chip{
@@ -292,6 +313,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     font-size: clamp(9px, 2.5vw, 12px) !important;
     letter-spacing: 0 !important;
     border: 2px solid rgba(255,255,255,0.9) !important;
+    touch-action: manipulation !important;
   }
 
   .chips-group > .chip[data-map="base"]{
@@ -374,6 +396,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     background: rgba(255,255,255,0.94);
     border: 2px solid rgba(255,255,255,0.9);
     box-shadow: 0 10px 20px rgba(61,20,22,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
+    touch-action: manipulation !important;
   }
 
   .search-pill svg{

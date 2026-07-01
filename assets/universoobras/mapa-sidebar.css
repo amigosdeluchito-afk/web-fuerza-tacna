@@ -520,6 +520,17 @@
     box-shadow: 0 16px 30px rgba(0,0,0,0.22) !important;
   }
 
+  #filtersDock.fp.is-collapsed .fp-drawer {
+    transform: translateX(calc(-100% - 88px)) !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+  }
+
+  #filtersDock.fp:not(.is-collapsed) .fp-drawer {
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
+  }
+
   #filtersDock .fp-panel {
     width: 100% !important;
     max-height: calc(min(70vh, 520px) - 54px) !important;
