@@ -261,7 +261,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   }
 
   .chips{
-    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    top: calc(env(safe-area-inset-top, 0px) + 58px) !important;
     left: 50vw !important;
     left: 50dvw !important;
     right: 0 !important;
@@ -293,7 +293,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     border-radius: 0 !important;
     display: grid !important;
     grid-template-columns: 82px minmax(148px, 1fr) !important;
-    grid-template-rows: 40px 40px !important;
+    grid-template-rows: 40px !important;
     align-items: center;
     background: transparent !important;
     border: 0 !important;
@@ -316,7 +316,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
   .chips-group > .chip[data-map="base"]{
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
     gap: 6px;
     background: #801039 !important;
     color: #fff4bd !important;
@@ -349,7 +349,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   .chip-more{
     display: inline-flex !important;
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1;
     justify-content: center;
     pointer-events: auto !important;
     gap: 7px;
@@ -383,13 +383,21 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
 
   .search-pill{
     flex: 1 1 auto !important;
-    width: 100% !important;
-    max-width: none !important;
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    left: 50vw !important;
+    left: 50dvw !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: min(430px, calc(100vw - 48px)) !important;
+    width: min(430px, calc(100dvw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+    max-width: calc(100dvw - 48px) !important;
     height: 40px;
     padding: 0 14px !important;
     justify-content: flex-start;
-    grid-column: 1 / -1;
-    grid-row: 1;
+    grid-column: auto;
+    grid-row: auto;
     border-radius: 999px;
     background: rgba(255,255,255,0.94);
     border: 2px solid rgba(255,255,255,0.9);
@@ -411,14 +419,18 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
   }
 
   .search-pill:focus-within{
-    position: relative;
-    left: auto;
+    position: fixed !important;
+    left: 50vw !important;
+    left: 50dvw !important;
     right: auto;
-    top: auto;
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    transform: translateX(-50%) !important;
     z-index: auto;
     flex-basis: auto !important;
-    width: 100% !important;
-    max-width: none !important;
+    width: min(430px, calc(100vw - 48px)) !important;
+    width: min(430px, calc(100dvw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+    max-width: calc(100dvw - 48px) !important;
     height: 40px;
     justify-content: flex-start;
     padding: 0 14px !important;
