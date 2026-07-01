@@ -2247,7 +2247,7 @@ function initRedVialStudio() {
 
     // Evento para colapsar/expandir el panel
     panel.querySelector('#rv-panel-header-btn').addEventListener('click', () => {
-        panel.classList.toggle('is-collapsed');
+        rvSetStudioPanelOpen(panel, panel.classList.contains('is-collapsed'));
     });
 
     // Evento Acordeón Avanzado
@@ -2436,12 +2436,13 @@ function rvSetStudioPanelOpen(panel, open) {
 
     const mobileVisibleStyles = {
         position: 'fixed',
-        top: 'auto',
+        top: 'calc(env(safe-area-inset-top, 0px) + 132px)',
         left: '0',
         right: '0',
         bottom: '0',
         width: '100%',
-        maxHeight: 'min(72dvh, 640px)',
+        height: 'auto',
+        maxHeight: 'calc(100dvh - 132px - env(safe-area-inset-top, 0px))',
         display: 'block',
         opacity: '1',
         visibility: 'visible',
@@ -2481,7 +2482,8 @@ function rvSetStudioPanelOpen(panel, open) {
 
     if (open) {
         if (fab && isMobile) {
-            fab.style.setProperty('transform', 'translateY(-8px)', 'important');
+            fab.style.setProperty('display', 'none', 'important');
+            fab.style.setProperty('transform', 'none', 'important');
             fab.style.setProperty('background', '#801039', 'important');
             fab.style.setProperty('color', '#ffc300', 'important');
         }
@@ -2490,6 +2492,7 @@ function rvSetStudioPanelOpen(panel, open) {
             advancedContent.classList.add('is-open');
         }
     } else if (fab && isMobile) {
+        fab.style.setProperty('display', 'grid', 'important');
         fab.style.setProperty('transform', 'none', 'important');
         fab.style.setProperty('background', 'rgba(255,255,255,0.98)', 'important');
         fab.style.setProperty('color', '#801039', 'important');
