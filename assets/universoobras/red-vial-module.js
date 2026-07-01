@@ -2169,7 +2169,7 @@ function initRedVialStudio() {
 
     const panel = document.createElement('div');
     panel.id = 'rv-studio-panel';
-    panel.className = 'rv-panel';
+    panel.className = window.matchMedia('(max-width: 1024px)').matches ? 'rv-panel is-collapsed' : 'rv-panel';
 
     panel.innerHTML = `
         <div class="rv-panel-header" id="rv-panel-header-btn" title="Mostrar/Ocultar capas">
