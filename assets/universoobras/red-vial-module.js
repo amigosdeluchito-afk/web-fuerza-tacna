@@ -2404,7 +2404,8 @@ function rvEnsureStudioFab(panel) {
         zIndex: '2147483600',
         pointerEvents: 'auto',
         opacity: '1',
-        visibility: 'visible'
+        visibility: 'visible',
+        transition: 'transform 0.2s ease, background 0.2s ease, color 0.2s ease'
     };
     Object.entries(fabStyle).forEach(([prop, value]) => {
         fab.style.setProperty(prop.replace(/[A-Z]/g, match => '-' + match.toLowerCase()), value, 'important');
@@ -2429,14 +2430,32 @@ function rvSetStudioPanelOpen(panel, open) {
     if (!panel) return;
 
     const fab = document.getElementById('rv-studio-fab');
+    const isMobile = window.matchMedia('(max-width: 1024px)').matches;
     panel.classList.toggle('is-collapsed', !open);
     fab?.classList.toggle('is-open', open);
 
-    const visibleStyles = {
+    const mobileVisibleStyles = {
+        position: 'fixed',
+        top: 'auto',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        width: '100%',
+        maxHeight: 'min(72dvh, 640px)',
+        display: 'block',
+        opacity: '1',
+        visibility: 'visible',
+        pointerEvents: 'auto',
+        transform: 'none',
+        zIndex: '2147483500'
+    };
+
+    const desktopVisibleStyles = {
         position: 'fixed',
         top: 'calc(env(safe-area-inset-top, 0px) + 294px)',
         left: '92px',
         right: '14px',
+        bottom: 'auto',
         width: 'auto',
         maxHeight: 'min(64dvh, 520px)',
         display: 'block',
@@ -2451,18 +2470,29 @@ function rvSetStudioPanelOpen(panel, open) {
         display: 'none',
         opacity: '0',
         visibility: 'hidden',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        transform: isMobile ? 'translateY(18px)' : 'none'
     };
 
-    Object.entries(open ? visibleStyles : hiddenStyles).forEach(([prop, value]) => {
+    const styles = open ? (isMobile ? mobileVisibleStyles : desktopVisibleStyles) : hiddenStyles;
+    Object.entries(styles).forEach(([prop, value]) => {
         panel.style.setProperty(prop.replace(/[A-Z]/g, match => '-' + match.toLowerCase()), value, 'important');
     });
 
     if (open) {
+        if (fab && isMobile) {
+            fab.style.setProperty('transform', 'translateY(-8px)', 'important');
+            fab.style.setProperty('background', '#801039', 'important');
+            fab.style.setProperty('color', '#ffc300', 'important');
+        }
         const advancedContent = panel.querySelector('#rv-advanced-content');
         if (advancedContent) {
             advancedContent.classList.add('is-open');
         }
+    } else if (fab && isMobile) {
+        fab.style.setProperty('transform', 'none', 'important');
+        fab.style.setProperty('background', 'rgba(255,255,255,0.98)', 'important');
+        fab.style.setProperty('color', '#801039', 'important');
     }
 }
 
