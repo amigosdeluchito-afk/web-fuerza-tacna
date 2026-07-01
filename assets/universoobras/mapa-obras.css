@@ -326,6 +326,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     display: inline-flex !important;
     grid-column: 3;
     justify-content: center;
+    pointer-events: auto !important;
     gap: 7px;
     background: linear-gradient(180deg, rgba(245,211,113,0.94), rgba(220,173,61,0.96));
     color: #801039;
@@ -420,6 +421,7 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     max-width: min(318px, calc(100dvw - 44px));
     max-height: min(66vh, 390px);
     overflow-y: auto;
+    pointer-events: auto !important;
     transform: none;
     z-index: 10001;
     display: grid;

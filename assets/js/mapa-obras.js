@@ -1408,13 +1408,15 @@ window.initMapEngine = async function(container) {
                         });
                     }
 
-                    mobileToggle.addEventListener('click', () => {
+                    mobileToggle.onclick = (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
                         if (!mobilePanel) return;
                         const isOpen = mobilePanel.hidden;
                         mobilePanel.hidden = !isOpen;
                         mobilePanel.classList.toggle('is-open', isOpen);
                         mobileToggle.setAttribute('aria-expanded', String(isOpen));
-                    });
+                    };
 
                     attachChipListeners();
                     console.log("[Mapa] ✅ Menú visual inyectado exitosamente:", menuItems);
