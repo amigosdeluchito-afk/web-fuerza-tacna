@@ -88,7 +88,7 @@ window.initMapEngine = async function(container) {
         const mapEl = getEl('map');
         const footer = getEl('home-footer');
         
-        if (chips) { 
+        if (chips && !chips.classList.contains('is-menu-booting')) {
             chips.style.opacity = '1'; 
             chips.style.visibility = 'visible'; 
         }
@@ -148,6 +148,97 @@ window.initMapEngine = async function(container) {
     };
 
     const FOCUS = { base: [0.50, 0.50], educacion: [0.50, 0.50], agua: [0.50, 0.50], transporte: [0.50, 0.50], agricultura: [0.50, 0.50], social: [0.50, 0.50], vias: [0.50, 0.50] };
+
+    const DEFAULT_MENU_ITEMS = [
+        { idHtml: 'educacion', nombreVis: 'Educación', orden: 10 },
+        { idHtml: 'vias', nombreVis: 'Vías', orden: 20 },
+        { idHtml: 'agua', nombreVis: 'Agua', orden: 30 },
+        { idHtml: 'social', nombreVis: 'Social', orden: 40 },
+        { idHtml: 'formalizacion', nombreVis: 'Formalización', orden: 50 },
+        { idHtml: 'cultura', nombreVis: 'Cultura', orden: 60 },
+        { idHtml: 'alcalde_provincial', nombreVis: 'Alcalde Provincial', orden: 70 }
+    ];
+
+    function normalizeChipLabel(label = '') {
+        return String(label || '').replace(/^acalde\b/i, 'Alcalde');
+    }
+
+    function renderChipsMenu(menuItems = DEFAULT_MENU_ITEMS, options = {}) {
+        const chipsGroup = target.querySelector('.chips-group');
+        const navChips = target.querySelector('.chips');
+        if (!chipsGroup) return;
+
+        let inicioBtn = (navChips && navChips.querySelector('.chip[data-map="base"]')) || chipsGroup.querySelector('.chip[data-map="base"]');
+        const label = chipsGroup.querySelector('.chip--label');
+        const searchPill = (navChips && navChips.querySelector('.search-pill')) || chipsGroup.querySelector('.search-pill');
+
+        if (!inicioBtn) {
+            inicioBtn = document.createElement('button');
+            inicioBtn.className = 'chip';
+            inicioBtn.setAttribute('data-map', 'base');
+            inicioBtn.innerHTML = `<span>Inicio</span>`;
+        }
+
+        chipsGroup.innerHTML = '';
+
+        chipsGroup.appendChild(inicioBtn);
+        const div1 = document.createElement('div');
+        div1.className = 'divider-v';
+        chipsGroup.appendChild(div1);
+
+        if (searchPill) {
+            chipsGroup.appendChild(searchPill);
+            const div2 = document.createElement('div');
+            div2.className = 'divider-v';
+            chipsGroup.appendChild(div2);
+        }
+
+        if (label) chipsGroup.appendChild(label);
+
+        [...menuItems].sort((a, b) => (a.orden || 0) - (b.orden || 0)).forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'chip';
+            if (item.idHtml.includes('alcalde') || item.idHtml.includes('provincial')) {
+                btn.classList.add('chip-alcalde', 'vhs-theme');
+            }
+            btn.setAttribute('data-map', item.idHtml);
+            btn.innerHTML = `<span>${normalizeChipLabel(item.nombreVis)}</span>`;
+            chipsGroup.appendChild(btn);
+        });
+
+        let mobileToggle = chipsGroup.querySelector('.chip-more');
+        if (!mobileToggle) {
+            mobileToggle = document.createElement('button');
+            mobileToggle.className = 'chip chip-more';
+            mobileToggle.type = 'button';
+            mobileToggle.setAttribute('aria-expanded', 'false');
+            mobileToggle.setAttribute('aria-controls', 'mobileCategoryPanel');
+            mobileToggle.innerHTML = '<span>Categorías</span>';
+            chipsGroup.appendChild(mobileToggle);
+        }
+
+        let mobilePanel = document.getElementById('mobileCategoryPanel') || (navChips ? navChips.querySelector('#mobileCategoryPanel') : null);
+        if (!mobilePanel && navChips) {
+            mobilePanel = document.createElement('div');
+            mobilePanel.id = 'mobileCategoryPanel';
+            mobilePanel.className = 'mobile-category-panel';
+            mobilePanel.hidden = true;
+            navChips.appendChild(mobilePanel);
+        }
+
+        if (mobilePanel && typeof window.renderMobileCategoryPanel === 'function') {
+            window.renderMobileCategoryPanel(menuItems.map(item => ({
+                idHtml: item.idHtml,
+                nombreVis: normalizeChipLabel(item.nombreVis)
+            })), { replace: true });
+        }
+
+        if (options.reveal !== false && navChips) {
+            navChips.classList.remove('is-menu-booting');
+            navChips.style.opacity = '1';
+            navChips.style.visibility = 'visible';
+        }
+    }
 
     function updateLegendVisibility(key){
         const el = getEl('legend');
@@ -1277,6 +1368,7 @@ window.initMapEngine = async function(container) {
             });
         });
     }
+    renderChipsMenu(DEFAULT_MENU_ITEMS);
     attachChipListeners();
 
     window.loadDynamicMenu = async function() {
@@ -1343,87 +1435,8 @@ window.initMapEngine = async function(container) {
                 
                 window.SHEETS_MAPPED = true;
                 
-                const chipsGroup = target.querySelector('.chips-group');
-                const navChips = target.querySelector('.chips');
-                
-                if (chipsGroup) {
-                    // Buscar Inicio y Buscador en toda la barra para no perderlos jamás
-                    let inicioBtn = (navChips && navChips.querySelector('.chip[data-map="base"]')) || chipsGroup.querySelector('.chip[data-map="base"]');
-                    const label = chipsGroup.querySelector('.chip--label');
-                    const searchPill = (navChips && navChips.querySelector('.search-pill')) || chipsGroup.querySelector('.search-pill');
-                    
-                    // Failsafe por si el script anterior borró por completo el botón Inicio
-                    if (!inicioBtn) {
-                        inicioBtn = document.createElement('button');
-                        inicioBtn.className = 'chip';
-                        inicioBtn.setAttribute('data-map', 'base');
-                        inicioBtn.innerHTML = `<span>Inicio</span>`;
-                    }
-                    
-                    chipsGroup.innerHTML = '';
-                    
-                    // Orden Exacto: Inicio -> Divisor -> Buscador -> Divisor -> Label -> Segmentos
-                    if (inicioBtn) {
-                        chipsGroup.appendChild(inicioBtn);
-                        let div1 = document.createElement('div'); div1.className = 'divider-v'; 
-                        chipsGroup.appendChild(div1);
-                    }
-                    
-                    if (searchPill) {
-                        chipsGroup.appendChild(searchPill);
-                        let div2 = document.createElement('div'); div2.className = 'divider-v'; 
-                        chipsGroup.appendChild(div2);
-                    }
-
-                    if (label) chipsGroup.appendChild(label);
-                    
-                    menuItems.sort((a, b) => a.orden - b.orden);
-                    
-                    menuItems.forEach(item => {
-                        const btn = document.createElement('button');
-                        btn.className = 'chip';
-                        
-                        // Rescate de temática especial (Ej: Alcalde Provincial - Animación VHS)
-                        if (item.idHtml.includes('alcalde') || item.idHtml.includes('provincial')) {
-                            btn.classList.add('chip-alcalde');
-                            btn.classList.add('vhs-theme');
-                        }
-                        
-                        btn.setAttribute('data-map', item.idHtml);
-                        btn.innerHTML = `<span>${item.nombreVis}</span>`; // FIX: El span hace que el CSS funcione
-                        chipsGroup.appendChild(btn);
-                    });
-
-                    let mobileToggle = chipsGroup.querySelector('.chip-more');
-                    if (!mobileToggle) {
-                        mobileToggle = document.createElement('button');
-                        mobileToggle.className = 'chip chip-more';
-                        mobileToggle.type = 'button';
-                        mobileToggle.setAttribute('aria-expanded', 'false');
-                        mobileToggle.setAttribute('aria-controls', 'mobileCategoryPanel');
-                        mobileToggle.innerHTML = '<span>Categorías</span>';
-                        chipsGroup.appendChild(mobileToggle);
-                    }
-
-                    let mobilePanel = document.getElementById('mobileCategoryPanel') || (navChips ? navChips.querySelector('#mobileCategoryPanel') : null);
-                    if (!mobilePanel && navChips) {
-                        mobilePanel = document.createElement('div');
-                        mobilePanel.id = 'mobileCategoryPanel';
-                        mobilePanel.className = 'mobile-category-panel';
-                        mobilePanel.hidden = true;
-                        navChips.appendChild(mobilePanel);
-                    }
-
-                    if (mobilePanel) {
-                        const mobileItems = menuItems.map(item => ({
-                            idHtml: item.idHtml,
-                            nombreVis: String(item.nombreVis || '').replace(/^acalde\b/i, 'Alcalde')
-                        }));
-                        if (typeof window.renderMobileCategoryPanel === 'function') {
-                            window.renderMobileCategoryPanel(mobileItems, { replace: true });
-                        }
-                    }
-
+                if (target.querySelector('.chips-group')) {
+                    renderChipsMenu(menuItems);
                     attachChipListeners();
                     console.log("[Mapa] ✅ Menú visual inyectado exitosamente:", menuItems);
                 }
