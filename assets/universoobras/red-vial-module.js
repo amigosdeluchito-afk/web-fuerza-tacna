@@ -2442,54 +2442,56 @@ function rvSetStudioPanelOpen(panel, open) {
     panel.classList.toggle('is-mobile-open', open && isMobile);
     fab?.classList.toggle('is-open', open);
 
+    const setStyles = (el, styles) => {
+        Object.entries(styles).forEach(([prop, value]) => {
+            el.style.setProperty(prop.replace(/[A-Z]/g, match => '-' + match.toLowerCase()), value, 'important');
+        });
+    };
+
+    const clearPanelInlineLayout = () => {
+        [
+            'position', 'top', 'left', 'right', 'bottom', 'width', 'max-width',
+            'height', 'max-height', 'display', 'opacity', 'visibility',
+            'pointer-events', 'transform', 'z-index', 'background', 'overflow'
+        ].forEach(prop => panel.style.removeProperty(prop));
+    };
+
+    if (!isMobile) {
+        clearPanelInlineLayout();
+        panel.classList.remove('is-mobile-open');
+        if (fab) fab.style.setProperty('display', 'none', 'important');
+        return;
+    }
+
     const mobileVisibleStyles = {
         position: 'fixed',
-        top: 'calc(env(safe-area-inset-top, 0px) + 214px)',
-        left: '0',
-        right: '0',
+        top: 'auto',
+        left: '50dvw',
+        right: 'auto',
         bottom: '0',
-        width: '100dvw',
-        maxWidth: '100dvw',
+        width: 'calc(100dvw - 20px)',
+        maxWidth: '520px',
         height: 'auto',
-        maxHeight: 'calc(100dvh - 214px - env(safe-area-inset-top, 0px))',
+        maxHeight: 'min(58dvh, 520px)',
         display: 'block',
         opacity: '1',
         visibility: 'visible',
         pointerEvents: 'auto',
-        transform: 'none',
+        transform: 'translateX(-50%) translateY(0)',
         zIndex: '2147483700',
         background: 'rgba(255,250,245,0.98)',
         overflow: 'hidden'
     };
 
-    const desktopVisibleStyles = {
-        position: 'fixed',
-        top: '112px',
-        left: '20px',
-        right: 'auto',
-        bottom: 'auto',
-        width: '260px',
-        maxWidth: '260px',
-        maxHeight: 'min(60vh, 560px)',
-        display: 'block',
-        opacity: '1',
-        visibility: 'visible',
-        pointerEvents: 'auto',
-        transform: 'none',
-        zIndex: '2147483500'
-    };
-
     const hiddenStyles = {
+        display: 'block',
         opacity: '0',
         visibility: 'hidden',
         pointerEvents: 'none',
-        transform: isMobile ? 'translateY(32px)' : 'none'
+        transform: 'translateX(-50%) translateY(calc(100% + 18px))'
     };
 
-    const styles = open ? (isMobile ? mobileVisibleStyles : desktopVisibleStyles) : hiddenStyles;
-    Object.entries(styles).forEach(([prop, value]) => {
-        panel.style.setProperty(prop.replace(/[A-Z]/g, match => '-' + match.toLowerCase()), value, 'important');
-    });
+    setStyles(panel, open ? mobileVisibleStyles : hiddenStyles);
 
     if (open) {
         if (fab && isMobile) {

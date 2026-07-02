@@ -1054,14 +1054,14 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
 @media (max-width: 1024px) {
   body.segmento-alcalde_provincial .rv-panel {
     position: fixed !important;
-    top: calc(env(safe-area-inset-top, 0px) + 214px) !important;
-    right: 0 !important;
+    top: auto !important;
+    right: auto !important;
     bottom: 0 !important;
-    left: 0 !important;
-    width: 100dvw !important;
-    max-width: 100dvw !important;
+    left: 50dvw !important;
+    width: calc(100dvw - 20px) !important;
+    max-width: 520px !important;
     height: auto !important;
-    max-height: calc(100dvh - 214px - env(safe-area-inset-top, 0px)) !important;
+    max-height: min(58dvh, 520px) !important;
     box-sizing: border-box !important;
     border-radius: 22px 22px 0 0 !important;
     z-index: 2147483500 !important;
@@ -1070,14 +1070,14 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     border-bottom: 0 !important;
     background: rgba(255, 250, 245, 0.98) !important;
     box-shadow: 0 -18px 36px rgba(61, 20, 22, 0.22) !important;
-    transform: translateY(0) !important;
+    transform: translateX(-50%) translateY(0) !important;
     transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.18s ease, visibility 0.18s ease !important;
   }
 
   body.segmento-alcalde_provincial .rv-panel.is-collapsed {
     opacity: 0 !important;
     pointer-events: none !important;
-    transform: translateY(32px) !important;
+    transform: translateX(-50%) translateY(calc(100% + 18px)) !important;
   }
 
   body.segmento-alcalde_provincial .rv-panel.is-mobile-open {
@@ -1085,7 +1085,7 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-    transform: translateY(0) !important;
+    transform: translateX(-50%) translateY(0) !important;
     z-index: 2147483700 !important;
   }
 
@@ -1120,7 +1120,7 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
 
   body.segmento-alcalde_provincial .rv-panel-header {
     position: relative !important;
-    padding: 20px 18px 11px !important;
+    padding: 18px 18px 10px !important;
     box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -1141,7 +1141,7 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
   }
 
   body.segmento-alcalde_provincial .rv-panel-title {
-    font-size: 16px !important;
+    font-size: 15px !important;
     letter-spacing: 0 !important;
   }
 
@@ -1158,8 +1158,8 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
   }
 
   body.segmento-alcalde_provincial .rv-panel-body {
-    max-height: calc(100dvh - 276px - env(safe-area-inset-top, 0px)) !important;
-    padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    max-height: calc(min(58dvh, 520px) - 60px) !important;
+    padding: 9px 12px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -1175,13 +1175,13 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     border-radius: 999px !important;
     padding: 4px !important;
     gap: 4px !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 8px !important;
     background: rgba(128,16,57,0.08) !important;
   }
 
   body.segmento-alcalde_provincial .rv-profile-btn {
     min-width: 0 !important;
-    min-height: 34px !important;
+    min-height: 32px !important;
     border-radius: 999px !important;
     font-size: 10px !important;
     color: #801039 !important;
@@ -1214,7 +1214,7 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     max-width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-    margin: 0 0 10px !important;
+    margin: 0 0 8px !important;
   }
 
   body.segmento-alcalde_provincial .rv-panel-group-title {
@@ -1222,7 +1222,7 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     margin: 0 0 6px !important;
     padding: 0 !important;
     border: 0 !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
     letter-spacing: 0.6px !important;
     color: #801039 !important;
   }
@@ -1231,16 +1231,16 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    min-height: 40px !important;
+    min-height: 34px !important;
     margin: 0 !important;
-    padding: 0 9px !important;
-    border-radius: 13px !important;
+    padding: 0 8px !important;
+    border-radius: 12px !important;
     background: rgba(255,255,255,0.86) !important;
     box-shadow: 0 5px 16px rgba(61,20,22,0.08) !important;
-    font-size: 13px !important;
+    font-size: 11px !important;
     font-weight: 800 !important;
     color: #334155 !important;
-    gap: 7px !important;
+    gap: 6px !important;
     min-width: 0 !important;
     line-height: 1.05 !important;
     overflow: hidden !important;
@@ -1251,15 +1251,20 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
   }
 
   body.segmento-alcalde_provincial .rv-panel-item input[type="checkbox"] {
-    width: 18px !important;
-    height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
     flex: 0 0 auto !important;
   }
 
   body.segmento-alcalde_provincial .rv-ref-list {
     grid-column: 1 / -1 !important;
-    max-height: 120px !important;
+    max-height: 84px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+  }
+
+  body.segmento-alcalde_provincial .rv-ref-list li {
+    padding: 4px 0 !important;
+    font-size: 10.5px !important;
   }
 }
