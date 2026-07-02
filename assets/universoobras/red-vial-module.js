@@ -2369,6 +2369,7 @@ function initRedVialStudio() {
 
 function rvEnsureStudioFab(panel) {
     if (!panel) return null;
+    const isMobile = window.matchMedia('(max-width: 1024px)').matches;
 
     let fab = document.getElementById('rv-studio-fab');
     if (!fab) {
@@ -2384,6 +2385,11 @@ function rvEnsureStudioFab(panel) {
             </svg>
         `;
         document.body.appendChild(fab);
+    }
+
+    if (!isMobile) {
+        fab.style.setProperty('display', 'none', 'important');
+        return fab;
     }
 
     const fabStyle = {
@@ -2455,12 +2461,13 @@ function rvSetStudioPanelOpen(panel, open) {
 
     const desktopVisibleStyles = {
         position: 'fixed',
-        top: 'calc(env(safe-area-inset-top, 0px) + 294px)',
-        left: '92px',
-        right: '14px',
+        top: '112px',
+        left: '20px',
+        right: 'auto',
         bottom: 'auto',
-        width: 'auto',
-        maxHeight: 'min(64dvh, 520px)',
+        width: '260px',
+        maxWidth: '260px',
+        maxHeight: 'min(60vh, 560px)',
         display: 'block',
         opacity: '1',
         visibility: 'visible',
