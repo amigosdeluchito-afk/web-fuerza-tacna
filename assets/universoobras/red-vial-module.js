@@ -2439,6 +2439,7 @@ function rvSetStudioPanelOpen(panel, open) {
     const isMobile = window.matchMedia('(max-width: 1024px)').matches;
     window.clearTimeout(panel._rvCloseTimer);
     panel.classList.toggle('is-collapsed', !open);
+    panel.classList.toggle('is-mobile-open', open && isMobile);
     fab?.classList.toggle('is-open', open);
 
     const mobileVisibleStyles = {
@@ -2456,7 +2457,9 @@ function rvSetStudioPanelOpen(panel, open) {
         visibility: 'visible',
         pointerEvents: 'auto',
         transform: 'none',
-        zIndex: '2147483500'
+        zIndex: '2147483700',
+        background: 'rgba(255,250,245,0.98)',
+        overflow: 'hidden'
     };
 
     const desktopVisibleStyles = {
@@ -2490,10 +2493,11 @@ function rvSetStudioPanelOpen(panel, open) {
 
     if (open) {
         if (fab && isMobile) {
-            fab.style.setProperty('display', 'none', 'important');
+            fab.style.setProperty('display', 'grid', 'important');
             fab.style.setProperty('transform', 'none', 'important');
             fab.style.setProperty('background', '#801039', 'important');
             fab.style.setProperty('color', '#ffc300', 'important');
+            fab.style.setProperty('z-index', '2147483800', 'important');
         }
         const advancedContent = panel.querySelector('#rv-advanced-content');
         if (advancedContent) {
@@ -2504,6 +2508,7 @@ function rvSetStudioPanelOpen(panel, open) {
         fab.style.setProperty('transform', 'none', 'important');
         fab.style.setProperty('background', 'rgba(255,255,255,0.98)', 'important');
         fab.style.setProperty('color', '#801039', 'important');
+        fab.style.setProperty('z-index', '2147483600', 'important');
 
         window.clearTimeout(panel._rvCloseTimer);
         panel._rvCloseTimer = window.setTimeout(() => {

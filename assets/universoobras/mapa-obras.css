@@ -1080,6 +1080,15 @@ body:not(.segmento-alcalde_provincial) #rv-studio-fab {
     transform: translateY(32px) !important;
   }
 
+  body.segmento-alcalde_provincial .rv-panel.is-mobile-open {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+    z-index: 2147483700 !important;
+  }
+
   body.segmento-alcalde_provincial .rv-studio-fab {
     position: fixed !important;
     top: calc(env(safe-area-inset-top, 0px) + 294px) !important;
