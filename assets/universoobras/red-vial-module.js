@@ -272,7 +272,7 @@ const RV_THEMES = {
 };
 
 window.rvApplyStyle = function() {
-    const t = RV_THEMES[window.rvStyleConfig.theme];
+    const t = { ...RV_THEMES.ciudadano, ...(RV_THEMES[window.rvStyleConfig.theme] || {}) };
     const toggles = window.rvStyleConfig.toggles;
     const isImpacto = window.rvStyleConfig.theme === 'impacto';
     const RV_ROUTE_WIDTH = ['interpolate', ['linear'], ['zoom'], 10, 1, 12, 4.25, 14, 7.5, 16, 10.75, 18, 14];
@@ -2924,6 +2924,27 @@ if (!window._rvPreloadScheduled) {
     }
 }
 
+function rvLockMobileViewport() {
+    if (!window.matchMedia('(max-width: 1024px)').matches) return false;
+    window.scrollTo(0, 0);
+    document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+    document.body.style.setProperty('overflow', 'hidden', 'important');
+    document.body.style.setProperty('position', 'fixed', 'important');
+    document.body.style.setProperty('inset', '0', 'important');
+    document.body.style.setProperty('width', '100dvw', 'important');
+    document.body.style.setProperty('height', '100dvh', 'important');
+    return true;
+}
+
+function rvUnlockMobileViewport() {
+    document.documentElement.style.removeProperty('overflow');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('position');
+    document.body.style.removeProperty('inset');
+    document.body.style.removeProperty('width');
+    document.body.style.removeProperty('height');
+}
+
 window.activateRedVial = async function() {
     console.log("[Red Vial] Activando módulo...");
     window.isRedVialActive = true;
@@ -2940,7 +2961,7 @@ window.activateRedVial = async function() {
         container.style.setProperty('opacity', '1', 'important');
         container.style.setProperty('visibility', 'visible', 'important');
         container.style.setProperty('pointer-events', 'auto', 'important');
-        if (isMobile) {
+        if (rvLockMobileViewport()) {
             container.style.setProperty('position', 'fixed', 'important');
             container.style.setProperty('inset', '0', 'important');
             container.style.setProperty('width', '100dvw', 'important');
@@ -3015,17 +3036,7 @@ window.deactivateRedVial = function() {
     const svg = document.getElementById('synced-svg-container');
     const filters = document.getElementById('red-vial-filters');
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
-    const isMobile = window.matchMedia('(max-width: 1024px)').matches;
-
-    if (isMobile) {
-        window.scrollTo(0, 0);
-        document.documentElement.style.setProperty('overflow', 'hidden', 'important');
-        document.body.style.setProperty('overflow', 'hidden', 'important');
-        document.body.style.setProperty('position', 'fixed', 'important');
-        document.body.style.setProperty('inset', '0', 'important');
-        document.body.style.setProperty('width', '100dvw', 'important');
-        document.body.style.setProperty('height', '100dvh', 'important');
-    }
+    rvUnlockMobileViewport();
     window.rvClearTramoEntryAnimation?.();
     rvSetStudioPanelOpen(document.getElementById('rv-studio-panel'), false);
     const studioFab = document.getElementById('rv-studio-fab');
