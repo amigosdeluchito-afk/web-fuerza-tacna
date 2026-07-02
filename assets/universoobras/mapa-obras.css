@@ -250,6 +250,51 @@ html,body{ margin:0; height:100% !important; width:100% !important; overflow:hid
     overscroll-behavior: none !important;
   }
 
+  html:has(body.segmento-alcalde_provincial),
+  body.segmento-alcalde_provincial{
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: 100vw !important;
+    max-width: 100dvw !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none;
+  }
+
+  body.segmento-alcalde_provincial #red-vial-map-container,
+  body.segmento-alcalde_provincial #red-vial-map-container .maplibregl-map,
+  body.segmento-alcalde_provincial #red-vial-map-container .maplibregl-canvas-container,
+  body.segmento-alcalde_provincial #red-vial-map-container .maplibregl-canvas {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: 100vw !important;
+    max-width: 100dvw !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+  }
+
+  body.segmento-alcalde_provincial .app-bg {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  body.segmento-alcalde_provincial #red-vial-map-container {
+    z-index: 50 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: #e9e5dc !important;
+  }
+
   .app-bg,
   #map,
   #video-intro-container{

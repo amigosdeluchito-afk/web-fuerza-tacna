@@ -2937,8 +2937,15 @@ window.activateRedVial = async function() {
     if (svg) svg.style.setProperty('opacity', '0', 'important');
     if (baseCanvas) baseCanvas.style.setProperty('opacity', '0', 'important');
     if (container) {
-        container.style.opacity = '1';
-        container.style.pointerEvents = 'auto';
+        container.style.setProperty('opacity', '1', 'important');
+        container.style.setProperty('visibility', 'visible', 'important');
+        container.style.setProperty('pointer-events', 'auto', 'important');
+        if (isMobile) {
+            container.style.setProperty('position', 'fixed', 'important');
+            container.style.setProperty('inset', '0', 'important');
+            container.style.setProperty('width', '100dvw', 'important');
+            container.style.setProperty('height', '100dvh', 'important');
+        }
     }
     if (filters) {
         filters.style.opacity = '0';
@@ -2971,8 +2978,9 @@ window.activateRedVial = async function() {
     }
 
     if (container) {
-        container.style.opacity = '1';
-        container.style.pointerEvents = 'auto';
+        container.style.setProperty('opacity', '1', 'important');
+        container.style.setProperty('visibility', 'visible', 'important');
+        container.style.setProperty('pointer-events', 'auto', 'important');
     }
 
     if (filters) {
@@ -2984,6 +2992,7 @@ window.activateRedVial = async function() {
     if (window.redVialMapInstance) {
         setTimeout(() => {
             if(window.redVialMapInstance) {
+                window.scrollTo(0, 0);
                 window.redVialMapInstance.resize();
                 window.rvUpdateZoomIndicator();
             }
@@ -2991,6 +3000,7 @@ window.activateRedVial = async function() {
         // Doble seguro por si la tarjeta de video tarda en asignar el ancho de la pantalla
         setTimeout(() => {
             if(window.redVialMapInstance) {
+                window.scrollTo(0, 0);
                 window.redVialMapInstance.resize();
                 window.rvUpdateZoomIndicator();
                 window.rvScheduleTramoEntryAnimation?.(1600);
@@ -3005,6 +3015,17 @@ window.deactivateRedVial = function() {
     const svg = document.getElementById('synced-svg-container');
     const filters = document.getElementById('red-vial-filters');
     const baseCanvas = document.querySelector('#map canvas.maplibregl-canvas');
+    const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+
+    if (isMobile) {
+        window.scrollTo(0, 0);
+        document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+        document.body.style.setProperty('overflow', 'hidden', 'important');
+        document.body.style.setProperty('position', 'fixed', 'important');
+        document.body.style.setProperty('inset', '0', 'important');
+        document.body.style.setProperty('width', '100dvw', 'important');
+        document.body.style.setProperty('height', '100dvh', 'important');
+    }
     window.rvClearTramoEntryAnimation?.();
     rvSetStudioPanelOpen(document.getElementById('rv-studio-panel'), false);
     const studioFab = document.getElementById('rv-studio-fab');
