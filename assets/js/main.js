@@ -551,6 +551,11 @@ function injectGlobalAssets() {
             .facebook-text .action-btn { margin-top: 0.5rem; }
             .fb-widget-container { display: flex; justify-content: center; align-items: flex-start; background: transparent; padding: 0; border: none; overflow: hidden; width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); justify-self: end; }
             .fb-widget-container iframe { width: 500px !important; max-width: 100%; background: #fff; border-radius: 12px; display: block; }
+            .social-widgets-stack { display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 500px; justify-self: end; }
+            .tiktok-widget-container { width: 100%; min-height: 340px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 18px; background: radial-gradient(circle at 18% 18%, rgba(0,242,234,0.22), transparent 34%), radial-gradient(circle at 82% 8%, rgba(255,0,80,0.22), transparent 32%), #07070b; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); padding: 1rem; }
+            .tiktok-widget-container .tiktok-embed { margin: 0 auto !important; min-width: 288px !important; max-width: 100% !important; }
+            .tiktok-widget-container .tiktok-embed section { width: 100%; min-height: 280px; display: flex; align-items: center; justify-content: center; }
+            .tiktok-widget-container .tiktok-embed a { color: #fff !important; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.35rem; text-decoration: none; }
 
             /* --- Estilos del Popup / Lightbox --- */
             .fuerza-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
@@ -611,6 +616,8 @@ function injectGlobalAssets() {
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
                 .fb-widget-container { width: 100%; max-width: 500px; margin: 0 auto; border-radius: 10px; overflow: hidden; justify-self: center; }
                 .fb-widget-container iframe { width: 500px !important; max-width: 100%; border-radius: 10px; }
+                .social-widgets-stack { max-width: 500px; margin: 0 auto; justify-self: center; }
+                .tiktok-widget-container { min-height: 320px; padding: 0.7rem; border-radius: 12px; }
                 .proposals-grid { grid-template-columns: 1fr; gap: 1rem; }
                 .proposal-card { padding: 1.5rem; border-radius: 0.8rem; gap: 1rem; }
                 .proposal-header { gap: 1rem; }
@@ -1245,6 +1252,23 @@ function formatTextContent(text) {
     return html.replace(/(<br>\s*)+$/,''); // Limpia <br> finales
 }
 
+function getTikTokUsername(url) {
+    const value = (url || '').trim();
+    const match = value.match(/tiktok\.com\/@([^/?#\s]+)/i);
+    const username = match ? match[1] : value.replace(/^@/, '');
+    return /^[A-Za-z0-9._]+$/.test(username) ? username : '';
+}
+
+function loadTikTokEmbedScript() {
+    const existingScript = document.querySelector('script[src="https://www.tiktok.com/embed.js"]');
+    if (existingScript) existingScript.remove();
+
+    const script = document.createElement('script');
+    script.src = 'https://www.tiktok.com/embed.js';
+    script.async = true;
+    document.body.appendChild(script);
+}
+
 // --- LÓGICA DE DETALLE Y MINIATURAS ---
 // Esta función es global para que pueda ser llamada desde los eventos onclick de las miniaturas
 window.showCandidateDetail = async function(candidatoId) {
@@ -1363,19 +1387,43 @@ window.showCandidateDetail = async function(candidatoId) {
     });
     if (!propuestasHTML) propuestasHTML = '<p class="text-muted" style="color:#bbb;">Aún no se han registrado propuestas.</p>';
 
-    let fbHTML = '';
+    let fbWidgetHTML = '';
     if (fullCandidato.fb_url_perfil && fullCandidato.fb_url_perfil.trim() !== '') {
-        fbHTML = `
+        fbWidgetHTML = `
+            <div class="fb-widget-container">
+                <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            </div>`;
+    }
+
+    let tiktokWidgetHTML = '';
+    const tiktokUsername = getTikTokUsername(fullCandidato.tiktok_url_perfil);
+    if (tiktokUsername) {
+        const tiktokProfileUrl = `https://www.tiktok.com/@${tiktokUsername}`;
+        tiktokWidgetHTML = `
+            <div class="tiktok-widget-container">
+                <blockquote class="tiktok-embed" cite="${tiktokProfileUrl}" data-unique-id="${tiktokUsername}" data-embed-from="embed_page" data-embed-type="creator" style="max-width:780px; min-width:288px;">
+                    <section>
+                        <a target="_blank" href="${tiktokProfileUrl}?refer=creator_embed">@${tiktokUsername}</a>
+                    </section>
+                </blockquote>
+            </div>`;
+    }
+
+    let socialHTML = '';
+    if (fbWidgetHTML || tiktokWidgetHTML) {
+        socialHTML = `
             <div id="sec-facebook" class="info-block">
-                <div class="block-title stagger-el">📱 Actividad Reciente</div>
+                <div class="block-title stagger-el">📱 Redes oficiales</div>
                 <div class="facebook-layout-grid stagger-el">
                     <div class="facebook-text">
-                        <h3>${fullCandidato.fb_titulo || '¡Sigue mi campaña!'}</h3>
-                        <p>${fullCandidato.fb_descripcion || 'Entérate de mis últimos recorridos y propuestas.'}</p>
-                        <a href="${fullCandidato.fb_url_perfil}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Perfil Completo</a>
+                        <h3>${fullCandidato.fb_titulo || fullCandidato.tiktok_titulo || '¡Sigue mi campaña!'}</h3>
+                        <p>${fullCandidato.fb_descripcion || fullCandidato.tiktok_descripcion || 'Entérate de mis últimos recorridos, videos y propuestas.'}</p>
+                        ${fullCandidato.fb_url_perfil ? `<a href="${fullCandidato.fb_url_perfil}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Facebook</a>` : ''}
+                        ${tiktokUsername ? `<a href="https://www.tiktok.com/@${tiktokUsername}" target="_blank" class="action-btn outline" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver TikTok</a>` : ''}
                     </div>
-                    <div class="fb-widget-container">
-                        <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                    <div class="social-widgets-stack">
+                        ${fbWidgetHTML}
+                        ${tiktokWidgetHTML}
                     </div>
                 </div>
             </div>`;
@@ -1435,7 +1483,7 @@ window.showCandidateDetail = async function(candidatoId) {
                     </div>
                 </div>
                 
-                ${fbHTML}
+                ${socialHTML}
 
                 <div class="candidate-actions stagger-el" style="justify-content: center; margin-bottom: 1.5rem;">
                     <a href="contacto.html" class="action-btn outline" style="padding: 1.2rem 3rem;">Contactar Candidato</a>
@@ -1466,6 +1514,9 @@ window.showCandidateDetail = async function(candidatoId) {
         <div class="candidato-detalle-container">${sidebarHTML}${contentHTML}</div>
     `;
     wrapper.style.display = 'block';
+    if (tiktokWidgetHTML) {
+        loadTikTokEmbedScript();
+    }
     
     // ¡NUEVO! Inicializar carruseles de la trayectoria que acaban de inyectarse dinámicamente
     wrapper.addEventListener('click', function(e) {

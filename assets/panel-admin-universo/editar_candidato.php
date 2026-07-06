@@ -75,6 +75,11 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .facebook-layout-grid { display: flex; flex-direction: column; gap: 1rem; background: rgba(255,255,255,0.02); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
         .facebook-text h3 { color: #ffc300; font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 1.6rem; margin: 0; text-transform: uppercase; line-height: 1.1; }
         .facebook-text p { color: #bbb; font-size: 1.05rem; line-height: 1.6; margin: 0; }
+        .tiktok-preview-card { margin-top: 1rem; background: linear-gradient(135deg, rgba(0,242,234,0.12), rgba(255,0,80,0.14)); border: 1px solid rgba(255,255,255,0.12); border-radius: 1.2rem; padding: 1.5rem; color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04); }
+        .tiktok-preview-card small { color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
+        .tiktok-preview-card h3 { color: #fff; font-family: 'Arial Black', Arial, sans-serif; font-size: 1.35rem; margin: 0.5rem 0; text-transform: uppercase; }
+        .tiktok-preview-card p { color: rgba(255,255,255,0.78); margin: 0 0 1rem; line-height: 1.5; }
+        .tiktok-preview-pill { display: inline-flex; align-items: center; gap: 0.5rem; background: #fff; color: #111; border-radius: 999px; padding: 0.65rem 1rem; font-weight: 900; text-decoration: none; }
         
         /* Sistema de Pestañas (Tabs) */
         .tabs-header { display: flex; background: #020617; border-bottom: 1px solid #1e293b; flex-wrap: wrap; }
@@ -228,6 +233,21 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <label>Enlace del Perfil de Facebook</label>
                     <input type="text" name="fb_url_perfil" class="form-control" placeholder="https://facebook.com/patrick...">
                 </div>
+                
+                <h4 style="color:#94a3b8; font-size: 14px; border-bottom:1px solid #334155; padding-bottom:5px; margin-top:25px;">🎵 Perfil de TikTok</h4>
+                <div class="form-group">
+                    <label>Título del Bloque TikTok</label>
+                    <input type="text" name="tiktok_titulo" class="form-control" placeholder="Ej: Mira mi campaña en TikTok">
+                </div>
+                <div class="form-group">
+                    <label>Descripción del Bloque TikTok</label>
+                    <input type="text" name="tiktok_descripcion" class="form-control" placeholder="Videos cortos, recorridos y mensajes para Tacna...">
+                </div>
+                <div class="form-group">
+                    <label>Enlace del Perfil de TikTok</label>
+                    <input type="text" name="tiktok_url_perfil" class="form-control" placeholder="https://www.tiktok.com/@glorialinares.alianza">
+                    <small style="display:block; color:#64748b; margin-top:6px;">Pega el enlace del perfil, no necesitas pegar el código embed completo.</small>
+                </div>
             </div>
             
             <!-- PESTAÑA 2: ETIQUETAS (BADGES) -->
@@ -292,6 +312,12 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="facebook-text">
                             <h3 id="preview-fb-titulo">¡Sigue mi campaña!</h3>
                             <p id="preview-fb-desc">Entérate de las últimas noticias</p>
+                        </div>
+                        <div class="tiktok-preview-card">
+                            <small>TikTok oficial</small>
+                            <h3 id="preview-tiktok-titulo">Mira mi campaña en TikTok</h3>
+                            <p id="preview-tiktok-desc">Videos cortos, recorridos y mensajes para Tacna.</p>
+                            <span class="tiktok-preview-pill" id="preview-tiktok-user">@usuario</span>
                         </div>
                     </div>
                 </div>
@@ -436,6 +462,13 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
     });
 
     // --- 3. MAGIA DE LA VISTA PREVIA (LIVE PREVIEW) ---
+    function getTikTokUsername(url) {
+        const value = (url || '').trim();
+        const match = value.match(/tiktok\.com\/@([^/?#\s]+)/i);
+        const username = match ? match[1] : value.replace(/^@/, '');
+        return /^[A-Za-z0-9._]+$/.test(username) ? username : '';
+    }
+
     function updateLivePreview() {
         const form = document.getElementById('candidato-form');
         
@@ -446,6 +479,10 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('preview-bio').innerText = form.querySelector('textarea[name="biografia"]').value || 'Escribe el resumen biográfico y lo verás aquí...';
         document.getElementById('preview-fb-titulo').innerText = form.querySelector('input[name="fb_titulo"]').value || '¡Sigue mi campaña!';
         document.getElementById('preview-fb-desc').innerText = form.querySelector('input[name="fb_descripcion"]').value || 'Entérate de las últimas noticias.';
+        document.getElementById('preview-tiktok-titulo').innerText = form.querySelector('input[name="tiktok_titulo"]').value || 'Mira mi campaña en TikTok';
+        document.getElementById('preview-tiktok-desc').innerText = form.querySelector('input[name="tiktok_descripcion"]').value || 'Videos cortos, recorridos y mensajes para Tacna.';
+        const tikTokUser = getTikTokUsername(form.querySelector('input[name="tiktok_url_perfil"]').value);
+        document.getElementById('preview-tiktok-user').innerText = tikTokUser ? '@' + tikTokUser : '@usuario';
         
         // Etiquetas
         const tagsCont = document.getElementById('preview-etiquetas');
@@ -540,6 +577,9 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     form.querySelector('input[name="fb_titulo"]').value = c.fb_titulo || '';
                     form.querySelector('input[name="fb_descripcion"]').value = c.fb_descripcion || '';
                     form.querySelector('input[name="fb_url_perfil"]').value = c.fb_url_perfil || '';
+                    form.querySelector('input[name="tiktok_titulo"]').value = c.tiktok_titulo || '';
+                    form.querySelector('input[name="tiktok_descripcion"]').value = c.tiktok_descripcion || '';
+                    form.querySelector('input[name="tiktok_url_perfil"]').value = c.tiktok_url_perfil || '';
                     
                     // Cargar la foto en la vista previa
                     if (c.foto_perfil) {

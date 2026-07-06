@@ -8,6 +8,22 @@ header('Content-Type: application/json; charset=utf-8');
 $db = get_db_connection();
 $action = $_REQUEST['action'] ?? '';
 
+function ensure_candidate_tiktok_columns(PDO $db) {
+    $columns = [
+        'tiktok_titulo' => "ALTER TABLE panel_candidatos ADD COLUMN tiktok_titulo VARCHAR(255) NULL",
+        'tiktok_descripcion' => "ALTER TABLE panel_candidatos ADD COLUMN tiktok_descripcion VARCHAR(500) NULL",
+        'tiktok_url_perfil' => "ALTER TABLE panel_candidatos ADD COLUMN tiktok_url_perfil VARCHAR(500) NULL"
+    ];
+
+    foreach ($columns as $column => $sql) {
+        $stmt = $db->prepare("SHOW COLUMNS FROM panel_candidatos LIKE ?");
+        $stmt->execute([$column]);
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $db->exec($sql);
+        }
+    }
+}
+
 try {
     // 1. Obtener lista rápida (Para el menú principal del panel admin)
     if ($action === 'listar') {
@@ -63,6 +79,9 @@ try {
         $fb_titulo = trim($_POST['fb_titulo'] ?? '');
         $fb_descripcion = trim($_POST['fb_descripcion'] ?? '');
         $fb_url_perfil = trim($_POST['fb_url_perfil'] ?? '');
+        $tiktok_titulo = trim($_POST['tiktok_titulo'] ?? '');
+        $tiktok_descripcion = trim($_POST['tiktok_descripcion'] ?? '');
+        $tiktok_url_perfil = trim($_POST['tiktok_url_perfil'] ?? '');
         $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 1;
 
         if ($nombres === '') {
@@ -70,6 +89,7 @@ try {
             exit;
         }
 
+        ensure_candidate_tiktok_columns($db);
         $db->beginTransaction();
 
         try {
@@ -104,8 +124,8 @@ try {
 
             if ($id > 0) {
                 // Actualizar candidato existente
-                $sql = "UPDATE panel_candidatos SET nombres=?, cargo_flotante=?, frase_cita=?, biografia=?, fb_titulo=?, fb_descripcion=?, fb_url_perfil=?, estado=?";
-                $params = [$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $estado];
+                $sql = "UPDATE panel_candidatos SET nombres=?, cargo_flotante=?, frase_cita=?, biografia=?, fb_titulo=?, fb_descripcion=?, fb_url_perfil=?, tiktok_titulo=?, tiktok_descripcion=?, tiktok_url_perfil=?, estado=?";
+                $params = [$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $tiktok_titulo, $tiktok_descripcion, $tiktok_url_perfil, $estado];
                 
                 if ($foto_perfil) {
                     $sql .= ", foto_perfil=?";
@@ -125,9 +145,9 @@ try {
                 $stmtOrden = $db->query("SELECT COALESCE(MAX(orden), 0) + 1 FROM panel_candidatos");
                 $orden = (int)$stmtOrden->fetchColumn();
 
-                $sql = "INSERT INTO panel_candidatos (nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, foto_perfil, foto_portada, estado, orden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO panel_candidatos (nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, tiktok_titulo, tiktok_descripcion, tiktok_url_perfil, foto_perfil, foto_portada, estado, orden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($sql);
-                $stmt->execute([$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $foto_perfil, $foto_portada, $estado, $orden]);
+                $stmt->execute([$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $tiktok_titulo, $tiktok_descripcion, $tiktok_url_perfil, $foto_perfil, $foto_portada, $estado, $orden]);
                 $id = $db->lastInsertId();
             }
 
