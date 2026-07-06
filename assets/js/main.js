@@ -552,7 +552,8 @@ function injectGlobalAssets() {
             .social-action-row { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; align-items: center; margin-top: 0.2rem; }
             .fb-widget-container { display: flex; justify-content: center; align-items: flex-start; background: transparent; padding: 0; border: none; overflow: hidden; width: 100%; max-width: none; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); justify-self: stretch; }
             .fb-widget-container iframe { width: 500px !important; max-width: 100%; background: #fff; border-radius: 12px; display: block; }
-            .social-widgets-stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 1.2rem; width: 100%; max-width: none; justify-self: stretch; align-items: start; }
+            .social-widgets-stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; width: 100%; max-width: none; justify-self: stretch; align-items: start; }
+            .social-widgets-stack > :only-child { grid-column: 1 / -1; max-width: 500px; justify-self: center; }
             .tiktok-widget-container { width: 100%; min-height: 340px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 18px; background: radial-gradient(circle at 18% 18%, rgba(0,242,234,0.22), transparent 34%), radial-gradient(circle at 82% 8%, rgba(255,0,80,0.22), transparent 32%), #07070b; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); padding: 1rem; }
             .tiktok-widget-container .tiktok-embed { margin: 0 auto !important; min-width: 288px !important; max-width: 100% !important; }
             .tiktok-widget-container .tiktok-embed section { width: 100%; min-height: 280px; display: flex; align-items: center; justify-content: center; }
@@ -1392,7 +1393,7 @@ window.showCandidateDetail = async function(candidatoId) {
     if (fullCandidato.fb_url_perfil && fullCandidato.fb_url_perfil.trim() !== '') {
         fbWidgetHTML = `
             <div class="fb-widget-container">
-                <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; accelerometer; gyroscope"></iframe>
             </div>`;
     }
 
