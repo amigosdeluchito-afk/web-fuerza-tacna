@@ -556,8 +556,14 @@ function injectGlobalAssets() {
             .social-widgets-stack > :only-child { grid-column: 1 / -1; max-width: 500px; justify-self: center; }
             .tiktok-widget-container { width: 100%; min-height: 340px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 18px; background: radial-gradient(circle at 18% 18%, rgba(0,242,234,0.22), transparent 34%), radial-gradient(circle at 82% 8%, rgba(255,0,80,0.22), transparent 32%), #07070b; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); padding: 1rem; }
             .tiktok-widget-container .tiktok-embed { margin: 0 auto !important; min-width: 288px !important; max-width: 100% !important; }
+            .tiktok-widget-container iframe { max-width: 100% !important; }
             .tiktok-widget-container .tiktok-embed section { width: 100%; min-height: 280px; display: flex; align-items: center; justify-content: center; }
             .tiktok-widget-container .tiktok-embed a { color: #fff !important; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 1.35rem; text-decoration: none; }
+            .social-embed-fallback { display: none; width: 100%; min-height: 280px; flex-direction: column; justify-content: center; align-items: center; gap: 1rem; text-align: center; color: #fff; padding: 2rem; background: rgba(0,0,0,0.2); }
+            .social-embed-fallback strong { font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; color: #ffc300; font-size: 1.15rem; text-transform: uppercase; }
+            .social-embed-fallback span { color: rgba(255,255,255,0.72); font-size: 0.92rem; line-height: 1.45; }
+            .fb-widget-container.has-error iframe, .tiktok-widget-container.has-error .tiktok-embed { display: none !important; }
+            .fb-widget-container.has-error .social-embed-fallback, .tiktok-widget-container.has-error .social-embed-fallback { display: flex; }
 
             /* --- Estilos del Popup / Lightbox --- */
             .fuerza-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
@@ -1262,13 +1268,72 @@ function getTikTokUsername(url) {
 }
 
 function loadTikTokEmbedScript() {
-    const existingScript = document.querySelector('script[src="https://www.tiktok.com/embed.js"]');
-    if (existingScript) existingScript.remove();
+    if (window.__tiktokEmbedScriptPromise) return window.__tiktokEmbedScriptPromise;
 
-    const script = document.createElement('script');
-    script.src = 'https://www.tiktok.com/embed.js';
-    script.async = true;
-    document.body.appendChild(script);
+    const existingScript = document.querySelector('script[src="https://www.tiktok.com/embed.js"]');
+    if (existingScript) {
+        window.__tiktokEmbedScriptPromise = Promise.resolve(existingScript);
+        return window.__tiktokEmbedScriptPromise;
+    }
+
+    window.__tiktokEmbedScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://www.tiktok.com/embed.js';
+        script.async = true;
+        script.onload = () => resolve(script);
+        script.onerror = () => reject(new Error('No se pudo cargar el embed de TikTok'));
+        document.body.appendChild(script);
+    });
+
+    return window.__tiktokEmbedScriptPromise;
+}
+
+function initLazySocialEmbeds(scope) {
+    const root = scope || document;
+    const lazyNodes = root.querySelectorAll('[data-social-embed]:not([data-social-ready])');
+    if (!lazyNodes.length) return;
+
+    const activate = (node) => {
+        if (!node || node.dataset.socialReady === '1') return;
+        node.dataset.socialReady = '1';
+
+        if (node.dataset.socialEmbed === 'facebook') {
+            const iframe = node.querySelector('iframe[data-src]');
+            if (!iframe) return;
+            iframe.onerror = () => node.classList.add('has-error');
+            iframe.src = iframe.dataset.src;
+            return;
+        }
+
+        if (node.dataset.socialEmbed === 'tiktok') {
+            loadTikTokEmbedScript()
+                .then(() => {
+                    window.setTimeout(() => {
+                        if (!node.querySelector('iframe') && !node.classList.contains('has-error')) {
+                            node.classList.add('has-error');
+                        }
+                    }, 6000);
+                })
+                .catch(() => {
+                    node.classList.add('has-error');
+                });
+        }
+    };
+
+    if (!('IntersectionObserver' in window)) {
+        lazyNodes.forEach(activate);
+        return;
+    }
+
+    const observer = new IntersectionObserver((entries, io) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            activate(entry.target);
+            io.unobserve(entry.target);
+        });
+    }, { rootMargin: '240px 0px' });
+
+    lazyNodes.forEach(node => observer.observe(node));
 }
 
 // --- LÓGICA DE DETALLE Y MINIATURAS ---
@@ -1391,9 +1456,15 @@ window.showCandidateDetail = async function(candidatoId) {
 
     let fbWidgetHTML = '';
     if (fullCandidato.fb_url_perfil && fullCandidato.fb_url_perfil.trim() !== '') {
+        const facebookEmbedUrl = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId`;
         fbWidgetHTML = `
-            <div class="fb-widget-container">
-                <iframe src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(fullCandidato.fb_url_perfil)}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="500" height="500" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; accelerometer; gyroscope"></iframe>
+            <div class="fb-widget-container" data-social-embed="facebook">
+                <iframe data-src="${facebookEmbedUrl}" title="Publicaciones de Facebook" width="500" height="500" loading="lazy" style="border:none;overflow:hidden; max-width: 100%;" scrolling="no" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; accelerometer; gyroscope"></iframe>
+                <div class="social-embed-fallback">
+                    <strong>Facebook no cargó aquí</strong>
+                    <span>Puedes abrir el perfil oficial en una nueva pestaña.</span>
+                    <a href="${fullCandidato.fb_url_perfil}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.78rem;">Ver publicación</a>
+                </div>
             </div>`;
     }
 
@@ -1402,12 +1473,17 @@ window.showCandidateDetail = async function(candidatoId) {
     if (tiktokUsername) {
         const tiktokProfileUrl = `https://www.tiktok.com/@${tiktokUsername}`;
         tiktokWidgetHTML = `
-            <div class="tiktok-widget-container">
+            <div class="tiktok-widget-container" data-social-embed="tiktok">
                 <blockquote class="tiktok-embed" cite="${tiktokProfileUrl}" data-unique-id="${tiktokUsername}" data-embed-from="embed_page" data-embed-type="creator" style="max-width:780px; min-width:288px;">
                     <section>
                         <a target="_blank" href="${tiktokProfileUrl}?refer=creator_embed">@${tiktokUsername}</a>
                     </section>
                 </blockquote>
+                <div class="social-embed-fallback">
+                    <strong>TikTok no cargó aquí</strong>
+                    <span>Puedes abrir el perfil oficial en una nueva pestaña.</span>
+                    <a href="${tiktokProfileUrl}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.78rem;">Ver publicación</a>
+                </div>
             </div>`;
     }
 
@@ -1518,9 +1594,7 @@ window.showCandidateDetail = async function(candidatoId) {
         <div class="candidato-detalle-container">${sidebarHTML}${contentHTML}</div>
     `;
     wrapper.style.display = 'block';
-    if (tiktokWidgetHTML) {
-        loadTikTokEmbedScript();
-    }
+    initLazySocialEmbeds(wrapper);
     
     // ¡NUEVO! Inicializar carruseles de la trayectoria que acaban de inyectarse dinámicamente
     wrapper.addEventListener('click', function(e) {
