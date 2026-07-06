@@ -542,16 +542,17 @@ function injectGlobalAssets() {
             .timeline-carousel-nav.prev { left: 12px; }
             .timeline-carousel-nav.next { right: 12px; }
 
-            /* --- Contenedor de Facebook (Widget 2 Columnas) --- */
-            .facebook-layout-grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(340px, 500px); gap: 2rem; align-items: stretch; background: linear-gradient(135deg, rgba(255,195,0,0.08), rgba(255,255,255,0.025)); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(255,195,0,0.16); margin-top: 0.8rem; overflow: hidden; }
-            .facebook-text { display: flex; flex-direction: column; justify-content: center; gap: 1rem; align-items: flex-start; padding: 2rem; min-height: 500px; border-radius: 1.2rem; background: rgba(0,0,0,0.16); border: 1px solid rgba(255,255,255,0.06); }
-            .facebook-text::before { content: 'FACEBOOK OFICIAL'; color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.78rem; letter-spacing: 2px; opacity: 0.8; }
-            .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: clamp(1.8rem, 3vw, 2.7rem); margin: 0; text-transform: uppercase; line-height: 1.02; max-width: 11ch; }
-            .facebook-text p { color: rgba(255,255,255,0.78); font-size: 1rem; line-height: 1.55; margin: 0 0 0.4rem 0; max-width: 34ch; font-weight: 300; }
+            /* --- Contenedor de Redes Oficiales --- */
+            .facebook-layout-grid { display: grid; grid-template-columns: 1fr; gap: 1.4rem; align-items: stretch; background: linear-gradient(135deg, rgba(255,195,0,0.08), rgba(255,255,255,0.025)); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(255,195,0,0.16); margin-top: 0.8rem; overflow: hidden; }
+            .facebook-text { display: flex; flex-direction: column; justify-content: center; gap: 0.8rem; align-items: center; text-align: center; padding: 1.4rem 2rem; border-radius: 1.2rem; background: rgba(0,0,0,0.16); border: 1px solid rgba(255,255,255,0.06); }
+            .facebook-text::before { content: 'REDES OFICIALES'; color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: 0.78rem; letter-spacing: 2px; opacity: 0.8; }
+            .facebook-text h3 { color: #ffc300; font-family: 'Arial Black Web', "Arial Black", Arial, sans-serif; font-size: clamp(1.7rem, 3vw, 2.5rem); margin: 0; text-transform: uppercase; line-height: 1.02; max-width: 100%; }
+            .facebook-text p { color: rgba(255,255,255,0.78); font-size: 1rem; line-height: 1.55; margin: 0; max-width: 58ch; font-weight: 300; }
             .facebook-text .action-btn { margin-top: 0.5rem; }
-            .fb-widget-container { display: flex; justify-content: center; align-items: flex-start; background: transparent; padding: 0; border: none; overflow: hidden; width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); justify-self: end; }
+            .social-action-row { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; align-items: center; margin-top: 0.2rem; }
+            .fb-widget-container { display: flex; justify-content: center; align-items: flex-start; background: transparent; padding: 0; border: none; overflow: hidden; width: 100%; max-width: none; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); justify-self: stretch; }
             .fb-widget-container iframe { width: 500px !important; max-width: 100%; background: #fff; border-radius: 12px; display: block; }
-            .social-widgets-stack { display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 500px; justify-self: end; }
+            .social-widgets-stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 1.2rem; width: 100%; max-width: none; justify-self: stretch; align-items: start; }
             .tiktok-widget-container { width: 100%; min-height: 340px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 18px; background: radial-gradient(circle at 18% 18%, rgba(0,242,234,0.22), transparent 34%), radial-gradient(circle at 82% 8%, rgba(255,0,80,0.22), transparent 32%), #07070b; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); padding: 1rem; }
             .tiktok-widget-container .tiktok-embed { margin: 0 auto !important; min-width: 288px !important; max-width: 100% !important; }
             .tiktok-widget-container .tiktok-embed section { width: 100%; min-height: 280px; display: flex; align-items: center; justify-content: center; }
@@ -610,13 +611,13 @@ function injectGlobalAssets() {
                 .next-candidate-module { flex-direction: column; text-align: center; gap: 0.8rem; padding: 0.8rem; margin-top: 1rem; }
                 .next-candidate-arrow { transform: rotate(90deg); }
                 .next-candidate-module:hover .next-candidate-arrow { transform: rotate(90deg) translateY(6px); }
-                .facebook-layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; text-align: center; margin-top: 0.5rem; overflow: hidden; border-radius: 1rem; }
+                .facebook-layout-grid { gap: 1rem; padding: 1rem; text-align: center; margin-top: 0.5rem; overflow: hidden; border-radius: 1rem; }
                 .facebook-text { align-items: center; gap: 0.6rem; min-height: auto; padding: 1.5rem; }
                 .facebook-text h3 { max-width: 100%; }
                 .facebook-text p { max-width: 100%; font-size: 0.85rem; line-height: 1.3; }
                 .fb-widget-container { width: 100%; max-width: 500px; margin: 0 auto; border-radius: 10px; overflow: hidden; justify-self: center; }
                 .fb-widget-container iframe { width: 500px !important; max-width: 100%; border-radius: 10px; }
-                .social-widgets-stack { max-width: 500px; margin: 0 auto; justify-self: center; }
+                .social-widgets-stack { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; justify-self: center; }
                 .tiktok-widget-container { min-height: 320px; padding: 0.7rem; border-radius: 12px; }
                 .proposals-grid { grid-template-columns: 1fr; gap: 1rem; }
                 .proposal-card { padding: 1.5rem; border-radius: 0.8rem; gap: 1rem; }
@@ -1418,8 +1419,10 @@ window.showCandidateDetail = async function(candidatoId) {
                     <div class="facebook-text">
                         <h3>${fullCandidato.fb_titulo || fullCandidato.tiktok_titulo || '¡Sigue mi campaña!'}</h3>
                         <p>${fullCandidato.fb_descripcion || fullCandidato.tiktok_descripcion || 'Entérate de mis últimos recorridos, videos y propuestas.'}</p>
-                        ${fullCandidato.fb_url_perfil ? `<a href="${fullCandidato.fb_url_perfil}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Facebook</a>` : ''}
-                        ${tiktokUsername ? `<a href="https://www.tiktok.com/@${tiktokUsername}" target="_blank" class="action-btn outline" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver TikTok</a>` : ''}
+                        <div class="social-action-row">
+                            ${fullCandidato.fb_url_perfil ? `<a href="${fullCandidato.fb_url_perfil}" target="_blank" class="action-btn primary" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver Facebook</a>` : ''}
+                            ${tiktokUsername ? `<a href="https://www.tiktok.com/@${tiktokUsername}" target="_blank" class="action-btn outline" style="padding: 0.8rem 2rem; font-size: 0.85rem;">Ver TikTok</a>` : ''}
+                        </div>
                     </div>
                     <div class="social-widgets-stack">
                         ${fbWidgetHTML}
