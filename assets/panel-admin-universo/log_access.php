@@ -23,5 +23,8 @@ try {
     
     echo json_encode(['ok' => true]);
 } catch (Exception $e) {
-    echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+    http_response_code(500);
+    error_log('log_access failed: ' . get_class($e));
+    echo json_encode(['ok' => false, 'error' => 'Error interno'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
