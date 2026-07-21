@@ -19,6 +19,174 @@ function is_session_present(): bool {
     return !empty($_SESSION['user']);
 }
 
+class CandidateUploadException extends RuntimeException {
+    private int $responseStatus;
+
+    public function __construct(string $message, int $responseStatus = 422) {
+        parent::__construct($message);
+        $this->responseStatus = $responseStatus;
+    }
+
+    public function responseStatus(): int {
+        return $this->responseStatus;
+    }
+}
+
+function save_candidate_image_upload(string $field, array &$createdFiles): ?string {
+    if (!isset($_FILES[$field]) || ($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    $file = $_FILES[$field];
+    $error = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+    if ($error !== UPLOAD_ERR_OK) {
+        throw new CandidateUploadException('La imagen no se recibio correctamente', 422);
+    }
+
+    $tmpPath = $file['tmp_name'] ?? '';
+    if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+        throw new CandidateUploadException('La imagen no se recibio correctamente', 422);
+    }
+
+    $reportedSize = (int)($file['size'] ?? 0);
+    if ($reportedSize <= 0) {
+        throw new CandidateUploadException('La imagen supera el limite permitido', 422);
+    }
+
+    $originalName = (string)($file['name'] ?? '');
+    $baseName = basename($originalName);
+    if ($originalName !== '' && ($baseName !== $originalName || strpos($baseName, "\0") !== false)) {
+        throw new CandidateUploadException('Nombre de imagen no permitido', 422);
+    }
+
+    $realSize = @filesize($tmpPath);
+    if ($realSize === false) {
+        throw new CandidateUploadException('No se pudo validar la imagen', 422);
+    }
+
+    $maxBytes = 8 * 1024 * 1024;
+    if ($realSize <= 0 || $realSize > $maxBytes) {
+        throw new CandidateUploadException('La imagen supera el limite permitido', 422);
+    }
+
+    if (!extension_loaded('gd') || !function_exists('imagewebp') || !function_exists('imagecreatetruecolor')) {
+        error_log('Candidate image upload failed: GD or imagewebp unavailable');
+        throw new CandidateUploadException('No se pudo procesar la imagen', 500);
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    if ($finfo === false) {
+        error_log('Candidate image upload failed: finfo unavailable');
+        throw new CandidateUploadException('No se pudo procesar la imagen', 500);
+    }
+
+    $mime = finfo_file($finfo, $tmpPath);
+    finfo_close($finfo);
+
+    $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!is_string($mime) || !in_array($mime, $allowedMimes, true)) {
+        throw new CandidateUploadException('Formato de imagen no permitido', 422);
+    }
+
+    $imageInfo = @getimagesize($tmpPath);
+    if (!$imageInfo || empty($imageInfo['mime']) || !in_array($imageInfo['mime'], $allowedMimes, true) || $imageInfo['mime'] !== $mime) {
+        throw new CandidateUploadException('La imagen no es valida', 422);
+    }
+
+    $width = (int)($imageInfo[0] ?? 0);
+    $height = (int)($imageInfo[1] ?? 0);
+    if ($width <= 0 || $height <= 0 || $width > 6000 || $height > 6000 || ($width * $height) > 20000000) {
+        throw new CandidateUploadException('Las dimensiones de la imagen no son validas', 422);
+    }
+
+    $loader = match ($mime) {
+        'image/jpeg' => 'imagecreatefromjpeg',
+        'image/png' => 'imagecreatefrompng',
+        'image/webp' => 'imagecreatefromwebp',
+        default => null,
+    };
+
+    if ($loader === null || !function_exists($loader)) {
+        error_log('Candidate image upload failed: missing loader for MIME ' . $mime);
+        throw new CandidateUploadException('No se pudo procesar la imagen', 500);
+    }
+
+    $src = @$loader($tmpPath);
+    if (!$src) {
+        throw new CandidateUploadException('La imagen no se pudo decodificar', 422);
+    }
+
+    $dst = null;
+    $destPath = null;
+
+    try {
+        $dst = imagecreatetruecolor($width, $height);
+        if (!$dst) {
+            throw new CandidateUploadException('No se pudo procesar la imagen', 500);
+        }
+
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
+        imagefilledrectangle($dst, 0, 0, $width, $height, $transparent);
+
+        if (!imagecopy($dst, $src, 0, 0, 0, 0, $width, $height)) {
+            throw new CandidateUploadException('No se pudo procesar la imagen', 500);
+        }
+
+        $uploadDir = __DIR__ . '/../universoobras/IMG/candidatos/';
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+            error_log('Candidate image upload failed: destination directory could not be created');
+            throw new CandidateUploadException('No se pudo guardar la imagen', 500);
+        }
+
+        $baseDir = realpath($uploadDir);
+        if ($baseDir === false || !is_dir($baseDir)) {
+            error_log('Candidate image upload failed: destination directory unavailable');
+            throw new CandidateUploadException('No se pudo guardar la imagen', 500);
+        }
+
+        do {
+            $filename = bin2hex(random_bytes(16)) . '.webp';
+            $destPath = $baseDir . DIRECTORY_SEPARATOR . $filename;
+        } while (file_exists($destPath));
+
+        $normalizedBase = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $baseDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $normalizedDest = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $destPath);
+        if (strncmp($normalizedDest, $normalizedBase, strlen($normalizedBase)) !== 0) {
+            error_log('Candidate image upload failed: destination path escaped upload directory');
+            throw new CandidateUploadException('No se pudo guardar la imagen', 500);
+        }
+
+        if (!imagewebp($dst, $destPath, 85)) {
+            if (is_string($destPath) && file_exists($destPath)) {
+                @unlink($destPath);
+            }
+            throw new CandidateUploadException('No se pudo guardar la imagen', 500);
+        }
+
+        if (!@chmod($destPath, 0644)) {
+            error_log('Candidate image upload warning: file permissions could not be applied');
+        }
+
+        $createdFiles[] = $destPath;
+        return $filename;
+    } finally {
+        if ($dst) {
+            imagedestroy($dst);
+        }
+        imagedestroy($src);
+    }
+}
+
+function cleanup_candidate_files(array $paths): void {
+    foreach ($paths as $path) {
+        if (is_string($path) && file_exists($path)) {
+            @unlink($path);
+        }
+    }
+}
+
 function ensure_candidate_tiktok_columns(PDO $db) {
     $columns = [
         'tiktok_titulo' => "ALTER TABLE panel_candidatos ADD COLUMN tiktok_titulo VARCHAR(255) NULL",
@@ -143,35 +311,11 @@ try {
 
         ensure_candidate_tiktok_columns($db);
         $db->beginTransaction();
+        $createdImageFiles = [];
 
         try {
-            $foto_perfil = null;
-
-            // Procesar la foto de perfil si se subio una
-            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/../universoobras/IMG/candidatos/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-
-                $ext = pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION);
-                $filename = 'cand_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
-
-                if (move_uploaded_file($_FILES['foto_perfil']['tmp_name'], $uploadDir . $filename)) {
-                    $foto_perfil = $filename;
-                }
-            }
-
-            $foto_portada = null;
-            if (isset($_FILES['foto_portada']) && $_FILES['foto_portada']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/../universoobras/IMG/candidatos/';
-                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-                $ext = pathinfo($_FILES['foto_portada']['name'], PATHINFO_EXTENSION);
-                $filename = 'cand_hover_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
-                if (move_uploaded_file($_FILES['foto_portada']['tmp_name'], $uploadDir . $filename)) {
-                    $foto_portada = $filename;
-                }
-            }
+            $foto_perfil = save_candidate_image_upload('foto_perfil', $createdImageFiles);
+            $foto_portada = save_candidate_image_upload('foto_portada', $createdImageFiles);
 
             if ($id > 0) {
                 // Actualizar candidato existente
@@ -249,13 +393,26 @@ try {
 
             $db->commit();
             json_response(['ok' => true, 'id' => $id]);
+        } catch (CandidateUploadException $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            cleanup_candidate_files($createdImageFiles);
+            if ($e->responseStatus() >= 500) {
+                error_log('Candidate image upload failed with internal status');
+                json_response(['ok' => false, 'error' => 'Error interno al procesar la imagen'], 500);
+            }
+            json_response(['ok' => false, 'error' => $e->getMessage()], 422);
         } catch (Throwable $e) {
             if ($db->inTransaction()) {
                 $db->rollBack();
             }
+            cleanup_candidate_files($createdImageFiles);
+            error_log('Candidate save failed after image validation: ' . get_class($e));
             json_response(['ok' => false, 'error' => 'Error interno al guardar el candidato'], 500);
         }
     }
 } catch (Throwable $e) {
+    error_log('Candidate API failed: ' . get_class($e));
     json_response(['ok' => false, 'error' => 'Error interno'], 500);
 }
