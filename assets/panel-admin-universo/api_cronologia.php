@@ -16,5 +16,8 @@ try {
     // Empaquetamos los datos y los enviamos
     echo json_encode(['ok' => true, 'datos' => $cronologia]);
 } catch (Exception $e) {
-    echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+    http_response_code(500);
+    error_log('api_cronologia failed: ' . get_class($e));
+    echo json_encode(['ok' => false, 'error' => 'Error interno'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
