@@ -1,12 +1,23 @@
 <?php
-// api_candidatos.php – API para gestionar a los candidatos
+// api_candidatos.php - API para gestionar a los candidatos
 require_once __DIR__ . '/config.php';
 
-// Permite que la API devuelva JSON
 header('Content-Type: application/json; charset=utf-8');
 
-$db = get_db_connection();
-$action = $_REQUEST['action'] ?? '';
+function json_response(array $payload, int $status = 200): void {
+    http_response_code($status);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function method_not_allowed(string $allow): void {
+    header('Allow: ' . $allow);
+    json_response(['ok' => false, 'error' => 'Metodo no permitido'], 405);
+}
+
+function is_session_present(): bool {
+    return !empty($_SESSION['user']);
+}
 
 function ensure_candidate_tiktok_columns(PDO $db) {
     $columns = [
@@ -24,53 +35,95 @@ function ensure_candidate_tiktok_columns(PDO $db) {
     }
 }
 
-try {
-    // 1. Obtener lista rápida (Para el menú principal del panel admin)
-    if ($action === 'listar') {
-        $stmt = $db->query("SELECT id, nombres, cargo_flotante, foto_perfil, foto_portada, COALESCE(estado, 1) AS estado FROM panel_candidatos ORDER BY orden ASC, id DESC");
-        $candidatos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode(['ok' => true, 'candidatos' => $candidatos]);
-        exit;
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+if ($method === 'GET') {
+    $action = $_GET['action'] ?? '';
+} elseif ($method === 'POST') {
+    $action = $_POST['action'] ?? '';
+} else {
+    method_not_allowed('GET, POST');
+}
+
+if (!in_array($action, ['listar', 'obtener', 'guardar'], true)) {
+    json_response(['ok' => false, 'error' => 'Accion invalida'], 400);
+}
+
+if ($action === 'listar' && $method !== 'GET') {
+    method_not_allowed('GET');
+}
+
+if ($action === 'obtener' && $method !== 'GET') {
+    method_not_allowed('GET');
+}
+
+if ($action === 'guardar') {
+    if ($method !== 'POST') {
+        method_not_allowed('POST');
     }
-    
-    // 2. Obtener TODA la información de un candidato específico (Para el editor visual)
+
+    if (!is_session_present()) {
+        json_response(['ok' => false, 'error' => 'Sesion requerida'], 401);
+    }
+
+    require_login();
+}
+
+try {
+    $db = get_db_connection();
+    $authenticated = is_session_present();
+
+    // 1. Obtener lista rapida
+    if ($action === 'listar') {
+        if ($authenticated) {
+            $stmt = $db->query("SELECT id, nombres, cargo_flotante, foto_perfil, foto_portada, COALESCE(estado, 1) AS estado FROM panel_candidatos ORDER BY orden ASC, id DESC");
+        } else {
+            $stmt = $db->query("SELECT id, nombres, cargo_flotante, foto_perfil, foto_portada, COALESCE(estado, 1) AS estado FROM panel_candidatos WHERE COALESCE(estado, 1) = 1 ORDER BY orden ASC, id DESC");
+        }
+
+        $candidatos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        json_response(['ok' => true, 'candidatos' => $candidatos]);
+    }
+
+    // 2. Obtener informacion de un candidato especifico
     if ($action === 'obtener') {
-        $id = (int)($_GET['id'] ?? 0);
-        
-        // Datos principales
-        $stmt = $db->prepare("SELECT * FROM panel_candidatos WHERE id = ?");
+        $id_raw = $_GET['id'] ?? '';
+        if (!ctype_digit((string)$id_raw) || (int)$id_raw <= 0) {
+            json_response(['ok' => false, 'error' => 'ID invalido'], 400);
+        }
+
+        $id = (int)$id_raw;
+
+        if ($authenticated) {
+            $stmt = $db->prepare("SELECT * FROM panel_candidatos WHERE id = ?");
+        } else {
+            $stmt = $db->prepare("SELECT id, nombres, cargo_flotante, frase_cita, biografia, fb_titulo, fb_descripcion, fb_url_perfil, tiktok_titulo, tiktok_descripcion, tiktok_url_perfil, foto_perfil, foto_portada, COALESCE(estado, 1) AS estado FROM panel_candidatos WHERE id = ? AND COALESCE(estado, 1) = 1");
+        }
+
         $stmt->execute([$id]);
         $candidato = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if (!$candidato) {
-            echo json_encode(['ok' => false, 'error' => 'Candidato no encontrado']);
-            exit;
+            json_response(['ok' => false, 'error' => 'Candidato no encontrado'], 404);
         }
-        
-        // Extraer Relaciones (Listas dinámicas)
+
         $stmt = $db->prepare("SELECT * FROM panel_candidato_etiquetas WHERE candidato_id = ? ORDER BY orden ASC");
         $stmt->execute([$id]);
         $candidato['etiquetas'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         $stmt = $db->prepare("SELECT * FROM panel_candidato_trayectoria WHERE candidato_id = ? ORDER BY orden ASC");
         $stmt->execute([$id]);
         $candidato['trayectoria'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         $stmt = $db->prepare("SELECT * FROM panel_candidato_propuestas WHERE candidato_id = ? ORDER BY orden ASC");
         $stmt->execute([$id]);
         $candidato['propuestas'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        echo json_encode(['ok' => true, 'candidato' => $candidato]);
-        exit;
+
+        json_response(['ok' => true, 'candidato' => $candidato]);
     }
 
-    // 3. Guardar Candidato (Crear o Actualizar) y Procesar Imágenes
+    // 3. Guardar Candidato (Crear o Actualizar) y Procesar Imagenes
     if ($action === 'guardar') {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['ok' => false, 'error' => 'Método no permitido']);
-            exit;
-        }
-
         $id = (int)($_POST['id'] ?? 0);
         $nombres = trim($_POST['nombres'] ?? '');
         $cargo_flotante = trim($_POST['cargo_flotante'] ?? '');
@@ -85,8 +138,7 @@ try {
         $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 1;
 
         if ($nombres === '') {
-            echo json_encode(['ok' => false, 'error' => 'El nombre es obligatorio']);
-            exit;
+            json_response(['ok' => false, 'error' => 'El nombre es obligatorio'], 422);
         }
 
         ensure_candidate_tiktok_columns($db);
@@ -94,23 +146,22 @@ try {
 
         try {
             $foto_perfil = null;
-            
-            // Procesar la foto de perfil si se subió una
+
+            // Procesar la foto de perfil si se subio una
             if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
                 $uploadDir = __DIR__ . '/../universoobras/IMG/candidatos/';
                 if (!is_dir($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
-                
+
                 $ext = pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION);
-                // Creamos un nombre único aleatorio para no sobreescribir fotos (Ej. cand_17315512_8392.jpg)
                 $filename = 'cand_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
-                
+
                 if (move_uploaded_file($_FILES['foto_perfil']['tmp_name'], $uploadDir . $filename)) {
                     $foto_perfil = $filename;
                 }
             }
-            
+
             $foto_portada = null;
             if (isset($_FILES['foto_portada']) && $_FILES['foto_portada']['error'] === UPLOAD_ERR_OK) {
                 $uploadDir = __DIR__ . '/../universoobras/IMG/candidatos/';
@@ -126,7 +177,7 @@ try {
                 // Actualizar candidato existente
                 $sql = "UPDATE panel_candidatos SET nombres=?, cargo_flotante=?, frase_cita=?, biografia=?, fb_titulo=?, fb_descripcion=?, fb_url_perfil=?, tiktok_titulo=?, tiktok_descripcion=?, tiktok_url_perfil=?, estado=?";
                 $params = [$nombres, $cargo_flotante, $frase_cita, $biografia, $fb_titulo, $fb_descripcion, $fb_url_perfil, $tiktok_titulo, $tiktok_descripcion, $tiktok_url_perfil, $estado];
-                
+
                 if ($foto_perfil) {
                     $sql .= ", foto_perfil=?";
                     $params[] = $foto_perfil;
@@ -151,8 +202,8 @@ try {
                 $id = $db->lastInsertId();
             }
 
-            // -- Procesar Relaciones Dinámicas (Eliminar viejas e insertar nuevas para mantener la sincronía) --
-            
+            // -- Procesar Relaciones Dinamicas (Eliminar viejas e insertar nuevas para mantener la sincronia) --
+
             // 1. Etiquetas (Badges)
             $db->prepare("DELETE FROM panel_candidato_etiquetas WHERE candidato_id = ?")->execute([$id]);
             if (!empty($_POST['etiquetas']) && is_array($_POST['etiquetas'])) {
@@ -197,14 +248,14 @@ try {
             }
 
             $db->commit();
-            echo json_encode(['ok' => true, 'id' => $id]);
-            
-        } catch (Exception $e) {
-            $db->rollBack();
-            echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+            json_response(['ok' => true, 'id' => $id]);
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            json_response(['ok' => false, 'error' => 'Error interno al guardar el candidato'], 500);
         }
-        exit;
     }
-} catch (Exception $e) {
-    echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+} catch (Throwable $e) {
+    json_response(['ok' => false, 'error' => 'Error interno'], 500);
 }
