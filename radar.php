@@ -1,7 +1,16 @@
 <?php
-// Forzar a que la página muestre los errores ocultos
+// Registrar todos los errores sin mostrarlos publicamente.
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', '0');
+
+require_once __DIR__ . '/assets/panel-admin-universo/config.php';
+
+if (!is_admin()) {
+    http_response_code(404);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo 'Not found';
+    exit;
+}
 
 echo "<h2 style='font-family:sans-serif;'>📡 Radar de Servidor</h2>";
 echo "<p style='font-family:sans-serif;'><b>Versión de PHP:</b> " . phpversion() . "</p>";
