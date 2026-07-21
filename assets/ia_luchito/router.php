@@ -405,7 +405,7 @@ function ft_responder_estadistica_obras($db, $mensaje_normalizado) {
 // 6. Diccionario Temático de Clasificación
 $temas_validos = [
     'Obras' => [
-        'regex' => '/(obra|proyecto|mapa|construccion|colegio|posta|infraestructura)/i',
+        'regex' => '/(obra|proyecto|mapa|construccion|colegio|posta|infraestructura|mantenimiento)/i',
         'simulado' => '😄 A ver vecino, esa consulta va por el lado de obras. Pronto podré buscar ese dato con más detalle. ¿Te llevo al mapa?',
         'acciones' => [['label' => '🗺️ Ver Obras', 'type' => 'ir_a_obras']]
     ],
@@ -577,6 +577,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         // --- MOTOR RAG (BÚSQUEDA DE CONTEXTO) ---
         $contexto_debug = '';
         $input_para_openai = $mensaje; // Mandamos el mensaje con formato original a OpenAI
+        $rag_encontro_contexto = false;
 
         // Filtro de Stop Words (Evita que palabras comunes dominen la búsqueda)
         $stop_words_fuertes = ['el','la','los','las','un','una','unos','unas','y','o','pero','si','de','del','a','al','en','por','para','con','sin','sobre','web','pagina','que','es','como','cuando','donde','quien','cuales','mas','estan','son','hay','tiene','tienen','hizo','han','cuanto','cuantos','cuanta','cuantas','cual','ha','he','has','dinero','costo'];
@@ -594,7 +595,11 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
             '/\bparalizados\b/' => 'paralizado',
             '/\bparalizada\b/' => 'paralizado',
             '/\bobras\b/' => 'obra',
-            '/\bproyectos\b/' => 'proyecto'
+            '/\bproyectos\b/' => 'proyecto',
+            '/\bmantenimientos\b/' => 'mantenimiento',
+            '/\bcolegios\b/' => 'colegio',
+            '/\binstituciones\b/' => 'institucion',
+            '/\beducativas\b/' => 'educativa'
         ];
         $texto_limpio = preg_replace(array_keys($reemplazos), array_values($reemplazos), $texto_limpio);
         
@@ -646,6 +651,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
                     
                     $input_para_openai = $contexto_texto;
                     $contexto_debug = $contexto_texto;
+                    $rag_encontro_contexto = true;
                 }
             } catch (Throwable $e) {
                 // Si falla el SQL, guardamos el error para el Debug, y dejamos que Luchito responda normalmente
@@ -654,7 +660,7 @@ if ($ia_activa === 1 && $motivo_bloqueo === '') {
         }
         // --- FIN MOTOR RAG ---
 
-        if ($contexto_estadistico_obras !== '') {
+        if ($contexto_estadistico_obras !== '' && !$rag_encontro_contexto) {
             $contexto_texto = "[INFORMACIÓN OFICIAL - ESTADÍSTICA DE OBRAS]\n";
             $contexto_texto .= "Dato calculado por el sistema desde la base oficial de obras:\n";
             $contexto_texto .= $contexto_estadistico_obras . "\n\n";
