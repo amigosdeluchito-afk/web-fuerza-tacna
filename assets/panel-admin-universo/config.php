@@ -111,17 +111,6 @@ function load_users() {
         ];
     }
 
-    // Si la tabla está vacía, crear el usuario admin por defecto
-    if (empty($data)) {
-        $default_pass = password_hash('admin123', PASSWORD_DEFAULT);
-        $stmt = $db->prepare("INSERT INTO panel_usuarios (username, password, role) VALUES (?, ?, ?)");
-        $stmt->execute(['admin', $default_pass, 'admin']);
-        
-        $data['admin'] = [
-            'password' => $default_pass,
-            'role'     => 'admin',
-        ];
-    }
     return $data;
 }
 
