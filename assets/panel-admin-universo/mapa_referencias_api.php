@@ -50,7 +50,9 @@ if ($action === 'geojson') {
         echo json_encode(['type' => 'FeatureCollection', 'features' => $features], JSON_UNESCAPED_UNICODE);
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Error de BD: ' . $e->getMessage()]);
+        error_log('mapa_referencias_api geojson failed: ' . get_class($e));
+        echo json_encode(['error' => 'Error interno'], JSON_UNESCAPED_UNICODE);
+        exit;
     }
     exit;
 }
