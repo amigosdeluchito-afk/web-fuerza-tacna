@@ -1,7 +1,8 @@
 <?php
-// 1. Mostrar todos los errores para saber exactamente qué falla en el servidor
+// 1. Registrar todos los errores sin mostrarlos públicamente
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
 
 // 2. Seguridad e inicio de sesión
 require_once __DIR__ . '/config.php';
