@@ -308,12 +308,16 @@ if ($action === 'geojson') {
         // SISTEMA DE FALLBACK SEGURO:
         // Si la base de datos colapsa, leemos el archivo estático
         // =========================================================
+        error_log('mapa_redvial_api geojson failed: ' . get_class($e));
         $fallback_file = __DIR__ . '/../universoobras/tramos-viales.geojson';
         if (file_exists($fallback_file)) {
             echo file_get_contents($fallback_file);
         } else {
             http_response_code(500);
-            echo json_encode(['error' => 'Error de BD y fallback no encontrado.']);
+            echo json_encode(
+                ['error' => 'Error interno'],
+                JSON_UNESCAPED_UNICODE
+            );
         }
         exit;
     }
