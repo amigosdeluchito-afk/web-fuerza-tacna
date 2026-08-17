@@ -1295,6 +1295,31 @@ require_admin();
             } catch(e) { alert('Error de conexión'); }
         }
 
+        async function eliminarRV(id) {
+            const feature = rvGeoJSON?.features?.find(f => f.properties.id === id);
+            const nombre = feature?.properties?.nombre || 'este tramo vial';
+            if (!confirm(`Eliminar definitivamente "${nombre}"?\n\nEsta accion borrara la via y sus fotos asociadas. No se puede deshacer.`)) return;
+
+            try {
+                const res = await fetch('mapa_redvial_api.php?action=delete', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({id})
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    if (document.getElementById('rvId').value === id) rvCancel();
+                    if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson');
+                    showToast('Via eliminada correctamente.', 'success');
+                    fetchListaRV();
+                } else {
+                    showToast('Error: ' + (data.error || 'No se pudo eliminar la via.'), 'error');
+                }
+            } catch(e) {
+                showToast('Error de conexion al eliminar.', 'error');
+            }
+        }
+        
         // ==========================================
         // DASHBOARD RESUMEN DE VÍAS (RV4-B)
         // ==========================================
@@ -1384,6 +1409,8 @@ require_admin();
                     ? `<button type="button" class="btn" style="padding:6px; background:#ef4444; color:white; min-width:30px;" onclick="toggleActivoRV('${p.id}', 0)" title="Desactivar y ocultar">🚫</button>`
                     : `<button type="button" class="btn" style="padding:6px; background:#10b981; color:white; min-width:30px;" onclick="toggleActivoRV('${p.id}', 1)" title="Reactivar">✅</button>`;
                 
+                const btnDelete = `<button type="button" class="btn" style="padding:6px; background:#b91c1c; color:white; min-width:30px;" onclick="eliminarRV('${p.id}')" title="Eliminar definitivamente">🗑️</button>`;
+
                 html += `<div style="background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; display:flex; justify-content:space-between; align-items:center; opacity:${opacity};">
                     <div><strong style="color:#f8fafc;">🛣️ ${p.nombre}</strong>${badgeActivo}<br><span style="color:#94a3b8; font-size:11px;">Tipo: ${p.tipo} | Estado: ${p.estado}</span></div>
                     <div style="display:flex; gap:6px;">
@@ -1391,6 +1418,7 @@ require_admin();
                         <button type="button" class="btn" style="padding:6px; background:#8b5cf6; color:white; min-width:30px;" onclick="abrirGaleriaRV('${p.id}', '${p.nombre.replace(/'/g, "\\'")}')" title="Galería de Fotos">📸</button>
                         <button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button>
                         ${btnToggle}
+                        ${btnDelete}
                     </div>
                 </div>`;
             });

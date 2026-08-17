@@ -150,16 +150,59 @@ if ($action === 'delete') {
     require_admin();
     $input = json_decode(file_get_contents('php://input'), true);
     $string_id = trim($input['id'] ?? '');
-    
-    if ($string_id === '') { http_response_code(400); echo json_encode(['error' => 'ID inválido']); exit; }
+
+    if ($string_id === '') { http_response_code(400); echo json_encode(['error' => 'ID invalido']); exit; }
 
     try {
         $db = get_db_connection();
+        $stmtCheck = $db->prepare("SELECT string_id, nombre FROM panel_tramos_viales WHERE string_id=?");
+        $stmtCheck->execute([$string_id]);
+        $tramo = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+        if (!$tramo) {
+            http_response_code(404);
+            echo json_encode(['error' => 'El tramo vial no existe.']);
+            exit;
+        }
+
+        $fotos = [];
+        $hasFotosTable = $db->query("SHOW TABLES LIKE 'panel_tramos_viales_fotos'")->fetchColumn();
+        if ($hasFotosTable) {
+            $stmtFotos = $db->prepare("SELECT archivo, archivo_thumb FROM panel_tramos_viales_fotos WHERE tramo_string_id=?");
+            $stmtFotos->execute([$string_id]);
+            $fotos = $stmtFotos->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        $db->beginTransaction();
+        if ($hasFotosTable) {
+            $stmtDeleteFotos = $db->prepare("DELETE FROM panel_tramos_viales_fotos WHERE tramo_string_id=?");
+            $stmtDeleteFotos->execute([$string_id]);
+        }
+
         $stmt = $db->prepare("DELETE FROM panel_tramos_viales WHERE string_id=?");
         $stmt->execute([$string_id]);
-        log_action('rv_eliminar', "Eliminó tramo vial ID: $string_id");
-        echo json_encode(['ok' => true]);
+        $db->commit();
+
+        global $PROJECT_ROOT;
+        $deleted_files = 0;
+        $safe_tramo_id = preg_replace('/[^a-zA-Z0-9_-]/', '', $string_id);
+        $base_dir = $PROJECT_ROOT ? realpath($PROJECT_ROOT . '/IMG/red-vial') : false;
+        $tramo_dir = $base_dir ? realpath($base_dir . '/' . $safe_tramo_id) : false;
+        if ($base_dir && $tramo_dir && strpos($tramo_dir, $base_dir) === 0) {
+            foreach ($fotos as $foto) {
+                foreach (['archivo', 'archivo_thumb'] as $key) {
+                    $file = basename($foto[$key] ?? '');
+                    if ($file === '') continue;
+                    $path = $tramo_dir . DIRECTORY_SEPARATOR . $file;
+                    if (is_file($path) && @unlink($path)) $deleted_files++;
+                }
+            }
+            @rmdir($tramo_dir);
+        }
+
+        log_action('rv_eliminar', "Elimino tramo vial ID: $string_id");
+        echo json_encode(['ok' => true, 'deleted_files' => $deleted_files]);
     } catch (Exception $e) {
+        if (isset($db) && $db instanceof PDO && $db->inTransaction()) $db->rollBack();
         http_response_code(500); echo json_encode(['error' => 'Error al eliminar: ' . $e->getMessage()]);
     }
     exit;
