@@ -59,6 +59,15 @@ require_admin();
         .rv-sum-card.c-orange .rv-sum-val { color: #f59e0b; }
         .rv-sum-card.c-purple { border-bottom-color: rgba(168, 85, 247, 0.5); }
         .rv-sum-card.c-purple .rv-sum-val { color: #a855f7; }
+
+        .rv-road-card { background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; }
+        .rv-road-card.is-inactive { opacity:0.72; }
+        .rv-road-title-row { display:flex; align-items:flex-start; gap:8px; flex-wrap:wrap; }
+        .rv-road-name { flex:1 1 180px; min-width:0; color:#f8fafc; font-size:15px; line-height:1.35; overflow-wrap:anywhere; }
+        .rv-road-badge { background:#ef4444; color:white; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; line-height:1.4; }
+        .rv-road-meta { color:#94a3b8; font-size:12px; line-height:1.45; margin-top:6px; }
+        .rv-road-actions { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:6px; margin-top:12px; }
+        .rv-road-actions .btn { width:100%; min-width:0; height:34px; padding:6px; display:flex; align-items:center; justify-content:center; font-size:15px; line-height:1; }
         
         /* TOAST NOTIFICATIONS (RV4-A) */
         .toast-container { position: fixed; top: 70px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
@@ -1403,17 +1412,21 @@ require_admin();
                 count++;
                 
                 const isActivo = p.activo === 1;
-                const opacity = isActivo ? '1' : '0.6';
-                const badgeActivo = isActivo ? '' : '<span style="background:#ef4444; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:8px;">INACTIVA</span>';
+                const cardClass = isActivo ? 'rv-road-card' : 'rv-road-card is-inactive';
+                const badgeActivo = isActivo ? '' : '<span class="rv-road-badge">INACTIVA</span>';
                 const btnToggle = isActivo 
                     ? `<button type="button" class="btn" style="padding:6px; background:#ef4444; color:white; min-width:30px;" onclick="toggleActivoRV('${p.id}', 0)" title="Desactivar y ocultar">🚫</button>`
                     : `<button type="button" class="btn" style="padding:6px; background:#10b981; color:white; min-width:30px;" onclick="toggleActivoRV('${p.id}', 1)" title="Reactivar">✅</button>`;
                 
                 const btnDelete = `<button type="button" class="btn" style="padding:6px; background:#b91c1c; color:white; min-width:30px;" onclick="eliminarRV('${p.id}')" title="Eliminar definitivamente">🗑️</button>`;
 
-                html += `<div style="background:#1e293b; margin-bottom:10px; padding:12px; border-radius:8px; border:1px solid #334155; font-size:13px; display:flex; justify-content:space-between; align-items:center; opacity:${opacity};">
-                    <div><strong style="color:#f8fafc;">🛣️ ${p.nombre}</strong>${badgeActivo}<br><span style="color:#94a3b8; font-size:11px;">Tipo: ${p.tipo} | Estado: ${p.estado}</span></div>
-                    <div style="display:flex; gap:6px;">
+                html += `<div class="${cardClass}">
+                    <div class="rv-road-title-row">
+                        <strong class="rv-road-name">🛣️ ${p.nombre}</strong>
+                        ${badgeActivo}
+                    </div>
+                    <div class="rv-road-meta">Tipo: ${p.tipo}<br>Estado: ${p.estado}</div>
+                    <div class="rv-road-actions">
                         <button type="button" class="btn" style="padding:6px; background:#4f46e5; color:white; min-width:30px;" onclick="centrarEnRV('${p.id}')" title="Ver en mapa">👁️</button>
                         <button type="button" class="btn" style="padding:6px; background:#8b5cf6; color:white; min-width:30px;" onclick="abrirGaleriaRV('${p.id}', '${p.nombre.replace(/'/g, "\\'")}')" title="Galería de Fotos">📸</button>
                         <button type="button" class="btn" style="padding:6px; background:#3b82f6; color:white; min-width:30px;" onclick="editarRV('${p.id}')" title="Editar">✏️</button>
