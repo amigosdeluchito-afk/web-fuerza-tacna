@@ -235,6 +235,9 @@ if ($action === 'guardar') {
     }
 
     require_login();
+    if (!csrf_validate()) {
+        json_response(['ok' => false, 'error' => 'Solicitud no válida'], 403);
+    }
 }
 
 try {

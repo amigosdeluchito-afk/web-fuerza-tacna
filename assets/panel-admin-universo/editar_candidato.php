@@ -189,6 +189,7 @@ $candidatos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         
         <form id="candidato-form" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+            <?= csrf_field() ?>
             <input type="hidden" name="estado" value="1">
             <!-- PESTAÑA 1: PERFIL PRINCIPAL -->
             <div id="tab-perfil" class="tab-content active">
