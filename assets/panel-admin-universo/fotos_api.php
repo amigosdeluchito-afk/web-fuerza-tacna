@@ -59,20 +59,12 @@ function handle_listar($segmento, $carpeta) {
         clearstatcache(true, $dir);
     }
 
-    // Agregamos data de depuración
-    $debug = [
-        'dir'    => $dir,
-        'is_dir' => is_dir($dir),
-        'files'  => is_dir($dir) ? @scandir($dir) : null
-    ];
-
     if (!$dir || !is_dir($dir)) {
         echo json_encode([
             'ok'        => true,
             'fotos'     => [],
             'total'     => 0,
-            'totalSize' => 0,
-            'debug'     => $debug
+            'totalSize' => 0
         ]);
         return;
     }
@@ -84,8 +76,7 @@ function handle_listar($segmento, $carpeta) {
             'ok'        => true,
             'fotos'     => [],
             'total'     => 0,
-            'totalSize' => 0,
-            'debug'     => $debug
+            'totalSize' => 0
         ]);
         return;
     }
@@ -138,8 +129,7 @@ function handle_listar($segmento, $carpeta) {
         'ok'        => true,
         'fotos'     => $fotos,
         'total'     => count($fotos),
-        'totalSize' => $totalSize,
-        'debug'     => $debug
+        'totalSize' => $totalSize
     ]);
 }
 
