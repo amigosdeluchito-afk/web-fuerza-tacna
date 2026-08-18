@@ -160,6 +160,7 @@ if (isset($_GET['success'])) {
             <?= $mensaje ?>
         
             <form action="guardar_obra.php" method="POST" enctype="multipart/form-data">
+                <?= csrf_field() ?>
                 <label>Segmento (Hoja de Excel destino):</label>
                 <select name="segmento" id="selectSegmento" required>
                     <option value="">Cargando segmentos activos...</option>

@@ -23,6 +23,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 $spreadsheetId = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
+
     try {
         $client = new \Google_Client();
         $client->setApplicationName('Panel de Obras Fuerza Tacna');
