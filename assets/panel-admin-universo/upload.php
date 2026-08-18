@@ -233,15 +233,11 @@ if ($slot === 1) {
     echo json_encode([
         'ok'      => ($subidas > 0),
         'subidas' => $subidas,
-        'errores' => $errores,
-        'destino' => $destDir,
-        'debug'   => [
-            'destDir'  => $destDir,
-            'archivos' => is_dir($destDir) ? @scandir($destDir) : []
-        ]
+        'errores' => $errores
     ], JSON_UNESCAPED_UNICODE);
     exit;
 
 } catch (Throwable $e) {
-    json_fail('Error interno: ' . $e->getMessage(), 500);
+    error_log('upload failed: ' . get_class($e));
+    json_fail('Error interno', 500);
 }
