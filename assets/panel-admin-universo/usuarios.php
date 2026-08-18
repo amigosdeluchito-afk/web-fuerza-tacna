@@ -7,6 +7,8 @@ $users   = get_users();
 $mensaje = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
+
     $accion = $_POST['accion'] ?? '';
     $username = trim($_POST['username'] ?? '');
     $role     = $_POST['role'] ?? 'editor';
@@ -115,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="card">
     <h2 style="margin-top:0;font-size:16px;">Crear / actualizar usuario</h2>
     <form method="post">
+      <?= csrf_field() ?>
       <input type="hidden" name="accion" value="guardar">
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <div>
@@ -154,6 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <td>
             <?php if ($u !== 'admin'): ?>
               <form method="post" class="inline" onsubmit="return confirm('¿Eliminar usuario <?= htmlspecialchars($u) ?>?');">
+                <?= csrf_field() ?>
                 <input type="hidden" name="accion" value="eliminar">
                 <input type="hidden" name="username" value="<?= htmlspecialchars($u) ?>">
                 <button type="submit" class="btn btn-danger">Eliminar</button>

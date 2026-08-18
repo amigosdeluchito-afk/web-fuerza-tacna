@@ -23,6 +23,8 @@ $stmtConf->execute(['sitio_privado_password', 'FT666']);
 $mensaje = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'guardar_config') {
+    require_csrf();
+
     $activo = isset($_POST['sitio_privado_activo']) ? '1' : '0';
     $password = trim($_POST['sitio_privado_password'] ?? 'FT666');
     if (empty($password)) $password = 'FT666';
@@ -133,6 +135,7 @@ $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <p style="color: #94a3b8; font-size: 14px;">Aquí puedes activar o desactivar la pantalla de contraseña que aparece al entrar a la página web pública.</p>
       
       <form method="POST" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+          <?= csrf_field() ?>
           <input type="hidden" name="action" value="guardar_config">
           
           <div>
