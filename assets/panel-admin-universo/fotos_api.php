@@ -13,19 +13,132 @@ header('Expires: 0');
 global $FOTOS_BASE;
 
 /**
- * Construye la ruta completa a la carpeta de una obra
+ * Valida que un valor sea un unico componente de ruta.
  */
-function get_obra_dir($segmento, $carpeta) {
-    global $FOTOS_BASE;
-    $segmento = trim($segmento);
-    $carpeta  = trim($carpeta);
-
-    if ($segmento === '' || $carpeta === '') {
+function is_safe_photo_component($value): bool {
+    if (!is_string($value)) {
         return false;
     }
 
-    $dir = $FOTOS_BASE . '/' . $segmento . '/' . $carpeta;
-    return $dir;
+    $value = trim($value);
+
+    if ($value === '' || $value === '.' || $value === '..') {
+        return false;
+    }
+
+    if (strpos($value, "\0") !== false) {
+        return false;
+    }
+
+    if (
+        strpos($value, '/') !== false ||
+        strpos($value, '\\') !== false ||
+        strpos($value, ':') !== false
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Verifica que una ruta resuelta permanezca dentro de la base de fotos.
+ */
+function is_path_inside_photo_base($resolvedPath, $basePath): bool {
+    $baseNorm = rtrim(str_replace('\\', '/', $basePath), '/') . '/';
+    $pathNorm = rtrim(str_replace('\\', '/', $resolvedPath), '/') . '/';
+    $length = strlen($baseNorm);
+
+    if (DIRECTORY_SEPARATOR === '\\') {
+        return strncasecmp($pathNorm, $baseNorm, $length) === 0;
+    }
+
+    return strncmp($pathNorm, $baseNorm, $length) === 0;
+}
+
+/**
+ * Resuelve una ruta segura dentro de la base de fotos.
+ */
+function resolve_safe_photo_dir($segmento, $carpeta = null, &$error = null) {
+    global $FOTOS_BASE;
+
+    if (!is_string($segmento)) {
+        $error = 'invalid';
+        return false;
+    }
+
+    if ($carpeta !== null && !is_string($carpeta)) {
+        $error = 'invalid';
+        return false;
+    }
+
+    $segmento = trim($segmento);
+    if ($carpeta !== null) {
+        $carpeta = trim($carpeta);
+    }
+
+    if (!is_safe_photo_component($segmento) || ($carpeta !== null && !is_safe_photo_component($carpeta))) {
+        $error = 'invalid';
+        return false;
+    }
+
+    $base = realpath($FOTOS_BASE);
+    if ($base === false || !is_dir($base)) {
+        $error = 'internal';
+        return false;
+    }
+
+    $target = rtrim($base, '/\\') . DIRECTORY_SEPARATOR . $segmento;
+    if ($carpeta !== null) {
+        $target .= DIRECTORY_SEPARATOR . $carpeta;
+    }
+
+    $resolved = realpath($target);
+    if ($resolved === false) {
+        $error = null;
+        return $target;
+    }
+
+    if (!is_path_inside_photo_base($resolved, $base)) {
+        $error = 'invalid';
+        return false;
+    }
+
+    $error = null;
+    return $resolved;
+}
+
+/**
+ * Construye la ruta completa a la carpeta de una obra.
+ */
+function get_obra_dir($segmento, $carpeta, &$error = null) {
+    return resolve_safe_photo_dir($segmento, $carpeta, $error);
+}
+
+/**
+ * Construye la ruta completa a la carpeta de un segmento.
+ */
+function get_segmento_dir($segmento, &$error = null) {
+    return resolve_safe_photo_dir($segmento, null, $error);
+}
+
+function respond_invalid_photo_path() {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Ruta no válida'], JSON_UNESCAPED_UNICODE);
+}
+
+function respond_internal_photo_path_error() {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Error interno'], JSON_UNESCAPED_UNICODE);
+}
+
+function respond_photo_path_error($error) {
+    if ($error === 'internal') {
+        respond_internal_photo_path_error();
+        return;
+    }
+
+    respond_invalid_photo_path();
 }
 
 /**
@@ -53,7 +166,12 @@ function get_obra_images($dir) {
  * Lista las imágenes de una obra
  */
 function handle_listar($segmento, $carpeta) {
-    $dir = get_obra_dir($segmento, $carpeta);
+    $pathError = null;
+    $dir = get_obra_dir($segmento, $carpeta, $pathError);
+    if ($dir === false) {
+        respond_photo_path_error($pathError);
+        return;
+    }
     
     if ($dir) {
         clearstatcache(true, $dir);
@@ -137,7 +255,13 @@ function handle_listar($segmento, $carpeta) {
  * Eliminar una foto por número (1-based, según orden)
  */
 function handle_eliminar($segmento, $carpeta, $numero) {
-    $dir = get_obra_dir($segmento, $carpeta);
+    $pathError = null;
+    $dir = get_obra_dir($segmento, $carpeta, $pathError);
+    if ($dir === false) {
+        respond_photo_path_error($pathError);
+        return;
+    }
+
     if (!$dir || !is_dir($dir)) {
         echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
         return;
@@ -204,7 +328,13 @@ function handle_eliminar($segmento, $carpeta, $numero) {
 }
 
 function handle_eliminar_todas($segmento, $carpeta) {
-    $dir = get_obra_dir($segmento, $carpeta);
+    $pathError = null;
+    $dir = get_obra_dir($segmento, $carpeta, $pathError);
+    if ($dir === false) {
+        respond_photo_path_error($pathError);
+        return;
+    }
+
     if (!$dir || !is_dir($dir)) {
         echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
         return;
@@ -239,7 +369,13 @@ function handle_eliminar_todas($segmento, $carpeta) {
  * la elegida sea la 1.* y las demás sigan en orden.
  */
 function handle_principal($segmento, $carpeta, $numero) {
-    $dir = get_obra_dir($segmento, $carpeta);
+    $pathError = null;
+    $dir = get_obra_dir($segmento, $carpeta, $pathError);
+    if ($dir === false) {
+        respond_photo_path_error($pathError);
+        return;
+    }
+
     if (!$dir || !is_dir($dir)) {
         echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
         return;
@@ -306,7 +442,13 @@ function handle_principal($segmento, $carpeta, $numero) {
  * $orden es un array con los números antiguos en su nuevo orden. Ej: [3, 1, 2]
  */
 function handle_reordenar($segmento, $carpeta, $orden) {
-    $dir = get_obra_dir($segmento, $carpeta);
+    $pathError = null;
+    $dir = get_obra_dir($segmento, $carpeta, $pathError);
+    if ($dir === false) {
+        respond_photo_path_error($pathError);
+        return;
+    }
+
     if (!$dir || !is_dir($dir)) {
         echo json_encode(['ok' => false, 'error' => 'Carpeta no encontrada']);
         return;
@@ -378,14 +520,13 @@ function handle_reordenar($segmento, $carpeta, $orden) {
  * Cuenta las fotos de todas las carpetas dentro de un segmento
  */
 function handle_contar_segmento($segmento) {
-    global $FOTOS_BASE;
-    $segmento = trim($segmento);
-    if ($segmento === '') {
-        echo json_encode(['ok' => false, 'error' => 'Segmento inválido']);
+    $pathError = null;
+    $dir = get_segmento_dir($segmento, $pathError);
+    if ($dir === false) {
+        respond_photo_path_error($pathError);
         return;
     }
 
-    $dir = $FOTOS_BASE . '/' . $segmento;
     $conteos = [];
 
     if (is_dir($dir)) {
@@ -414,7 +555,19 @@ function handle_contar_segmento($segmento) {
  * Descargar ZIP con todas las fotos
  */
 function handle_download_zip($segmento, $carpeta) {
-    $dir = get_obra_dir($segmento, $carpeta);
+    $pathError = null;
+    $dir = get_obra_dir($segmento, $carpeta, $pathError);
+    if ($dir === false) {
+        if ($pathError === 'internal') {
+            http_response_code(500);
+            echo "Error interno";
+        } else {
+            http_response_code(400);
+            echo "Ruta no válida";
+        }
+        return;
+    }
+
     if (!$dir || !is_dir($dir)) {
         http_response_code(404);
         echo "Carpeta no encontrada";
