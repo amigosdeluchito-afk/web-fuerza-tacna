@@ -446,6 +446,7 @@ require_login();
 // =============================
 
 // ID de tu Google Sheet
+const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
 const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
 
 // URL base del GViz
@@ -864,6 +865,7 @@ async function guardarNuevoOrden() {
 
   const fd = new FormData();
   fd.append("action", "reordenar");
+  fd.append("_csrf", CSRF_TOKEN);
   fd.append("segmento", segmento.toLowerCase());
   fd.append("carpeta", item.carpeta);
   fd.append("orden", JSON.stringify(nuevoOrden));
@@ -897,6 +899,7 @@ async function marcarPrincipal(numFoto) {
 
   const fd = new FormData();
   fd.append("action", "principal");
+  fd.append("_csrf", CSRF_TOKEN);
   fd.append("segmento", segmento.toLowerCase());
 
   fd.append("carpeta", item.carpeta);
@@ -927,6 +930,7 @@ async function eliminarFoto(numFoto) {
 
   const fd = new FormData();
   fd.append("action", "eliminar");
+  fd.append("_csrf", CSRF_TOKEN);
   fd.append("segmento", segmento.toLowerCase());
 
   fd.append("carpeta", item.carpeta);
@@ -958,6 +962,7 @@ async function eliminarTodasFotos() {
 
   const fd = new FormData();
   fd.append("action", "eliminar_todas");
+  fd.append("_csrf", CSRF_TOKEN);
   fd.append("segmento", segmento.toLowerCase());
   fd.append("carpeta", item.carpeta);
 
@@ -1007,6 +1012,7 @@ async function subirFotos(e) {
 
   const fd = new FormData();
   fd.append("action", "subir");
+  fd.append("_csrf", CSRF_TOKEN);
   fd.append("segmento", segmento.toLowerCase());
 
  // ej. "educacion"

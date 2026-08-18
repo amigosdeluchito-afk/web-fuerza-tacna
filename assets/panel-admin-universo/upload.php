@@ -78,6 +78,10 @@ try {
 }
 
 
+    if (!csrf_validate()) {
+        json_fail('Solicitud no válida', 403);
+    }
+
     $segmento = trim($_POST['segmento'] ?? '');
     $carpeta  = trim($_POST['carpeta'] ?? '');
 

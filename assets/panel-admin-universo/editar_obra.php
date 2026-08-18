@@ -452,6 +452,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
+        const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
         const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
         let SEGMENTOS = [];
@@ -1010,7 +1011,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         async function guardarNuevoOrden() {
-            const fd = new FormData(); fd.append("action", "reordenar"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
+            const fd = new FormData(); fd.append("action", "reordenar"); fd.append("_csrf", CSRF_TOKEN); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
             fd.append("orden", JSON.stringify([...document.querySelectorAll("#galeria .foto-card")].map(c => parseInt(c.dataset.num, 10))));
             await fetch("fotos_api.php", { method: "POST", body: fd }); 
             cargarFotosObra();
@@ -1021,17 +1022,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setTimeout(() => { if(statusEl.textContent.includes("orden")) statusEl.textContent = ""; }, 3000);
         }
         async function marcarPrincipal(numFoto) {
-            const fd = new FormData(); fd.append("action", "principal"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value); fd.append("numero", numFoto);
+            const fd = new FormData(); fd.append("action", "principal"); fd.append("_csrf", CSRF_TOKEN); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value); fd.append("numero", numFoto);
             await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
         }
         async function eliminarFoto(numFoto) {
             if (!confirm("¿Seguro que deseas eliminar esta foto?")) return;
-            const fd = new FormData(); fd.append("action", "eliminar"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value); fd.append("numero", numFoto);
+            const fd = new FormData(); fd.append("action", "eliminar"); fd.append("_csrf", CSRF_TOKEN); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value); fd.append("numero", numFoto);
             await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
         }
         document.getElementById('btnEliminarTodo').addEventListener('click', async () => {
             if (!confirm("Vas a eliminar TODAS las fotos de esta obra. ¿Confirmas?")) return;
-            const fd = new FormData(); fd.append("action", "eliminar_todas"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
+            const fd = new FormData(); fd.append("action", "eliminar_todas"); fd.append("_csrf", CSRF_TOKEN); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
             await fetch("fotos_api.php", { method: "POST", body: fd }); cargarFotosObra();
         });
         document.getElementById('btnDescargarZip').addEventListener('click', () => {
@@ -1043,7 +1044,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault(); const filesInput = document.getElementById("files"); if (!filesInput.files.length) return;
-            const fd = new FormData(); fd.append("action", "subir"); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
+            const fd = new FormData(); fd.append("action", "subir"); fd.append("_csrf", CSRF_TOKEN); fd.append("segmento", document.getElementById('formSegmento').value.toLowerCase()); fd.append("carpeta", document.getElementById('formCarpeta').value);
             for (const file of filesInput.files) fd.append("files[]", file);
             const statusEl = document.getElementById("status"); const btnSubir = document.getElementById("btnSubirFotos"); document.getElementById("progressContainer").style.display = "block"; btnSubir.disabled = true;
             try {

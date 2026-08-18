@@ -636,6 +636,13 @@ $carpeta  = $_POST['carpeta']  ?? '';
 
 
 
+$csrfActions = ['eliminar', 'eliminar_todas', 'principal', 'reordenar'];
+if (in_array($action, $csrfActions, true) && !csrf_validate()) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 switch ($action) {
   case 'listar':
     handle_listar($segmento, $carpeta);
