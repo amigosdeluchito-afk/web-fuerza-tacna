@@ -8,7 +8,232 @@ $mensaje = '';
 // Directorio donde se guardarán las fotos de la cronología
 $uploadDir = __DIR__ . '/../IMG/cronologia/';
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
+    mkdir($uploadDir, 0755, true);
+}
+
+class CronologiaUploadException extends Exception {}
+
+function cronologia_upload_fail(string $message): void {
+    throw new CronologiaUploadException($message);
+}
+
+function cronologia_base_dir(): string {
+    return __DIR__ . '/../IMG/cronologia/';
+}
+
+function cronologia_is_inside_upload_dir(string $path, string $baseDir): bool {
+    $realBase = realpath($baseDir);
+    $realPath = realpath($path);
+    if ($realBase === false || $realPath === false) {
+        return false;
+    }
+
+    $baseNorm = rtrim(str_replace('\\', '/', $realBase), '/') . '/';
+    $pathNorm = rtrim(str_replace('\\', '/', $realPath), '/') . '/';
+    $length = strlen($baseNorm);
+
+    if (DIRECTORY_SEPARATOR === '\\') {
+        return strncasecmp($pathNorm, $baseNorm, $length) === 0;
+    }
+
+    return strncmp($pathNorm, $baseNorm, $length) === 0;
+}
+
+function cronologia_is_safe_stored_filename($filename): bool {
+    if (!is_string($filename)) {
+        return false;
+    }
+
+    $filename = trim($filename);
+    if ($filename === '' || $filename === '.' || $filename === '..') {
+        return false;
+    }
+
+    if (
+        strpos($filename, "\0") !== false ||
+        strpos($filename, '/') !== false ||
+        strpos($filename, '\\') !== false ||
+        strpos($filename, ':') !== false
+    ) {
+        return false;
+    }
+
+    return basename($filename) === $filename;
+}
+
+function delete_created_cronologia_image(?string $filename): void {
+    if ($filename === null || !cronologia_is_safe_stored_filename($filename)) {
+        return;
+    }
+
+    $baseDir = cronologia_base_dir();
+    $path = $baseDir . $filename;
+    if (!file_exists($path)) {
+        return;
+    }
+
+    if (!cronologia_is_inside_upload_dir($path, $baseDir)) {
+        error_log('Cronologia image cleanup skipped: unsafe generated path');
+        return;
+    }
+
+    @unlink($path);
+}
+
+function delete_cronologia_image_if_safe($filename): void {
+    if (!cronologia_is_safe_stored_filename($filename)) {
+        if (is_string($filename) && trim($filename) !== '') {
+            error_log('Cronologia image delete skipped: unsafe stored filename');
+        }
+        return;
+    }
+
+    $baseDir = cronologia_base_dir();
+    $path = $baseDir . $filename;
+    if (!file_exists($path)) {
+        return;
+    }
+
+    if (!cronologia_is_inside_upload_dir($path, $baseDir)) {
+        error_log('Cronologia image delete skipped: path outside upload dir');
+        return;
+    }
+
+    @unlink($path);
+}
+
+function process_cronologia_image_upload(array $file): ?string {
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    if (($file['error'] ?? null) !== UPLOAD_ERR_OK) {
+        cronologia_upload_fail('No se pudo subir la imagen.');
+    }
+
+    $tmpPath = $file['tmp_name'] ?? '';
+    if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+        cronologia_upload_fail('Imagen no válida.');
+    }
+
+    $realSize = @filesize($tmpPath);
+    if ($realSize === false || $realSize <= 0 || $realSize > 8 * 1024 * 1024) {
+        cronologia_upload_fail('La imagen supera el límite permitido.');
+    }
+
+    if (!function_exists('imagecreatetruecolor') || !function_exists('imagewebp')) {
+        error_log('Cronologia image upload failed: GD WebP support unavailable');
+        cronologia_upload_fail('No se pudo procesar la imagen.');
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    if ($finfo === false) {
+        error_log('Cronologia image upload failed: finfo unavailable');
+        cronologia_upload_fail('No se pudo procesar la imagen.');
+    }
+
+    $mime = finfo_file($finfo, $tmpPath);
+    finfo_close($finfo);
+
+    $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!in_array($mime, $allowedMimes, true)) {
+        cronologia_upload_fail('Formato de imagen no permitido.');
+    }
+
+    $imageInfo = @getimagesize($tmpPath);
+    if (!$imageInfo || empty($imageInfo['mime']) || $imageInfo['mime'] !== $mime || !in_array($imageInfo['mime'], $allowedMimes, true)) {
+        cronologia_upload_fail('Imagen no válida.');
+    }
+
+    $width = (int)($imageInfo[0] ?? 0);
+    $height = (int)($imageInfo[1] ?? 0);
+    if ($width <= 0 || $height <= 0 || $width > 6000 || $height > 6000 || ($width * $height) > 20000000) {
+        cronologia_upload_fail('La imagen supera las dimensiones permitidas.');
+    }
+
+    $loader = match ($mime) {
+        'image/jpeg' => 'imagecreatefromjpeg',
+        'image/png' => 'imagecreatefrompng',
+        'image/webp' => 'imagecreatefromwebp',
+        default => null,
+    };
+
+    if ($loader === null || !function_exists($loader)) {
+        error_log('Cronologia image upload failed: GD loader unavailable');
+        cronologia_upload_fail('No se pudo procesar la imagen.');
+    }
+
+    $src = null;
+    $dst = null;
+
+    try {
+    $src = @$loader($tmpPath);
+    if (!$src) {
+        $src = null;
+        cronologia_upload_fail('Imagen no válida.');
+    }
+
+    $dst = imagecreatetruecolor($width, $height);
+    if (!$dst) {
+        $dst = null;
+        cronologia_upload_fail('No se pudo procesar la imagen.');
+    }
+
+    if ($mime === 'image/png' || $mime === 'image/webp') {
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+        imagefilledrectangle($dst, 0, 0, $width, $height, $transparent);
+    }
+
+    if (!imagecopy($dst, $src, 0, 0, 0, 0, $width, $height)) {
+        cronologia_upload_fail('No se pudo procesar la imagen.');
+    }
+
+    $baseDir = cronologia_base_dir();
+    if (!is_dir($baseDir) && !mkdir($baseDir, 0755, true)) {
+        error_log('Cronologia image upload failed: upload dir unavailable');
+        cronologia_upload_fail('No se pudo guardar la imagen.');
+    }
+
+    $filename = null;
+    $destPath = null;
+    for ($i = 0; $i < 5; $i++) {
+        $candidate = bin2hex(random_bytes(16)) . '.webp';
+        $candidatePath = $baseDir . $candidate;
+        if (!file_exists($candidatePath)) {
+            $filename = $candidate;
+            $destPath = $candidatePath;
+            break;
+        }
+    }
+
+    if ($filename === null || $destPath === null) {
+        error_log('Cronologia image upload failed: filename collision');
+        cronologia_upload_fail('No se pudo guardar la imagen.');
+    }
+
+    if (!imagewebp($dst, $destPath, 85)) {
+        if (file_exists($destPath)) {
+            @unlink($destPath);
+        }
+        cronologia_upload_fail('No se pudo guardar la imagen.');
+    }
+
+    if (!@chmod($destPath, 0644)) {
+        error_log('Cronologia image upload warning: chmod failed');
+    }
+
+    return $filename;
+    } finally {
+        if ($src !== null) {
+            imagedestroy($src);
+        }
+
+        if ($dst !== null) {
+            imagedestroy($dst);
+        }
+    }
 }
 
 // Manejo de los formularios (Agregar, Editar y Eliminar)
@@ -22,18 +247,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $orden = (int)($_POST['orden'] ?? 0);
         
         $imagen = '';
+        $newImage = null;
         // Subir la imagen si se seleccionó una
-        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-            $ext = pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION);
-            $imagen = 'historia_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            move_uploaded_file($_FILES['imagen']['tmp_name'], $uploadDir . $imagen);
+        if (isset($_FILES['imagen'])) {
+            try {
+                $newImage = process_cronologia_image_upload($_FILES['imagen']);
+                if ($newImage !== null) {
+                    $imagen = $newImage;
+                }
+            } catch (CronologiaUploadException $e) {
+                $mensaje = '<div class="msg-error">' . htmlspecialchars($e->getMessage()) . '</div>';
+            }
         }
         
-        $stmt = $db->prepare("INSERT INTO cronologia_historia (fecha_texto, titulo, descripcion, imagen, orden, estado) VALUES (?, ?, ?, ?, ?, 1)");
-        if ($stmt->execute([$fecha_texto, $titulo, $descripcion, $imagen, $orden])) {
+        if ($mensaje === '') {
+            $stmt = $db->prepare("INSERT INTO cronologia_historia (fecha_texto, titulo, descripcion, imagen, orden, estado) VALUES (?, ?, ?, ?, ?, 1)");
+            try {
+                if ($stmt->execute([$fecha_texto, $titulo, $descripcion, $imagen, $orden])) {
             $mensaje = '<div class="msg-success">¡Fecha agregada a la historia exitosamente!</div>';
-        } else {
-            $mensaje = '<div class="msg-error">Error al guardar la fecha.</div>';
+                } else {
+                    delete_created_cronologia_image($newImage);
+                    $mensaje = '<div class="msg-error">Error al guardar la fecha.</div>';
+                }
+            } catch (Throwable $e) {
+                delete_created_cronologia_image($newImage);
+                throw $e;
+            }
         }
     } elseif ($action === 'edit') {
         $id = (int)$_POST['id'];
@@ -44,23 +283,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $update_query = "UPDATE cronologia_historia SET fecha_texto = ?, titulo = ?, descripcion = ?, orden = ?";
         $params = [$fecha_texto, $titulo, $descripcion, $orden];
+        $newImage = null;
 
-        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-            $ext = pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION);
-            $imagen = 'historia_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            if (move_uploaded_file($_FILES['imagen']['tmp_name'], $uploadDir . $imagen)) {
-                $update_query .= ", imagen = ?";
-                $params[] = $imagen;
+        if (isset($_FILES['imagen'])) {
+            try {
+                $newImage = process_cronologia_image_upload($_FILES['imagen']);
+                if ($newImage !== null) {
+                    $update_query .= ", imagen = ?";
+                    $params[] = $newImage;
+                }
+            } catch (CronologiaUploadException $e) {
+                $mensaje = '<div class="msg-error">' . htmlspecialchars($e->getMessage()) . '</div>';
             }
         }
-        $update_query .= " WHERE id = ?";
-        $params[] = $id;
+        if ($mensaje === '') {
+            $update_query .= " WHERE id = ?";
+            $params[] = $id;
 
-        $stmt = $db->prepare($update_query);
-        if ($stmt->execute($params)) {
+            $stmt = $db->prepare($update_query);
+            try {
+                if ($stmt->execute($params)) {
             $mensaje = '<div class="msg-success">¡Fecha editada exitosamente!</div>';
-        } else {
-            $mensaje = '<div class="msg-error">Error al actualizar la fecha.</div>';
+                } else {
+                    delete_created_cronologia_image($newImage);
+                    $mensaje = '<div class="msg-error">Error al actualizar la fecha.</div>';
+                }
+            } catch (Throwable $e) {
+                delete_created_cronologia_image($newImage);
+                throw $e;
+            }
         }
     } elseif ($action === 'delete') {
         $id = (int)$_POST['id'];
@@ -70,8 +321,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $item = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($item && !empty($item['imagen'])) {
-            $imgPath = $uploadDir . $item['imagen'];
-            if (file_exists($imgPath)) unlink($imgPath);
+            delete_cronologia_image_if_safe($item['imagen']);
         }
         
         $stmt = $db->prepare("DELETE FROM cronologia_historia WHERE id = ?");
