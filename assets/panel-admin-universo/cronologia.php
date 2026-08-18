@@ -238,6 +238,8 @@ function process_cronologia_image_upload(array $file): ?string {
 
 // Manejo de los formularios (Agregar, Editar y Eliminar)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
+
     $action = $_POST['action'] ?? '';
 
     if ($action === 'add') {
@@ -456,6 +458,7 @@ if (isset($_GET['edit'])) {
                                 <div style="display: flex; gap: 8px; align-items: center;">
                                     <a href="cronologia.php?edit=<?= $item['id'] ?>#formulario-edicion" class="btn-edit">✏️ Editar</a>
                                     <form action="cronologia.php" method="POST" onsubmit="return confirm('¿Borrar esta fecha para siempre?');" style="margin:0;">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $item['id'] ?>">
                                         <button type="submit" class="btn-delete">🗑️ Eliminar</button>
@@ -474,6 +477,7 @@ if (isset($_GET['edit'])) {
             <h2><?= $is_editing ? '✏️ Editar Punto de la Historia' : '➕ Agregar Nuevo Punto' ?></h2>
             
             <form action="cronologia.php" method="POST" enctype="multipart/form-data">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="<?= $is_editing ? 'edit' : 'add' ?>">
                 <?php if ($is_editing): ?>
                     <input type="hidden" name="id" value="<?= $edit_data['id'] ?>">
