@@ -2,6 +2,15 @@
 require_once __DIR__ . '/config.php';
 require_login();
 
+$action = $_POST['action'] ?? '';
+$csrfActions = ['toggle_visibilidad', 'eliminar_definitivo'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, $csrfActions, true) && !csrf_validate()) {
+    header('Content-Type: application/json; charset=utf-8');
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 // --- MANEJO DE PETICIONES AJAX PARA CAMBIAR ESTADO ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_visibilidad') {
     header('Content-Type: application/json; charset=utf-8');
@@ -232,6 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <script>
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
         const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
+        const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
         let obrasActuales = [];
         const selectSegmento = document.getElementById('selectSegmento');
         const tbodyObras = document.getElementById('tbodyObras');
@@ -352,6 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             const fd = new FormData();
             fd.append('action', 'toggle_visibilidad');
+            fd.append('_csrf', CSRF_TOKEN);
             fd.append('segmento', segmento);
             fd.append('fila', fila);
             fd.append('nuevo_estado', nuevoEstado);
@@ -390,6 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             const fd = new FormData();
             fd.append('action', 'eliminar_definitivo');
+            fd.append('_csrf', CSRF_TOKEN);
             fd.append('segmento', segmento);
             fd.append('fila', fila);
             fd.append('carpeta', carpeta);
