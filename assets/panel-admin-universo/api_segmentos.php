@@ -248,10 +248,10 @@ try {
         }
 
         // 3. Actualizar la fila en SEGMENTOS
-        $values = [[$id_segmento, $nombre_visible, $nuevo_nombre_pestana, $activo, $orden]];
+        $values = [[$id_segmento, $nombre_visible, $nuevo_nombre_pestana, $activo]];
         $body = new \Google_Service_Sheets_ValueRange(['values' => $values]);
         $params = ['valueInputOption' => 'RAW'];
-        $service->spreadsheets_values->update($spreadsheetId, "SEGMENTOS!A{$rowIndex}:E{$rowIndex}", $body, $params);
+        $service->spreadsheets_values->update($spreadsheetId, "SEGMENTOS!A{$rowIndex}:D{$rowIndex}", $body, $params);
 
         echo json_encode(['ok' => true, 'mensaje' => "Segmento actualizado con éxito."]);
         exit;
