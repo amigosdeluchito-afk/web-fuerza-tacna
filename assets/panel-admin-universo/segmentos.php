@@ -135,6 +135,7 @@ require_login();
     </div>
 
     <script>
+        const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
         let isEditMode = false;
 
         async function cargarTabla() {
@@ -231,6 +232,7 @@ require_login();
 
                 const fd = new FormData();
                 fd.append('action', 'reordenar');
+                fd.append('_csrf', CSRF_TOKEN);
                 fd.append('orden_ids', JSON.stringify(orderedIds));
 
                 try {
@@ -275,6 +277,7 @@ require_login();
 
             const fd = new FormData();
             fd.append('action', isEditMode ? 'editar' : 'crear');
+            fd.append('_csrf', CSRF_TOKEN);
             fd.append('nombre_visible', document.getElementById('inputNombreVisible').value);
             
             if (isEditMode) {

@@ -11,6 +11,13 @@ $spreadsheetId = '1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI';
 $reserved_names = ['LISTAS', 'SEGMENTOS', 'PLANTILLA_SEGMENTO'];
 
 // Función para limpiar y generar el nombre de pestaña técnico
+$csrfActions = ['crear', 'editar', 'reordenar'];
+if (in_array($action, $csrfActions, true) && !csrf_validate()) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 function generar_nombre_pestana($str) {
     $str = str_replace(
         ['á','é','í','ó','ú','Á','É','Í','Ó','Ú','ñ','Ñ'],
