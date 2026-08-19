@@ -1608,11 +1608,11 @@ require_admin();
 
         async function marcarPortadaRV(fotoId) {
             if (!confirm('¿Marcar esta foto como la portada principal? La anterior pasará a ser galería normal.')) return;
-            try { const res = await fetch('fotos_redvial_api.php?action=update_meta', { method: 'POST', body: JSON.stringify({id: fotoId, tipo: 'portada'}) }); const data = await res.json(); if (data.ok) fetchFotosRV(); else alert('Error: ' + data.error); } catch (e) { alert('Error de conexión'); }
+            try { const res = await fetch('fotos_redvial_api.php?action=update_meta', { method: 'POST', headers: {'Content-Type':'application/json', 'X-CSRF-Token': CSRF_TOKEN}, body: JSON.stringify({id: fotoId, tipo: 'portada'}) }); const data = await res.json(); if (data.ok) fetchFotosRV(); else alert('Error: ' + data.error); } catch (e) { alert('Error de conexión'); }
         }
         async function toggleActivoFotoRV(fotoId, activo) {
             if (!confirm(`¿Estás seguro de ${activo ? 'mostrar' : 'ocultar'} esta foto?`)) return;
-            try { const res = await fetch('fotos_redvial_api.php?action=toggle_activo', { method: 'POST', body: JSON.stringify({id: fotoId, activo: activo}) }); const data = await res.json(); if (data.ok) fetchFotosRV(); else alert('Error: ' + data.error); } catch (e) { alert('Error de conexión'); }
+            try { const res = await fetch('fotos_redvial_api.php?action=toggle_activo', { method: 'POST', headers: {'Content-Type':'application/json', 'X-CSRF-Token': CSRF_TOKEN}, body: JSON.stringify({id: fotoId, activo: activo}) }); const data = await res.json(); if (data.ok) fetchFotosRV(); else alert('Error: ' + data.error); } catch (e) { alert('Error de conexión'); }
         }
 
         // Enviar Formulario

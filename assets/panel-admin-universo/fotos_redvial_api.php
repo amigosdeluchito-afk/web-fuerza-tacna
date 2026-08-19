@@ -182,6 +182,9 @@ if ($action === 'upload') {
 // =========================================================
 if ($action === 'update_meta') {
     require_admin();
+    if (!csrf_validate()) {
+        json_response(['ok' => false, 'error' => 'Solicitud no válida'], 403);
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
     $tipo = in_array($input['tipo'] ?? '', ['portada', 'galeria', 'antes', 'despues']) ? $input['tipo'] : 'galeria';
@@ -220,6 +223,9 @@ if ($action === 'update_meta') {
 // =========================================================
 if ($action === 'toggle_activo') {
     require_admin();
+    if (!csrf_validate()) {
+        json_response(['ok' => false, 'error' => 'Solicitud no válida'], 403);
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
     $activo = (isset($input['activo']) && (int)$input['activo'] === 1) ? 1 : 0;
