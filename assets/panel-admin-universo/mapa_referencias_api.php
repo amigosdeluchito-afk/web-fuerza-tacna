@@ -60,6 +60,11 @@ if ($action === 'geojson') {
 if ($action === 'create') {
     // Endpoint Privado: Requiere sesión de administrador
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
     $input = json_decode(file_get_contents('php://input'), true);
     
@@ -92,6 +97,11 @@ if ($action === 'create') {
 
 if ($action === 'update') {
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     
     $id = isset($input['id']) ? (int)$input['id'] : 0;
@@ -120,6 +130,11 @@ if ($action === 'update') {
 
 if ($action === 'delete') {
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     $id = isset($input['id']) ? (int)$input['id'] : 0;
     

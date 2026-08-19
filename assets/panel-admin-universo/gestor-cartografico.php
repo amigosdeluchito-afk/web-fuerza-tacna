@@ -384,6 +384,7 @@ require_admin();
 
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <script>
+        const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
         let map;
         let activeMarker = null;
         let refsGeoJSON = null;
@@ -1297,7 +1298,7 @@ require_admin();
         async function eliminarRef(id) {
             if (!confirm('⚠️ ¿Estás seguro de eliminar este punto? Desaparecerá de todos los mapas públicos de inmediato.')) return;
             try {
-                const res = await fetch('mapa_referencias_api.php?action=delete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) });
+                const res = await fetch('mapa_referencias_api.php?action=delete', { method: 'POST', headers: {'Content-Type':'application/json', 'X-CSRF-Token': CSRF_TOKEN}, body: JSON.stringify({id}) });
                 const data = await res.json();
                 if (data.ok) { if (map && map.getSource('referencias')) map.getSource('referencias').setData('mapa_referencias_api.php?action=geojson'); fetchLista(); } 
                 else { alert('Error: ' + data.error); }
@@ -1625,7 +1626,7 @@ require_admin();
             if (isEdit) payload.id = parseInt(document.getElementById('refId').value);
             
             try {
-                const res = await fetch(`mapa_referencias_api.php?action=${isEdit ? 'update' : 'create'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const res = await fetch(`mapa_referencias_api.php?action=${isEdit ? 'update' : 'create'}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.ok) {
                     if (map && map.getSource('referencias')) map.getSource('referencias').setData('mapa_referencias_api.php?action=geojson');
