@@ -30,6 +30,11 @@ function ensure_rv_columns($db) {
 
 if ($action === 'create') {
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $input = json_decode(file_get_contents('php://input'), true);
 
     $nombre = trim($input['nombre'] ?? '');
@@ -90,6 +95,11 @@ if ($action === 'create') {
 
 if ($action === 'update') {
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     
     $string_id = trim($input['id'] ?? '');
@@ -148,6 +158,11 @@ if ($action === 'update') {
 
 if ($action === 'delete') {
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     $string_id = trim($input['id'] ?? '');
 
@@ -210,6 +225,11 @@ if ($action === 'delete') {
 
 if ($action === 'toggle_activo') {
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     $string_id = trim($input['id'] ?? '');
     $activo = isset($input['activo']) ? (int)$input['activo'] : 1;

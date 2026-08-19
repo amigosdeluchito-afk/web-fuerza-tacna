@@ -1313,7 +1313,7 @@ require_admin();
             try {
                 const res = await fetch('mapa_redvial_api.php?action=delete', {
                     method: 'POST',
-                    headers: {'Content-Type':'application/json'},
+                    headers: {'Content-Type':'application/json', 'X-CSRF-Token': CSRF_TOKEN},
                     body: JSON.stringify({id})
                 });
                 const data = await res.json();
@@ -1514,7 +1514,7 @@ require_admin();
             const accionTexto = activo === 1 ? 'reactivar' : 'desactivar (ocultar del mapa público)';
             if (!confirm(`⚠️ ¿Estás seguro de ${accionTexto} este tramo vial?`)) return;
             try {
-                const res = await fetch('mapa_redvial_api.php?action=toggle_activo', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id: id, activo: activo}) });
+                const res = await fetch('mapa_redvial_api.php?action=toggle_activo', { method: 'POST', headers: {'Content-Type':'application/json', 'X-CSRF-Token': CSRF_TOKEN}, body: JSON.stringify({id: id, activo: activo}) });
                 const data = await res.json();
                 if (data.ok) { 
                     if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson'); 
@@ -1674,7 +1674,7 @@ require_admin();
             if (isEdit) payload.id = document.getElementById('rvId').value;
             
             try {
-                const res = await fetch(`mapa_redvial_api.php?action=${isEdit ? 'update' : 'create'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const res = await fetch(`mapa_redvial_api.php?action=${isEdit ? 'update' : 'create'}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.ok) {
                     if (map && map.getSource('tramos-viales')) map.getSource('tramos-viales').setData('mapa_redvial_api.php?action=geojson');
