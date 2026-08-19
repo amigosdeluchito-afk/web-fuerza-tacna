@@ -317,14 +317,7 @@ if ($action === 'geojson') {
         // Garantizar toda la estructura usando el helper unificado
         ensure_rv_columns($db);
 
-        // 2. Sembrar los datos idénticos al archivo estático original (Si la tabla está vacía)
-        $db->exec("INSERT IGNORE INTO panel_tramos_viales (string_id, nombre, tipo, estado, color, coordenadas) VALUES
-            ('tramo-1', 'Avenida San Martín', 'Provincial', 'En ejecución', '#801039', '[[-70.2505, -18.0135], [-70.2548, -18.0156], [-70.2580, -18.0175]]'),
-            ('tramo-2', 'Avenida Bolognesi', 'Local', 'Entregado', '#ffc300', '[[-70.2480, -18.0160], [-70.2520, -18.0185], [-70.2555, -18.0205]]'),
-            ('tramo-3', 'Vía Regional Jorge Basadre', 'Regional', 'En estudios', '#1a73e8', '[[-70.2450, -18.0100], [-70.2400, -18.0050], [-70.2350, -18.0000]]')
-        ");
-
-        // 3. Obtener los tramos activos y empaquetarlos en GeoJSON
+        // 2. Obtener los tramos activos y empaquetarlos en GeoJSON
         $stmt = $db->query("SELECT * FROM panel_tramos_viales WHERE activo = 1 ORDER BY id ASC");
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
