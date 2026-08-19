@@ -183,7 +183,7 @@ try {
         }
 
         if (!empty($updateRequests)) {
-            $batchUpdateRequest = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest(['requests' => [$updateRequests]]);
+            $batchUpdateRequest = new \Google_Service_Sheets_BatchUpdateSpreadsheetRequest(['requests' => $updateRequests]);
             $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
         }
 
@@ -260,5 +260,8 @@ try {
     throw new Exception('Acción inválida.');
 
 } catch (Throwable $e) {
-    echo json_encode(['ok' => false, 'error' => 'Error de Google API: ' . $e->getMessage()]);
+    http_response_code(500);
+    error_log('api_segmentos failed: ' . get_class($e));
+
+    echo json_encode(['ok' => false, 'error' => 'Error interno'], JSON_UNESCAPED_UNICODE);
 }
