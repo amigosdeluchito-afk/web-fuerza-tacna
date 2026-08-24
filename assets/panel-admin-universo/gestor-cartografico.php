@@ -1595,7 +1595,7 @@ require_admin();
             if (fileInput.files.length === 0) return;
             
             btn.disabled = true; btn.textContent = '⏳ Subiendo...'; msg.innerHTML = '';
-            const fd = new FormData(); fd.append('action', 'upload'); fd.append('tramo_string_id', currentGalleryTramoId); fd.append('tipo', tipoInput.value); fd.append('foto', fileInput.files[0]);
+            const fd = new FormData(); fd.append('action', 'upload'); fd.append('tramo_string_id', currentGalleryTramoId); fd.append('tipo', tipoInput.value); fd.append('foto', fileInput.files[0]); fd.append('_csrf', CSRF_TOKEN);
             
             try {
                 const res = await fetch('fotos_redvial_api.php?action=upload', { method: 'POST', body: fd });

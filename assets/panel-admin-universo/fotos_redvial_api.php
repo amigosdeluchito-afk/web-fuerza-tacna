@@ -84,6 +84,9 @@ function render_to_webp($tmp_name, $mime, $dest_path, $max_width) {
 // =========================================================
 if ($action === 'upload') {
     require_admin();
+    if (!csrf_validate()) {
+        json_response(['ok' => false, 'error' => 'Solicitud no válida'], 403);
+    }
     
     $raw_tramo = $_POST['tramo_string_id'] ?? '';
     $tramo_id = preg_replace('/[^a-zA-Z0-9_-]/', '', $raw_tramo); // Sanitización Path Traversal
