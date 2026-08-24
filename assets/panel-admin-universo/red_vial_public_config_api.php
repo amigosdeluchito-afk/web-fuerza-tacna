@@ -121,6 +121,11 @@ if ($action === 'get') {
 if ($action === 'save') {
     require_once __DIR__ . '/config.php';
     require_admin();
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $input = json_decode(file_get_contents('php://input'), true);
     if (!is_array($input)) {
         http_response_code(400);

@@ -768,7 +768,7 @@ require_admin();
             try {
                 const res = await fetch('red_vial_public_config_api.php?action=save', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ defaultProfile: profile, initialView, layers, style })
                 });
                 const data = await res.json();
