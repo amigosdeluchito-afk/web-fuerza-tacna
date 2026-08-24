@@ -441,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const levelIndex = Number(levelCard.dataset.levelIndex || 0) + 1;
         const formData = new FormData();
         formData.append('action', 'upload_find_image');
+        formData.append('_csrf', window.CSRF_TOKEN || '');
         formData.append('level', String(levelIndex));
         formData.append('asset', isFoundImage ? 'found' : 'level');
         formData.append('image', fileInput.files[0]);

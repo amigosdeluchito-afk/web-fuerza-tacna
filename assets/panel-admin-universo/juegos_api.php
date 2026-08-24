@@ -55,6 +55,12 @@ if ($method === 'POST') {
     require_admin();
 
     if (($_POST['action'] ?? '') === 'upload_find_image') {
+        if (!csrf_validate()) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
         if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
             http_response_code(400);
             echo json_encode(['ok' => false, 'error' => 'No llego la imagen.']);

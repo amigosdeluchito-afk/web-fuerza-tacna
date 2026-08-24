@@ -1108,6 +1108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             const fdIA = new FormData();
             fdIA.append('action', 'save_single');
+            fdIA.append('_csrf', CSRF_TOKEN);
             fdIA.append('titulo', tituloClave);
             fdIA.append('contenido', textoIA.trim());
             fdIA.append('palabras', `${document.getElementById('inputNombre').value.trim()}, ${dist}, ${nombreSeg}`);
@@ -1203,6 +1204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             const fd = new FormData();
             fd.append('action', 'save_single');
+            fd.append('_csrf', CSRF_TOKEN);
             fd.append('titulo', tituloClave);
             fd.append('contenido', texto);
             fd.append('palabras', palabrasClave);

@@ -11,6 +11,13 @@ $mensaje = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json; charset=utf-8');
     $action = $_POST['action'] ?? '';
+    $csrfActions = ['save_single', 'save_batch'];
+
+    if (in_array($action, $csrfActions, true) && !csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
     try {
         $stmtCheck = $db->prepare("SELECT id FROM panel_ia_conocimiento WHERE titulo = ?");
@@ -263,6 +270,7 @@ try {
     </main>
 
     <script>
+        const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
         // Pasamos el conocimiento actual de la IA a Javascript
         const CEREBRO_IA = <?php echo json_encode($conocimiento_ia); ?>;
         
@@ -664,6 +672,7 @@ try {
 
             const fd = new FormData();
             fd.append('action', 'save_single');
+            fd.append('_csrf', CSRF_TOKEN);
             fd.append('titulo', obraSeleccionada.tituloClave);
             fd.append('contenido', superContenido);
             fd.append('palabras', palabrasClave);
@@ -743,7 +752,7 @@ try {
                 return { titulo: obra.tituloClave, palabras: `${obra.nombre}, ${obra.distrito}, ${obra.segmento}`, contenido: generarSuperParrafo(obra, contextoManual) };
             });
 
-            const fd = new FormData(); fd.append('action', 'save_batch'); fd.append('obras', JSON.stringify(payload));
+            const fd = new FormData(); fd.append('action', 'save_batch'); fd.append('_csrf', CSRF_TOKEN); fd.append('obras', JSON.stringify(payload));
             try {
                 const resp = await fetch('ia_cerebro_obras.php', { method: 'POST', body: fd });
                 const data = await resp.json();

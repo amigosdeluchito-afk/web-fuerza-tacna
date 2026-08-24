@@ -274,6 +274,7 @@ if (isset($_GET['success'])) {
     </div>
 
     <script>
+        const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
         const SHEET_ID = "1ybyNINgEElYXGnsMQsoWSbwlr0kz67HZ1M1OJJmayHI";
         const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
         
@@ -330,6 +331,7 @@ if (isset($_GET['success'])) {
             
             const fdIA = new FormData();
             fdIA.append('action', 'save_single');
+            fdIA.append('_csrf', CSRF_TOKEN);
             fdIA.append('titulo', "Obra: " + nombreObra);
             fdIA.append('contenido', texto.trim());
             fdIA.append('palabras', `${nombreObra}, ${distrito}, ${nombreSeg}`);
