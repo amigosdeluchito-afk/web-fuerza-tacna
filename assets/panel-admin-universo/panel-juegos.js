@@ -665,7 +665,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('juegos_api.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': window.CSRF_TOKEN || ''
+                },
                 body: JSON.stringify({ games: gamesData })
             });
             const result = await response.json();

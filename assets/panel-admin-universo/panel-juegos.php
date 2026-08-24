@@ -167,6 +167,9 @@ require_admin();
 
 <div id="toast-msg" class="toast-msg">Mensaje</div>
 
+<script>
+  window.CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
+</script>
 <script src="panel-juegos.js?v=9"></script>
 
 <script>

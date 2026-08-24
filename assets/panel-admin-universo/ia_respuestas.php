@@ -103,6 +103,7 @@ if (isset($_SESSION['ia_mensaje'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    require_csrf();
 
     if ($action === 'save') {
         $id = $_POST['id'] ?? '';
@@ -464,6 +465,7 @@ sort($all_cats);
                 <div class="card-body" id="body-manual">
                     <h6 class="mb-3 font-weight-bold" id="form-title" style="color:#801039;">Nueva Respuesta</h6>
                     <form method="POST" id="ia-form">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="id" id="input-id" value="">
                         <input type="hidden" name="huerfana_id" id="input-huerfana-id" value="">
@@ -536,6 +538,7 @@ sort($all_cats);
                 <div class="card-body" id="body-import" style="display:none;">
                     <h6 class="mb-3 font-weight-bold" style="color:#801039;">Importación Masiva (JSON)</h6>
                     <form method="POST" id="import-form">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="import_json">
                         <input type="hidden" name="json_data" id="input-final-json">
                         
@@ -617,7 +620,7 @@ sort($all_cats);
                                         <td class="align-middle"><strong><?= htmlspecialchars($h['pregunta']) ?></strong><br><small class="badge badge-secondary mt-1"><?= htmlspecialchars($h['categoria_detectada'] ?: 'Sin Tema') ?></small></td>
                                         <td class="text-right align-middle" style="white-space: nowrap;">
                                             <button class="btn btn-sm btn-outline-success mr-1" title="Convertir en Regla" onclick="convertirHuerfana(<?= $h['id'] ?>, '<?= htmlspecialchars(addslashes($h['categoria_detectada'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($h['normalizada'])) ?>')">✨</button>
-                                            <form method="POST" style="display:inline;" onsubmit="return confirm('¿Ignorar esta pregunta? Ya no aparecerá en la lista.');"><input type="hidden" name="action" value="ignorar_huerfana"><input type="hidden" name="id" value="<?= $h['id'] ?>"><button class="btn btn-sm btn-outline-danger" title="Ignorar">❌</button></form>
+                                            <form method="POST" style="display:inline;" onsubmit="return confirm('¿Ignorar esta pregunta? Ya no aparecerá en la lista.');"><?= csrf_field() ?><input type="hidden" name="action" value="ignorar_huerfana"><input type="hidden" name="id" value="<?= $h['id'] ?>"><button class="btn btn-sm btn-outline-danger" title="Ignorar">❌</button></form>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -630,6 +633,7 @@ sort($all_cats);
                 <!-- TAB DE PROMPT MAESTRO Y CONFIGURACIÓN -->
                 <div class="card-body" id="body-prompt" style="display:none;">
                     <form method="POST" id="prompt-form">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="save_prompt">
                         
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -746,7 +750,7 @@ sort($all_cats);
                             </div>
                         </div>
                     </form>
-                    <form method="POST" id="restore-form" style="display:none;"><input type="hidden" name="action" value="restore_prompt"></form>
+                    <form method="POST" id="restore-form" style="display:none;"><?= csrf_field() ?><input type="hidden" name="action" value="restore_prompt"></form>
                 </div>
 
                 <!-- TAB DE AUDITORÍA -->
@@ -871,6 +875,7 @@ sort($all_cats);
                                             <button class="btn btn-sm btn-outline-primary" onclick="editRow(<?= $row['id'] ?>)">Editar</button>
                                             
                                             <form method="POST" style="display:inline;" onsubmit="return confirm('¿Cambiar estado?');">
+                                                <?= csrf_field() ?>
                                                 <input type="hidden" name="action" value="toggle">
                                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                                 <input type="hidden" name="nuevo_estado" value="<?= $row['estado'] == 1 ? 0 : 1 ?>">
@@ -878,6 +883,7 @@ sort($all_cats);
                                             </form>
                                             
                                             <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar definitivamente?');">
+                                                <?= csrf_field() ?>
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                                 <button class="btn btn-sm btn-outline-danger">X</button>

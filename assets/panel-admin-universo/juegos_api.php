@@ -116,6 +116,12 @@ if ($method === 'POST') {
         exit;
     }
 
+    if (!csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
 
     if (!isset($input['games']) || !is_array($input['games'])) {
