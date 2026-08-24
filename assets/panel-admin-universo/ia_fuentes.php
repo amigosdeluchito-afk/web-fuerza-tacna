@@ -60,6 +60,16 @@ function chunk_text_rag($text, $max_len = 1200, $min_len = 800) {
 // 2. Procesar Formularios (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    $csrfActions = [
+        'save_manual',
+        'sync_sources',
+        'extract_link',
+        'delete'
+    ];
+
+    if (in_array($action, $csrfActions, true)) {
+        require_csrf();
+    }
 
     // GUARDAR TEXTO MANUAL
     if ($action === 'save_manual') {
@@ -333,6 +343,7 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="col-md-4 text-right">
             <form method="POST" style="display:inline;" onsubmit="return confirm('¿Sincronizar fuentes aprobadas hacia el cerebro de Luchito?\n\nSolo se sincronizarán las que estén en estado Aprobado. Las demás serán ignoradas.');">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="sync_sources">
                 <button type="submit" class="btn btn-outline-success font-weight-bold mb-2">🔄 Sincronizar Hacia Conocimiento</button>
             </form>
@@ -413,6 +424,7 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </button>
                                     
                                     <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar fuente permanentemente?');">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                         <button class="btn btn-sm btn-outline-danger py-0 px-2">X</button>
@@ -437,6 +449,7 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="card-body">
             <form method="POST">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="save_manual">
                 <input type="hidden" name="id" id="texto-id" value="">
                 
@@ -499,6 +512,7 @@ $fuentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="card-body">
             <form method="POST">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="extract_link">
                 <div class="form-group">
                     <label class="font-weight-bold">URL a Extraer</label>

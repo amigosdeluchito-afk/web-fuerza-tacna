@@ -7,6 +7,13 @@ $db = get_db_connection();
 // --- INICIO FASE 8.3: MOTOR AJAX DE SINCRONIZACIÓN DE OBRAS ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array($_POST['action'], ['preview_sync_obras', 'confirm_sync_obras'])) {
     header('Content-Type: application/json; charset=utf-8');
+    $action = $_POST['action'];
+    if ($action === 'confirm_sync_obras' && !csrf_validate()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     try {
         if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
             throw new Exception("Falta la carpeta 'vendor' de Google API.");
@@ -117,6 +124,25 @@ if (isset($_SESSION['ia_msg'])) {
 // 2. Procesar Formularios (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    $csrfActions = [
+        'save',
+        'delete',
+        'toggle',
+        'move_to_obra',
+        'confirm_sync_obras',
+        'unificar_fragmentados'
+    ];
+
+    if (in_array($action, $csrfActions, true) && !csrf_validate()) {
+        if ($action === 'unificar_fragmentados') {
+            header('Content-Type: application/json');
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'error' => 'Solicitud no válida'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        require_csrf();
+    }
 
     if ($action === 'save') {
         $id = $_POST['id'] ?? '';
@@ -421,6 +447,7 @@ sort($segmentos_unicos);
                 </div>
                 <div class="card-body">
                     <form method="POST" id="conocimiento-form">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="id" id="input-id" value="">
                         
@@ -554,6 +581,7 @@ sort($segmentos_unicos);
                                                 <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editRow(<?= $row['id'] ?>)">Editar</button>
                                                 
                                                 <form method="POST" style="display:inline;" onsubmit="return confirm('¿Cambiar estado de este documento?');">
+                                                    <?= csrf_field() ?>
                                                     <input type="hidden" name="action" value="toggle">
                                                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                                     <input type="hidden" name="nuevo_estado" value="<?= $row['estado'] == 1 ? 0 : 1 ?>">
@@ -561,6 +589,7 @@ sort($segmentos_unicos);
                                                 </form>
                                                 
                                                 <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar definitivamente este documento de conocimiento?');">
+                                                    <?= csrf_field() ?>
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                                     <button class="btn btn-sm btn-outline-danger py-0 px-2">X</button>
@@ -591,6 +620,7 @@ sort($segmentos_unicos);
         <div style="padding: 20px;">
             <p style="color: #94a3b8; font-size: 13px; margin-top: 0; margin-bottom: 15px;">Este documento se convertirá en una nueva pestaña de la obra seleccionada y desaparecerá de esta lista.</p>
             <form method="POST" id="formMoverObra">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="move_to_obra">
                 <input type="hidden" name="id_doc" id="mover_id_doc" value="">
                 
@@ -625,6 +655,8 @@ sort($segmentos_unicos);
 </div>
 
 <script>
+    const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
+
     function resetForm() {
         document.getElementById('form-title').innerText = "➕ Agregar Documento";
         document.getElementById('input-id').value = "";
@@ -863,6 +895,7 @@ sort($segmentos_unicos);
         const btn = document.getElementById('btn-confirm-sync');
         btn.disabled = true; btn.innerText = '⏳ Sincronizando e Inyectando Conocimiento...';
         const fd = new FormData(); fd.append('action', 'confirm_sync_obras');
+        fd.append('_csrf', CSRF_TOKEN);
         try {
             const resp = await fetch('ia_conocimiento.php', { method: 'POST', body: fd });
             const data = await resp.json();
@@ -900,6 +933,7 @@ sort($segmentos_unicos);
         const txtOriginal = btn.innerHTML;
         btn.innerHTML = '⏳ Unificando...'; btn.disabled = true;
         const fd = new FormData(); fd.append('action', 'unificar_fragmentados');
+        fd.append('_csrf', CSRF_TOKEN);
         try {
             const resp = await fetch('ia_conocimiento.php', { method: 'POST', body: fd });
             const data = await resp.json();
