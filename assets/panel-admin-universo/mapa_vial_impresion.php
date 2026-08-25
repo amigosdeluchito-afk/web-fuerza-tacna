@@ -76,7 +76,7 @@ require_admin();
     <main class="main-container">
         <aside class="controls">
             <h1>Mapa vial para impresion</h1>
-            <p>Genera un SVG editable con calles base, tramos destacados y nombres de tramos.</p>
+            <p>Genera un SVG vectorial editable con mapa base, tramos numerados y listado lateral.</p>
             <a class="btn btn-secondary" href="gestor-cartografico.php" style="margin:0 0 14px;">Volver al Gestor de mapas</a>
 
             <div class="section-title">BBOX geografico</div>

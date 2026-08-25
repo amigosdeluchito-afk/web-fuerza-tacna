@@ -190,9 +190,7 @@ function decodeLines(geometry) {
         y += zigZagDecode(geometry[i++]);
         line.push({ x, y });
       }
-    } else if (cmd === 7) {
-      if (line.length) line.push(line[0]);
-    } else {
+    } else if (cmd !== 7) {
       break;
     }
   }
@@ -250,14 +248,25 @@ function buildProjector(bounds) {
   const maxX = lonToMercX(bounds.east);
   const minY = latToMercY(bounds.north);
   const maxY = latToMercY(bounds.south);
-  const height = Math.round(bounds.width * ((maxY - minY) / (maxX - minX)));
+  const panelWidth = Math.min(460, Math.max(340, Math.round(bounds.width * 0.28)));
+  const mapWidth = bounds.width - panelWidth;
+  const mapHeight = Math.round(mapWidth * ((maxY - minY) / (maxX - minX)));
+  const height = mapHeight + 80;
+  const mapX = 30;
+  const mapY = 30;
   return {
     width: bounds.width,
     height,
+    mapX,
+    mapY,
+    mapWidth,
+    mapHeight,
+    panelX: mapWidth,
+    panelWidth,
     pointFromMerc(globalX, globalY) {
       return [
-        (globalX - minX) / (maxX - minX) * bounds.width,
-        (globalY - minY) / (maxY - minY) * height
+        mapX + (globalX - minX) / (maxX - minX) * mapWidth,
+        mapY + (globalY - minY) / (maxY - minY) * mapHeight
       ];
     },
     pointFromLngLat(lng, lat) {
@@ -269,6 +278,35 @@ function buildProjector(bounds) {
 function lineToPath(points) {
   if (!points || points.length < 2) return '';
   return points.map((p, i) => `${i === 0 ? 'M' : 'L'}${fmt(p[0])} ${fmt(p[1])}`).join(' ');
+}
+
+function midpointOfLines(lines) {
+  const segments = [];
+  let total = 0;
+  for (const points of lines) {
+    for (let i = 1; i < points.length; i++) {
+      const start = points[i - 1];
+      const end = points[i];
+      const length = Math.hypot(end[0] - start[0], end[1] - start[1]);
+      if (Number.isFinite(length) && length > 0) {
+        segments.push({ start, end, length });
+        total += length;
+      }
+    }
+  }
+  if (!total) return lines[0]?.[0] || [0, 0];
+  let distance = total / 2;
+  for (const segment of segments) {
+    if (distance <= segment.length) {
+      const ratio = distance / segment.length;
+      return [
+        segment.start[0] + (segment.end[0] - segment.start[0]) * ratio,
+        segment.start[1] + (segment.end[1] - segment.start[1]) * ratio
+      ];
+    }
+    distance -= segment.length;
+  }
+  return segments[segments.length - 1].end;
 }
 
 function fmt(n) {
@@ -317,7 +355,7 @@ async function loadRoads(bounds, projector) {
             const globalX = (x + p.x / roadsLayer.extent) / n;
             const globalY = (y + p.y / roadsLayer.extent) / n;
             return projector.pointFromMerc(globalX, globalY);
-          });
+          }).filter(([px, py]) => Number.isFinite(px) && Number.isFinite(py));
           const d = lineToPath(points);
           const key = `${kind}|${feature.properties.name || ''}|${d}`;
           if (d && !seen.has(key)) {
@@ -336,9 +374,7 @@ async function loadTramos(bounds, projector) {
   if (!res.ok) throw new Error(`No se pudo cargar tramos: HTTP ${res.status}`);
   const geojson = await res.json();
   const tramos = [];
-  const labels = [];
   const features = Array.isArray(geojson.features) ? geojson.features : [];
-  const seenLabels = new Set();
   for (const feature of features) {
     const geom = feature.geometry || {};
     const props = feature.properties || {};
@@ -347,23 +383,28 @@ async function loadTramos(bounds, projector) {
       : geom.type === 'MultiLineString'
         ? geom.coordinates
         : [];
-    for (const coords of lines) {
-      const inside = coords.some(([lng, lat]) => lng >= bounds.west && lng <= bounds.east && lat >= bounds.south && lat <= bounds.north);
-      if (!inside) continue;
-      const points = coords.map(([lng, lat]) => projector.pointFromLngLat(lng, lat));
-      const d = lineToPath(points);
-      if (!d) continue;
-      const color = safeColor(props.color, '#8A1538');
-      const id = `tramo-${slug(props.id || props.nombre || tramos.length)}`;
-      tramos.push({ id, d, color, points, nombre: props.nombre || 'Tramo vial' });
-      const labelKey = String(props.id || props.nombre || d);
-      if (!seenLabels.has(labelKey)) {
-        seenLabels.add(labelKey);
-        labels.push({ id, nombre: props.nombre || 'Tramo vial', points });
-      }
-    }
+    const visibleLines = lines.filter((coords) => coords.some((pair) => {
+      const [lng, lat] = pair || [];
+      return Number.isFinite(lng) && Number.isFinite(lat)
+        && lng >= bounds.west && lng <= bounds.east
+        && lat >= bounds.south && lat <= bounds.north;
+    }));
+    const projectedLines = visibleLines.map((coords) => coords
+      .filter((pair) => Array.isArray(pair) && pair.length >= 2 && pair.every(Number.isFinite))
+      .map(([lng, lat]) => projector.pointFromLngLat(lng, lat)))
+      .filter((points) => points.length > 1 && points.every(([px, py]) => Number.isFinite(px) && Number.isFinite(py)));
+    const paths = projectedLines.map(lineToPath).filter(Boolean);
+    if (!paths.length) continue;
+    const index = tramos.length + 1;
+    tramos.push({
+      id: `tramo-${index}-${slug(props.id || props.nombre || 'x')}`,
+      d: paths.join(' '),
+      color: safeColor(props.color, '#2f7d5b'),
+      marker: midpointOfLines(projectedLines),
+      nombre: String(props.nombre || 'Tramo vial')
+    });
   }
-  return { tramos, labels };
+  return { tramos };
 }
 
 function safeColor(value, fallback) {
@@ -375,16 +416,7 @@ function slug(value) {
   return String(value).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'x';
 }
 
-function labelTransform(points) {
-  const midIndex = Math.max(0, Math.floor((points.length - 1) / 2));
-  const p1 = points[midIndex];
-  const p2 = points[Math.min(points.length - 1, midIndex + 1)] || p1;
-  let angle = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]) * 180 / Math.PI;
-  if (angle > 90 || angle < -90) angle += 180;
-  return { x: p1[0], y: p1[1], angle };
-}
-
-function createSvg(projector, roads, tramos, labels) {
+function createSvg(projector, roads, tramos) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('xmlns', SVG_NS);
   svg.setAttribute('version', '1.1');
@@ -392,11 +424,23 @@ function createSvg(projector, roads, tramos, labels) {
   svg.setAttribute('width', String(projector.width));
   svg.setAttribute('height', String(projector.height));
   svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', 'Mapa vial para impresion');
+  svg.setAttribute('aria-label', 'Mapa vial y listado de vias mejoradas');
 
   const style = document.createElementNS(SVG_NS, 'style');
-  style.textContent = 'path{fill:none;vector-effect:non-scaling-stroke}.road{stroke-linecap:round;stroke-linejoin:round}.tramo{stroke-linecap:round;stroke-linejoin:round}.tramo-label{font-family:Arial,sans-serif;font-size:14px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;fill:#111827}';
+  style.textContent = 'path{fill:none}.road,.tramo{stroke-linecap:round;stroke-linejoin:round}.panel-title,.panel-row,.legend-text,.north-text{font-family:Arial,sans-serif;fill:#263238}.panel-title{font-size:22px;font-weight:700}.panel-row{font-size:14px}.legend-text,.north-text{font-size:12px}.marker-number{font-family:Arial,sans-serif;font-size:12px;font-weight:700;fill:#fff}';
   svg.appendChild(style);
+
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  const clip = document.createElementNS(SVG_NS, 'clipPath');
+  clip.setAttribute('id', 'mapClip');
+  const clipRect = document.createElementNS(SVG_NS, 'rect');
+  clipRect.setAttribute('x', projector.mapX);
+  clipRect.setAttribute('y', projector.mapY);
+  clipRect.setAttribute('width', projector.mapWidth - 30);
+  clipRect.setAttribute('height', projector.mapHeight);
+  clip.appendChild(clipRect);
+  defs.appendChild(clip);
+  svg.appendChild(defs);
 
   const bg = document.createElementNS(SVG_NS, 'rect');
   bg.setAttribute('width', '100%');
@@ -404,9 +448,14 @@ function createSvg(projector, roads, tramos, labels) {
   bg.setAttribute('fill', '#f8fafc');
   svg.appendChild(bg);
 
+  const mapArea = document.createElementNS(SVG_NS, 'g');
+  mapArea.setAttribute('id', 'map-area');
+  mapArea.setAttribute('clip-path', 'url(#mapClip)');
+  svg.appendChild(mapArea);
+
   const baseGroup = document.createElementNS(SVG_NS, 'g');
   baseGroup.setAttribute('id', 'mapa-base');
-  svg.appendChild(baseGroup);
+  mapArea.appendChild(baseGroup);
   for (const road of roads) {
     appendPath(baseGroup, road.d, {
       class: `road road-${road.kind}`,
@@ -417,7 +466,7 @@ function createSvg(projector, roads, tramos, labels) {
 
   const tramosGroup = document.createElementNS(SVG_NS, 'g');
   tramosGroup.setAttribute('id', 'tramos');
-  svg.appendChild(tramosGroup);
+  mapArea.appendChild(tramosGroup);
   for (const tramo of tramos) {
     appendPath(tramosGroup, tramo.d, {
       id: tramo.id,
@@ -427,21 +476,151 @@ function createSvg(projector, roads, tramos, labels) {
     });
   }
 
-  const labelsGroup = document.createElementNS(SVG_NS, 'g');
-  labelsGroup.setAttribute('id', 'nombres-tramos');
-  svg.appendChild(labelsGroup);
-  for (const label of labels) {
-    if (!label.nombre || !label.points || label.points.length < 2) continue;
-    const t = labelTransform(label.points);
-    const text = document.createElementNS(SVG_NS, 'text');
-    text.setAttribute('class', 'tramo-label');
-    text.setAttribute('text-anchor', 'middle');
-    text.setAttribute('dominant-baseline', 'central');
-    text.setAttribute('transform', `translate(${fmt(t.x)} ${fmt(t.y - 11)}) rotate(${fmt(t.angle)})`);
-    text.textContent = label.nombre;
-    labelsGroup.appendChild(text);
+  const markersGroup = document.createElementNS(SVG_NS, 'g');
+  markersGroup.setAttribute('id', 'marcadores-tramos');
+  mapArea.appendChild(markersGroup);
+  const offsets = [[0, 0], [10, -10], [-10, -10], [10, 10], [-10, 10], [0, -16], [16, 0]];
+  const placed = [];
+  for (const tramo of tramos) {
+    const [x, y] = tramo.marker;
+    const offset = offsets.find(([dx, dy]) => placed.every(([px, py]) => Math.hypot(x + dx - px, y + dy - py) >= 24)) || [0, 0];
+    const markerX = x + offset[0];
+    const markerY = y + offset[1];
+    placed.push([markerX, markerY]);
+    const marker = document.createElementNS(SVG_NS, 'g');
+    marker.setAttribute('class', 'tramo-marker');
+    marker.setAttribute('transform', `translate(${fmt(markerX)} ${fmt(markerY)})`);
+    const circle = document.createElementNS(SVG_NS, 'circle');
+    circle.setAttribute('r', '12');
+    circle.setAttribute('fill', tramo.color);
+    circle.setAttribute('stroke', '#fff');
+    circle.setAttribute('stroke-width', '2');
+    const number = document.createElementNS(SVG_NS, 'text');
+    number.setAttribute('class', 'marker-number');
+    number.setAttribute('text-anchor', 'middle');
+    number.setAttribute('dominant-baseline', 'central');
+    number.textContent = String(tramo.number);
+    marker.append(circle, number);
+    markersGroup.appendChild(marker);
   }
+
+  const panel = document.createElementNS(SVG_NS, 'g');
+  panel.setAttribute('id', 'panel-listado');
+  const panelRect = document.createElementNS(SVG_NS, 'rect');
+  panelRect.setAttribute('x', projector.panelX);
+  panelRect.setAttribute('y', '0');
+  panelRect.setAttribute('width', projector.panelWidth);
+  panelRect.setAttribute('height', projector.height);
+  panelRect.setAttribute('fill', '#fff');
+  panelRect.setAttribute('stroke', '#d7dee3');
+  panel.appendChild(panelRect);
+  const title = document.createElementNS(SVG_NS, 'text');
+  title.setAttribute('class', 'panel-title');
+  title.setAttribute('x', projector.panelX + 28);
+  title.setAttribute('y', '48');
+  title.textContent = 'RED VIAL - VIAS MEJORADAS';
+  panel.appendChild(title);
+  const columns = tramos.length > 25 ? 2 : 1;
+  const rows = Math.ceil(tramos.length / columns);
+  const rowHeight = Math.max(30, Math.min(52, Math.floor((projector.height - 105) / Math.max(rows, 1))));
+  const fontSize = tramos.length > 40 ? 11 : tramos.length > 25 ? 12 : 14;
+  for (let i = 0; i < tramos.length; i++) {
+    const column = Math.floor(i / rows);
+    const row = i % rows;
+    const columnWidth = projector.panelWidth / columns;
+    const x = projector.panelX + column * columnWidth + 26;
+    const y = 88 + row * rowHeight;
+    const circle = document.createElementNS(SVG_NS, 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y - 5);
+    circle.setAttribute('r', '10');
+    circle.setAttribute('fill', tramos[i].color);
+    panel.appendChild(circle);
+    const number = document.createElementNS(SVG_NS, 'text');
+    number.setAttribute('class', 'marker-number');
+    number.setAttribute('x', x);
+    number.setAttribute('y', y - 5);
+    number.setAttribute('text-anchor', 'middle');
+    number.setAttribute('dominant-baseline', 'central');
+    number.textContent = String(tramos[i].number);
+    panel.appendChild(number);
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('class', 'panel-row');
+    text.setAttribute('x', x + 18);
+    text.setAttribute('y', y - 9);
+    text.setAttribute('font-size', fontSize);
+    for (const [lineIndex, line] of wrapText(tramos[i].nombre, Math.max(18, Math.floor((columnWidth - 62) / (fontSize * 0.56)))).entries()) {
+      const tspan = document.createElementNS(SVG_NS, 'tspan');
+      tspan.setAttribute('x', x + 18);
+      tspan.setAttribute('dy', lineIndex === 0 ? '0' : String(fontSize + 3));
+      tspan.textContent = line;
+      text.appendChild(tspan);
+    }
+    panel.appendChild(text);
+  }
+  svg.appendChild(panel);
+  appendMapDecorations(mapArea, projector);
   return svg;
+}
+
+function wrapText(value, maxChars) {
+  const words = String(value).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (line && next.length > maxChars) {
+      lines.push(line);
+      line = word;
+    } else line = next;
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : ['Tramo vial'];
+}
+
+function appendMapDecorations(mapArea, projector) {
+  const legendY = projector.mapY + projector.mapHeight - 28;
+  const legend = document.createElementNS(SVG_NS, 'g');
+  legend.setAttribute('id', 'leyenda');
+  const legendTitle = document.createElementNS(SVG_NS, 'text');
+  legendTitle.setAttribute('class', 'legend-text');
+  legendTitle.setAttribute('x', projector.mapX + 20);
+  legendTitle.setAttribute('y', legendY - 20);
+  legendTitle.textContent = 'LEYENDA';
+  legend.appendChild(legendTitle);
+  for (const [index, item] of ['Vias mejoradas', 'Vias existentes'].entries()) {
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('x1', projector.mapX + 20 + index * 150);
+    line.setAttribute('x2', projector.mapX + 48 + index * 150);
+    line.setAttribute('y1', legendY);
+    line.setAttribute('y2', legendY);
+    line.setAttribute('stroke', index ? '#b7c0c8' : '#2f7d5b');
+    line.setAttribute('stroke-width', '4');
+    legend.appendChild(line);
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('class', 'legend-text');
+    text.setAttribute('x', projector.mapX + 54 + index * 150);
+    text.setAttribute('y', legendY + 4);
+    text.textContent = item;
+    legend.appendChild(text);
+  }
+  mapArea.appendChild(legend);
+  const north = document.createElementNS(SVG_NS, 'g');
+  north.setAttribute('id', 'norte');
+  const northX = projector.mapX + projector.mapWidth - 65;
+  const northY = projector.mapY + 50;
+  const arrow = document.createElementNS(SVG_NS, 'polygon');
+  arrow.setAttribute('points', `${northX},${northY - 24} ${northX - 10},${northY + 4} ${northX},${northY - 1} ${northX + 10},${northY + 4}`);
+  arrow.setAttribute('fill', '#263238');
+  north.appendChild(arrow);
+  const northText = document.createElementNS(SVG_NS, 'text');
+  northText.setAttribute('class', 'north-text');
+  northText.setAttribute('x', northX);
+  northText.setAttribute('y', northY - 30);
+  northText.setAttribute('text-anchor', 'middle');
+  northText.textContent = 'N';
+  north.appendChild(northText);
+  mapArea.appendChild(north);
 }
 
 function setStatus(message, type = '') {
@@ -458,17 +637,18 @@ async function generate() {
     els.zoom.value = String(bounds.zoom);
     const projector = buildProjector(bounds);
     setStatus('Leyendo PMTiles y tramos...');
-    const [{ roads, tileCount }, { tramos, labels }] = await Promise.all([
+    const [{ roads, tileCount }, { tramos }] = await Promise.all([
       loadRoads(bounds, projector),
       loadTramos(bounds, projector)
     ]);
-    const svg = createSvg(projector, roads, tramos, labels);
+    tramos.forEach((tramo, index) => { tramo.number = index + 1; });
+    const svg = createSvg(projector, roads, tramos);
     els.preview.innerHTML = '';
     els.preview.appendChild(svg);
     currentSvg = svg;
     els.download.disabled = false;
-    els.meta.textContent = `${roads.length} calles | ${tramos.length} tramos | ${labels.length} nombres`;
-    setStatus(`SVG generado correctamente.\nTiles leidos: ${tileCount}\nCalles: ${roads.length}\nTramos: ${tramos.length}\nNombres: ${labels.length}`, 'ok');
+    els.meta.textContent = `${roads.length} calles | ${tramos.length} tramos | panel vectorial`;
+    setStatus(`SVG generado correctamente.\nTiles leidos: ${tileCount}\nCalles: ${roads.length}\nTramos numerados: ${tramos.length}`, 'ok');
   } catch (error) {
     els.preview.innerHTML = '<div class="empty-preview">No se pudo generar el SVG. Revisa el mensaje del panel.</div>';
     els.meta.textContent = 'Error';
