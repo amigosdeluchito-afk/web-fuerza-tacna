@@ -152,6 +152,47 @@ function initChatIA() {
         }[tag]));
     };
 
+    const decodeLegacyEscapedText = (str) => {
+        return String(str ?? '').replace(/&(amp|lt|gt|quot|#39);/g, entity => ({
+            '&amp;': '&',
+            '&lt;': '<',
+            '&gt;': '>',
+            '&quot;': '"',
+            '&#39;': "'"
+        }[entity] || entity));
+    };
+
+    const appendTextWithLineBreaks = (container, text) => {
+        const lines = String(text ?? '').split(/\r?\n/);
+        lines.forEach((line, index) => {
+            if (index > 0) container.appendChild(document.createElement('br'));
+            container.appendChild(document.createTextNode(line));
+        });
+    };
+
+    const validateActionType = (actionType) => {
+        const action = String(actionType ?? '').trim();
+        const fixedActions = new Set([
+            'ir_a_obras',
+            'ir_a_candidatos',
+            'ir_a_propuestas',
+            'ir_a_sumate',
+            'ir_a_contacto',
+            'jugar_luchito'
+        ]);
+
+        if (fixedActions.has(action)) return action;
+
+        if (action.startsWith('ir_a_obra:') && action.length <= 220) {
+            const parts = action.split(':');
+            if (parts.length === 3 && parts[1].trim() !== '' && parts[2].trim() !== '') {
+                return action;
+            }
+        }
+
+        return '';
+    };
+
     const normalizeText = (str) => {
         return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     };
@@ -272,15 +313,18 @@ function initChatIA() {
         }
     };
 
-    const renderMessage = (text, type, actions = []) => {
-        let finalActions = actions ? [...actions] : [];
+    const renderMessage = (text, type, actions = [], options = {}) => {
+        let finalActions = Array.isArray(actions) ? [...actions] : [];
         let finalText = text;
 
         // Parseo de botones inline (Shortcodes) solo para mensajes de la IA
         if (type === 'ai-message') {
             const btnRegex = /\[btn:([^|\]]+)\|([^\]]+)\]/gi;
             finalText = finalText.replace(btnRegex, (match, actionType, actionLabel) => {
-                finalActions.push({ type: actionType.trim(), label: actionLabel.trim() });
+                const validatedAction = validateActionType(actionType);
+                if (validatedAction) {
+                    finalActions.push({ type: validatedAction, label: actionLabel.trim() });
+                }
                 return ""; // Elimina el shortcode del texto visible
             }).trim();
         }
@@ -290,28 +334,49 @@ function initChatIA() {
         
         const avatarIcon = type === 'user-message' ? 'FT' : '🤖';
         
-        let htmlContent = `<div class="ft-avatar">${avatarIcon}</div><div class="ft-bubble">${finalText}`;
-        
-        if (finalActions.length > 0) {
-            htmlContent += `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">`;
-            finalActions.forEach((act) => {
-                htmlContent += `<button class="ft-action-btn" data-action="${act.type}">${act.label}</button>`;
-            });
-            htmlContent += `</div>`;
-        }
-        htmlContent += `</div>`;
-        
-        msgDiv.innerHTML = htmlContent;
-        
-        if (finalActions.length > 0) {
-            const btns = msgDiv.querySelectorAll('.ft-action-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const actionType = e.target.getAttribute('data-action');
+        const avatar = document.createElement('div');
+        avatar.className = 'ft-avatar';
+        avatar.textContent = avatarIcon;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'ft-bubble';
+
+        const textToRender = type === 'user-message' && options.legacyEscaped
+            ? decodeLegacyEscapedText(finalText)
+            : finalText;
+        appendTextWithLineBreaks(bubble, textToRender);
+
+        const validActions = finalActions
+            .map(act => ({
+                type: validateActionType(act && act.type),
+                label: String((act && act.label) ?? '').trim()
+            }))
+            .filter(act => act.type && act.label);
+
+        if (validActions.length > 0) {
+            const actionsWrap = document.createElement('div');
+            actionsWrap.style.display = 'flex';
+            actionsWrap.style.flexWrap = 'wrap';
+            actionsWrap.style.gap = '8px';
+            actionsWrap.style.marginTop = '10px';
+
+            validActions.forEach((act) => {
+                const button = document.createElement('button');
+                button.className = 'ft-action-btn';
+                button.dataset.action = act.type;
+                button.textContent = act.label;
+                button.addEventListener('click', (e) => {
+                    const actionType = e.currentTarget.dataset.action;
                     if (typeof navigateTo === 'function') navigateTo(actionType);
                 });
+                actionsWrap.appendChild(button);
             });
+
+            bubble.appendChild(actionsWrap);
         }
+
+        msgDiv.appendChild(avatar);
+        msgDiv.appendChild(bubble);
         
         messagesBody.appendChild(msgDiv);
         setTimeout(() => {
@@ -320,9 +385,9 @@ function initChatIA() {
     };
 
     const addMessage = (text, type, actions = []) => {
-        renderMessage(text, type, actions);
+        renderMessage(text, type, actions, { legacyEscaped: false });
         let history = JSON.parse(sessionStorage.getItem('ft_chat_history') || '[]');
-        history.push({ text, type, actions });
+        history.push({ text, type, actions, escaped: false });
         sessionStorage.setItem('ft_chat_history', JSON.stringify(history));
     };
 
@@ -353,9 +418,8 @@ function initChatIA() {
         const text = inputField.value.trim();
         if (!text) return;
         
-        // 1. Mostrar mensaje del usuario limpio
-        const safeText = escapeHTML(text);
-        addMessage(safeText, 'user-message');
+        // 1. Mostrar mensaje del usuario como texto seguro
+        addMessage(text, 'user-message');
         inputField.value = '';
 
         // 2. Mostrar animación de escritura
@@ -433,7 +497,11 @@ function initChatIA() {
     // --- RECUPERAR HISTORIAL Y ESTADO DEL CHAT ---
     const history = JSON.parse(sessionStorage.getItem('ft_chat_history') || 'null');
     if (history && history.length > 0) {
-        history.forEach(msg => renderMessage(msg.text, msg.type, msg.actions));
+        history.forEach(msg => {
+            renderMessage(msg.text, msg.type, msg.actions, {
+                legacyEscaped: msg.type === 'user-message' && msg.escaped !== false
+            });
+        });
     }
     if (sessionStorage.getItem('ft_chat_state') === 'open') {
         // Si detectamos que entramos a la sección de Obras, forzamos al chat a minimizarse

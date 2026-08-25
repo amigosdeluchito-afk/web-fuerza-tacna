@@ -124,6 +124,7 @@ require_admin();
         <div class="instrucciones">📍 Haz clic en cualquier lugar de Tacna para anclar un nuevo Titán</div>
         <button id="btnVerLista" onclick="abrirListaActual()" style="position:absolute; top: 20px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #3b82f6; color: #93c5fd; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;">📋 Ver Lista de Puntos</button>
         <button id="btnVistaPublica" onclick="abrirConfigPublica()" style="position:absolute; top: 68px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #a855f7; color: #d8b4fe; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;">Vista Publica</button>
+        <a id="btnMapaImpresion" href="mapa_vial_impresion.php" style="position:absolute; top: 116px; right: 20px; z-index: 10; background: #0f172a; border: 1px solid #10b981; color: #bbf7d0; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s; text-decoration:none;">Mapa para impresion</a>
         <div id="map"></div>
 
         <div class="panel-lista" id="panelConfigPublica">
