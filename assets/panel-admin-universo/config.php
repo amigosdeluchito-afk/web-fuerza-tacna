@@ -67,32 +67,31 @@ const LOG_FILE   = __DIR__ . '/data/historial.log';
 // =======================
 //  BASE DE DATOS (MYSQL)
 // =======================
-$legacyConfig = [
-    'DB_HOST' => 'localhost',
-    'DB_USER' => 'tacnwddf_adminfreddy',
-    'DB_PASS' => 'adminfreddy14021993',
-    'DB_NAME' => 'tacnwddf_fuerza',
-    'IA_HASH_SALT' => 'FuerzaTacna_IA_SecretSalt_2024!@#',
-    'OPENAI_API_KEY' => '',
-    'OPENAI_KEY_ENCRYPTION_SECRET' => 'FuerzaTacna_AES_MasterKey_2024**!!',
-    'CRON_SYNC_TOKEN' => '',
-];
+function fail_private_config(): void {
+    error_log('Private application configuration unavailable');
 
-function load_external_config(string $path): ?array {
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+    }
+
+    echo 'Error de configuración del servidor.';
+    exit;
+}
+
+function load_external_config(string $path): array {
     if (!is_file($path)) {
-        return null;
+        fail_private_config();
     }
 
     try {
         $config = require $path;
     } catch (Throwable $e) {
-        error_log('External configuration load failed');
-        return null;
+        fail_private_config();
     }
 
     if (!is_array($config)) {
-        error_log('External configuration load failed');
-        return null;
+        fail_private_config();
     }
 
     $requiredKeys = [
@@ -101,73 +100,33 @@ function load_external_config(string $path): ?array {
         'DB_PASS',
         'DB_NAME',
         'IA_HASH_SALT',
-        'OPENAI_API_KEY',
         'OPENAI_KEY_ENCRYPTION_SECRET',
     ];
 
     foreach ($requiredKeys as $key) {
         if (!array_key_exists($key, $config)) {
-            error_log('External configuration load failed');
-            return null;
+            fail_private_config();
         }
     }
 
     return $config;
 }
 
-function create_external_config(string $path, array $config): bool {
-    if (is_file($path)) {
-        return false;
-    }
-
-    try {
-        $tmp = $path . '.tmp.' . bin2hex(random_bytes(8));
-        $contents = "<?php\n\nreturn " . var_export($config, true) . ";\n";
-
-        if (file_put_contents($tmp, $contents, LOCK_EX) === false) {
-            throw new RuntimeException('write failed');
-        }
-
-        @chmod($tmp, 0600);
-
-        if (is_file($path) || !rename($tmp, $path)) {
-            throw new RuntimeException('rename failed');
-        }
-
-        @chmod($path, 0600);
-        return true;
-    } catch (Throwable $e) {
-        if (isset($tmp) && is_file($tmp)) {
-            @unlink($tmp);
-        }
-
-        error_log('External configuration creation failed');
-        return false;
-    }
-}
-
 $configLocalPath = __DIR__ . '/data/config.local.php';
-$externalConfig = load_external_config($configLocalPath);
+$appConfig = load_external_config($configLocalPath);
 
-if ($externalConfig === null && !is_file($configLocalPath)) {
-    create_external_config($configLocalPath, $legacyConfig);
-    $externalConfig = load_external_config($configLocalPath);
-}
-
-$appConfig = $externalConfig ?? $legacyConfig;
-
-define('PRIVATE_CONFIG_ACTIVE', $externalConfig !== null);
-define('DB_HOST', $appConfig['DB_HOST'] ?? $legacyConfig['DB_HOST']);
-define('DB_USER', $appConfig['DB_USER'] ?? $legacyConfig['DB_USER']);
-define('DB_PASS', $appConfig['DB_PASS'] ?? $legacyConfig['DB_PASS']);
-define('DB_NAME', $appConfig['DB_NAME'] ?? $legacyConfig['DB_NAME']);
+define('PRIVATE_CONFIG_ACTIVE', true);
+define('DB_HOST', $appConfig['DB_HOST']);
+define('DB_USER', $appConfig['DB_USER']);
+define('DB_PASS', $appConfig['DB_PASS']);
+define('DB_NAME', $appConfig['DB_NAME']);
 
 // =======================
 //  SEGURIDAD IA (SALT PARA IPs)
 // =======================
-define('IA_HASH_SALT', $appConfig['IA_HASH_SALT'] ?? $legacyConfig['IA_HASH_SALT']);
-define('OPENAI_API_KEY', $appConfig['OPENAI_API_KEY'] ?? $legacyConfig['OPENAI_API_KEY']); // Dejar vacío en Git, poner la clave directa en cPanel
-define('OPENAI_KEY_ENCRYPTION_SECRET', $appConfig['OPENAI_KEY_ENCRYPTION_SECRET'] ?? $legacyConfig['OPENAI_KEY_ENCRYPTION_SECRET']); // Llave inventada, GitHub no la bloquea
+define('IA_HASH_SALT', $appConfig['IA_HASH_SALT']);
+define('OPENAI_API_KEY', $appConfig['OPENAI_API_KEY'] ?? ''); // Dejar vacío en Git, poner la clave directa en cPanel
+define('OPENAI_KEY_ENCRYPTION_SECRET', $appConfig['OPENAI_KEY_ENCRYPTION_SECRET']);
 define('IA_DEBUG_MODE', false); // Poner en true solo para diagnosticar problemas de enrutamiento
 
 function encrypt_api_key($plain_text) {
