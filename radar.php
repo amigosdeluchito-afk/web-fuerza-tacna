@@ -14,6 +14,8 @@ if (!is_admin()) {
 
 echo "<h2 style='font-family:sans-serif;'>📡 Radar de Servidor</h2>";
 echo "<p style='font-family:sans-serif;'><b>Versión de PHP:</b> " . phpversion() . "</p>";
+$privateConfigStatus = (defined('PRIVATE_CONFIG_ACTIVE') && PRIVATE_CONFIG_ACTIVE) ? 'ACTIVA' : 'FALLBACK';
+echo "<p style='font-family:sans-serif;'><b>Configuración privada:</b> " . $privateConfigStatus . "</p>";
 
 echo "<h3 style='font-family:sans-serif;'>Carpetas encontradas aquí:</h3><ul>";
 $dirs = array_filter(glob('*'), 'is_dir');
