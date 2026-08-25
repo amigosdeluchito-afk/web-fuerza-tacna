@@ -4,6 +4,8 @@ const PMTILES_URL = '../data/pmtiles_proxy_departamento.php';
 const TRAMOS_URL = 'mapa_redvial_api.php?action=geojson';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ROAD_KINDS = new Set(['highway', 'major_road', 'minor_road']);
+const MAP_ASPECT_RATIO = 1.55;
+const TRAMO_STROKE_WIDTH = 4;
 
 const els = {
   west: document.getElementById('west'),
@@ -250,7 +252,7 @@ function buildProjector(bounds) {
   const maxY = latToMercY(bounds.south);
   const panelWidth = Math.min(460, Math.max(340, Math.round(bounds.width * 0.28)));
   const mapWidth = bounds.width - panelWidth;
-  const mapHeight = Math.round(mapWidth * ((maxY - minY) / (maxX - minX)));
+  const mapHeight = Math.round(mapWidth / MAP_ASPECT_RATIO);
   const height = mapHeight + 80;
   const mapX = 30;
   const mapY = 30;
@@ -393,11 +395,15 @@ async function loadRoads(bounds, projector) {
   return { roads, roadCount, tileCount: range.count };
 }
 
-async function loadTramos(bounds, projector) {
+async function loadTramos(bounds) {
   const res = await fetch(TRAMOS_URL, { cache: 'no-store' });
   if (!res.ok) throw new Error(`No se pudo cargar tramos: HTTP ${res.status}`);
   const geojson = await res.json();
   const tramos = [];
+  let minMercX = Infinity;
+  let maxMercX = -Infinity;
+  let minMercY = Infinity;
+  let maxMercY = -Infinity;
   const features = Array.isArray(geojson.features) ? geojson.features : [];
   for (const feature of features) {
     const geom = feature.geometry || {};
@@ -407,28 +413,57 @@ async function loadTramos(bounds, projector) {
       : geom.type === 'MultiLineString'
         ? geom.coordinates
         : [];
-    const visibleLines = lines.filter((coords) => coords.some((pair) => {
+    const validLines = lines.map((coords) => coords.filter((pair) => {
       const [lng, lat] = pair || [];
       return Number.isFinite(lng) && Number.isFinite(lat)
-        && lng >= bounds.west && lng <= bounds.east
-        && lat >= bounds.south && lat <= bounds.north;
-    }));
-    const projectedLines = visibleLines.map((coords) => coords
-      .filter((pair) => Array.isArray(pair) && pair.length >= 2 && pair.every(Number.isFinite))
-      .map(([lng, lat]) => projector.pointFromLngLat(lng, lat)))
-      .filter((points) => points.length > 1 && points.every(([px, py]) => Number.isFinite(px) && Number.isFinite(py)));
-    const paths = projectedLines.map(lineToPath).filter(Boolean);
-    if (!paths.length) continue;
+    })).filter((coords) => coords.length > 1);
+    if (!validLines.length) continue;
+    for (const coords of validLines) {
+      for (const [lng, lat] of coords) {
+        const mercX = lonToMercX(lng);
+        const mercY = latToMercY(lat);
+        minMercX = Math.min(minMercX, mercX);
+        maxMercX = Math.max(maxMercX, mercX);
+        minMercY = Math.min(minMercY, mercY);
+        maxMercY = Math.max(maxMercY, mercY);
+      }
+    }
     const index = tramos.length + 1;
     tramos.push({
       id: `tramo-${index}-${slug(props.id || props.nombre || 'x')}`,
-      d: paths.join(' '),
       color: safeColor(props.color, '#2f7d5b'),
-      marker: midpointOfLines(projectedLines),
+      lines: validLines,
       nombre: String(props.nombre || 'Tramo vial')
     });
   }
-  return { tramos };
+  if (!tramos.length) return { tramos, frameBounds: bounds, warning: 'No hay tramos disponibles para calcular el encuadre automatico.' };
+
+  let mercWidth = maxMercX - minMercX;
+  let mercHeight = maxMercY - minMercY;
+  const centerX = (minMercX + maxMercX) / 2;
+  const centerY = (minMercY + maxMercY) / 2;
+  const minWidth = lonToMercX(0.01) - lonToMercX(0);
+  const minHeight = Math.abs(latToMercY(-0.01) - latToMercY(0));
+  mercWidth = Math.max(mercWidth, minWidth);
+  mercHeight = Math.max(mercHeight, minHeight);
+  mercWidth *= 1.2;
+  mercHeight *= 1.2;
+  const targetAspect = MAP_ASPECT_RATIO;
+  if (mercWidth / mercHeight < targetAspect) mercWidth = mercHeight * targetAspect;
+  else mercHeight = mercWidth / targetAspect;
+  minMercX = centerX - mercWidth / 2;
+  maxMercX = centerX + mercWidth / 2;
+  minMercY = centerY - mercHeight / 2;
+  maxMercY = centerY + mercHeight / 2;
+  return {
+    tramos,
+    frameBounds: {
+      west: minMercX * 360 - 180,
+      east: maxMercX * 360 - 180,
+      north: Math.atan(Math.sinh(Math.PI * (1 - 2 * minMercY))) * 180 / Math.PI,
+      south: Math.atan(Math.sinh(Math.PI * (1 - 2 * maxMercY))) * 180 / Math.PI
+    }
+  };
 }
 
 function safeColor(value, fallback) {
@@ -502,7 +537,7 @@ function createSvg(projector, roads, tramos) {
       class: 'tramo',
       fill: 'none',
       stroke: tramo.color,
-      'stroke-width': 6,
+      'stroke-width': TRAMO_STROKE_WIDTH,
       'stroke-linecap': 'round',
       'stroke-linejoin': 'round'
     });
@@ -689,14 +724,22 @@ async function generate() {
   els.download.disabled = true;
   currentSvg = null;
   try {
-    const bounds = readBounds();
-    els.zoom.value = String(bounds.zoom);
+    const requestedBounds = readBounds();
+    els.zoom.value = String(requestedBounds.zoom);
+    setStatus('Calculando encuadre de tramos...');
+    const tramoData = await loadTramos(requestedBounds);
+    const bounds = { ...requestedBounds, ...tramoData.frameBounds };
     const projector = buildProjector(bounds);
-    setStatus('Leyendo PMTiles y tramos...');
-    const [{ roads, roadCount, tileCount }, { tramos }] = await Promise.all([
-      loadRoads(bounds, projector),
-      loadTramos(bounds, projector)
-    ]);
+    const tramos = tramoData.tramos;
+    for (const tramo of tramos) {
+      const projectedLines = tramo.lines.map((coords) => coords
+        .map(([lng, lat]) => projector.pointFromLngLat(lng, lat))
+        .filter(([px, py]) => Number.isFinite(px) && Number.isFinite(py)));
+      tramo.d = projectedLines.map(lineToPath).filter(Boolean).join(' ');
+      tramo.marker = midpointOfLines(projectedLines);
+    }
+    setStatus('Leyendo PMTiles y preparando SVG...');
+    const { roads, roadCount, tileCount } = await loadRoads(bounds, projector);
     tramos.forEach((tramo, index) => { tramo.number = index + 1; });
     const svg = createSvg(projector, roads, tramos);
     els.preview.innerHTML = '';
@@ -704,7 +747,7 @@ async function generate() {
     currentSvg = svg;
     els.download.disabled = false;
     els.meta.textContent = `${roadCount} calles en ${roads.length} objetos | ${tramos.length} tramos | panel vectorial`;
-    setStatus(`SVG generado correctamente.\nTiles leidos: ${tileCount}\nCalles: ${roadCount} en ${roads.length} objetos\nTramos numerados: ${tramos.length}`, 'ok');
+    setStatus(`SVG generado correctamente.${tramoData.warning ? `\nAdvertencia: ${tramoData.warning}` : ''}\nTiles leidos: ${tileCount}\nCalles: ${roadCount} en ${roads.length} objetos\nTramos numerados: ${tramos.length}`, tramoData.warning ? '' : 'ok');
   } catch (error) {
     els.preview.innerHTML = '<div class="empty-preview">No se pudo generar el SVG. Revisa el mensaje del panel.</div>';
     els.meta.textContent = 'Error';
