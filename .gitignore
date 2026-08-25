@@ -3,6 +3,11 @@ assets/panel-admin-universo/data/credenciales.json
 
 # Ignorar historial de actividad local
 assets/panel-admin-universo/data/historial.log
+assets/panel-admin-universo/data/config.local.php
+
+# Ignorar configuraciones locales de entorno
+.env
+.env.local
 
 # Ignorar librerías pesadas y archivos comprimidos
 assets/panel-admin-universo/vendor/
