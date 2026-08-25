@@ -337,7 +337,8 @@ async function loadRoads(bounds, projector) {
   }
 
   const n = Math.pow(2, bounds.zoom);
-  const roads = [];
+  const roadPaths = { secondary: [], major: [], highway: [] };
+  let roadCount = 0;
   const seen = new Set();
   for (let x = range.xMin; x <= range.xMax; x++) {
     for (let y = range.yMin; y <= range.yMax; y++) {
@@ -349,7 +350,6 @@ async function loadRoads(bounds, projector) {
       for (const feature of roadsLayer.features) {
         const kind = feature.properties.kind || '';
         if (!ROAD_KINDS.has(kind)) continue;
-        const style = roadStyle(kind);
         for (const line of feature.lines) {
           const points = line.map((p) => {
             const globalX = (x + p.x / roadsLayer.extent) / n;
@@ -379,13 +379,18 @@ async function loadRoads(bounds, projector) {
           const key = `${kind}|${feature.properties.name || ''}|${d}`;
           if (d && !seen.has(key)) {
             seen.add(key);
-            roads.push({ d, kind, style });
+            roadPaths[kind === 'highway' ? 'highway' : kind === 'major_road' ? 'major' : 'secondary'].push(d);
+            roadCount++;
           }
         }
       }
     }
   }
-  return { roads, tileCount: range.count };
+  const roads = [];
+  if (roadPaths.secondary.length) roads.push({ id: 'vias-secundarias', d: roadPaths.secondary.join(' '), style: roadStyle('minor_road') });
+  if (roadPaths.major.length) roads.push({ id: 'vias-principales', d: roadPaths.major.join(' '), style: roadStyle('major_road') });
+  if (roadPaths.highway.length) roads.push({ id: 'vias-highway', d: roadPaths.highway.join(' '), style: roadStyle('highway') });
+  return { roads, roadCount, tileCount: range.count };
 }
 
 async function loadTramos(bounds, projector) {
@@ -478,7 +483,8 @@ function createSvg(projector, roads, tramos) {
   mapArea.appendChild(baseGroup);
   for (const road of roads) {
     appendPath(baseGroup, road.d, {
-      class: `road road-${road.kind}`,
+      id: road.id,
+      class: 'road',
       fill: 'none',
       stroke: road.style.stroke,
       'stroke-width': road.style.width,
@@ -505,11 +511,11 @@ function createSvg(projector, roads, tramos) {
   const markersGroup = document.createElementNS(SVG_NS, 'g');
   markersGroup.setAttribute('id', 'marcadores-tramos');
   mapArea.appendChild(markersGroup);
-  const offsets = [[0, 0], [10, -10], [-10, -10], [10, 10], [-10, 10], [0, -16], [16, 0]];
+  const offsets = [[0, 0], [8, -8], [-8, -8], [8, 8], [-8, 8], [0, -13], [13, 0]];
   const placed = [];
   for (const tramo of tramos) {
     const [x, y] = tramo.marker;
-    const offset = offsets.find(([dx, dy]) => placed.every(([px, py]) => Math.hypot(x + dx - px, y + dy - py) >= 24)) || [0, 0];
+    const offset = offsets.find(([dx, dy]) => placed.every(([px, py]) => Math.hypot(x + dx - px, y + dy - py) >= 18)) || [0, 0];
     const markerX = x + offset[0];
     const markerY = y + offset[1];
     placed.push([markerX, markerY]);
@@ -517,14 +523,14 @@ function createSvg(projector, roads, tramos) {
     marker.setAttribute('class', 'tramo-marker');
     marker.setAttribute('transform', `translate(${fmt(markerX)} ${fmt(markerY)})`);
     const circle = document.createElementNS(SVG_NS, 'circle');
-    circle.setAttribute('r', '12');
-    circle.setAttribute('fill', tramo.color);
+    circle.setAttribute('r', '8');
+    circle.setAttribute('fill', '#c62828');
     circle.setAttribute('stroke', '#fff');
     circle.setAttribute('stroke-width', '2');
     const number = document.createElementNS(SVG_NS, 'text');
     number.setAttribute('class', 'marker-number');
     number.setAttribute('font-family', 'Arial, sans-serif');
-    number.setAttribute('font-size', '12');
+    number.setAttribute('font-size', '9');
     number.setAttribute('font-weight', '700');
     number.setAttribute('fill', '#fff');
     number.setAttribute('text-anchor', 'middle');
@@ -567,13 +573,13 @@ function createSvg(projector, roads, tramos) {
     const circle = document.createElementNS(SVG_NS, 'circle');
     circle.setAttribute('cx', x);
     circle.setAttribute('cy', y - 5);
-    circle.setAttribute('r', '10');
-    circle.setAttribute('fill', tramos[i].color);
+    circle.setAttribute('r', '8');
+    circle.setAttribute('fill', '#c62828');
     panel.appendChild(circle);
     const number = document.createElementNS(SVG_NS, 'text');
     number.setAttribute('class', 'marker-number');
     number.setAttribute('font-family', 'Arial, sans-serif');
-    number.setAttribute('font-size', '12');
+    number.setAttribute('font-size', '9');
     number.setAttribute('font-weight', '700');
     number.setAttribute('fill', '#fff');
     number.setAttribute('x', x);
@@ -687,7 +693,7 @@ async function generate() {
     els.zoom.value = String(bounds.zoom);
     const projector = buildProjector(bounds);
     setStatus('Leyendo PMTiles y tramos...');
-    const [{ roads, tileCount }, { tramos }] = await Promise.all([
+    const [{ roads, roadCount, tileCount }, { tramos }] = await Promise.all([
       loadRoads(bounds, projector),
       loadTramos(bounds, projector)
     ]);
@@ -697,8 +703,8 @@ async function generate() {
     els.preview.appendChild(svg);
     currentSvg = svg;
     els.download.disabled = false;
-    els.meta.textContent = `${roads.length} calles | ${tramos.length} tramos | panel vectorial`;
-    setStatus(`SVG generado correctamente.\nTiles leidos: ${tileCount}\nCalles: ${roads.length}\nTramos numerados: ${tramos.length}`, 'ok');
+    els.meta.textContent = `${roadCount} calles en ${roads.length} objetos | ${tramos.length} tramos | panel vectorial`;
+    setStatus(`SVG generado correctamente.\nTiles leidos: ${tileCount}\nCalles: ${roadCount} en ${roads.length} objetos\nTramos numerados: ${tramos.length}`, 'ok');
   } catch (error) {
     els.preview.innerHTML = '<div class="empty-preview">No se pudo generar el SVG. Revisa el mensaje del panel.</div>';
     els.meta.textContent = 'Error';
