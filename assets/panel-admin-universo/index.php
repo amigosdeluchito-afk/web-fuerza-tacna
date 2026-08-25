@@ -368,7 +368,7 @@ require_login();
       </nav>
       <div class="user">
         <?= htmlspecialchars(current_user() ?? '') ?> ·
-        <a href="logout.php" style="color:#9ca3af;">Salir</a>
+        <form method="POST" action="logout.php" style="display:inline; margin:0;"><?= csrf_field() ?><button type="submit" style="background:none; border:0; padding:0; color:#9ca3af; cursor:pointer; font:inherit;">Salir</button></form>
       </div>
     </header>
 

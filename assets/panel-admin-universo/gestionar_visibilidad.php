@@ -199,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <?php endif; ?>
       </nav>
       <div class="user">
-        <?= htmlspecialchars(current_user() ?? '') ?> · <a href="logout.php" style="color:#9ca3af;">Salir</a>
+        <?= htmlspecialchars(current_user() ?? '') ?> · <form method="POST" action="logout.php" style="display:inline; margin:0;"><?= csrf_field() ?><button type="submit" style="background:none; border:0; padding:0; color:#9ca3af; cursor:pointer; font:inherit;">Salir</button></form>
       </div>
     </header>
 

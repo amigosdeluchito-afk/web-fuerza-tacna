@@ -15,6 +15,8 @@ if (!empty($_SESSION['user'])) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
+
     $user = trim($_POST['username'] ?? '');
     $pass = $_POST['password'] ?? '';
 
@@ -94,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="card">
     <h1>Iniciar sesión</h1>
     <form method="post">
+      <?= csrf_field() ?>
       <label>Usuario
         <input type="text" name="username" autocomplete="username">
       </label>
