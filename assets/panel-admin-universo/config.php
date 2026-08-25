@@ -4,7 +4,33 @@
 // =======================
 //  SESIÓN
 // =======================
+function is_https_request(): bool {
+    if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+
+    if (($_SERVER['SERVER_PORT'] ?? null) == 443) {
+        return true;
+    }
+
+    return isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+        && strtolower((string)$_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https';
+}
+
 if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_trans_sid', '0');
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => is_https_request(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+
     session_start();
 }
 
