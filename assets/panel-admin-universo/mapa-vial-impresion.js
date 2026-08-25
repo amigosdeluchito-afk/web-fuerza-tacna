@@ -357,6 +357,25 @@ async function loadRoads(bounds, projector) {
             return projector.pointFromMerc(globalX, globalY);
           }).filter(([px, py]) => Number.isFinite(px) && Number.isFinite(py));
           const d = lineToPath(points);
+          let maxSegment = 0;
+          for (let i = 1; i < points.length; i++) {
+            maxSegment = Math.max(maxSegment, Math.hypot(
+              points[i][0] - points[i - 1][0],
+              points[i][1] - points[i - 1][1]
+            ));
+          }
+          if (maxSegment > projector.mapWidth * 0.5 && kind !== 'highway') {
+            console.warn('[mapa-vial] segmento sospechoso', {
+              tile: { z: bounds.zoom, x, y },
+              featureId: feature.id,
+              kind,
+              name: feature.properties.name || '',
+              parts: feature.lines.length,
+              points: points.length,
+              maxSegment,
+              d
+            });
+          }
           const key = `${kind}|${feature.properties.name || ''}|${d}`;
           if (d && !seen.has(key)) {
             seen.add(key);
@@ -423,6 +442,7 @@ function createSvg(projector, roads, tramos) {
   svg.setAttribute('viewBox', `0 0 ${projector.width} ${projector.height}`);
   svg.setAttribute('width', String(projector.width));
   svg.setAttribute('height', String(projector.height));
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   svg.setAttribute('role', 'img');
   svg.setAttribute('aria-label', 'Mapa vial y listado de vias mejoradas');
 
@@ -459,8 +479,11 @@ function createSvg(projector, roads, tramos) {
   for (const road of roads) {
     appendPath(baseGroup, road.d, {
       class: `road road-${road.kind}`,
+      fill: 'none',
       stroke: road.style.stroke,
-      'stroke-width': road.style.width
+      'stroke-width': road.style.width,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round'
     });
   }
 
@@ -471,8 +494,11 @@ function createSvg(projector, roads, tramos) {
     appendPath(tramosGroup, tramo.d, {
       id: tramo.id,
       class: 'tramo',
+      fill: 'none',
       stroke: tramo.color,
-      'stroke-width': 6
+      'stroke-width': 6,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round'
     });
   }
 
@@ -497,6 +523,10 @@ function createSvg(projector, roads, tramos) {
     circle.setAttribute('stroke-width', '2');
     const number = document.createElementNS(SVG_NS, 'text');
     number.setAttribute('class', 'marker-number');
+    number.setAttribute('font-family', 'Arial, sans-serif');
+    number.setAttribute('font-size', '12');
+    number.setAttribute('font-weight', '700');
+    number.setAttribute('fill', '#fff');
     number.setAttribute('text-anchor', 'middle');
     number.setAttribute('dominant-baseline', 'central');
     number.textContent = String(tramo.number);
@@ -516,6 +546,10 @@ function createSvg(projector, roads, tramos) {
   panel.appendChild(panelRect);
   const title = document.createElementNS(SVG_NS, 'text');
   title.setAttribute('class', 'panel-title');
+  title.setAttribute('font-family', 'Arial, sans-serif');
+  title.setAttribute('font-size', '22');
+  title.setAttribute('font-weight', '700');
+  title.setAttribute('fill', '#263238');
   title.setAttribute('x', projector.panelX + 28);
   title.setAttribute('y', '48');
   title.textContent = 'RED VIAL - VIAS MEJORADAS';
@@ -538,6 +572,10 @@ function createSvg(projector, roads, tramos) {
     panel.appendChild(circle);
     const number = document.createElementNS(SVG_NS, 'text');
     number.setAttribute('class', 'marker-number');
+    number.setAttribute('font-family', 'Arial, sans-serif');
+    number.setAttribute('font-size', '12');
+    number.setAttribute('font-weight', '700');
+    number.setAttribute('fill', '#fff');
     number.setAttribute('x', x);
     number.setAttribute('y', y - 5);
     number.setAttribute('text-anchor', 'middle');
@@ -546,9 +584,11 @@ function createSvg(projector, roads, tramos) {
     panel.appendChild(number);
     const text = document.createElementNS(SVG_NS, 'text');
     text.setAttribute('class', 'panel-row');
+    text.setAttribute('font-family', 'Arial, sans-serif');
+    text.setAttribute('font-size', String(fontSize));
+    text.setAttribute('fill', '#263238');
     text.setAttribute('x', x + 18);
     text.setAttribute('y', y - 9);
-    text.setAttribute('font-size', fontSize);
     for (const [lineIndex, line] of wrapText(tramos[i].nombre, Math.max(18, Math.floor((columnWidth - 62) / (fontSize * 0.56)))).entries()) {
       const tspan = document.createElementNS(SVG_NS, 'tspan');
       tspan.setAttribute('x', x + 18);
@@ -584,6 +624,9 @@ function appendMapDecorations(mapArea, projector) {
   legend.setAttribute('id', 'leyenda');
   const legendTitle = document.createElementNS(SVG_NS, 'text');
   legendTitle.setAttribute('class', 'legend-text');
+  legendTitle.setAttribute('font-family', 'Arial, sans-serif');
+  legendTitle.setAttribute('font-size', '12');
+  legendTitle.setAttribute('fill', '#263238');
   legendTitle.setAttribute('x', projector.mapX + 20);
   legendTitle.setAttribute('y', legendY - 20);
   legendTitle.textContent = 'LEYENDA';
@@ -596,9 +639,13 @@ function appendMapDecorations(mapArea, projector) {
     line.setAttribute('y2', legendY);
     line.setAttribute('stroke', index ? '#b7c0c8' : '#2f7d5b');
     line.setAttribute('stroke-width', '4');
+    line.setAttribute('stroke-linecap', 'round');
     legend.appendChild(line);
     const text = document.createElementNS(SVG_NS, 'text');
     text.setAttribute('class', 'legend-text');
+    text.setAttribute('font-family', 'Arial, sans-serif');
+    text.setAttribute('font-size', '12');
+    text.setAttribute('fill', '#263238');
     text.setAttribute('x', projector.mapX + 54 + index * 150);
     text.setAttribute('y', legendY + 4);
     text.textContent = item;
@@ -615,6 +662,9 @@ function appendMapDecorations(mapArea, projector) {
   north.appendChild(arrow);
   const northText = document.createElementNS(SVG_NS, 'text');
   northText.setAttribute('class', 'north-text');
+  northText.setAttribute('font-family', 'Arial, sans-serif');
+  northText.setAttribute('font-size', '12');
+  northText.setAttribute('fill', '#263238');
   northText.setAttribute('x', northX);
   northText.setAttribute('y', northY - 30);
   northText.setAttribute('text-anchor', 'middle');
