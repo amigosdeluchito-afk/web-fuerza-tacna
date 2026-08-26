@@ -5,7 +5,10 @@ const TRAMOS_URL = 'mapa_redvial_api.php?action=geojson';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const ROAD_KINDS = new Set(['highway', 'major_road', 'minor_road']);
 const MAP_ASPECT_RATIO = 1.55;
-const TRAMO_STROKE_WIDTH = 4;
+const TRAMO_STROKE_WIDTH = 3;
+const MARKER_RADIUS = 6;
+const MARKER_FONT_SIZE = 7.5;
+const MARKER_TEXT_DY = '0.34em';
 
 const els = {
   west: document.getElementById('west'),
@@ -487,7 +490,7 @@ function createSvg(projector, roads, tramos) {
   svg.setAttribute('aria-label', 'Mapa vial y listado de vias mejoradas');
 
   const style = document.createElementNS(SVG_NS, 'style');
-  style.textContent = 'path{fill:none}.road,.tramo{stroke-linecap:round;stroke-linejoin:round}.panel-title,.panel-row,.legend-text,.north-text{font-family:Arial,sans-serif;fill:#263238}.panel-title{font-size:22px;font-weight:700}.panel-row{font-size:14px}.legend-text,.north-text{font-size:12px}.marker-number{font-family:Arial,sans-serif;font-size:12px;font-weight:700;fill:#fff}';
+  style.textContent = 'path{fill:none}.road,.tramo{stroke-linecap:round;stroke-linejoin:round}.panel-title,.panel-row,.legend-text,.north-text{font-family:Arial,sans-serif;fill:#263238}.panel-title{font-size:22px;font-weight:700}.panel-row{font-size:14px}.legend-text,.north-text{font-size:12px}.marker-number{font-family:Arial,sans-serif;font-size:7.5px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:middle}';
   svg.appendChild(style);
 
   const defs = document.createElementNS(SVG_NS, 'defs');
@@ -558,18 +561,20 @@ function createSvg(projector, roads, tramos) {
     marker.setAttribute('class', 'tramo-marker');
     marker.setAttribute('transform', `translate(${fmt(markerX)} ${fmt(markerY)})`);
     const circle = document.createElementNS(SVG_NS, 'circle');
-    circle.setAttribute('r', '8');
+    circle.setAttribute('r', String(MARKER_RADIUS));
     circle.setAttribute('fill', '#c62828');
-    circle.setAttribute('stroke', '#fff');
-    circle.setAttribute('stroke-width', '2');
     const number = document.createElementNS(SVG_NS, 'text');
     number.setAttribute('class', 'marker-number');
     number.setAttribute('font-family', 'Arial, sans-serif');
-    number.setAttribute('font-size', '9');
+    number.setAttribute('font-size', String(MARKER_FONT_SIZE));
     number.setAttribute('font-weight', '700');
     number.setAttribute('fill', '#fff');
+    number.setAttribute('x', '0');
+    number.setAttribute('y', '0');
+    number.setAttribute('dy', MARKER_TEXT_DY);
     number.setAttribute('text-anchor', 'middle');
-    number.setAttribute('dominant-baseline', 'central');
+    number.setAttribute('dominant-baseline', 'middle');
+    number.setAttribute('alignment-baseline', 'middle');
     number.textContent = String(tramo.number);
     marker.append(circle, number);
     markersGroup.appendChild(marker);
@@ -608,19 +613,21 @@ function createSvg(projector, roads, tramos) {
     const circle = document.createElementNS(SVG_NS, 'circle');
     circle.setAttribute('cx', x);
     circle.setAttribute('cy', y - 5);
-    circle.setAttribute('r', '8');
+    circle.setAttribute('r', String(MARKER_RADIUS));
     circle.setAttribute('fill', '#c62828');
     panel.appendChild(circle);
     const number = document.createElementNS(SVG_NS, 'text');
     number.setAttribute('class', 'marker-number');
     number.setAttribute('font-family', 'Arial, sans-serif');
-    number.setAttribute('font-size', '9');
+    number.setAttribute('font-size', String(MARKER_FONT_SIZE));
     number.setAttribute('font-weight', '700');
     number.setAttribute('fill', '#fff');
     number.setAttribute('x', x);
     number.setAttribute('y', y - 5);
+    number.setAttribute('dy', MARKER_TEXT_DY);
     number.setAttribute('text-anchor', 'middle');
-    number.setAttribute('dominant-baseline', 'central');
+    number.setAttribute('dominant-baseline', 'middle');
+    number.setAttribute('alignment-baseline', 'middle');
     number.textContent = String(tramos[i].number);
     panel.appendChild(number);
     const text = document.createElementNS(SVG_NS, 'text');
