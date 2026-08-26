@@ -129,6 +129,6 @@ require_admin();
         </section>
     </main>
 
-    <script type="module" src="mapa-vial-impresion.js?v=3"></script>
+    <script type="module" src="mapa-vial-impresion.js?v=4"></script>
 </body>
 </html>
