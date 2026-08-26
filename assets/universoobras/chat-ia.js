@@ -153,12 +153,13 @@ function initChatIA() {
     };
 
     const decodeLegacyEscapedText = (str) => {
-        return String(str ?? '').replace(/&(amp|lt|gt|quot|#39);/g, entity => ({
+        return String(str ?? '').replace(/&(amp|lt|gt|quot|#39|apos);/g, entity => ({
             '&amp;': '&',
             '&lt;': '<',
             '&gt;': '>',
             '&quot;': '"',
-            '&#39;': "'"
+            '&#39;': "'",
+            '&apos;': "'"
         }[entity] || entity));
     };
 
