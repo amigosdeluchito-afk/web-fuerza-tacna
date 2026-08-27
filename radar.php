@@ -17,6 +17,62 @@ echo "<p style='font-family:sans-serif;'><b>Versión de PHP:</b> " . phpversion(
 $privateConfigStatus = (defined('PRIVATE_CONFIG_ACTIVE') && PRIVATE_CONFIG_ACTIVE) ? 'ACTIVA' : 'FALLBACK';
 echo "<p style='font-family:sans-serif;'><b>Configuración privada:</b> " . $privateConfigStatus . "</p>";
 
+function radar_header_status(string $key): string {
+    return isset($_SERVER[$key]) && trim((string)$_SERVER[$key]) !== '' ? 'PRESENTE' : 'AUSENTE';
+}
+
+function radar_mask_ip(string $ip): string {
+    $ip = trim($ip);
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        $parts = explode('.', $ip);
+        return $parts[0] . '.' . $parts[1] . '.xxx.xxx';
+    }
+
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        $parts = explode(':', $ip);
+        $prefix = implode(':', array_slice($parts, 0, 2));
+        return $prefix . ':xxxx:xxxx:xxxx';
+    }
+
+    return 'formato no reconocido';
+}
+
+function radar_compare_header_to_remote(string $key): string {
+    $remote = trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
+    $header = trim((string)($_SERVER[$key] ?? ''));
+
+    if ($remote === '' || $header === '') {
+        return 'NO COMPARABLE';
+    }
+
+    if ($key === 'HTTP_X_FORWARDED_FOR') {
+        $parts = array_map('trim', explode(',', $header));
+        $header = $parts[0] ?? '';
+        if (count($parts) !== 1) {
+            return 'NO COMPARABLE';
+        }
+    }
+
+    return hash_equals($remote, $header) ? 'IGUALES' : 'DIFERENTES';
+}
+
+$remoteAddr = trim((string)($_SERVER['REMOTE_ADDR'] ?? ''));
+$remoteAddrMasked = $remoteAddr !== '' ? radar_mask_ip($remoteAddr) : 'AUSENTE';
+$cfComparison = radar_compare_header_to_remote('HTTP_CF_CONNECTING_IP');
+$xffComparison = radar_compare_header_to_remote('HTTP_X_FORWARDED_FOR');
+
+echo "<h3 style='font-family:sans-serif;'>Diagnostico de proxy/IP</h3>";
+echo "<ul style='font-family:sans-serif;'>";
+echo "<li><b>REMOTE_ADDR:</b> " . radar_header_status('REMOTE_ADDR') . " (" . htmlspecialchars($remoteAddrMasked, ENT_QUOTES, 'UTF-8') . ")</li>";
+echo "<li><b>CF-Connecting-IP:</b> " . radar_header_status('HTTP_CF_CONNECTING_IP') . "</li>";
+echo "<li><b>X-Forwarded-For:</b> " . radar_header_status('HTTP_X_FORWARDED_FOR') . "</li>";
+echo "<li><b>X-Real-IP:</b> " . radar_header_status('HTTP_X_REAL_IP') . "</li>";
+echo "<li><b>REMOTE_ADDR y CF-Connecting-IP son:</b> " . $cfComparison . "</li>";
+echo "<li><b>REMOTE_ADDR y X-Forwarded-For simple son:</b> " . $xffComparison . "</li>";
+echo "</ul>";
+echo "<p style='font-family:sans-serif;'>Si REMOTE_ADDR coincide con la IP real del cliente, puede utilizarse para rate limiting. Si REMOTE_ADDR corresponde al proxy/CDN y otro header contiene al cliente, necesitaremos un resolver de proxy confiable.</p>";
+echo "<p style='font-family:sans-serif;'><i>No se afirma automaticamente que una IP pertenezca a Cloudflare sin validarla contra rangos oficiales.</i></p>";
+
 echo "<h3 style='font-family:sans-serif;'>Carpetas encontradas aquí:</h3><ul>";
 $dirs = array_filter(glob('*'), 'is_dir');
 if (empty($dirs)) {
