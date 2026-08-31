@@ -2,9 +2,101 @@
 // assets/ia_luchito/router.php
 header('Content-Type: application/json; charset=utf-8');
 
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['ok' => false, 'error' => 'Metodo no permitido'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 // Cargar conexión a la base de datos para registrar preguntas huérfanas
 require_once __DIR__ . '/../panel-admin-universo/config.php';
 $db = get_db_connection();
+
+const IA_BURST_RATE_LIMIT_WINDOW_SECONDS = 60;
+const IA_BURST_RATE_LIMIT_BLOCK_SECONDS = 60;
+const IA_BURST_RATE_LIMIT_ATTEMPTS = 10;
+
+function ia_rate_limit_prepare(PDO $db): void {
+    $db->exec("CREATE TABLE IF NOT EXISTS panel_ia_rate_limits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        key_hash CHAR(64) NOT NULL,
+        attempts INT NOT NULL DEFAULT 0,
+        window_start DATETIME NOT NULL,
+        blocked_until DATETIME NULL,
+        last_attempt DATETIME NOT NULL,
+        UNIQUE KEY uniq_key_hash (key_hash),
+        KEY idx_last_attempt (last_attempt),
+        KEY idx_blocked_until (blocked_until)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    if (random_int(1, 100) === 1) {
+        $db->exec("DELETE FROM panel_ia_rate_limits
+            WHERE last_attempt < (NOW() - INTERVAL 2 DAY)
+            AND (blocked_until IS NULL OR blocked_until < NOW())");
+    }
+}
+
+function ia_rate_limit_check(PDO $db, string $keyHash): array {
+    $db->beginTransaction();
+
+    try {
+        $stmt = $db->prepare("SELECT attempts, window_start, blocked_until
+            FROM panel_ia_rate_limits
+            WHERE key_hash = ?
+            LIMIT 1 FOR UPDATE");
+        $stmt->execute([$keyHash]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            $stmt = $db->prepare("INSERT INTO panel_ia_rate_limits
+                (key_hash, attempts, window_start, blocked_until, last_attempt)
+                VALUES (?, 1, NOW(), NULL, NOW())");
+            $stmt->execute([$keyHash]);
+            $db->commit();
+            return ['blocked' => false, 'retry_after' => 0];
+        }
+
+        $blockedUntil = !empty($row['blocked_until']) ? strtotime($row['blocked_until']) : false;
+        if ($blockedUntil !== false && $blockedUntil > time()) {
+            $db->commit();
+            return ['blocked' => true, 'retry_after' => max(1, $blockedUntil - time())];
+        }
+
+        $windowStart = strtotime($row['window_start']);
+        $windowExpired = ($windowStart === false || $windowStart <= (time() - IA_BURST_RATE_LIMIT_WINDOW_SECONDS));
+
+        if ($windowExpired || ($blockedUntil !== false && $blockedUntil <= time())) {
+            $stmt = $db->prepare("UPDATE panel_ia_rate_limits
+                SET attempts = 1, window_start = NOW(), blocked_until = NULL, last_attempt = NOW()
+                WHERE key_hash = ?");
+            $stmt->execute([$keyHash]);
+            $db->commit();
+            return ['blocked' => false, 'retry_after' => 0];
+        }
+
+        if ((int)$row['attempts'] >= IA_BURST_RATE_LIMIT_ATTEMPTS) {
+            $stmt = $db->prepare("UPDATE panel_ia_rate_limits
+                SET blocked_until = DATE_ADD(NOW(), INTERVAL " . IA_BURST_RATE_LIMIT_BLOCK_SECONDS . " SECOND),
+                    last_attempt = NOW()
+                WHERE key_hash = ?");
+            $stmt->execute([$keyHash]);
+            $db->commit();
+            return ['blocked' => true, 'retry_after' => IA_BURST_RATE_LIMIT_BLOCK_SECONDS];
+        }
+
+        $stmt = $db->prepare("UPDATE panel_ia_rate_limits
+            SET attempts = attempts + 1, last_attempt = NOW()
+            WHERE key_hash = ?");
+        $stmt->execute([$keyHash]);
+        $db->commit();
+        return ['blocked' => false, 'retry_after' => 0];
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        throw $e;
+    }
+}
 
 // --- LECTURA DE CONFIGURACIÓN IA (ETAPA 5B - PASO 2) ---
 $prompt_fallback = "Eres Luchito, el asistente virtual y mascota oficial de Fuerza Tacna. Eres un osito andino amigable, un 'tío digital' con mucho cariño por Tacna. Respondes de forma coloquial, cercana y breve (máximo 2 o 3 oraciones). Varía tus expresiones al saludar o referirte al usuario (usa vecino, sobrino, amigo) y NO abuses de la palabra 'causa'. Nunca inventas información que no tienes. Si te preguntan sobre temas políticos nacionales (Presidentes, Congreso, Lima), respondes que tu labor es exclusivamente sobre Tacna y sus obras.";
@@ -52,6 +144,27 @@ $mensaje = trim($input['mensaje'] ?? '');
 if (empty($mensaje)) {
     echo json_encode(['ok' => false, 'error' => 'El mensaje está vacío.']);
     exit;
+}
+
+$ip_real = $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
+$burstIpHash = hash_hmac('sha256', 'ia_ip|' . $ip_real, IA_HASH_SALT);
+$dailyIpHash = hash('sha256', $ip_real . IA_HASH_SALT);
+$ip_hash = $dailyIpHash;
+
+try {
+    ia_rate_limit_prepare($db);
+    $burstLimit = ia_rate_limit_check($db, $burstIpHash);
+    if ($burstLimit['blocked']) {
+        http_response_code(429);
+        header('Retry-After: ' . max(1, (int)$burstLimit['retry_after']));
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Demasiados mensajes. Intenta nuevamente en un momento.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+} catch (Throwable $e) {
+    error_log('IA burst rate limit unavailable: ' . get_class($e));
 }
 
 // 3. Escudo de Longitud
@@ -521,9 +634,6 @@ if ($motivo_bloqueo === '') {
 // --- AUDITORÍA Y LÍMITES IA (ETAPA 6B) ---
 if ($ia_activa === 1 && $motivo_bloqueo === '') {
     
-    $ip_real = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
-    $salt = defined('IA_HASH_SALT') ? IA_HASH_SALT : 'FallbackSalt';
-    $ip_hash = hash('sha256', $ip_real . $salt);
     $fecha_hoy = date('Y-m-d');
 
     // 1. Crear tabla de auditoría si no existe
