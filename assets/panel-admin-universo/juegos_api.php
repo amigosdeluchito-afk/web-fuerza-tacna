@@ -5,6 +5,43 @@ require_once __DIR__ . '/config.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $db = get_db_connection();
 
+if ($method === 'GET') {
+    try {
+        $stmt = $db->query("SELECT * FROM panel_juegos_config ORDER BY sort_order ASC");
+        $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($games) === 0) {
+            http_response_code(503);
+            echo json_encode(['ok' => false, 'error' => 'Juegos temporalmente no disponibles.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $defaults = [
+            'game_id' => '',
+            'title' => '',
+            'description' => '',
+            'status' => 'soon',
+            'sort_order' => 10,
+            'default_difficulty' => 'medium',
+            'icon' => '',
+            'config_json' => null,
+        ];
+
+        foreach ($games as &$game) {
+            $game = array_merge($defaults, $game);
+        }
+        unset($game);
+
+        echo json_encode(['ok' => true, 'games' => $games], JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        http_response_code(503);
+        error_log('Games public config unavailable: ' . get_class($e));
+        echo json_encode(['ok' => false, 'error' => 'Juegos temporalmente no disponibles.'], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+
+if ($method === 'POST') {
 // --- AUTOCREACIÓN DE TABLA Y DATOS INICIALES ---
 $db->exec("CREATE TABLE IF NOT EXISTS `panel_juegos_config` (
   `game_id` varchar(50) NOT NULL,
@@ -37,19 +74,6 @@ if ($stmtCheck->fetchColumn() == 0) {
 }
 // ------------------------------------------------
 
-if ($method === 'GET') {
-    try {
-        $stmt = $db->query("SELECT * FROM panel_juegos_config ORDER BY sort_order ASC");
-        $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode(['ok' => true, 'games' => $games]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['ok' => false, 'error' => 'Error al consultar la base de datos.']);
-    }
-    exit;
-}
-
-if ($method === 'POST') {
     // Escudo: Solo Admins
     require_login();
     require_admin();
