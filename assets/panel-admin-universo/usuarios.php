@@ -110,6 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <main>
   <h1>Usuarios del panel</h1>
 
+  <div class="msg">Token cron privado: <?= CRON_PRIVATE_TOKEN_ACTIVE ? 'ACTIVO' : 'PENDIENTE' ?></div>
+
   <?php if ($mensaje): ?>
     <div class="msg"><?= htmlspecialchars($mensaje) ?></div>
   <?php endif; ?>

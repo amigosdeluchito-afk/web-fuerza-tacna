@@ -7,10 +7,9 @@ require_once __DIR__ . '/config.php';
 // Protección: Solo permitir ejecución desde la consola del servidor (Cron) 
 // o mediante una URL con token secreto para evitar ataques.
 $is_cli = (php_sapi_name() === 'cli');
-$token = $_GET['token'] ?? '';
-$secret_token = 'FuerzaTacnaCron2024'; // Contraseña secreta para ejecutar vía navegador
+$token = isset($_GET['token']) && is_string($_GET['token']) ? $_GET['token'] : '';
 
-if (!$is_cli && $token !== $secret_token) {
+if (!$is_cli && !hash_equals(CRON_SYNC_TOKEN, $token)) {
     http_response_code(403);
     die("Acceso denegado. Este script solo corre automáticamente en el servidor.");
 }

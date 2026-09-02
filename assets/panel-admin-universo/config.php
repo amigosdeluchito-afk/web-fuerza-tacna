@@ -112,8 +112,57 @@ function load_external_config(string $path): array {
     return $config;
 }
 
+const LEGACY_CRON_SYNC_TOKEN = 'FuerzaTacnaCron2024';
+
+function private_config_has_cron_token(array $config): bool {
+    return isset($config['CRON_SYNC_TOKEN'])
+        && is_string($config['CRON_SYNC_TOKEN'])
+        && trim($config['CRON_SYNC_TOKEN']) !== '';
+}
+
+function write_private_config_array(string $path, array $config): bool {
+    $dir = dirname($path);
+    $tmp = tempnam($dir, 'config.local.');
+    if ($tmp === false) {
+        return false;
+    }
+
+    $content = "<?php\n\nreturn " . var_export($config, true) . ";\n";
+    $written = file_put_contents($tmp, $content, LOCK_EX);
+    if ($written === false) {
+        @unlink($tmp);
+        return false;
+    }
+
+    if (!@rename($tmp, $path)) {
+        @unlink($tmp);
+        return false;
+    }
+
+    @chmod($path, 0600);
+    return true;
+}
+
+function migrate_cron_token_to_private_config(string $path, array &$config): bool {
+    if (private_config_has_cron_token($config)) {
+        return true;
+    }
+
+    $updatedConfig = $config;
+    $updatedConfig['CRON_SYNC_TOKEN'] = LEGACY_CRON_SYNC_TOKEN;
+
+    if (!write_private_config_array($path, $updatedConfig)) {
+        error_log('Cron token private config migration failed');
+        return false;
+    }
+
+    $config = $updatedConfig;
+    return true;
+}
+
 $configLocalPath = __DIR__ . '/data/config.local.php';
 $appConfig = load_external_config($configLocalPath);
+$cronPrivateTokenActive = migrate_cron_token_to_private_config($configLocalPath, $appConfig);
 
 define('PRIVATE_CONFIG_ACTIVE', true);
 define('DB_HOST', $appConfig['DB_HOST']);
@@ -127,6 +176,8 @@ define('DB_NAME', $appConfig['DB_NAME']);
 define('IA_HASH_SALT', $appConfig['IA_HASH_SALT']);
 define('OPENAI_API_KEY', $appConfig['OPENAI_API_KEY'] ?? ''); // Dejar vacío en Git, poner la clave directa en cPanel
 define('OPENAI_KEY_ENCRYPTION_SECRET', $appConfig['OPENAI_KEY_ENCRYPTION_SECRET']);
+define('CRON_PRIVATE_TOKEN_ACTIVE', $cronPrivateTokenActive);
+define('CRON_SYNC_TOKEN', $cronPrivateTokenActive ? $appConfig['CRON_SYNC_TOKEN'] : LEGACY_CRON_SYNC_TOKEN);
 define('IA_DEBUG_MODE', false); // Poner en true solo para diagnosticar problemas de enrutamiento
 
 function encrypt_api_key($plain_text) {
@@ -158,7 +209,13 @@ function get_db_connection() {
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     } catch (PDOException $e) {
-        die("Error BD: Crea la base de datos '" . DB_NAME . "' en phpMyAdmin. Detalle: " . $e->getMessage());
+        error_log('Database connection unavailable: ' . get_class($e));
+        if (!headers_sent()) {
+            http_response_code(500);
+            header('Content-Type: text/plain; charset=utf-8');
+        }
+        echo 'Error interno del servidor.';
+        exit;
     }
 }
 
