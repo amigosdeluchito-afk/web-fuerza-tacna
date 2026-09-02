@@ -163,38 +163,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $prioridad = (int)($_POST['prioridad_link'] ?? 5);
 
         if ($url && $categoria) {
-            $parsed = parse_url($url);
-            if (!$parsed || !isset($parsed['scheme']) || !in_array(strtolower($parsed['scheme']), ['http', 'https'])) {
+            try {
+                $fetchResult = fetch_external_http_text($url);
+                $html = $fetchResult['body'];
+                $host = parse_url($fetchResult['final_url'], PHP_URL_HOST) ?: parse_url($url, PHP_URL_HOST) ?: 'web';
+            } catch (InvalidArgumentException $e) {
                 $_SESSION['ia_msg'] = "Error: Solo se permiten URLs válidas (http o https).";
-            } else {
-                $host = $parsed['host'] ?? '';
-                
-                // Protección SSRF pre-DNS
-                if (in_array(strtolower($host), ['localhost', '127.0.0.1', '0.0.0.0'])) {
-                    $_SESSION['ia_msg'] = "Error SSRF: Host local bloqueado por seguridad.";
-                } elseif (filter_var(gethostbyname($host), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-                    $_SESSION['ia_msg'] = "Error SSRF: URL bloqueada por seguridad. No se pueden extraer datos de redes privadas.";
-                } else {
+            } catch (LengthException $e) {
+                $_SESSION['ia_msg'] = "Error: La página es demasiado grande.";
+            } catch (UnexpectedValueException $e) {
+                $_SESSION['ia_msg'] = "Error: La página no es un contenido de texto compatible.";
+            } catch (Throwable $e) {
+                error_log('External URL fetch failed: ' . get_class($e));
+                $_SESSION['ia_msg'] = "Error: No se pudo obtener el contenido de esa página.";
+            }
+
+            if (isset($html)) {
                     $stmtCheck = $db->prepare("SELECT id FROM panel_fuentes_aprobadas WHERE url_original = ?");
                     $stmtCheck->execute([$url]);
                     if ($stmtCheck->fetch()) {
                         $_SESSION['ia_msg'] = "Error: Este enlace ya fue extraído anteriormente. Puedes buscarlo en la lista y editarlo.";
                     } else {
-                        $ch = curl_init();
-                        curl_setopt($ch, CURLOPT_URL, $url);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-                        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Límite de 10 segundos
-                        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS); // Bloquea file://, ftp://, php://
-                        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-                        $html = curl_exec($ch);
-                        $curl_err = curl_error($ch);
-                        curl_close($ch);
-
-                        if (!$html) {
-                            $_SESSION['ia_msg'] = "Error: No se pudo descargar el contenido de la URL o tardó demasiado. ($curl_err)";
-                        } else {
                             // 1. Limpieza inicial suave
                             $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
                             
@@ -248,8 +237,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
                     }
-                }
-            }
         }
     } elseif ($action === 'delete') {
         $id = $_POST['id'] ?? '';

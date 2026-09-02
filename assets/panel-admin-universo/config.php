@@ -359,6 +359,319 @@ function log_action($tipo, $detalle, $extra = []) {
 //  HELPERS GENERALES
 // =======================
 
+function external_http_normalize_host(string $host): string {
+    $host = trim($host);
+
+    if (strlen($host) >= 2 && $host[0] === '[' && substr($host, -1) === ']') {
+        $host = substr($host, 1, -1);
+    }
+
+    return rtrim(strtolower($host), '.');
+}
+
+function external_http_is_public_ip(string $ip): bool {
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+        return false;
+    }
+
+    if ($ip === '0.0.0.0' || $ip === '::') {
+        return false;
+    }
+
+    return true;
+}
+
+function validate_external_http_url(string $url): array {
+    $url = trim($url);
+
+    if ($url === '' || strlen($url) > 4096 || preg_match('/[\x00-\x20\x7f]/', $url)) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    $parts = parse_url($url);
+    if ($parts === false || empty($parts['scheme']) || empty($parts['host'])) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    $scheme = strtolower((string)$parts['scheme']);
+    if (!in_array($scheme, ['http', 'https'], true)) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    if (isset($parts['user']) || isset($parts['pass'])) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    $host = external_http_normalize_host((string)$parts['host']);
+    if ($host === '' || preg_match('/[\x00-\x20\x7f]/', $host)) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    if (filter_var($host, FILTER_VALIDATE_IP) === false && preg_match('/^(?:0x[0-9a-f]+|[0-9]+|[0-9.]+)$/i', $host)) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
+    $port = (int)$port;
+    if (($scheme === 'http' && $port !== 80) || ($scheme === 'https' && $port !== 443)) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    return [
+        'url' => $url,
+        'scheme' => $scheme,
+        'host' => $host,
+        'port' => $port,
+    ];
+}
+
+function resolve_external_http_host(string $host): array {
+    $host = external_http_normalize_host($host);
+
+    if (filter_var($host, FILTER_VALIDATE_IP)) {
+        if (!external_http_is_public_ip($host)) {
+            throw new InvalidArgumentException('URL no valida');
+        }
+
+        return [$host];
+    }
+
+    $ips = [];
+    $records = @dns_get_record($host, DNS_A | DNS_AAAA);
+    if (is_array($records)) {
+        foreach ($records as $record) {
+            if (($record['type'] ?? '') === 'A' && !empty($record['ip'])) {
+                $ips[] = $record['ip'];
+            }
+
+            if (($record['type'] ?? '') === 'AAAA' && !empty($record['ipv6'])) {
+                $ips[] = $record['ipv6'];
+            }
+        }
+    }
+
+    $ips = array_values(array_unique($ips));
+    if (empty($ips)) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    foreach ($ips as $ip) {
+        if (!external_http_is_public_ip($ip)) {
+            throw new InvalidArgumentException('URL no valida');
+        }
+    }
+
+    return $ips;
+}
+
+function external_http_build_authority(array $parts): string {
+    $host = $parts['host'] ?? '';
+    if ($host === '') {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    $authority = $host;
+    if (isset($parts['port'])) {
+        $authority .= ':' . (int)$parts['port'];
+    }
+
+    return $authority;
+}
+
+function external_http_normalize_path(string $path): string {
+    $segments = explode('/', $path);
+    $safe = [];
+
+    foreach ($segments as $segment) {
+        if ($segment === '' || $segment === '.') {
+            continue;
+        }
+
+        if ($segment === '..') {
+            array_pop($safe);
+            continue;
+        }
+
+        $safe[] = $segment;
+    }
+
+    return '/' . implode('/', $safe);
+}
+
+function external_http_resolve_location(string $baseUrl, string $location): string {
+    $location = trim($location);
+    if ($location === '' || preg_match('/[\x00-\x1f\x7f]/', $location)) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    $locationParts = parse_url($location);
+    if ($locationParts !== false && isset($locationParts['scheme'])) {
+        return $location;
+    }
+
+    $base = parse_url($baseUrl);
+    if ($base === false || empty($base['scheme']) || empty($base['host'])) {
+        throw new InvalidArgumentException('URL no valida');
+    }
+
+    if (substr($location, 0, 2) === '//') {
+        return strtolower((string)$base['scheme']) . ':' . $location;
+    }
+
+    $authority = external_http_build_authority($base);
+    $query = '';
+    $fragment = '';
+
+    if ($locationParts !== false) {
+        if (isset($locationParts['query'])) {
+            $query = '?' . $locationParts['query'];
+        }
+
+        if (isset($locationParts['fragment'])) {
+            $fragment = '#' . $locationParts['fragment'];
+        }
+    }
+
+    if (isset($location[0]) && $location[0] === '/') {
+        $path = external_http_normalize_path($locationParts['path'] ?? '/');
+    } else {
+        $basePath = $base['path'] ?? '/';
+        $baseDir = preg_replace('~/[^/]*$~', '/', $basePath);
+        $path = external_http_normalize_path($baseDir . ($locationParts['path'] ?? $location));
+    }
+
+    return strtolower((string)$base['scheme']) . '://' . $authority . $path . $query . $fragment;
+}
+
+function external_http_is_text_content_type(?string $contentType): bool {
+    if ($contentType === null || trim($contentType) === '') {
+        return true;
+    }
+
+    $mime = strtolower(trim(explode(';', $contentType, 2)[0]));
+
+    if (strpos($mime, 'text/') === 0) {
+        return true;
+    }
+
+    return $mime === 'application/xhtml+xml';
+}
+
+function fetch_external_http_text(string $url, int $maxBytes = 1048576, int $maxRedirects = 3): array {
+    $currentUrl = $url;
+
+    for ($redirects = 0; $redirects <= $maxRedirects; $redirects++) {
+        $urlInfo = validate_external_http_url($currentUrl);
+        $ips = resolve_external_http_host($urlInfo['host']);
+        $selectedIp = $ips[0];
+        $isLiteralIpHost = filter_var($urlInfo['host'], FILTER_VALIDATE_IP) !== false;
+        $curlIp = strpos($selectedIp, ':') !== false ? '[' . $selectedIp . ']' : $selectedIp;
+
+        $body = '';
+        $location = null;
+        $contentType = null;
+        $tooLarge = false;
+        $invalidMime = false;
+
+        $ch = curl_init($urlInfo['url']);
+        if ($ch === false) {
+            throw new RuntimeException('No se pudo obtener el contenido');
+        }
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        if (!$isLiteralIpHost) {
+            curl_setopt($ch, CURLOPT_RESOLVE, [$urlInfo['host'] . ':' . $urlInfo['port'] . ':' . $curlIp]);
+        }
+
+        if (defined('CURLOPT_PROTOCOLS') && defined('CURLPROTO_HTTP') && defined('CURLPROTO_HTTPS')) {
+            curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+        }
+
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($ch, string $header) use (&$location, &$contentType, &$tooLarge, &$invalidMime, $maxBytes): int {
+            $line = trim($header);
+            if ($line === '' || strpos($line, ':') === false) {
+                return strlen($header);
+            }
+
+            [$name, $value] = array_map('trim', explode(':', $line, 2));
+            $name = strtolower($name);
+
+            if ($name === 'location') {
+                $location = $value;
+            } elseif ($name === 'content-type') {
+                $contentType = $value;
+                if (!external_http_is_text_content_type($contentType)) {
+                    $invalidMime = true;
+                    return 0;
+                }
+            } elseif ($name === 'content-length' && ctype_digit($value) && (int)$value > $maxBytes) {
+                $tooLarge = true;
+                return 0;
+            }
+
+            return strlen($header);
+        });
+
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, string $chunk) use (&$body, &$tooLarge, $maxBytes): int {
+            if (strlen($body) + strlen($chunk) > $maxBytes) {
+                $tooLarge = true;
+                return 0;
+            }
+
+            $body .= $chunk;
+            return strlen($chunk);
+        });
+
+        $ok = curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($tooLarge) {
+            throw new LengthException('La pagina es demasiado grande');
+        }
+
+        if ($invalidMime) {
+            throw new UnexpectedValueException('Contenido no compatible');
+        }
+
+        if ($ok === false) {
+            throw new RuntimeException('No se pudo obtener el contenido');
+        }
+
+        if (in_array($httpCode, [301, 302, 303, 307, 308], true)) {
+            if ($location === null || $redirects === $maxRedirects) {
+                throw new RuntimeException('No se pudo obtener el contenido');
+            }
+
+            $currentUrl = external_http_resolve_location($urlInfo['url'], $location);
+            continue;
+        }
+
+        if ($httpCode < 200 || $httpCode > 299) {
+            throw new RuntimeException('No se pudo obtener el contenido');
+        }
+
+        if (!external_http_is_text_content_type($contentType)) {
+            throw new UnexpectedValueException('Contenido no compatible');
+        }
+
+        return [
+            'body' => $body,
+            'final_url' => $urlInfo['url'],
+            'content_type' => $contentType,
+            'http_code' => $httpCode,
+        ];
+    }
+
+    throw new RuntimeException('No se pudo obtener el contenido');
+}
+
 /**
  * Asegurarse de que exista una carpeta.
  */

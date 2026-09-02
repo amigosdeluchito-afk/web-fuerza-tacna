@@ -200,18 +200,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'extract_url_ajax') {
         header('Content-Type: application/json');
         $url = trim($_POST['url'] ?? '');
-        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) { echo json_encode(['ok' => false, 'error' => 'URL inválida']); exit; }
-        
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-        $html = curl_exec($ch); curl_close($ch);
-
-        if (!$html) { echo json_encode(['ok' => false, 'error' => 'No se pudo descargar la web']); exit; }
+        try {
+            $fetchResult = fetch_external_http_text($url);
+            $html = $fetchResult['body'];
+        } catch (InvalidArgumentException $e) {
+            echo json_encode(['ok' => false, 'error' => 'URL inválida'], JSON_UNESCAPED_UNICODE);
+            exit;
+        } catch (LengthException $e) {
+            echo json_encode(['ok' => false, 'error' => 'La página es demasiado grande.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        } catch (UnexpectedValueException $e) {
+            echo json_encode(['ok' => false, 'error' => 'La página no es un contenido de texto compatible.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        } catch (Throwable $e) {
+            error_log('External URL fetch failed: ' . get_class($e));
+            echo json_encode(['ok' => false, 'error' => 'No se pudo obtener el contenido de esa página.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
 
         $html = preg_replace('@<(script|style|noscript|iframe|svg|canvas)[^>]*?>.*?</\1>@si', ' ', $html);
         $dom = new DOMDocument(); libxml_use_internal_errors(true); @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8')); libxml_clear_errors();
